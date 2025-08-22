@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calculadora Inteligente</title>
+
+  <!-- TailwindCSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Estilos personalizados -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="gradient-bg min-h-screen py-8">
+
+  <div class="container mx-auto px-4 max-w-6xl">
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-white mb-2">💰 Calculadora Inteligente</h1>
+      <p class="text-white/80 text-lg">Gestiona precios y métodos de pago con precisión</p>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-8">
+      <!-- Panel de Configuración -->
+      <div class="bg-white rounded-2xl p-6 card-shadow">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
+          ⚙️ Configuración
+        </h2>
+
+        <!-- Selección de Producto -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Producto (Base de Datos)
+          </label>
+          <select id="productSelect"
+                  class="w-full p-3 border border-gray-300 rounded-lg input-focus transition-all">
+            <option value="">Seleccionar producto...</option>
+            <option value="laptop1" data-price="1250" data-currency="USD">
+              💻 MacBook Pro 14" - $1,250 USD
+            </option>
+            <!-- ...más productos según el original... -->
+            <option value="custom">✏️ Producto personalizado</option>
+          </select>
+        </div>
+
+        <!-- Precio personalizado -->
+        <div id="customPriceDiv" class="mb-6 hidden">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Precio Original
+          </label>
+          <div class="flex gap-2">
+            <input type="number" id="customPrice"
+                   placeholder="Ingresa el precio..."
+                   class="flex-1 p-3 border border-gray-300 rounded-lg input-focus">
+            <select id="customCurrency"
+                    class="p-3 border border-gray-300 rounded-lg input-focus">
+              <option value="USD">USD ($)</option>
+              <option value="EUR">EUR (€)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Tasa de Transferencia -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            USDT Rate
+          </label>
+          <input type="password" id="transferRate" value="15" step="0.1"
+                 class="w-full p-3 border border-gray-300 rounded-lg input-focus"
+                 placeholder="Ej: 15.5">
+        </div>
+
+        <!-- Valor API (simulado) -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Valor API Dinámico (Divisor)
+          </label>
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-2">
+            <div class="flex items-center gap-2 text-sm text-blue-700 mb-1">
+              <span class="animate-pulse">🔄</span>
+              <span>Simulando API externa en tiempo real</span>
+            </div>
+            <div class="text-xs text-blue-600">
+              Última actualización: <span id="lastUpdate">--:--:--</span>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <input type="number" id="apiValue" value="3.8" step="0.01"
+                   class="flex-1 p-3 border border-gray-300 rounded-lg input-focus">
+            <button onclick="updateApiValue()"
+                    class="px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+              🔄 Actualizar API
+            </button>
+          </div>
+        </div>
+
+        <!-- Método de Pago -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Método de Pago
+          </label>
+          <select id="paymentMethod"
+                  class="w-full p-3 border border-gray-300 rounded-lg input-focus">
+            <option value="cash">💵 Efectivo/Divisas</option>
+            <option value="zelle">💳 Zelle</option>
+            <option value="binance">₿ Binance</option>
+            <option value="transfer">🏦 Transferencia</option>
+            <option value="mixed">🔄 Pago Mixto</option>
+          </select>
+        </div>
+
+        <!-- Pago Mixto -->
+        <div id="mixedPaymentDiv" class="mb-6 hidden">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Monto en Transferencia ($)
+          </label>
+          <input type="number" id="transferAmount"
+                 class="w-full p-3 border border-gray-300 rounded-lg input-focus"
+                 placeholder="Cantidad a pagar por transferencia">
+        </div>
+
+        <div class="bg-gradient-to-r from-purple-100 to-blue-100 border border-purple-200 rounded-lg p-4 text-center">
+          <div class="flex items-center justify-center gap-2 text-purple-700">
+            <span class="animate-pulse">⚡</span>
+            <span class="font-semibold">Cálculo en Tiempo Real Activado</span>
+            <span class="animate-pulse">⚡</span>
+          </div>
+          <p class="text-sm text-purple-600 mt-1">
+            Los resultados se actualizan automáticamente
+          </p>
+        </div>
+      </div>
+
+      <!-- Panel de Resultados -->
+      <div class="bg-white rounded-2xl p-6 card-shadow">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
+          📊 Resultados
+        </h2>
+
+        <div id="results" class="space-y-4">
+          <div class="text-center text-gray-500 py-8">
+            <div class="text-6xl mb-4">🧮</div>
+            <p>
+              Configura los parámetros y presiona "Calcular" para ver los resultados
+            </p>
+          </div>
+        </div>
+
+        <!-- Comparación de Métodos -->
+        <div id="comparison" class="mt-8 hidden">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+            📈 Comparación de Métodos
+          </h3>
+          <div id="comparisonContent" class="space-y-3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lógica JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>

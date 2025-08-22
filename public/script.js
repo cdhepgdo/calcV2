@@ -308,7 +308,7 @@ function displayResults(res, method) {
           <div class="bg-white rounded p-3">
             <h4 class="font-medium text-gray-700 mb-2">🏦 Parte en Transferencia</h4>
             <div class="text-sm text-gray-600 mb-1">
-              Cálculo: ${sym}${res.transferAmount.toFixed(2)}RT×TR${res.rate}
+               ${res.transferAmount.toFixed(2)}RT×TR${res.rate}
             </div>
             <div class="text-lg font-bold text-blue-600">
               Bs ${res.transferWithRate.toLocaleString()}
@@ -397,3 +397,4 @@ function getMethodName(key) {
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
+

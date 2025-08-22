@@ -72,7 +72,7 @@
         <!-- Valor API (simulado) -->
         <div class="mb-6">
           <label class="block text-sm font-medium text-gray-700 mb-2">
-            Valor API Dinámico (Divisor)
+            Tasa BCV
           </label>
           <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-2">
             <div class="flex items-center gap-2 text-sm text-blue-700 mb-1">
@@ -88,6 +88,30 @@
                    class="flex-1 p-3 border border-gray-300 rounded-lg input-focus">
             <button onclick="updateApiValue()"
                     class="px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+              🔄 Actualizar API
+            </button>
+          </div>
+        </div>
+
+        <!-- Valor API Dinámico EUR/VES -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Tasa EUR/VES
+          </label>
+          <div class="bg-green-50 border border-green-200 rounded-lg p-3 mb-2">
+            <div class="flex items-center gap-2 text-sm text-green-700 mb-1">
+              <span class="animate-pulse">🔄</span>
+              <span>Simulando API externa en tiempo real (EUR/VES)</span>
+            </div>
+            <div class="text-xs text-green-600">
+              Última actualización: <span id="lastUpdateEUR">--:--:--</span>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <input type="number" id="apiValueEUR" value="17.2" step="0.01"
+                   class="flex-1 p-3 border border-gray-300 rounded-lg input-focus">
+            <button onclick="updateApiValueEUR()"
+                    class="px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600">
               🔄 Actualizar API
             </button>
           </div>
@@ -160,3 +184,4 @@
   <script src="script.js"></script>
 </body>
 </html>
+

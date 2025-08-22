@@ -1,0 +1,22 @@
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Fuente global */
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Fondo degradado principal */
+.gradient-bg {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Sombra para tarjetas */
+.card-shadow {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo de foco para inputs */
+.input-focus:focus {
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}

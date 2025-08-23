@@ -259,6 +259,31 @@
           </label>
         </div>
 
+        <!-- Método de Pago -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Método de Pago
+          </label>
+          <select id="paymentMethod"
+                  class="w-full p-3 border border-gray-300 rounded-lg input-focus">
+            <option value="transfer">🏦 Transferencia</option>
+            <option value="cash">💵 Efectivo/Divisas</option>
+            <option value="zelle">💳 Zelle</option>
+            <option value="binance">₿ Binance</option>
+            <option value="mixed">🔄 Pago Mixto</option>
+          </select>
+        </div>
+
+        <!-- Pago Mixto -->
+        <div id="mixedPaymentDiv" class="mb-6 hidden">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Monto en Transferencia ($)
+          </label>
+          <input type="number" id="transferAmount"
+                 class="w-full p-3 border border-gray-300 rounded-lg input-focus"
+                 placeholder="Cantidad a pagar por transferencia">
+        </div>
+
         <!-- Tasa de Transferencia -->
         <div class="mb-6">
           <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -310,30 +335,7 @@
           </div>
         </div>
 
-        <!-- Método de Pago -->
-        <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Método de Pago
-          </label>
-          <select id="paymentMethod"
-                  class="w-full p-3 border border-gray-300 rounded-lg input-focus">
-            <option value="transfer">🏦 Transferencia</option>
-            <option value="cash">💵 Efectivo/Divisas</option>
-            <option value="zelle">💳 Zelle</option>
-            <option value="binance">₿ Binance</option>
-            <option value="mixed">🔄 Pago Mixto</option>
-          </select>
-        </div>
-
-        <!-- Pago Mixto -->
-        <div id="mixedPaymentDiv" class="mb-6 hidden">
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Monto en Transferencia ($)
-          </label>
-          <input type="number" id="transferAmount"
-                 class="w-full p-3 border border-gray-300 rounded-lg input-focus"
-                 placeholder="Cantidad a pagar por transferencia">
-        </div>
+        
 
         <div class="bg-gradient-to-r from-purple-100 to-blue-100 border border-purple-200 rounded-lg p-4 text-center">
           <div class="flex items-center justify-center gap-2 text-purple-700">
@@ -377,6 +379,7 @@
   <script src="script.js"></script>
 </body>
 </html>
+
 
 
 

@@ -391,7 +391,7 @@ function getMethodName(key) {
 }
 
 
-const productSelect = document.getElementById('productSelect');
+//const productSelect = document.getElementById('productSelect');
 const batteryFullCheckbox = document.getElementById('batteryFullCheckbox');
 
 productSelect.addEventListener('change', updatePrice);
@@ -420,5 +420,6 @@ function updatePrice() {
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
+
 
 

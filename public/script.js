@@ -391,10 +391,34 @@ function getMethodName(key) {
 }
 
 
+const productSelect = document.getElementById('productSelect');
+const batteryFullCheckbox = document.getElementById('batteryFullCheckbox');
+
+productSelect.addEventListener('change', updatePrice);
+batteryFullCheckbox.addEventListener('change', updatePrice);
+
+function updatePrice() {
+  const selectedOption = productSelect.options[productSelect.selectedIndex];
+  if (!selectedOption || !selectedOption.dataset.price) {
+    console.log('No producto seleccionado');
+    return;
+  }
+
+  let basePrice = parseFloat(selectedOption.dataset.price);
+  if (batteryFullCheckbox.checked) {
+    basePrice += 20; // Suma $20 si tiene 100% batería
+  }
+
+  console.log(`Precio ajustado: $${basePrice} USD`);
+  // Aquí puedes actualizar la UI o precio mostrado según tu app
+}
+
+
 
 
 // Inicialización
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
+
 

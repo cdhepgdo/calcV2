@@ -391,7 +391,7 @@ function getMethodName(key) {
 }
 
 
-//const productSelect = document.getElementById('productSelect');
+/* //const productSelect = document.getElementById('productSelect');
 const batteryFullCheckbox = document.getElementById('batteryFullCheckbox');
 
 productSelect.addEventListener('change', updatePrice);
@@ -412,7 +412,7 @@ function updatePrice() {
   console.log(`Precio ajustado: $${basePrice} USD`);
   // Aquí puedes actualizar la UI o precio mostrado según tu app
 }
-
+ */
 
 
 
@@ -420,6 +420,7 @@ function updatePrice() {
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
+
 
 
 

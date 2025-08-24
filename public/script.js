@@ -24,6 +24,8 @@ const comparisonDiv    = document.getElementById('comparison');
 const comparisonContent= document.getElementById('comparisonContent');
 const lastUpdateSpan   = document.getElementById('lastUpdate');
 
+const batteryFullCheckbox = document.getElementById('batteryFullCheckbox');
+
 
 // Función reusable para obtener la tasa promedio de Binance P2P
 async function fetchBinanceP2PAverage() {
@@ -64,7 +66,25 @@ apiValueInput.addEventListener('input', calculateRealTime);
 paymentMethod.addEventListener('change', onMethodChange);
 transferAmount.addEventListener('input', calculateRealTime);
 
-// Manejo de selección de producto
+
+
+// Listener para el checkbox:
+batteryFullCheckbox.addEventListener('change', () => {
+  if (productSelect.value === 'custom') {
+    updatePrice('custom');
+  } else {
+    onProductChange();
+  }
+});
+
+function getAdjustedPrice(basePrice) {
+  let price = basePrice;
+  if (batteryFullCheckbox && batteryFullCheckbox.checked) {
+    price += 20;
+  }
+  return price;
+}
+/* // Manejo de selección de producto
 function onProductChange() {
   const val = productSelect.value;
   if (val === 'custom') {
@@ -82,9 +102,29 @@ function onProductChange() {
     currentCurrency = opt.dataset.currency || 'USD';
   }
   calculateRealTime();
+} */
+// Modifica onProductChange:
+function onProductChange() {
+  const val = productSelect.value;
+  if (val === 'custom') {
+    customPriceDiv.classList.remove('hidden');
+    currentPrice = getAdjustedPrice(parseFloat(customPrice.value) || 0);
+    currentCurrency = customCurrency.value;
+  } else if (!val) {
+    customPriceDiv.classList.add('hidden');
+    currentPrice = 0;
+    currentCurrency = 'USD';
+  } else {
+    customPriceDiv.classList.add('hidden');
+    const opt = productSelect.selectedOptions[0];
+    const basePrice = parseFloat(opt.dataset.price) || 0;
+    currentPrice = getAdjustedPrice(basePrice);
+    currentCurrency = opt.dataset.currency || 'USD';
+  }
+  calculateRealTime();
 }
 
-// Actualiza el precio cuando cambias el input personalizado
+/* // Actualiza el precio cuando cambias el input personalizado
 function updatePrice(type) {
   if (type === 'custom') {
     currentPrice = parseFloat(customPrice.value) || 0;
@@ -92,7 +132,18 @@ function updatePrice(type) {
     currentCurrency = customCurrency.value;
   }
   calculateRealTime();
+} */
+// Modifica updatePrice:
+function updatePrice(type) {
+  if (type === 'custom') {
+    currentPrice = getAdjustedPrice(parseFloat(customPrice.value) || 0);
+  } else {
+    currentCurrency = customCurrency.value;
+    currentPrice = getAdjustedPrice(parseFloat(customPrice.value) || 0);
+  }
+  calculateRealTime();
 }
+
 
 // Mostrar u ocultar sección de pago mixto
 function onMethodChange() {
@@ -420,6 +471,7 @@ function updatePrice() {
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
+
 
 
 

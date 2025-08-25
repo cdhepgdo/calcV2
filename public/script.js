@@ -40,7 +40,7 @@ async function fetchBinanceP2PAverage() {
     const promedio = data.stats.trimmedAverage || data.stats.average;
 
     // Asignamos el valor al input
-    transferRate.value = promedio.toFixed(2) | 0;
+    transferRate.value = promedio.toFixed(2) /* | 0 */;
 
     return promedio;
   } catch (err) {
@@ -471,6 +471,7 @@ function updatePrice() {
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
+
 
 
 

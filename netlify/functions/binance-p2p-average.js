@@ -69,7 +69,7 @@ export const handler = async (event) => {
       return sliced.length ? mean(sliced) : mean(arr);
     };
 
-    const avg = mean(prices);
+    const avg = Math.round(mean(prices));
     const med = median(prices);
     const tMean = trimmedMean(prices, trim);
 
@@ -117,6 +117,7 @@ function response(statusCode, data, cacheSeconds = 0) {
     body: JSON.stringify(data)
   };
 }
+
 
 
 

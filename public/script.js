@@ -40,7 +40,7 @@ async function fetchBinanceP2PAverage() {
     const promedio = data.stats.trimmedAverage || data.stats.average;
 
     // Asignamos el valor al input
-    transferRate.value = promedio/*.toFixed(2)  | 0 */;
+    transferRate.value = promedio.toFixed(2)  | 0;
 
     return promedio;
   } catch (err) {
@@ -182,7 +182,7 @@ async function updateApiValue() {
   const binanceRate = await fetchBinanceP2PAverage();
   if (rate !== null) {
     apiValueInput.value = rate.toFixed(2);
-    transferRate.value = binanceRate/* .toFixed(2) | 0 */;
+    transferRate.value = binanceRate.toFixed(2) | 0;
     calculateRealTime(); // recalcula con el nuevo valor
   }
 }
@@ -471,6 +471,7 @@ function updatePrice() {
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
+
 
 
 

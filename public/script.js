@@ -30,7 +30,7 @@ const batteryFullCheckbox = document.getElementById('batteryFullCheckbox');
 // Función reusable para obtener la tasa promedio de Binance P2P
 async function fetchBinanceP2PAverage() {
   try {
-    const res = await fetch('/.netlify/functions/binance-p2p-average?asset=USDT&fiat=VES&tradeType=SELL&rows=22&trim=0.1');
+    const res = await fetch('/.netlify/functions/binance-p2p-average?asset=USDT&fiat=VES&tradeType=SELL&rows=20&trim=0.1');
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
     const data = await res.json();
@@ -471,6 +471,7 @@ function updatePrice() {
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
+
 
 
 

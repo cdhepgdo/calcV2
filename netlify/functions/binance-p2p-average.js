@@ -57,7 +57,7 @@ export const handler = async (event) => {
     // Ordenar para mediana y recorte
     prices.sort((a, b) => a - b);
 
-    const mean = /* (arr) => arr.reduce((s, v) => s + v, 0) / arr.length */ arr.reduce((max, num) => (num > max ? num : max), -Infinity);
+    const mean = /* (arr) => arr.reduce((s, v) => s + v, 0) / arr.length */ 10 /* arr.reduce((max, num) => (num > max ? num : max), -Infinity) */;
     const median = (arr) => {
       const m = Math.floor(arr.length / 2);
       return arr.length % 2 ? arr[m] : (arr[m - 1] + arr[m]) / 2;
@@ -117,6 +117,7 @@ function response(statusCode, data, cacheSeconds = 0) {
     body: JSON.stringify(data)
   };
 }
+
 
 
 

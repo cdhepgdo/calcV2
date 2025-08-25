@@ -7,7 +7,7 @@ export const handler = async (event) => {
   const asset = params.get("asset") || "USDT";
   const fiat = params.get("fiat") || "VES";
   const tradeType = (params.get("tradeType") || "SELL").toUpperCase(); // SELL: anunciante vende USDT (típico para comprar USDT)
-  const rows = Math.max(1, Math.min(parseInt(params.get("rows") || "6", 10), 50)); // 1..50
+  const rows = Math.max(1, Math.min(parseInt(params.get("rows") || "3", 10), 50)); // 1..50
   const trim = Math.min(Math.max(Number(params.get("trim") || "0.1"), 0), 0.4); // 0..0.4 (0%..40%)
   const payTypesParam = params.get("payTypes"); // ej: "BANK_TRANSFER,MobilePayment"
   const payTypes = payTypesParam ? payTypesParam.split(",").map(s => s.trim()).filter(Boolean) : [];
@@ -117,6 +117,7 @@ function response(statusCode, data, cacheSeconds = 0) {
     body: JSON.stringify(data)
   };
 }
+
 
 
 

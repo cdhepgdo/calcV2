@@ -6,8 +6,9 @@ export const handler = async (event) => {
 
   const asset = params.get("asset") || "USDT";
   const fiat = params.get("fiat") || "VES";
-  const tradeType = (params.get("tradeType") || "SELL").toUpperCase(); // SELL: anunciante vende USDT (típico para comprar USDT)
+  const tradeType = (params.get("tradeType") || "BUY").toUpperCase(); // SELL: anunciante vende USDT (típico para comprar USDT)
   const rows = Math.max(1, Math.min(parseInt(params.get("rows") || "20", 10), 50)); // 1..50
+  //console.log("rows:", rows);
   const trim = Math.min(Math.max(Number(params.get("trim") || "0.1"), 0), 0.4); // 0..0.4 (0%..40%)
   const payTypesParam = params.get("payTypes"); // ej: "BANK_TRANSFER,MobilePayment"
   const payTypes = payTypesParam ? payTypesParam.split(",").map(s => s.trim()).filter(Boolean) : [];
@@ -37,8 +38,9 @@ export const handler = async (event) => {
     if (!res.ok) {
       throw new Error(`Binance P2P respondió ${res.status}`);
     }
-
+    //console.log("res.ok:", res);
     const json = await res.json();
+    //console.log("json:", json);
     const list = Array.isArray(json?.data) ? json.data : [];
 
     // Extraer precios numéricos
@@ -46,6 +48,7 @@ export const handler = async (event) => {
       .map(item => parseFloat(item?.adv?.price))
       .filter(n => Number.isFinite(n));
 
+    //console.log("prices:", prices);
     if (prices.length === 0) {
       return response(200, {
         ok: false,
@@ -57,7 +60,7 @@ export const handler = async (event) => {
     // Ordenar para mediana y recorte
     prices.sort((a, b) => a - b);
 
-    const mean = /* (arr) => arr.reduce((s, v) => s + v, 0) / arr.length */ 10 /* arr.reduce((max, num) => (num > max ? num : max), -Infinity) */;
+    const mean = (arr) => arr.reduce((s, v) => s + v, 0) / arr.length /* arr.reduce((max, num) => (num > max ? num : max), -Infinity) */;
     const median = (arr) => {
       const m = Math.floor(arr.length / 2);
       return arr.length % 2 ? arr[m] : (arr[m - 1] + arr[m]) / 2;
@@ -84,7 +87,7 @@ export const handler = async (event) => {
       stats: {
         min: prices[0],
         max: prices[prices.length - 1],
-        average: /* avg */220,
+        average: avg,
         median: med,
         trimmedAverage: tMean,
         trimFraction: trim
@@ -117,6 +120,7 @@ function response(statusCode, data, cacheSeconds = 0) {
     body: JSON.stringify(data)
   };
 }
+
 
 
 

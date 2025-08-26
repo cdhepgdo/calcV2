@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Precios en Bs</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+    h1 { text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #333; color: #fff; }
+    tr:nth-child(even) { background: #fafafa; }
+    .bs { font-weight: bold; color: green; }
+  </style>
+</head>
+<body>
+  <h1>💱 Lista de Precios en Bs (Tasa Binance P2P)</h1>
+  <p id="tasa">Cargando tasa...</p>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>Producto</th>
+        <th>Precio Bs</th>
+      </tr>
+    </thead>
+    <tbody id="tabla-productos"></tbody>
+  </table>
+
+  <script>
+    const productos = [
+      { nombre: "Apple Watch serie 8 45mm", usd: 280 },
+      { nombre: "Apple Watch serie 9 45mm", usd: 319 },
+      { nombre: "Apple Watch serie X 42mm", usd: 469 },
+      { nombre: "Apple Watch serie X 46mm", usd: 499 },
+      { nombre: "iPhone 11 (64gb)", usd: 259 },
+      { nombre: "iPhone 11 (128gb)", usd: 279 },
+      { nombre: "iPhone 11 (256gb)", usd: 299 },
+      { nombre: "iPhone 11 Pro (64gb)", usd: 290 },
+      { nombre: "iPhone 11 Pro (256gb)", usd: 349 },
+      { nombre: "iPhone 11 Pro Max (64gb)", usd: 340 },
+      { nombre: "iPhone 11 Pro Max (256gb)", usd: 350 },
+      { nombre: "iPhone 12 (64gb)", usd: 290 },
+      { nombre: "iPhone 12 (128gb)", usd: 339 },
+      { nombre: "iPhone 12 (256gb)", usd: 365 },
+      { nombre: "iPhone 12 Pro (128gb)", usd: 370 },
+      { nombre: "iPhone 12 Pro (256gb)", usd: 400 },
+      { nombre: "iPhone 12 Pro (512gb)", usd: 419 },
+      { nombre: "iPhone 12 Pro Max (128gb)", usd: 449 },
+      { nombre: "iPhone 12 Pro Max (256gb)", usd: 479 },
+      { nombre: "iPhone 12 Pro Max (512gb)", usd: 520 },
+      { nombre: "iPhone 13 (128gb)", usd: 385 },
+      { nombre: "iPhone 13 (256gb)", usd: 409 },
+      { nombre: "iPhone 13 (512gb)", usd: 460 },
+      { nombre: "iPhone 13 Pro (128gb)", usd: 509 },
+      { nombre: "iPhone 13 Pro (256gb)", usd: 539 },
+      { nombre: "iPhone 13 Pro (512gb)", usd: 559 },
+      { nombre: "iPhone 13 Pro (1TB)", usd: 580 },
+      { nombre: "iPhone 13 Pro Max (128gb)", usd: 589 },
+      { nombre: "iPhone 13 Pro Max (256gb)", usd: 639 },
+      { nombre: "iPhone 13 Pro Max (512gb)", usd: 659 },
+      { nombre: "iPhone 13 Pro Max (1TB)", usd: 669 },
+      { nombre: "iPhone 14 (128gb)", usd: 439 },
+      { nombre: "iPhone 14 (256gb)", usd: 469 },
+      { nombre: "iPhone 14 (512gb)", usd: 489 },
+      { nombre: "iPhone 14 Plus (128gb)", usd: 499 },
+      { nombre: "iPhone 14 Plus (256gb)", usd: 519 },
+      { nombre: "iPhone 14 Pro (128gb)", usd: 609 },
+      { nombre: "iPhone 14 Pro (256gb)", usd: 629 },
+      { nombre: "iPhone 14 Pro (512gb)", usd: 649 },
+      { nombre: "iPhone 14 Pro Max (128gb)", usd: 699 },
+      { nombre: "iPhone 14 Pro Max (256gb)", usd: 739 },
+      { nombre: "iPhone 14 Pro Max (512gb)", usd: 779 },
+      { nombre: "iPhone 15 (128gb)", usd: 639 },
+      { nombre: "iPhone 15 (256gb)", usd: 679 },
+      { nombre: "iPhone 15 (512gb)", usd: 689 },
+      { nombre: "iPhone 15 Plus (128gb)", usd: 690 },
+      { nombre: "iPhone 15 Plus (256gb)", usd: 720 },
+      { nombre: "iPhone 15 Pro (128gb)", usd: 760 },
+      { nombre: "iPhone 15 Pro (256gb)", usd: 790 },
+      { nombre: "iPhone 15 Pro Max (256gb)", usd: 890 },
+      { nombre: "iPhone 15 Pro Max (512gb)", usd: 979 },
+      { nombre: "iPhone 15 Pro Max (1TB)", usd: 1019 },
+      { nombre: "iPhone 16 (128gb)", usd: 819 },
+      { nombre: "iPhone 16 (256gb)", usd: 849 },
+      { nombre: "iPhone 16 Plus (128gb)", usd: 869 },
+      { nombre: "iPhone 16 Plus (256gb)", usd: 919 },
+      { nombre: "iPhone 16 Pro (128gb)", usd: 980 },
+      { nombre: "iPhone 16 Pro (512gb)", usd: 1120 },
+      { nombre: "iPhone 16 Pro (1TB)", usd: 1160 },
+      { nombre: "iPhone 16 Pro Max (256gb)", usd: 1159 },
+      { nombre: "iPhone 16 Pro Max (512gb)", usd: 1230 },
+      { nombre: "iPhone 16 Pro Max (1TB)", usd: 1350 }
+    ];
+
+    async function fetchTasaYCalcular() {
+      try {
+        const res = await fetch('/.netlify/functions/binance-p2p-average?asset=USDT&fiat=VES&tradeType=SELL&rows=20&trim=0.1');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.message || 'Respuesta no válida');
+
+        const promedio = data.stats.trimmedAverage || data.stats.average;
+        document.getElementById('tasa').textContent = `Tasa Binance P2P: Bs ${promedio.toFixed(2)}`;
+
+        const tbody = document.getElementById('tabla-productos');
+        tbody.innerHTML = '';
+
+        productos.forEach(p => {
+          const precioBs = p.usd * promedio;
+          const fila = `<tr>
+            <td>${p.nombre}</td>
+            <td class="bs">Bs ${precioBs.toFixed(2)}</td>
+          </tr>`;
+          tbody.innerHTML += fila;
+        });
+      } catch (err) {
+        console.error(err);
+        document.getElementById('tasa').textContent = 'Error al obtener tasa';
+      }
+    }
+
+    fetchTasaYCalcular();
+  </script>
+</body>
+</html>

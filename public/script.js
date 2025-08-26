@@ -28,7 +28,7 @@ const batteryFullCheckbox = document.getElementById('batteryFullCheckbox');
 
 
 // Función reusable para obtener la tasa promedio de Binance P2P
-async function fetchBinanceP2PAverage() {
+/* async function fetchBinanceP2PAverage() {
   try {
     const res = await fetch('/.netlify/functions/binance-p2p-average?asset=USDT&fiat=VES&tradeType=SELL&rows=20&trim=0.1');
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -55,7 +55,38 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Inicializamos la tasa de Binance P2P
   const binanceRate = await fetchBinanceP2PAverage();
 });
+ */
+async function fetchBinanceP2PAverage() {
+  try {
+    const res = await fetch('/.netlify/functions/binance-p2p-average?asset=USDT&fiat=VES&tradeType=SELL&rows=20&trim=0.1');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.message || 'Respuesta no válida');
+
+    console.log('Binance P2P data:', data);
+
+    // Tomamos los valores
+    const promedio = /* data.stats.trimmedAverage ||  */data.stats.average;
+    const maximo = data.stats.max;
+
+    // Calculamos la diferencia
+    const diferencia = Math.abs(maximo - promedio);
+
+    // Si la diferencia es menor a 1.8 usamos el promedio, si no, el máximo
+    const valorFinal = diferencia < 1.8 ? promedio : maximo;
+
+    // Asignamos el valor al input (sin el bitwise, que no es necesario aquí)
+    transferRate.value = valorFinal.toFixed(2);
+
+    return valorFinal;
+
+  } catch (err) {
+    console.error('Error obteniendo tasa:', err);
+    // Si falla, mantenemos el valor por defecto (15) o cualquier otro
+    return null;
+  }
+}
 
 // Listeners para inputs
 productSelect.addEventListener('change', onProductChange);
@@ -471,6 +502,7 @@ function updatePrice() {
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
+
 
 
 

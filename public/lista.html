@@ -14,8 +14,13 @@
   </style>
 </head>
 <body>
-  <h1>💱 Lista de Precios en Bs (Tasa Binance P2P)</h1>
+  <h1>💱 Lista de Precios en Bs </h1>
   <p id="tasa">Cargando tasa...</p>
+
+  <div style="margin-top: 20px;">
+    <button id="btnImprimir">🖨 Imprimir lista</button>
+    <button id="btnDescargar">💾 Descargar CSV</button>
+  </div>
   
   <table>
     <thead>
@@ -125,6 +130,33 @@
         document.getElementById('tasa').textContent = 'Error al obtener tasa';
       }
     }
+
+    // Botón para imprimir
+    document.getElementById('btnImprimir').addEventListener('click', () => {
+      window.print();
+    });
+  
+    // Botón para descargar CSV
+    document.getElementById('btnDescargar').addEventListener('click', () => {
+      const filas = document.querySelectorAll('#tabla-productos tr');
+      let csv = "Producto,Precio Bs\n";
+      filas.forEach(fila => {
+        const cols = fila.querySelectorAll('td');
+        const producto = cols[0].innerText;
+        const precio = cols[1].innerText.replace("Bs", "").trim();
+        csv += `"${producto}",${precio}\n`;
+      });
+  
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+  
+      const enlace = document.createElement('a');
+      enlace.href = url;
+      enlace.download = 'lista_precios.csv';
+      enlace.click();
+  
+      URL.revokeObjectURL(url);
+    });
 
     fetchTasaYCalcular();
   </script>

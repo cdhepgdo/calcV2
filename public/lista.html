@@ -110,10 +110,13 @@
         tbody.innerHTML = '';
 
         productos.forEach(p => {
+          //const precioBs = p.usd * promedio;
           const precioBs = p.usd * promedio;
+          const precioFormateado = Math.round(precioBs).toLocaleString("es-VE");
+
           const fila = `<tr>
             <td>${p.nombre}</td>
-            <td class="bs">Bs ${precioBs.toFixed(2)}</td>
+            <td class="bs">Bs ${/* precioBs.toFixed(2) */precioFormateado}</td>
           </tr>`;
           tbody.innerHTML += fila;
         });

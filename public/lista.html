@@ -70,12 +70,28 @@
       <tr>
         <th>Producto</th>
         <th>Precio Bs</th>
+        <th>Estimado $ BCV</th>
+        <th>Oferta Divisas</th>
       </tr>
     </thead>
     <tbody id="tabla-productos"></tbody>
   </table>
 
   <script>
+    async function fetchTasaBCV() {
+      try {
+        const res = await fetch("https://open.er-api.com/v6/latest/USD");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        // El valor viene como string, lo convertimos a número
+        return parseFloat(data.rates.VES);
+      } catch (err) {
+        console.error("Error obteniendo tasa BCV:", err);
+        return null;
+      }
+    }
+
+    
     const productos = [
       { nombre: "Apple Watch serie 8 45mm", usd: 280 },
       { nombre: "Apple Watch serie 9 45mm", usd: 319 },
@@ -153,6 +169,11 @@
         console.log(promedio.toFixed(2));
         promedio = parseFloat(promedio.toFixed(2)) + 1.5;
         console.log(promedio.toFixed(2));
+
+        // 2️⃣ Obtener tasa BCV en vivo
+        const tasaBCV = await fetchTasaBCV();
+        if (!tasaBCV) throw new Error("No se pudo obtener la tasa BCV");
+        
         document.getElementById('tasa').textContent = `Tasa Binance P2P: Bs ${parseInt(promedio.toFixed(2))}`;
 
         const tbody = document.getElementById('tabla-productos');
@@ -160,20 +181,26 @@
 
         productos.forEach(p => {
           //const precioBs = p.usd * promedio;
+          /* const precioBs = p.usd * promedio;
+          const precioFormateado = Math.round(precioBs).toLocaleString("es-VE"); */
           const precioBs = p.usd * promedio;
           const precioFormateado = Math.round(precioBs).toLocaleString("es-VE");
+          const estimadoBCV = precioBs / tasaBCV; // Bs → USD usando BCV
+          const ofertaDivisas = p.usd; // USD base
 
           const fila = `<tr>
             <td>${p.nombre}</td>
             <td class="bs">Bs ${/* precioBs.toFixed(2) */precioFormateado}</td>
+            <td>$ ${estimadoBCV.toFixed(2)}</td>
+            <td>$ ${ofertaDivisas.toFixed(2)}</td>
           </tr>`;
           tbody.innerHTML += fila;
         });
-      } catch (err) {
-        console.error(err);
-        document.getElementById('tasa').textContent = 'Error al obtener tasa';
+        } catch (err) {
+          console.error(err);
+          document.getElementById('tasa').textContent = 'Error al obtener tasa';
+        }
       }
-    }
 
     // Botón para imprimir
     document.getElementById('btnImprimir').addEventListener('click', () => {

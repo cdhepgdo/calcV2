@@ -102,7 +102,7 @@
 
         const promedio = data.stats.trimmedAverage || data.stats.average;
         console.log(promedio.toFixed(2));
-        promedio = parseInt(promedio.toFixed(2)) + 1.5;
+        promedio = parseFloat(promedio.toFixed(2)) + 1.5;
         console.log(promedio.toFixed(2));
         document.getElementById('tasa').textContent = `Tasa Binance P2P: Bs ${parseInt(promedio.toFixed(2))}`;
 

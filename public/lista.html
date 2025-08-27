@@ -100,7 +100,7 @@
         const data = await res.json();
         if (!data.ok) throw new Error(data.message || 'Respuesta no válida');
 
-        const promedio = data.stats.trimmedAverage || data.stats.average;
+        let promedio = data.stats.trimmedAverage || data.stats.average;
         console.log(promedio.toFixed(2));
         promedio = parseFloat(promedio.toFixed(2)) + 1.5;
         console.log(promedio.toFixed(2));

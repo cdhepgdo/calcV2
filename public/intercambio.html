@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Diferencia (Tu Lógica)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+</head>
+
+<body class="bg-slate-100 flex items-center justify-center min-h-screen p-4">
+  <button class="py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600" >
+        <a href="/">💱 Volver a Calculadora...</a>
+    </button>
+
+    <main class="grid grid-cols-1 lg:grid-cols-5 gap-8 w-full max-w-6xl">
+
+        <section class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-lg">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="bg-slate-100 p-2 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800">⚙ Configuración</h2>
+            </div>
+
+            <div class="space-y-5">
+                <div>
+                    <label for="recibido" class="block mb-2 text-sm font-medium text-slate-600">Equipo Recibido:</label>
+                    <select id="recibido" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                      <option value="">Seleccionar Equipo a recibir...</option>
+                    </select>
+                </div>
+
+                <div id="venta-wrapper" class="transition-opacity duration-300">
+                    <label for="venta" class="block mb-2 text-sm font-medium text-slate-600">Equipo de Venta:</label>
+                    <select id="venta" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                      <option value="">Seleccionar Equipo a entregar...</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block mb-2 text-sm font-medium text-slate-600">Condiciones del Equipo Recibido</label>
+                    <div class="space-y-2 text-sm">
+                        <label class="flex items-center gap-2"><input type="checkbox" value="-30" class="condicion w-4 h-4 text-blue-600 rounded"><span>Batería &lt; 80% (-30 USD)</span></label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="-10" class="condicion w-4 h-4 text-blue-600 rounded"><span>Sin caja (-10 USD)</span></label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="-10" class="condicion w-4 h-4 text-blue-600 rounded"><span>Bocinas dañadas (-10 USD)</span></label>
+                        <label class="flex items-center gap-2"><input type="checkbox" id="solo-venta-chk" value="-30" class="condicion w-4 h-4 text-blue-600 rounded"><span>Solo venta (-30 USD)</span></label>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="tasas" class="mt-8 bg-purple-100 text-purple-800 p-4 rounded-lg flex items-center gap-3 font-semibold">
+                Cargando tasas...
+            </div>
+        </section>
+
+        <section class="lg:col-span-3 bg-white p-6 rounded-2xl shadow-lg space-y-6">
+            <div class="flex items-center gap-3">
+                 <div class="bg-slate-100 p-2 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                </div>
+                <h2 id="resultado-titulo" class="text-2xl font-bold text-slate-800">📊 Resultados del Intercambio</h2>
+            </div>
+
+            <div id="resultado" class="bg-blue-50 border-t-4 border-blue-500 p-5 rounded-lg space-y-3">
+                <p class="text-slate-500">Selecciona los equipos para ver el resultado.</p>
+            </div>
+        </section>
+    </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // === DATOS Y LÓGICA ORIGINAL ===
+    /* const recibidos = [
+        { nombre: "iPhone 11 (256gb)", usd: 150 },
+        { nombre: "iPhone 12 (128gb)", usd: 200 },
+        { nombre: "iPhone 13 (256gb)", usd: 310 },
+        { nombre: "iPhone 14 (128gb)", usd: 320 }
+    ]; */
+    const recibidos = [
+      { nombre: "iPhone 11 (64gb)", usd: 130 },
+      { nombre: "iPhone 11 (128gb)", usd: 140 },
+      { nombre: "iPhone 11 (256gb)", usd: 150 },
+      { nombre: "iPhone 11 Pro (64gb)", usd: 190 },
+      { nombre: "iPhone 11 Pro (256gb)", usd: 220 },
+      { nombre: "iPhone 11 Pro Max (64gb)", usd: 200 },
+      { nombre: "iPhone 11 Pro Max (256gb)", usd: 240 },
+      { nombre: "iPhone 12 (64gb)", usd: 190 },
+      { nombre: "iPhone 12 (128gb)", usd: 220 },
+      { nombre: "iPhone 12 (256gb)", usd: 220 },
+      { nombre: "iPhone 12 Pro (128gb)", usd: 260 },
+      { nombre: "iPhone 12 Pro (256gb)", usd: 280 },
+      { nombre: "iPhone 12 Pro (512gb)", usd: 290 },
+      { nombre: "iPhone 12 Pro Max (128gb)", usd: 330 },
+      { nombre: "iPhone 12 Pro Max (256gb)", usd: 350 },
+      { nombre: "iPhone 12 Pro Max (512gb)", usd: 360 },
+      { nombre: "iPhone 13 (128gb)", usd: 270 },
+      { nombre: "iPhone 13 (256gb)", usd: 290 },
+      { nombre: "iPhone 13 (512gb)", usd: 300 },
+      { nombre: "iPhone 13 Pro (128gb)", usd: 400 },
+      { nombre: "iPhone 13 Pro (256gb)", usd: 400 },
+      { nombre: "iPhone 13 Pro (512gb)", usd: 430 },
+      { nombre: "iPhone 13 Pro (1TB)", usd: 440 },
+      { nombre: "iPhone 13 Pro Max (128gb)", usd: 460 },
+      { nombre: "iPhone 13 Pro Max (256gb)", usd: 500 },
+      { nombre: "iPhone 13 Pro Max (512gb)", usd: 520 },
+      { nombre: "iPhone 13 Pro Max (1TB)", usd: 540 },
+      { nombre: "iPhone 14 (128gb)", usd: 320 },
+      { nombre: "iPhone 14 (256gb)", usd: 340 },
+      { nombre: "iPhone 14 (512gb)", usd: 360 },
+      { nombre: "iPhone 14 Plus (128gb)", usd: 380 },
+      { nombre: "iPhone 14 Plus (256gb)", usd: 390 },
+      { nombre: "iPhone 14 Pro (128gb)", usd: 480 },
+      { nombre: "iPhone 14 Pro (256gb)", usd: 500 },
+      { nombre: "iPhone 14 Pro (512gb)", usd: 510 },
+      { nombre: "iPhone 14 Pro Max (128gb)", usd: 570 },
+      { nombre: "iPhone 14 Pro Max (256gb)", usd: 600 },
+      { nombre: "iPhone 14 Pro Max (512gb)", usd: 620 },
+      { nombre: "iPhone 15 (128gb)", usd: 480 },
+      { nombre: "iPhone 15 (256gb)", usd: 500 },
+      { nombre: "iPhone 15 (512gb)", usd: 520 },
+      { nombre: "iPhone 15 Plus (128gb)", usd: 550 },
+      { nombre: "iPhone 15 Plus (256gb)", usd: 590 },
+      { nombre: "iPhone 15 Pro (128gb)", usd: 600 },
+      { nombre: "iPhone 15 Pro (256gb)", usd: 620 },
+      { nombre: "iPhone 15 Pro Max (256gb)", usd: 730 },
+      { nombre: "iPhone 15 Pro Max (512gb)", usd: 750 },
+      { nombre: "iPhone 15 Pro Max (1TB)", usd: 770 },
+      { nombre: "iPhone 16 (128gb)", usd: 690 },
+      { nombre: "iPhone 16 (256gb)", usd: 700 },
+      { nombre: "iPhone 16 Plus (128gb)", usd: 730 },
+      { nombre: "iPhone 16 Plus (256gb)", usd: 760 },
+      { nombre: "iPhone 16 Pro (128gb)", usd: 800 },
+      { nombre: "iPhone 16 Pro (512gb)", usd: 830 },
+      { nombre: "iPhone 16 Pro (1TB)", usd: 870 },
+      { nombre: "iPhone 16 Pro Max (256gb)", usd: 900 },
+      { nombre: "iPhone 16 Pro Max (512gb)", usd: 940 },
+      { nombre: "iPhone 16 Pro Max (1TB)", usd: 960 }
+    ];
+
+    const ventas = [
+      { nombre: "Apple Watch serie 8 45mm", usd: 280 },
+      { nombre: "Apple Watch serie 9 45mm", usd: 319 },
+      { nombre: "Apple Watch serie X 42mm", usd: 469 },
+      { nombre: "Apple Watch serie X 46mm", usd: 499 },
+      { nombre: "iPhone 11 (64gb)", usd: 259 },
+      { nombre: "iPhone 11 (128gb)", usd: 279 },
+      { nombre: "iPhone 11 (256gb)", usd: 299 },
+      { nombre: "iPhone 11 Pro (64gb)", usd: 290 },
+      { nombre: "iPhone 11 Pro (256gb)", usd: 349 },
+      { nombre: "iPhone 11 Pro Max (64gb)", usd: 340 },
+      { nombre: "iPhone 11 Pro Max (256gb)", usd: 350 },
+      { nombre: "iPhone 12 (64gb)", usd: 290 },
+      { nombre: "iPhone 12 (128gb)", usd: 339 },
+      { nombre: "iPhone 12 (256gb)", usd: 365 },
+      { nombre: "iPhone 12 Pro (128gb)", usd: 380 },
+      { nombre: "iPhone 12 Pro (256gb)", usd: 410 },
+      { nombre: "iPhone 12 Pro (512gb)", usd: 445 },
+      { nombre: "iPhone 12 Pro Max (128gb)", usd: 449 },
+      { nombre: "iPhone 12 Pro Max (256gb)", usd: 479 },
+      { nombre: "iPhone 12 Pro Max (512gb)", usd: 520 },
+      { nombre: "iPhone 13 (128gb)", usd: 390 },
+      { nombre: "iPhone 13 (256gb)", usd: 420 },
+      { nombre: "iPhone 13 (512gb)", usd: 440 },
+      { nombre: "iPhone 13 Pro (128gb)", usd: 509 },
+      { nombre: "iPhone 13 Pro (256gb)", usd: 539 },
+      { nombre: "iPhone 13 Pro (512gb)", usd: 559 },
+      { nombre: "iPhone 13 Pro (1TB)", usd: 580 },
+      { nombre: "iPhone 13 Pro Max (128gb)", usd: 589 },
+      { nombre: "iPhone 13 Pro Max (256gb)", usd: 639 },
+      { nombre: "iPhone 13 Pro Max (512gb)", usd: 659 },
+      { nombre: "iPhone 13 Pro Max (1TB)", usd: 669 },
+      { nombre: "iPhone 14 (128gb)", usd: 439 },
+      { nombre: "iPhone 14 (256gb)", usd: 469 },
+      { nombre: "iPhone 14 (512gb)", usd: 489 },
+      { nombre: "iPhone 14 Plus (128gb)", usd: 499 },
+      { nombre: "iPhone 14 Plus (256gb)", usd: 519 },
+      { nombre: "iPhone 14 Pro (128gb)", usd: 609 },
+      { nombre: "iPhone 14 Pro (256gb)", usd: 629 },
+      { nombre: "iPhone 14 Pro (512gb)", usd: 649 },
+      { nombre: "iPhone 14 Pro Max (128gb)", usd: 699 },
+      { nombre: "iPhone 14 Pro Max (256gb)", usd: 739 },
+      { nombre: "iPhone 14 Pro Max (512gb)", usd: 779 },
+      { nombre: "iPhone 15 (128gb)", usd: 639 },
+      { nombre: "iPhone 15 (256gb)", usd: 679 },
+      { nombre: "iPhone 15 (512gb)", usd: 689 },
+      { nombre: "iPhone 15 Plus (128gb)", usd: 690 },
+      { nombre: "iPhone 15 Plus (256gb)", usd: 720 },
+      { nombre: "iPhone 15 Pro (128gb)", usd: 780 },
+      { nombre: "iPhone 15 Pro (256gb)", usd: 820 },
+      { nombre: "iPhone 15 Pro Max (256gb)", usd: 890 },
+      { nombre: "iPhone 15 Pro Max (512gb)", usd: 979 },
+      { nombre: "iPhone 15 Pro Max (1TB)", usd: 970 },
+      { nombre: "iPhone 16 (128gb)", usd: 819 },
+      { nombre: "iPhone 16 (256gb)", usd: 849 },
+      { nombre: "iPhone 16 Plus (128gb)", usd: 869 },
+      { nombre: "iPhone 16 Plus (256gb)", usd: 919 },
+      { nombre: "iPhone 16 Pro (128gb)", usd: 1050 },
+      { nombre: "iPhone 16 Pro (512gb)", usd: 1120 },
+      { nombre: "iPhone 16 Pro (1TB)", usd: 1160 },
+      { nombre: "iPhone 16 Pro Max (256gb)", usd: 1159 },
+      { nombre: "iPhone 16 Pro Max (512gb)", usd: 1230 },
+      { nombre: "iPhone 16 Pro Max (1TB)", usd: 1350 }
+    ];
+
+
+    // === ELEMENTOS DEL DOM ===
+    const selRecibido = document.getElementById('recibido');
+    const selVenta = document.getElementById('venta');
+    const ventaWrapper = document.getElementById('venta-wrapper');
+    const resultadoDiv = document.getElementById('resultado');
+    const resultadoTitulo = document.getElementById('resultado-titulo');
+    const condiciones = document.querySelectorAll('.condicion');
+    const soloVentaChk = document.getElementById('solo-venta-chk');
+    const tasasDiv = document.getElementById('tasas');
+
+    // === INICIALIZACIÓN ===
+    //recibidos.forEach(p => selRecibido.innerHTML += `<option value="${p.usd}">${p.nombre}</option>`);
+    recibidos.forEach(p => selRecibido.innerHTML += `<option value="${p.usd}" data-price="${p.usd}" data-currency="USD">
+      ${p.nombre}
+    </option>`);
+    //ventas.forEach(p => selVenta.innerHTML += `<option value="${p.usd}">${p.nombre}</option>`);
+    ventas.forEach(p => selVenta.innerHTML += `<option value="${p.usd}" data-price="${p.usd}" data-currency="USD">
+      ${p.nombre}
+    </option>`);
+
+    // === ESTADO DE TASAS ===
+    let tasaBinance = 0, tasaBCV = 0;
+
+    async function fetchTasa(url, tasa) {
+        try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        // El valor viene como string, lo convertimos a número
+        if (tasa === "BCV"){
+            return parseFloat(data.rates.VES);
+        } else if (tasa === "BNC"){
+            return data.stats.trimmedAverage || dataB.stats.average;
+        }
+        //return parseFloat(data.rates.VES);
+        } catch (err) {
+        console.error(`Error obteniendo tasa ${tasa}:`, err);
+        return null;
+        }
+    }
+
+    // === FETCH DE TASAS ===
+    /* async function fetchTasas() {
+        try {
+            const [resBinance, resBCV] = await Promise.all([
+                fetch("https://pydolarve.org/api/v1/pages/p2p?monitor=binance"),
+                fetch("https://pydolarve.org/api/v1/dollar")
+            ]);
+            const dataBinance = await resBinance.json();
+            const dataBCV = await resBCV.json();
+            
+            tasaBinance = (parseFloat(dataBinance.monitors.binance.buy) + parseFloat(dataBinance.monitors.binance.sell)) / 2;
+            tasaBCV = dataBCV.rates.bcv;
+
+            tasasDiv.textContent = `Tasa Binance: Bs ${tasaBinance.toFixed(2)} | Tasa BCV: Bs ${tasaBCV.toFixed(2)}`;
+            calcular();
+        } catch (err) {
+            console.error("Error obteniendo tasas:", err);
+            tasasDiv.textContent = "Error al cargar las tasas.";
+        }
+    } */
+    async function fetchTasas() {
+        try {
+            // Usamos pydolarve.org para ambas tasas para consistencia
+
+            const dataBinance = await fetchTasa("/.netlify/functions/binance-p2p-average?asset=USDT&fiat=VES&tradeType=SELL&rows=20&trim=0.1", "BNC");
+            const dataBCV = await fetchTasa("https://open.er-api.com/v6/latest/USD", "BCV");
+            
+            // Calculamos el promedio de compra/venta de Binance
+            tasaBinance = dataBinance + 2;
+            tasaBCV = dataBCV;
+
+            tasasDiv.textContent = `BNC ${tasaBinance.toFixed(2)} | .v.c.v. ${tasaBCV.toFixed(2)}`;
+            
+            calcular(); // Llama a calcular una vez que las tasas están listas
+        } catch (err) {
+            console.error("Error obteniendo tasas:", err);
+            tasasDiv.textContent = "Error al cargar las tasas.";
+        }
+    }
+
+    // === FUNCIÓN DE CÁLCULO (MODIFICADA) ===
+    function calcular() {
+        if (!tasaBinance || !tasaBCV) return;
+
+        const formatUSD = (num) => `$${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        const formatBS = (num) => `Bs ${num.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        
+        // --- NUEVA LÓGICA: MODO "SOLO VENTA" ---
+        if (soloVentaChk.checked) {
+            resultadoTitulo.textContent = '📊 Resultado de la Compra';
+            
+            let precioRecibido = parseFloat(selRecibido.value);
+
+            // Aplicamos TODAS las condiciones marcadas
+            condiciones.forEach(chk => {
+                if (chk.checked) {
+                    precioRecibido += parseFloat(chk.value);
+                }
+            });
+
+            const totalPagarBs = precioRecibido * tasaBinance;
+
+            resultadoDiv.innerHTML = `
+                <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                    <span class="text-slate-500">Equipo Recibido:</span>
+                    <span class="font-semibold text-slate-800 text-right">${selRecibido.options[selRecibido.selectedIndex].text}</span>
+
+                    <span class="text-slate-500">Valor Final con Ajustes:</span>
+                    <span class="font-semibold text-slate-800 text-right">${formatUSD(precioRecibido)}</span>
+                </div>
+                
+                <div class="mt-4 bg-green-100 text-green-800 text-center font-bold p-3 rounded-lg text-lg">
+                    Total a Pagar al Cliente (USD): ${formatUSD(precioRecibido)}
+                </div>
+
+                <div class="mt-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-500 font-medium">Total a Pagar al Cliente (Bs):</span>
+                        <span class="font-bold text-xl text-blue-600">${formatBS(totalPagarBs)}</span>
+                    </div>
+                </div>
+            `;
+
+        } else {
+            // --- LÓGICA ANTERIOR: MODO "INTERCAMBIO" ---
+            resultadoTitulo.textContent = '📊 Resultados del Intercambio';
+
+            let precioRecibido = parseFloat(selRecibido.value);
+            const precioVenta = parseFloat(selVenta.value);
+
+            condiciones.forEach(chk => {
+                if (chk.checked) {
+                    precioRecibido += parseFloat(chk.value);
+                }
+            });
+
+            const diferenciaUSD = precioVenta - precioRecibido;
+            const diferenciaBs = diferenciaUSD * tasaBinance;
+            const diferenciaBCV = diferenciaBs / tasaBCV;
+            
+            resultadoDiv.innerHTML = `
+                <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                    <span class="text-slate-500">Valor Final Recibido:</span>
+                    <span class="font-semibold text-slate-800 text-right">${formatUSD(precioRecibido)}</span>
+                    <span class="text-slate-500">Valor de Venta:</span>
+                    <span class="font-semibold text-slate-800 text-right">${formatUSD(precioVenta)}</span>
+                </div>
+                <div class="mt-4 bg-yellow-100 text-yellow-800 text-center font-bold p-3 rounded-lg text-lg">
+                    Diferencia a Pagar (USD): ${formatUSD(diferenciaUSD)}
+                </div>
+                <div class="mt-4 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-500 font-medium">Diferencia en Bs (B.N.C):</span>
+                        <span class="font-bold text-xl text-blue-600">${formatBS(diferenciaBs)}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-500 font-medium">Equivalente en USD (Tasa BCV):</span>
+                        <span class="font-bold text-xl text-purple-600">${formatUSD(diferenciaBCV)}</span>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    // === MANEJADOR DEL TOGGLE "SOLO VENTA" ===
+    function handleSoloVentaToggle() {
+        const isChecked = soloVentaChk.checked;
+        selVenta.disabled = isChecked; // Desactiva/Activa el select de venta
+        ventaWrapper.classList.toggle('opacity-50', isChecked); // Atenúa visualmente el campo
+        
+        calcular(); // Vuelve a calcular todo con la nueva modalidad
+    }
+
+    // === EVENT LISTENERS ===
+    selRecibido.addEventListener('change', calcular);
+    selVenta.addEventListener('change', calcular);
+    condiciones.forEach(chk => chk.addEventListener('change', calcular));
+    // Listener específico para el toggle de "Solo Venta"
+    soloVentaChk.addEventListener('change', handleSoloVentaToggle);
+
+
+    // === INICIO DE LA APP ===
+    fetchTasas();
+});
+</script>
+
+</body>
+</html>

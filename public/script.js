@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
  */
 
-const nav = document.getElementById('globalMenu');
+/* const nav = document.getElementById('globalMenu');
 const menuOptions = document.getElementById('menuOptions');
 const menuToggle = document.getElementById('menuToggle');
 
@@ -82,7 +82,35 @@ window.addEventListener('scroll', () => {
 // Lógica para mostrar las opciones al hacer click en el botón
 menuToggle.addEventListener('click', () => {
   menuOptions.classList.toggle('hidden');
+}); */
+
+const nav = document.getElementById('globalMenu');
+const menuOptions = document.getElementById('menuOptions');
+const menuToggle = document.getElementById('menuToggle');
+const floatingMenu = document.getElementById('floatingMenu');
+const configSection = document.querySelector('.card-shadow');
+
+window.addEventListener('scroll', () => {
+  const configTop = configSection.getBoundingClientRect().top + window.scrollY;
+  if (window.scrollY >= configTop - nav.offsetHeight) {
+    nav.classList.remove('top-0');
+    nav.classList.add('bottom-6', 'right-6', 'left-auto', 'rounded-full', 'p-0', 'w-14', 'h-14', 'justify-center', 'items-center');
+    menuOptions.classList.add('hidden');
+    menuToggle.classList.remove('hidden');
+    floatingMenu.classList.add('hidden'); // Esconder menú flotante inicialmente
+  } else {
+    nav.classList.add('top-0');
+    nav.classList.remove('bottom-6', 'right-6', 'left-auto', 'rounded-full', 'p-0', 'w-14', 'h-14', 'justify-center', 'items-center');
+    menuOptions.classList.remove('hidden');
+    menuToggle.classList.add('hidden');
+    floatingMenu.classList.add('hidden'); // Asegurar que el menú flotante esté oculto
+  }
 });
+
+menuToggle.addEventListener('click', () => {
+  floatingMenu.classList.toggle('hidden');
+});
+
 
 async function fetchBinanceP2PAverage() {
   try {
@@ -530,6 +558,7 @@ function updatePrice() {
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
+
 
 
 

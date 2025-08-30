@@ -13,7 +13,23 @@
 </head>
 <body class="gradient-bg min-h-screen py-8">
 
-  <div class="container mx-auto px-4 max-w-6xl">
+  <!-- Barra de menú fija -->
+<nav id="globalMenu" class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white transition-all duration-300 shadow-lg">
+  <div class="font-bold text-lg">Menú</div>
+  <div class="flex gap-2" id="menuOptions">
+    <a href="lista.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">LISTADO PRECIOS</a>
+    <a href="intercambio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cálculo Trading</a>
+  </div>
+  <button id="menuToggle" class="hidden text-2xl focus:outline-none" aria-label="Abrir menú">
+    ☰
+  </button>
+</nav>
+
+<!-- Espaciador para que el contenido no se oculte tras el menú fijo -->
+<div class="h-14"></div>
+
+
+  <!-- <div class="container mx-auto px-4 max-w-6xl">
     <div class="text-center mb-8">
       <h1 class="text-4xl font-bold text-white mb-2">💰 Calculadora Inteligente</h1>
       <p class="text-white/80 text-lg">Gestiona precios y métodos de pago con precisión</p>
@@ -28,7 +44,7 @@
       <button class="py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600" >
         <a href="intercambio.html">Calculo Trading</a>
       </button>
-    </div>
+    </div> -->
 
     <div class="grid lg:grid-cols-2 gap-8">
       <!-- Panel de Configuración -->
@@ -484,6 +500,7 @@
   <script src="script.js"></script>
 </body>
 </html>
+
 
 
 

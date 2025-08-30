@@ -14,7 +14,7 @@
 <body class="gradient-bg min-h-screen py-8">
 
   <!-- Barra de menú fija -->
-<nav id="globalMenu" class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white transition-all duration-300 shadow-lg">
+<!-- <nav id="globalMenu" class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white transition-all duration-300 shadow-lg">
   <div class="font-bold text-lg">Menú</div>
   <div class="flex gap-2" id="menuOptions">
     <a href="lista.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">LISTADO PRECIOS</a>
@@ -23,7 +23,27 @@
   <button id="menuToggle" class="hidden text-2xl focus:outline-none" aria-label="Abrir menú">
     ☰
   </button>
+</nav> -->
+
+  <!-- Añade un contenedor para el menú flotante debajo del botón toggle -->
+<nav id="globalMenu" 
+     class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white transition-all duration-300 shadow-lg">
+  <div class="font-bold text-lg">Menú</div>
+  <div class="flex gap-2" id="menuOptions">
+    <a href="lista.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">LISTADO PRECIOS</a>
+    <a href="intercambio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cálculo Trading</a>
+  </div>
+  <button id="menuToggle" class="hidden text-2xl focus:outline-none relative z-50" aria-label="Abrir menú">
+    ☰
+  </button>
+
+  <!-- Contenedor menú desplegable para botón flotante -->
+  <div id="floatingMenu" class="hidden fixed bottom-20 right-6 bg-blue-700 text-white rounded-lg shadow-lg py-2 flex flex-col gap-1 z-40">
+    <a href="lista.html" class="px-4 py-2 hover:bg-blue-900 rounded">LISTADO PRECIOS</a>
+    <a href="intercambio.html" class="px-4 py-2 hover:bg-blue-900 rounded">Cálculo Trading</a>
+  </div>
 </nav>
+
 
 <!-- Espaciador para que el contenido no se oculte tras el menú fijo -->
 <div class="h-14"></div>
@@ -500,6 +520,7 @@
   <script src="script.js"></script>
 </body>
 </html>
+
 
 
 

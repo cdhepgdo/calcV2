@@ -56,6 +56,34 @@ document.addEventListener('DOMContentLoaded', async () => {
   const binanceRate = await fetchBinanceP2PAverage();
 });
  */
+
+const nav = document.getElementById('globalMenu');
+const menuOptions = document.getElementById('menuOptions');
+const menuToggle = document.getElementById('menuToggle');
+
+const configSection = document.querySelector('.card-shadow'); // Primer panel: Configuración
+
+// Lógica de scroll: El nav se mantiene fijo solo hasta el top de la sección de configuración.
+window.addEventListener('scroll', () => {
+  const configTop = configSection.getBoundingClientRect().top + window.scrollY;
+  if (window.scrollY >= configTop - nav.offsetHeight) {
+    nav.classList.remove('top-0');
+    nav.classList.add('bottom-6', 'right-6', 'left-auto', 'rounded-full', 'p-0', 'w-14', 'h-14', 'justify-center', 'items-center');
+    menuOptions.classList.add('hidden');
+    menuToggle.classList.remove('hidden');
+  } else {
+    nav.classList.add('top-0');
+    nav.classList.remove('bottom-6', 'right-6', 'left-auto', 'rounded-full', 'p-0', 'w-14', 'h-14', 'justify-center', 'items-center');
+    menuOptions.classList.remove('hidden');
+    menuToggle.classList.add('hidden');
+  }
+});
+
+// Lógica para mostrar las opciones al hacer click en el botón
+menuToggle.addEventListener('click', () => {
+  menuOptions.classList.toggle('hidden');
+});
+
 async function fetchBinanceP2PAverage() {
   try {
     const res = await fetch('/.netlify/functions/binance-p2p-average?asset=USDT&fiat=VES&tradeType=SELL&rows=20&trim=0.1');
@@ -502,6 +530,7 @@ function updatePrice() {
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
+
 
 
 

@@ -1,7 +1,7 @@
 // scripts/main.js
 let currentPrice = 0;
 let currentCurrency = 'USD';
-
+console.log("hh")
 // Formateo numérico en español
 function formatNumber(number) {
   return number.toLocaleString('es-ES', {
@@ -558,6 +558,7 @@ function updatePrice() {
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
+
 
 
 

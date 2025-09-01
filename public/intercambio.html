@@ -28,7 +28,7 @@
   <!-- Contenedor menú desplegable para botón flotante -->
   <div id="floatingMenu" class="hidden fixed bottom-20 right-6 bg-blue-700 text-white rounded-lg shadow-lg py-2 flex flex-col gap-1 z-40">
     <a href="lista.html" class="px-4 py-2 hover:bg-blue-900 rounded">LISTADO PRECIOS</a>
-    <a href="intercambio.html" class="px-4 py-2 hover:bg-blue-900 rounded">Cálculo Trading</a>
+    <a href="/" class="px-4 py-2 hover:bg-blue-900 rounded">Calculadora</a>
   </div>
 </nav>
 
@@ -294,7 +294,7 @@ const menuToggle = document.getElementById('menuToggle');
 const floatingMenu = document.getElementById('floatingMenu');
 const configSection = document.querySelector('.card-shadow');
 
-window.addEventListener('scroll', () => {
+/* window.addEventListener('scroll', () => {
   const configTop = configSection.getBoundingClientRect().top + window.scrollY;
   if (window.scrollY >= configTop - nav.offsetHeight) {
     nav.classList.remove('top-0');
@@ -308,6 +308,22 @@ window.addEventListener('scroll', () => {
     menuOptions.classList.remove('hidden');
     menuToggle.classList.add('hidden');
     floatingMenu.classList.add('hidden'); // Asegurar que el menú flotante esté oculto
+  }
+}) */
+    window.addEventListener('scroll', () => {
+  const threshold = 150; // píxeles que hay que bajar para activar menú flotante
+  if (window.scrollY >= threshold) {
+    nav.classList.remove('top-0');
+    nav.classList.add('bottom-6', 'right-6', 'left-auto', 'rounded-full', 'p-0', 'w-14', 'h-14', 'justify-center', 'items-center');
+    menuOptions.classList.add('hidden');
+    menuToggle.classList.remove('hidden');
+    floatingMenu.classList.add('hidden');
+  } else {
+    nav.classList.add('top-0');
+    nav.classList.remove('bottom-6', 'right-6', 'left-auto', 'rounded-full', 'p-0', 'w-14', 'h-14', 'justify-center', 'items-center');
+    menuOptions.classList.remove('hidden');
+    menuToggle.classList.add('hidden');
+    floatingMenu.classList.add('hidden');
   }
 });
 

@@ -167,7 +167,19 @@
         const data = await res.json();
         if (!data.ok) throw new Error(data.message || 'Respuesta no válida');
 
-        let promedio = data.stats.trimmedAverage || data.stats.average;
+        console.log('Binance P2P data:', data);
+
+    // Tomamos los valores
+    const promedioo = /* data.stats.trimmedAverage ||  */data.stats.average;
+    const maximo = data.stats.max;
+
+    // Calculamos la diferencia
+    const diferencia = Math.abs(maximo - promedioo);
+
+    // Si la diferencia es menor a 1.8 usamos el promedio, si no, el máximo
+    const promedio = diferencia < 1.8 ? promedioo : maximo;
+
+        //let promedio = /* data.stats.trimmedAverage || */ data.stats.average;
         console.log(promedio.toFixed(2));
         promedio = parseFloat(promedio.toFixed(2)) + 3;
         console.log(promedio.toFixed(2));

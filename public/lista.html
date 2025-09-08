@@ -162,7 +162,7 @@
 
     async function fetchTasaYCalcular() {
       try {
-        const res = await fetch('/.netlify/functions/binance-p2p-average?asset=USDT&fiat=VES&tradeType=SELL&rows=20&trim=0.1');
+        const res = await fetch('/.netlify/functions/binance-p2p-average?asset=USDT&fiat=VES&tradeType=BUY&rows=20&trim=0.1');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (!data.ok) throw new Error(data.message || 'Respuesta no válida');

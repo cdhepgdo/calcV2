@@ -130,7 +130,7 @@ async function fetchBinanceP2PAverage() {
     const diferencia = Math.abs(maximo - promedio);
 
     // Si la diferencia es menor a 1.8 usamos el promedio, si no, el máximo
-    const valorFinal = diferencia < 1.8 ? promedio : maximo;
+    const valorFinal = /* diferencia < 1.8 ? promedio : maximo */promedio;
 
     // Asignamos el valor al input (sin el bitwise, que no es necesario aquí)
     transferRate.value = valorFinal.toFixed(2);
@@ -558,6 +558,7 @@ function updatePrice() {
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
+
 
 
 

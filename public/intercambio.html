@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     ventas.forEach(venta => {
         const diferenciaUSD = venta.usd - precioRecibido;
-        if (diferenciaUSD > 0) {
+        if (/* diferenciaUSD > 0 */0<1) {
             const diferenciaBs = diferenciaUSD * tasaBinance;
             const diferenciaBCV = diferenciaBs / tasaBCV;
             tabla += `<tr class="hover:bg-blue-100">

@@ -3,41 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Diferencia (Tu Lógica)</title>
+    <title>Calculadora de Diferencia (Reestructurada)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
 </head>
-
 <body class="bg-slate-100 flex items-center justify-center min-h-screen p-4">
-  <!-- <button class="py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600" >
-        <a href="/">💱 Volver a Calculadora...</a>
-    </button> -->
-      <!-- Añade un contenedor para el menú flotante debajo del botón toggle -->
-<nav id="globalMenu" 
-     class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white transition-all duration-300 shadow-lg">
-  <!-- <div class="font-bold text-lg">Menú</div> -->
-  <div class="flex gap-2" id="menuOptions">
- <!--    <a href="lista.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">LISTADO PRECIOS</a> -->
-    <a href="Lista.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Lista</a>
-    <a href="/" class="px-3 py-2 rounded hover:bg-blue-900 transition">Calculadora Principal</a>
-  </div>
-  <button id="menuToggle" class="hidden text-2xl focus:outline-none relative z-50" aria-label="Abrir menú">
-    ☰
-  </button>
-
-  <!-- Contenedor menú desplegable para botón flotante -->
-  <div id="floatingMenu" class="hidden fixed bottom-20 right-6 bg-blue-700 text-white rounded-lg shadow-lg py-2 flex flex-col gap-1 z-40">
-    <a href="lista.html" class="px-4 py-2 hover:bg-blue-900 rounded">LISTADO PRECIOS</a>
-    <a href="/" class="px-4 py-2 hover:bg-blue-900 rounded">Calculadora</a>
-  </div>
-</nav>
-
-
-<!-- Espaciador para que el contenido no se oculte tras el menú fijo -->
-<div class="h-14"></div>
-
     <main class="grid grid-cols-1 lg:grid-cols-5 gap-8 w-full max-w-6xl card-shadow">
-
         <section class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-lg">
             <div class="flex items-center gap-3 mb-6">
                 <div class="bg-slate-100 p-2 rounded-lg">
@@ -45,7 +15,6 @@
                 </div>
                 <h2 class="text-2xl font-bold text-slate-800">⚙ Configuración</h2>
             </div>
-
             <div class="space-y-5">
                 <div>
                     <label for="recibido" class="block mb-2 text-sm font-medium text-slate-600">Equipo Recibido:</label>
@@ -53,202 +22,111 @@
                       <option value="">Seleccionar Equipo a recibir...</option>
                     </select>
                 </div>
-
-                <div id="venta-wrapper" class="transition-opacity duration-300">
-                    <label for="venta" class="block mb-2 text-sm font-medium text-slate-600">Equipo de Venta:</label>
-                    <select id="venta" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                      <option value="">Seleccionar Equipo a entregar...</option>
-                    </select>
-                </div>
-
                 <div>
                     <label class="block mb-2 text-sm font-medium text-slate-600">Condiciones del Equipo Recibido</label>
                     <div class="space-y-2 text-sm">
-                        <label class="flex items-center gap-2"><input type="checkbox" value="-30" class="condicion w-4 h-4 text-blue-600 rounded"><span>Batería &lt; 80% (-30 USD)</span></label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="-10" class="condicion w-4 h-4 text-blue-600 rounded"><span>Sin caja (-10 USD)</span></label>
-                        <label class="flex items-center gap-2"><input type="checkbox" value="-10" class="condicion w-4 h-4 text-blue-600 rounded"><span>Bocinas dañadas (-10 USD)</span></label>
-                        <label class="flex items-center gap-2"><input type="checkbox" id="solo-venta-chk" value="-30" class="condicion w-4 h-4 text-blue-600 rounded"><span>Solo venta (-30 USD)</span></label>
+                        <label class="flex items-center gap-2"><input type="checkbox" id="soloVentaChk" class="condicion w-4 h-4 text-blue-600 rounded" value="-30"><span>Solo venta </span></label>
+
+                        <label class="flex items-center gap-2"><input type="checkbox" value="-30" class="condicion w-4 h-4 text-blue-600 rounded"><span>Batería &lt; 80% </span></label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="-10" class="condicion w-4 h-4 text-blue-600 rounded"><span>Sin caja </span></label>
+                        <label class="flex items-center gap-2"><input type="checkbox" value="-10" class="condicion w-4 h-4 text-blue-600 rounded"><span>Bocinas dañadas </span></label>
                     </div>
                 </div>
             </div>
-            
             <div id="tasas" class="mt-8 bg-purple-100 text-purple-800 p-4 rounded-lg flex items-center gap-3 font-semibold">
                 Cargando tasas...
             </div>
         </section>
-
         <section class="lg:col-span-3 bg-white p-6 rounded-2xl shadow-lg space-y-6">
             <div class="flex items-center gap-3">
-                 <div class="bg-slate-100 p-2 rounded-lg">
+                <div class="bg-slate-100 p-2 rounded-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
                 </div>
-                <h2 id="resultado-titulo" class="text-2xl font-bold text-slate-800">📊 Resultados del Intercambio</h2>
+                <h2 id="resultado-titulo" class="text-2xl font-bold text-slate-800">📊 Comparativa Global de Intercambio</h2>
             </div>
-
-            <div id="resultado" class="bg-blue-50 border-t-4 border-blue-500 p-5 rounded-lg space-y-3">
-                <p class="text-slate-500">Selecciona los equipos para ver el resultado.</p>
+            <div id="resultado" class="bg-blue-50 border-t-4 border-blue-500 p-5 rounded-lg space-y-3 overflow-x-auto">
+                <p class="text-slate-500">Selecciona el equipo recibido para ver la tabla comparativa.</p>
             </div>
         </section>
     </main>
-
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    // === DATOS Y LÓGICA ORIGINAL ===
-    /* const recibidos = [
-        { nombre: "iPhone 11 (256gb)", usd: 150 },
-        { nombre: "iPhone 12 (128gb)", usd: 200 },
-        { nombre: "iPhone 13 (256gb)", usd: 310 },
-        { nombre: "iPhone 14 (128gb)", usd: 320 }
-    ]; */
+document.addEventListener('DOMContentLoaded', async () => {
+    // === DATA ORIGINAL, AJUSTAR SEGÚN TU NECESIDAD ===
     const recibidos = [
-  
-      { nombre: "iPhone 11 (64gb)", usd: 130 }, // Igual
-      { nombre: "iPhone 11 (128gb)", usd: 140 }, // Igual
-      { nombre: "iPhone 11 (256gb)", usd: 150 }, // Igual
-      { nombre: "iPhone 11 Pro (64gb)", usd: 180 }, // Cambió de 190 a 180
-      { nombre: "iPhone 11 Pro (256gb)", usd: 200 }, // Cambió de 220 a 200
-      { nombre: "iPhone 11 Pro Max (64gb)", usd: 180 }, // Cambió de 200 a 180
-      { nombre: "iPhone 11 Pro Max (256gb)", usd: 220 }, // Cambió de 240 a 220
-      { nombre: "iPhone 12 (64gb)", usd: 180 }, // Cambió de 190 a 180
-      { nombre: "iPhone 12 (128gb)", usd: 200 }, // Cambió de 220 a 200
-      { nombre: "iPhone 12 (256gb)", usd: 210 }, // Cambió de 220 a 210
-      { nombre: "iPhone 12 Pro (128gb)", usd: 260 }, // Igual
-      { nombre: "iPhone 12 Pro (256gb)", usd: 280 }, // Igual
-      { nombre: "iPhone 12 Pro (512gb)", usd: 290 }, // Igual
-      { nombre: "iPhone 12 Pro Max (128gb)", usd: 330 }, // Igual
-      { nombre: "iPhone 12 Pro Max (256gb)", usd: 350 }, // Igual
-      { nombre: "iPhone 12 Pro Max (512gb)", usd: 360 }, // Igual
-      { nombre: "iPhone 13 (128gb)", usd: 270 }, // Igual
-      { nombre: "iPhone 13 (256gb)", usd: 290 }, // Igual
-      { nombre: "iPhone 13 (512gb)", usd: 300 }, // Igual
-      { nombre: "iPhone 13 Pro (128gb)", usd: 390 }, // Cambió de 400 a 390
-      { nombre: "iPhone 13 Pro (256gb)", usd: 400 }, // Igual
-      { nombre: "iPhone 13 Pro (512gb)", usd: 430 }, // Igual
-      { nombre: "iPhone 13 Pro (1TB)", usd: 440 }, // Igual
-      { nombre: "iPhone 13 Pro Max (128gb)", usd: 450 }, // Cambió de 460 a 450
-      { nombre: "iPhone 13 Pro Max (256gb)", usd: 490 }, // Cambió de 500 a 490
-      { nombre: "iPhone 13 Pro Max (512gb)", usd: 520 }, // Igual
-      { nombre: "iPhone 13 Pro Max (1TB)", usd: 540 }, // Igual
-      { nombre: "iPhone 14 (128gb)", usd: 320 }, // Igual
-      { nombre: "iPhone 14 (256gb)", usd: 340 }, // Igual
-      { nombre: "iPhone 14 (512gb)", usd: 360 }, // Igual
-      { nombre: "iPhone 14 Plus (128gb)", usd: 380 }, // Igual
-      { nombre: "iPhone 14 Plus (256gb)", usd: 390 }, // Igual
-      { nombre: "iPhone 14 Pro (128gb)", usd: 480 }, // Igual
-      { nombre: "iPhone 14 Pro (256gb)", usd: 500 }, // Igual
-      { nombre: "iPhone 14 Pro (512gb)", usd: 510 }, // Igual
-      { nombre: "iPhone 14 Pro Max (128gb)", usd: 570 }, // Igual
-      { nombre: "iPhone 14 Pro Max (256gb)", usd: 600 }, // Igual
-      { nombre: "iPhone 14 Pro Max (512gb)", usd: 620 }, // Igual
-      { nombre: "iPhone 15 (128gb)", usd: 480 }, // Igual
-      { nombre: "iPhone 15 (256gb)", usd: 500 }, // Igual
-      { nombre: "iPhone 15 (512gb)", usd: 520 }, // Igual
-      { nombre: "iPhone 15 Plus (128gb)", usd: 550 }, // Igual
-      { nombre: "iPhone 15 Plus (256gb)", usd: 590 }, // Igual
-      { nombre: "iPhone 15 Pro (128gb)", usd: 600 }, // Igual
-      { nombre: "iPhone 15 Pro (256gb)", usd: 620 }, // Igual
-      { nombre: "iPhone 15 Pro Max (256gb)", usd: 730 }, // Igual
-      { nombre: "iPhone 15 Pro Max (512gb)", usd: 750 }, // Igual
-      { nombre: "iPhone 15 Pro Max (1TB)", usd: 770 }, // Igual
-      { nombre: "iPhone 16 (128gb)", usd: 690 }, // Igual
-      { nombre: "iPhone 16 (256gb)", usd: 700 }, // Igual
-      { nombre: "iPhone 16 Plus (128gb)", usd: 730 }, // Igual
-      { nombre: "iPhone 16 Plus (256gb)", usd: 760 }, // Igual
-      { nombre: "iPhone 16 Pro (128gb)", usd: 800 }, // Igual
-      { nombre: "iPhone 16 Pro (512gb)", usd: 830 }, // Igual
-      { nombre: "iPhone 16 Pro (1TB)", usd: 870 }, // Igual
-      { nombre: "iPhone 16 Pro Max (256gb)", usd: 900 }, // Igual
-      { nombre: "iPhone 16 Pro Max (512gb)", usd: 940 }, // Igual
-      { nombre: "iPhone 16 Pro Max (1TB)", usd: 960 }  // Igual
+      { nombre: "iPhone 11 (64gb)", usd: 130 }, { nombre: "iPhone 11 (128gb)", usd: 140 },
+      { nombre: "iPhone 11 (256gb)", usd: 150 }, { nombre: "iPhone 11 Pro (64gb)", usd: 180 },
+      { nombre: "iPhone 11 Pro (256gb)", usd: 200 }, { nombre: "iPhone 11 Pro Max (64gb)", usd: 180 },
+      { nombre: "iPhone 11 Pro Max (256gb)", usd: 220 }, { nombre: "iPhone 12 (64gb)", usd: 180 },
+      { nombre: "iPhone 12 (128gb)", usd: 200 }, { nombre: "iPhone 12 (256gb)", usd: 210 },
+      { nombre: "iPhone 12 Pro (128gb)", usd: 260 }, { nombre: "iPhone 12 Pro (256gb)", usd: 280 },
+      { nombre: "iPhone 12 Pro (512gb)", usd: 290 }, { nombre: "iPhone 12 Pro Max (128gb)", usd: 330 },
+      { nombre: "iPhone 12 Pro Max (256gb)", usd: 350 }, { nombre: "iPhone 12 Pro Max (512gb)", usd: 360 },
+      { nombre: "iPhone 13 (128gb)", usd: 270 }, { nombre: "iPhone 13 (256gb)", usd: 290 },
+      { nombre: "iPhone 13 (512gb)", usd: 300 }, { nombre: "iPhone 13 Pro (128gb)", usd: 390 },
+      { nombre: "iPhone 13 Pro (256gb)", usd: 400 }, { nombre: "iPhone 13 Pro (512gb)", usd: 430 },
+      { nombre: "iPhone 13 Pro (1TB)", usd: 440 }, { nombre: "iPhone 13 Pro Max (128gb)", usd: 450 },
+      { nombre: "iPhone 13 Pro Max (256gb)", usd: 490 }, { nombre: "iPhone 13 Pro Max (512gb)", usd: 520 },
+      { nombre: "iPhone 13 Pro Max (1TB)", usd: 540 }, { nombre: "iPhone 14 (128gb)", usd: 320 },
+      { nombre: "iPhone 14 (256gb)", usd: 340 }, { nombre: "iPhone 14 (512gb)", usd: 360 },
+      { nombre: "iPhone 14 Plus (128gb)", usd: 380 }, { nombre: "iPhone 14 Plus (256gb)", usd: 390 },
+      { nombre: "iPhone 14 Pro (128gb)", usd: 480 }, { nombre: "iPhone 14 Pro (256gb)", usd: 500 },
+      { nombre: "iPhone 14 Pro (512gb)", usd: 510 }, { nombre: "iPhone 14 Pro Max (128gb)", usd: 570 },
+      { nombre: "iPhone 14 Pro Max (256gb)", usd: 600 }, { nombre: "iPhone 14 Pro Max (512gb)", usd: 620 },
+      { nombre: "iPhone 15 (128gb)", usd: 480 }, { nombre: "iPhone 15 (256gb)", usd: 500 },
+      { nombre: "iPhone 15 (512gb)", usd: 520 }, { nombre: "iPhone 15 Plus (128gb)", usd: 550 },
+      { nombre: "iPhone 15 Plus (256gb)", usd: 590 }, { nombre: "iPhone 15 Pro (128gb)", usd: 600 },
+      { nombre: "iPhone 15 Pro (256gb)", usd: 620 }, { nombre: "iPhone 15 Pro Max (256gb)", usd: 730 },
+      { nombre: "iPhone 15 Pro Max (512gb)", usd: 750 }, { nombre: "iPhone 15 Pro Max (1TB)", usd: 770 },
+      { nombre: "iPhone 16 (128gb)", usd: 690 }, { nombre: "iPhone 16 (256gb)", usd: 700 },
+      { nombre: "iPhone 16 Plus (128gb)", usd: 730 }, { nombre: "iPhone 16 Plus (256gb)", usd: 760 },
+      { nombre: "iPhone 16 Pro (128gb)", usd: 800 }, { nombre: "iPhone 16 Pro (512gb)", usd: 830 },
+      { nombre: "iPhone 16 Pro (1TB)", usd: 870 }, { nombre: "iPhone 16 Pro Max (256gb)", usd: 900 },
+      { nombre: "iPhone 16 Pro Max (512gb)", usd: 940 }, { nombre: "iPhone 16 Pro Max (1TB)", usd: 960 }
     ];
-
-
-const ventas = [
-  { nombre: "iPhone 11 (64gb)", usd: 249 }, // Cambió de 259 a 249
-  { nombre: "IPhone 11 (128gb)", usd: 279 }, // Igual
-  { nombre: "IPhone 11 (256gb)", usd: 299 }, // Igual
-  { nombre: "iPhone 11 Pro (64gb)", usd: 290 }, // Igual
-  { nombre: "IPhone 11 pro (256gb)", usd: 349 }, // Igual
-  { nombre: "IPhone 11 Pro Max (64gb)", usd: 340 }, // Igual
-  { nombre: "IPhone 11 Pro Max (256gb)", usd: 350 }, // Igual
-  { nombre: "IPhone 12 (64gb)", usd: 285 }, // Cambió de 290 a 285
-  { nombre: "IPhone 12 (128gb)", usd: 310 }, // Cambió de 339 a 310
-  { nombre: "IPhone 12 (256gb)", usd: 340 }, // Cambió de 365 a 340
-  { nombre: "Iphone 12 Pro (128gb)", usd: 380 }, // Igual
-  { nombre: "IPhone 12 Pro (256gb)", usd: 410 }, // Igual
-  { nombre: "IPhone 12 Pro (512gb)", usd: 445 }, // Igual
-  { nombre: "IPhone 12 Pro Max (128gb)", usd: 449 }, // Igual
-  { nombre: "IPhone 12 Pro Max (256gb)", usd: 479 }, // Igual
-  { nombre: "IPhone 12 Pro Max (512gb)", usd: 520 }, // Igual
-  { nombre: "IPhone 13 (128gb)", usd: 390 }, // Igual pero agregaste "clase A" en el texto
-  { nombre: "IPhone 13 (256gb)", usd: 419 }, // Cambió de 420 a 419
-  { nombre: "IPhone 13 (512gb)", usd: 429 }, // Cambió de 440 a 429
-  { nombre: "IPhone 13 Pro (128gb)", usd: 489 }, // Cambió de 509 a 489
-  { nombre: "IPhone 13 Pro (256gb)", usd: 529 }, // Cambió de 539 a 529
-  { nombre: "IPhone 13 Pro (512gb)", usd: 559 }, // Igual
-  { nombre: "IPhone 13 Pro (1TB)", usd: 580 }, // Igual
-  { nombre: "IPhone 13 Pro Max (128gb)", usd: 570 }, // Cambió de 589 a 570
-  { nombre: "IPhone 13 Pro Max (256gb)", usd: 620 }, // Cambió de 639 a 620
-  { nombre: "IPhone 13 Pro Max (512gb)", usd: 649 }, // Igual
-  { nombre: "IPhone 13 Pro Max (1TB)", usd: 669 }, // Igual
-  { nombre: "IPhone 14 (128gb)", usd: 429 }, // Cambió de 439 a 429
-  { nombre: "IPhone 14 (256gb)", usd: 459 }, // Cambió de 469 a 459
-  { nombre: "IPhone 14 (512gb)", usd: 489 }, // Igual
-  { nombre: "IPhone 14 Plus (128gb)", usd: 439 }, // Cambió de 499 a 439
-  { nombre: "IPhone 14 Plus (256gb)", usd: 479 }, // Cambió de 519 a 479
-  { nombre: "IPhone 14 Pro (128gb)", usd: 599 }, // Cambió de 609 a 599
-  { nombre: "IPhone 14 Pro (256gb)", usd: 629 }, // Igual
-  { nombre: "IPhone 14 Pro (512gb)", usd: 649 }, // Igual
-  { nombre: "IPhone 14 Pro Max (128gb)", usd: 699 }, // Igual
-  { nombre: "IPhone 14 Pro Max (256gb)", usd: 729 }, // Cambió de 739 a 729
-  { nombre: "IPhone 14 Pro Max (512gb)", usd: 779 }, // Igual
-  { nombre: "IPhone 15 (128gb)", usd: 639 }, // Igual
-  { nombre: "IPhone 15 (256gb)", usd: 679 }, // Igual
-  { nombre: "IPhone 15 (512gb)", usd: 689 }, // Igual
-  { nombre: "IPhone 15 Plus (128gb)", usd: 690 }, // Igual
-  { nombre: "IPhone 15 Plus (256gb)", usd: 720 }, // Igual
-  { nombre: "IPhone 15 Pro (128gb)", usd: 780 }, // Igual
-  { nombre: "IPhone 15 Pro (256gb)", usd: 820 }, // Igual
-  { nombre: "IPhone 15 Pro Max (256gb)", usd: 870 }, // Cambió de 890 a 870
-  { nombre: "IPhone 15 Pro Max (512gb)", usd: 930 }, // Cambió de 979 a 930
-  { nombre: "IPhone 15 Pro Max (1TB)", usd: 960 }, // Cambió de 970 a 960
-  { nombre: "IPhone 16 (128gb)", usd: 819 }, // Igual
-  { nombre: "IPhone 16 (256gb)", usd: 849 }, // Igual
-  { nombre: "IPhone 16 Plus (128gb)", usd: 819 }, // Cambió de 869 a 819
-  { nombre: "IPhone 16 Plus (256gb)", usd: 890 }, // Cambió de 919 a 890
-  { nombre: "IPhone 16 Pro (128gb)", usd: 970 }, // Cambió de 1050 a 970
-  { nombre: "IPhone 16 Pro (512gb)", usd: 1120 }, // Igual
-  { nombre: "IPhone 16 Pro (1TB)", usd: 1160 }, // Igual
-  { nombre: "IPhone 16 Pro Max (256gb)", usd: 1159 }, // Igual
-  { nombre: "IPhone 16 Pro Max (512gb)", usd: 1230 }, // Igual
-  { nombre: "IPhone 16 Pro Max (1TB)", usd: 1350 } // Igual
-];
-
-
+    const ventas = [
+        { nombre: "iPhone 11 (64gb)", usd: 249 }, { nombre: "IPhone 11 (128gb)", usd: 279 },
+        { nombre: "IPhone 11 (256gb)", usd: 299 }, { nombre: "iPhone 11 Pro (64gb)", usd: 290 },
+        { nombre: "IPhone 11 pro (256gb)", usd: 349 }, { nombre: "IPhone 11 Pro Max (64gb)", usd: 340 },
+        { nombre: "IPhone 11 Pro Max (256gb)", usd: 350 }, { nombre: "IPhone 12 (64gb)", usd: 285 },
+        { nombre: "IPhone 12 (128gb)", usd: 310 }, { nombre: "IPhone 12 (256gb)", usd: 340 },
+        { nombre: "Iphone 12 Pro (128gb)", usd: 380 }, { nombre: "IPhone 12 Pro (256gb)", usd: 410 },
+        { nombre: "IPhone 12 Pro (512gb)", usd: 445 }, { nombre: "IPhone 12 Pro Max (128gb)", usd: 449 },
+        { nombre: "IPhone 12 Pro Max (256gb)", usd: 479 }, { nombre: "IPhone 12 Pro Max (512gb)", usd: 520 },
+        { nombre: "IPhone 13 (128gb)", usd: 390 }, { nombre: "IPhone 13 (256gb)", usd: 419 },
+        { nombre: "IPhone 13 (512gb)", usd: 429 }, { nombre: "IPhone 13 Pro (128gb)", usd: 489 },
+        { nombre: "IPhone 13 Pro (256gb)", usd: 529 }, { nombre: "IPhone 13 Pro (512gb)", usd: 559 },
+        { nombre: "IPhone 13 Pro (1TB)", usd: 580 }, { nombre: "IPhone 13 Pro Max (128gb)", usd: 570 },
+        { nombre: "IPhone 13 Pro Max (256gb)", usd: 620 }, { nombre: "IPhone 13 Pro Max (512gb)", usd: 649 },
+        { nombre: "IPhone 13 Pro Max (1TB)", usd: 669 }, { nombre: "IPhone 14 (128gb)", usd: 429 },
+        { nombre: "IPhone 14 (256gb)", usd: 459 }, { nombre: "IPhone 14 (512gb)", usd: 489 },
+        { nombre: "IPhone 14 Plus (128gb)", usd: 439 }, { nombre: "IPhone 14 Plus (256gb)", usd: 479 },
+        { nombre: "IPhone 14 Pro (128gb)", usd: 599 }, { nombre: "IPhone 14 Pro (256gb)", usd: 629 },
+        { nombre: "IPhone 14 Pro (512gb)", usd: 649 }, { nombre: "IPhone 14 Pro Max (128gb)", usd: 699 },
+        { nombre: "IPhone 14 Pro Max (256gb)", usd: 729 }, { nombre: "IPhone 14 Pro Max (512gb)", usd: 779 },
+        { nombre: "IPhone 15 (128gb)", usd: 639 }, { nombre: "IPhone 15 (256gb)", usd: 679 },
+        { nombre: "IPhone 15 (512gb)", usd: 689 }, { nombre: "IPhone 15 Plus (128gb)", usd: 690 },
+        { nombre: "IPhone 15 Plus (256gb)", usd: 720 }, { nombre: "IPhone 15 Pro (128gb)", usd: 780 },
+        { nombre: "IPhone 15 Pro (256gb)", usd: 820 }, { nombre: "IPhone 15 Pro Max (256gb)", usd: 870 },
+        { nombre: "IPhone 15 Pro Max (512gb)", usd: 930 }, { nombre: "IPhone 15 Pro Max (1TB)", usd: 960 },
+        { nombre: "IPhone 16 (128gb)", usd: 819 }, { nombre: "IPhone 16 (256gb)", usd: 849 },
+        { nombre: "IPhone 16 Plus (128gb)", usd: 819 }, { nombre: "IPhone 16 Plus (256gb)", usd: 890 },
+        { nombre: "IPhone 16 Pro (128gb)", usd: 970 }, { nombre: "IPhone 16 Pro (512gb)", usd: 1120 },
+        { nombre: "IPhone 16 Pro (1TB)", usd: 1160 }, { nombre: "IPhone 16 Pro Max (256gb)", usd: 1159 },
+        { nombre: "IPhone 16 Pro Max (512gb)", usd: 1230 }, { nombre: "IPhone 16 Pro Max (1TB)", usd: 1350 }
+    ];
 
     // === ELEMENTOS DEL DOM ===
     const selRecibido = document.getElementById('recibido');
-    const selVenta = document.getElementById('venta');
-    const ventaWrapper = document.getElementById('venta-wrapper');
-    const resultadoDiv = document.getElementById('resultado');
-    const resultadoTitulo = document.getElementById('resultado-titulo');
     const condiciones = document.querySelectorAll('.condicion');
-    const soloVentaChk = document.getElementById('solo-venta-chk');
     const tasasDiv = document.getElementById('tasas');
+    const resultadoDiv = document.getElementById('resultado');
 
-    // === INICIALIZACIÓN ===
-    //recibidos.forEach(p => selRecibido.innerHTML += `<option value="${p.usd}">${p.nombre}</option>`);
-    recibidos.forEach(p => selRecibido.innerHTML += `<option value="${p.usd}" data-price="${p.usd}" data-currency="USD">
-      ${p.nombre}
-    </option>`);
-    //ventas.forEach(p => selVenta.innerHTML += `<option value="${p.usd}">${p.nombre}</option>`);
-    ventas.forEach(p => selVenta.innerHTML += `<option value="${p.usd}" data-price="${p.usd}" data-currency="USD">
-      ${p.nombre}
-    </option>`);
+    // === LLENAR SELECT DE RECIBIDOS ===
+    recibidos.forEach(p =>
+      selRecibido.innerHTML += `<option value="${p.usd}">${p.nombre}</option>`
+    );
 
-    // === ESTADO DE TASAS ===
-    let tasaBinance = 0, tasaBCV = 0;
-
+    // === ESTADO DE TASAS (SIMULADO/MODIFIQUE SEGÚN SU API) ===
     async function fetchTasa(url, tasa) {
         try {
         const res = await fetch(url);
@@ -266,195 +144,91 @@ const ventas = [
         return null;
         }
     }
+    let tasaBinance = await fetchTasa("/.netlify/functions/binance-p2p-average?asset=USDT&fiat=VES&tradeType=SELL&rows=20&trim=0.1", "BNC")
+    let tasaBCV = await fetchTasa("https://open.er-api.com/v6/latest/USD", "BCV")
 
-    // === FETCH DE TASAS ===
-    /* async function fetchTasas() {
-        try {
-            const [resBinance, resBCV] = await Promise.all([
-                fetch("https://pydolarve.org/api/v1/pages/p2p?monitor=binance"),
-                fetch("https://pydolarve.org/api/v1/dollar")
-            ]);
-            const dataBinance = await resBinance.json();
-            const dataBCV = await resBCV.json();
-            
-            tasaBinance = (parseFloat(dataBinance.monitors.binance.buy) + parseFloat(dataBinance.monitors.binance.sell)) / 2;
-            tasaBCV = dataBCV.rates.bcv;
+    tasasDiv.textContent = `Tasa Binance: Bs ${tasaBinance.toFixed(2)} | Tasa BCV: Bs ${tasaBCV.toFixed(2)}`;
 
-            tasasDiv.textContent = `Tasa Binance: Bs ${tasaBinance.toFixed(2)} | Tasa BCV: Bs ${tasaBCV.toFixed(2)}`;
-            calcular();
-        } catch (err) {
-            console.error("Error obteniendo tasas:", err);
-            tasasDiv.textContent = "Error al cargar las tasas.";
-        }
-    } */
-    const nav = document.getElementById('globalMenu');
-const menuOptions = document.getElementById('menuOptions');
-const menuToggle = document.getElementById('menuToggle');
-const floatingMenu = document.getElementById('floatingMenu');
-const configSection = document.querySelector('.card-shadow');
+    // === FUNCIONES DE FORMATEO ===
+    const formatUSD = num =>
+      `$${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const formatBS = num =>
+      `Bs ${num.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-/* window.addEventListener('scroll', () => {
-  const configTop = configSection.getBoundingClientRect().top + window.scrollY;
-  if (window.scrollY >= configTop - nav.offsetHeight) {
-    nav.classList.remove('top-0');
-    nav.classList.add('bottom-6', 'right-6', 'left-auto', 'rounded-full', 'p-0', 'w-14', 'h-14', 'justify-center', 'items-center');
-    menuOptions.classList.add('hidden');
-    menuToggle.classList.remove('hidden');
-    floatingMenu.classList.add('hidden'); // Esconder menú flotante inicialmente
-  } else {
-    nav.classList.add('top-0');
-    nav.classList.remove('bottom-6', 'right-6', 'left-auto', 'rounded-full', 'p-0', 'w-14', 'h-14', 'justify-center', 'items-center');
-    menuOptions.classList.remove('hidden');
-    menuToggle.classList.add('hidden');
-    floatingMenu.classList.add('hidden'); // Asegurar que el menú flotante esté oculto
-  }
-}) */
-    window.addEventListener('scroll', () => {
-  const threshold = 150; // píxeles que hay que bajar para activar menú flotante
-  if (window.scrollY >= threshold) {
-    nav.classList.remove('top-0');
-    nav.classList.add('bottom-6', 'right-6', 'left-auto', 'rounded-full', 'p-0', 'w-14', 'h-14', 'justify-center', 'items-center');
-    menuOptions.classList.add('hidden');
-    menuToggle.classList.remove('hidden');
-    floatingMenu.classList.add('hidden');
-  } else {
-    nav.classList.add('top-0');
-    nav.classList.remove('bottom-6', 'right-6', 'left-auto', 'rounded-full', 'p-0', 'w-14', 'h-14', 'justify-center', 'items-center');
-    menuOptions.classList.remove('hidden');
-    menuToggle.classList.add('hidden');
-    floatingMenu.classList.add('hidden');
-  }
-});
-
-menuToggle.addEventListener('click', () => {
-  floatingMenu.classList.toggle('hidden');
-});
-    async function fetchTasas() {
-        try {
-            // Usamos pydolarve.org para ambas tasas para consistencia
-
-            const dataBinance = await fetchTasa("/.netlify/functions/binance-p2p-average?asset=USDT&fiat=VES&tradeType=SELL&rows=20&trim=0.1", "BNC");
-            const dataBCV = await fetchTasa("https://open.er-api.com/v6/latest/USD", "BCV");
-            
-            // Calculamos el promedio de compra/venta de Binance
-            tasaBinance = dataBinance + 2;
-            tasaBCV = dataBCV;
-
-            tasasDiv.textContent = `BNC ${tasaBinance.toFixed(2)} | .v.c.v. ${tasaBCV.toFixed(2)}`;
-            
-            calcular(); // Llama a calcular una vez que las tasas están listas
-        } catch (err) {
-            console.error("Error obteniendo tasas:", err);
-            tasasDiv.textContent = "Error al cargar las tasas.";
-        }
+    // === FUNCIÓN DE CÁLCULO NUEVA (TABLA GLOBAL) ===
+    function calcular() {
+    if (!tasaBinance || !tasaBCV || !selRecibido.value) {
+        resultadoDiv.innerHTML = `<p class="text-slate-500">Selecciona el equipo recibido para ver la tabla comparativa.</p>`;
+        return;
     }
 
-    // === FUNCIÓN DE CÁLCULO (MODIFICADA) ===
-    function calcular() {
-        if (!tasaBinance || !tasaBCV) return;
+    let precioRecibido = parseFloat(selRecibido.value);
+    condiciones.forEach(chk => {
+        if (chk.checked) {
+            precioRecibido += parseFloat(chk.value);
+        }
+    });
 
-        const formatUSD = (num) => `$${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        const formatBS = (num) => `Bs ${num.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        
-        // --- NUEVA LÓGICA: MODO "SOLO VENTA" ---
-        if (soloVentaChk.checked) {
-            resultadoTitulo.textContent = '📊 Resultado de la Compra';
-            
-            let precioRecibido = parseFloat(selRecibido.value);
+    // Verifica si "Solo venta" está activado
+    const soloVentaChk = document.getElementById('soloVentaChk');
+    if(soloVentaChk && soloVentaChk.checked) {
+        const totalBs = precioRecibido * tasaBinance;
+        resultadoDiv.innerHTML = `
+          <div class="mb-6 bg-green-100 rounded-lg p-4 flex flex-col gap-2">
+            <span class="text-slate-600 font-medium">Monto recibido (ajustado):</span>
+            <span class="font-bold text-green-900 text-xl">${formatUSD(precioRecibido)}</span>
+            <hr/>
+            <span class="text-slate-600 font-medium">Total a cancelar al cliente:</span>
+            <span class="font-bold text-blue-600 text-lg">${formatBS(totalBs)}</span>
+          </div>
+          <div class="mt-2 text-slate-500 text-sm">Modo solo venta: entrega directa de efectivo, sin tabla comparativa.</div>
+        `;
+        return;
+    }
 
-            // Aplicamos TODAS las condiciones marcadas
-            condiciones.forEach(chk => {
-                if (chk.checked) {
-                    precioRecibido += parseFloat(chk.value);
-                }
-            });
+    // Modo tabla comparativa (normal)
+    let bloqueRecibido = `
+      <div class="mb-6 bg-blue-100 rounded-lg p-4 flex justify-between items-center">
+        <span class="text-slate-600 font-medium">Monto recibido (ajustado):</span>
+        <span class="font-bold text-blue-900 text-xl">${formatUSD(precioRecibido)}</span>
+      </div>
+    `;
 
-            const totalPagarBs = precioRecibido * tasaBinance;
+    let tabla = `<table class="min-w-full divide-y divide-slate-300 text-xs md:text-sm">
+        <thead class="bg-slate-200">
+          <tr>
+            <th class="px-2 py-2 text-left font-bold">Equipo de Venta</th>
+            <th class="px-2 py-2 text-right font-bold">Diferencia USD</th>
+            <th class="px-2 py-2 text-right font-bold">Equivalente Bolívares</th>
+            <th class="px-2 py-2 text-right font-bold">Equiv. BCV USD</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">`;
 
-            resultadoDiv.innerHTML = `
-                <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-                    <span class="text-slate-500">Equipo Recibido:</span>
-                    <span class="font-semibold text-slate-800 text-right">${selRecibido.options[selRecibido.selectedIndex].text}</span>
-
-                    <span class="text-slate-500">Valor Final con Ajustes:</span>
-                    <span class="font-semibold text-slate-800 text-right">${formatUSD(precioRecibido)}</span>
-                </div>
-                
-                <div class="mt-4 bg-green-100 text-green-800 text-center font-bold p-3 rounded-lg text-lg">
-                    Total a Pagar al Cliente (USD): ${formatUSD(precioRecibido)}
-                </div>
-
-                <div class="mt-4">
-                    <div class="flex justify-between items-center">
-                        <span class="text-slate-500 font-medium">Total a Pagar al Cliente (Bs):</span>
-                        <span class="font-bold text-xl text-blue-600">${formatBS(totalPagarBs)}</span>
-                    </div>
-                </div>
-            `;
-
-        } else {
-            // --- LÓGICA ANTERIOR: MODO "INTERCAMBIO" ---
-            resultadoTitulo.textContent = '📊 Resultados del Intercambio';
-
-            let precioRecibido = parseFloat(selRecibido.value);
-            const precioVenta = parseFloat(selVenta.value);
-
-            condiciones.forEach(chk => {
-                if (chk.checked) {
-                    precioRecibido += parseFloat(chk.value);
-                }
-            });
-
-            const diferenciaUSD = precioVenta - precioRecibido;
+    ventas.forEach(venta => {
+        const diferenciaUSD = venta.usd - precioRecibido;
+        if (diferenciaUSD > 0) {
             const diferenciaBs = diferenciaUSD * tasaBinance;
             const diferenciaBCV = diferenciaBs / tasaBCV;
-            
-            resultadoDiv.innerHTML = `
-                <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-                    <span class="text-slate-500">Valor Final Recibido:</span>
-                    <span class="font-semibold text-slate-800 text-right">${formatUSD(precioRecibido)}</span>
-                    <span class="text-slate-500">Valor de Venta:</span>
-                    <span class="font-semibold text-slate-800 text-right">${formatUSD(precioVenta)}</span>
-                </div>
-                <div class="mt-4 bg-yellow-100 text-yellow-800 text-center font-bold p-3 rounded-lg text-lg">
-                    Diferencia a Pagar (USD): ${formatUSD(diferenciaUSD)}
-                </div>
-                <div class="mt-4 space-y-2">
-                    <div class="flex justify-between items-center">
-                        <span class="text-slate-500 font-medium">Diferencia en Bs (B.N.C):</span>
-                        <span class="font-bold text-xl text-blue-600">${formatBS(diferenciaBs)}</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-slate-500 font-medium">Equivalente en USD (Tasa BCV):</span>
-                        <span class="font-bold text-xl text-purple-600">${formatUSD(diferenciaBCV)}</span>
-                    </div>
-                </div>
-            `;
+            tabla += `<tr class="hover:bg-blue-100">
+                <td class="px-2 py-1">${venta.nombre}</td>
+                <td class="px-2 py-1 text-right">${formatUSD(diferenciaUSD)}</td>
+                <td class="px-2 py-1 text-right">${formatBS(diferenciaBs)}</td>
+                <td class="px-2 py-1 text-right">${formatUSD(diferenciaBCV)}</td>
+            </tr>`;
         }
-    }
+    });
+    tabla += '</tbody></table>';
 
-    // === MANEJADOR DEL TOGGLE "SOLO VENTA" ===
-    function handleSoloVentaToggle() {
-        const isChecked = soloVentaChk.checked;
-        selVenta.disabled = isChecked; // Desactiva/Activa el select de venta
-        ventaWrapper.classList.toggle('opacity-50', isChecked); // Atenúa visualmente el campo
-        
-        calcular(); // Vuelve a calcular todo con la nueva modalidad
-    }
+    resultadoDiv.innerHTML = bloqueRecibido + tabla;
+}
 
-    // === EVENT LISTENERS ===
+
+    // === EVENTOS ===
     selRecibido.addEventListener('change', calcular);
-    selVenta.addEventListener('change', calcular);
     condiciones.forEach(chk => chk.addEventListener('change', calcular));
-    // Listener específico para el toggle de "Solo Venta"
-    soloVentaChk.addEventListener('change', handleSoloVentaToggle);
 
-
-    // === INICIO DE LA APP ===
-    fetchTasas();
 });
 </script>
-    
-
 </body>
 </html>

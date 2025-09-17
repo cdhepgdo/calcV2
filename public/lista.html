@@ -299,7 +299,7 @@
         const tasaBCV = await fetchTasaBCV();
         if (!tasaBCV) throw new Error("No se pudo obtener la tasa BCV");
         
-        document.getElementById('tasa').textContent = `Tasa Binance P2P: Bs ${parseInt(promedio.toFixed(2))}`;
+        document.getElementById('tasa').textContent = ` BNC: ${parseInt(promedio.toFixed(2))}`;
 
         const tbody = document.getElementById('tabla-productos');
         tbody.innerHTML = '';

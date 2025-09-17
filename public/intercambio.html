@@ -78,7 +78,7 @@
     const floatingMenu = document.getElementById('floatingMenu');
     const configSection = document.querySelector('.card-shadow');
     
-    window.addEventListener('scroll', () => {
+    /* window.addEventListener('scroll', () => {
       const configTop = configSection.getBoundingClientRect().top + window.scrollY;
       if (window.scrollY >= configTop - nav.offsetHeight) {
         nav.classList.remove('top-0');
@@ -93,7 +93,27 @@
         menuToggle.classList.add('hidden');
         floatingMenu.classList.add('hidden'); // Asegurar que el menú flotante esté oculto
       }
+    }); */
+    window.addEventListener('scroll', () => {
+      if (!configSection) return; // seguridad
+    
+      const configTopViewport = configSection.getBoundingClientRect().top;
+    
+      if (configTopViewport <= nav.offsetHeight) {
+        nav.classList.remove('top-0');
+        nav.classList.add('bottom-6', 'right-6', 'left-auto', 'rounded-full', 'p-0', 'w-14', 'h-14', 'justify-center', 'items-center');
+        menuOptions.classList.add('hidden');
+        menuToggle.classList.remove('hidden');
+        floatingMenu.classList.add('hidden');
+      } else {
+        nav.classList.add('top-0');
+        nav.classList.remove('bottom-6', 'right-6', 'left-auto', 'rounded-full', 'p-0', 'w-14', 'h-14', 'justify-center', 'items-center');
+        menuOptions.classList.remove('hidden');
+        menuToggle.classList.add('hidden');
+        floatingMenu.classList.add('hidden');
+      }
     });
+
     
     menuToggle.addEventListener('click', () => {
       floatingMenu.classList.toggle('hidden');

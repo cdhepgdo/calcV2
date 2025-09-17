@@ -244,7 +244,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (tasa === "BCV"){
             return parseFloat(data.rates.VES);
         } else if (tasa === "BNC"){
-            return /* data.stats.trimmedAverage || */ dataB.stats.average - 4;
+            return /* data.stats.trimmedAverage || */ data.stats.average - 4;
         }
         //return parseFloat(data.rates.VES);
         } catch (err) {

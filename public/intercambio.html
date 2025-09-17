@@ -244,7 +244,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (tasa === "BCV"){
             return parseFloat(data.rates.VES);
         } else if (tasa === "BNC"){
-            return data.stats.trimmedAverage || dataB.stats.average;
+            return /* data.stats.trimmedAverage || */ dataB.stats.average - 4;
         }
         //return parseFloat(data.rates.VES);
         } catch (err) {
@@ -255,7 +255,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let tasaBinance = await fetchTasa("/.netlify/functions/binance-p2p-average?asset=USDT&fiat=VES&tradeType=SELL&rows=20&trim=0.1", "BNC")
     let tasaBCV = await fetchTasa("https://open.er-api.com/v6/latest/USD", "BCV")
 
-    tasasDiv.textContent = `Tasa Binance: Bs ${tasaBinance.toFixed(2)} | Tasa BCV: Bs ${tasaBCV.toFixed(2)}`;
+    tasasDiv.textContent = `BNC: ${tasaBinance.toFixed(2)} | Tasa BCV: Bs ${tasaBCV.toFixed(2)}`;
 
     // === FUNCIONES DE FORMATEO ===
     const formatUSD = num =>

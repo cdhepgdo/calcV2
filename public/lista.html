@@ -24,6 +24,7 @@
       h1,
       .acciones,
       header,
+       nav, div, 
       footer {
         display: none !important;
       }
@@ -56,6 +57,26 @@
   </style>
 </head>
 <body>
+      <!-- Añade un contenedor para el menú flotante debajo del botón toggle -->
+<nav id="globalMenu" 
+     class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white transition-all duration-300 shadow-lg">
+  <!-- <div class="font-bold text-lg">Menú</div> -->
+  <div class="flex gap-2" id="menuOptions">
+    <a href="lista.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">LISTADO PRECIOS</a>
+    <a href="intercambio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cálculo Trading</a>
+  </div>
+  <button id="menuToggle" class="hidden text-2xl focus:outline-none relative z-50" aria-label="Abrir menú">
+    ☰
+  </button>
+
+  <!-- Contenedor menú desplegable para botón flotante -->
+  <div id="floatingMenu" class="hidden fixed bottom-20 right-6 bg-blue-700 text-white rounded-lg shadow-lg py-2 flex flex-col gap-1 z-40">
+    <a href="lista.html" class="px-4 py-2 hover:bg-blue-900 rounded">LISTADO PRECIOS</a>
+    <a href="intercambio.html" class="px-4 py-2 hover:bg-blue-900 rounded">Cálculo Trading</a>
+  </div>
+</nav>
+
+  
   <h1>💱 Lista de Precios en Bs </h1>
   <p id="tasa">Cargando tasa...</p>
 
@@ -80,6 +101,36 @@
   </table>
 
   <script>
+      const nav = document.getElementById('globalMenu');
+      const menuOptions = document.getElementById('menuOptions');
+      const menuToggle = document.getElementById('menuToggle');
+      const floatingMenu = document.getElementById('floatingMenu');
+      const configSection = document.querySelector('.card-shadow');
+      
+      window.addEventListener('scroll', () => {
+        const configTop = configSection.getBoundingClientRect().top + window.scrollY;
+        if (window.scrollY >= configTop - nav.offsetHeight) {
+          nav.classList.remove('top-0');
+          nav.classList.add('bottom-6', 'right-6', 'left-auto', 'rounded-full', 'p-0', 'w-14', 'h-14', 'justify-center', 'items-center');
+          menuOptions.classList.add('hidden');
+          menuToggle.classList.remove('hidden');
+          floatingMenu.classList.add('hidden'); // Esconder menú flotante inicialmente
+        } else {
+          nav.classList.add('top-0');
+          nav.classList.remove('bottom-6', 'right-6', 'left-auto', 'rounded-full', 'p-0', 'w-14', 'h-14', 'justify-center', 'items-center');
+          menuOptions.classList.remove('hidden');
+          menuToggle.classList.add('hidden');
+          floatingMenu.classList.add('hidden'); // Asegurar que el menú flotante esté oculto
+        }
+      });
+      
+      menuToggle.addEventListener('click', () => {
+        floatingMenu.classList.toggle('hidden');
+      });
+
+
+
+    
     async function fetchTasaBCV() {
       try {
         const res = await fetch("https://open.er-api.com/v6/latest/USD");

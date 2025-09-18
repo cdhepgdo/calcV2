@@ -88,7 +88,7 @@ const nav = document.getElementById('globalMenu');
 const menuOptions = document.getElementById('menuOptions');
 const menuToggle = document.getElementById('menuToggle');
 const floatingMenu = document.getElementById('floatingMenu');
-const configSection = document.querySelector('.card-shadoww');
+const configSection = document.querySelector('.card-shadow');
 
 window.addEventListener('scroll', () => {
   const configTop = configSection.getBoundingClientRect().top + window.scrollY;
@@ -558,6 +558,7 @@ function updatePrice() {
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
+
 
 
 

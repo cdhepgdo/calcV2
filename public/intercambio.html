@@ -72,14 +72,13 @@
         </section>
     </main>
 <script>
-    let lastScroll = 0;
     const nav = document.getElementById('globalMenu');
     const menuOptions = document.getElementById('menuOptions');
     const menuToggle = document.getElementById('menuToggle');
     const floatingMenu = document.getElementById('floatingMenu');
     const configSection = document.querySelector('.card-shadow');
     
-    /* window.addEventListener('scroll', () => {
+    window.addEventListener('scroll', () => {
       const configTop = configSection.getBoundingClientRect().top + window.scrollY;
       if (window.scrollY >= configTop - nav.offsetHeight) {
         nav.classList.remove('top-0');
@@ -94,24 +93,6 @@
         menuToggle.classList.add('hidden');
         floatingMenu.classList.add('hidden'); // Asegurar que el menú flotante esté oculto
       }
-    }); */
-    window.addEventListener('scroll', () => {
-      const currentScroll = window.pageYOffset;
-      if (currentScroll > lastScroll && currentScroll > 80) {
-        // Scroll abajo: oculta barra y muestra botón flotante
-        nav.classList.add('-top-20');
-        nav.classList.remove('top-0');
-        menuToggle.classList.remove('hidden');
-        // Siempre ocultar menú desplegable al ocultar barra
-        floatingMenu.classList.add('hidden');
-      } else {
-        // Scroll arriba: muestra barra y oculta botón flotante y menú
-        nav.classList.remove('-top-20');
-        nav.classList.add('top-0');
-        menuToggle.classList.add('hidden');
-        floatingMenu.classList.add('hidden');
-      }
-      lastScroll = currentScroll;
     });
 
     

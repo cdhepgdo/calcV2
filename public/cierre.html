@@ -401,6 +401,13 @@
                     <input type="number" id="montoTotal" step="0.01" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg font-semibold" placeholder="0.00" required>
                 </div>
 
+                <!-- Agregar checkbox weppa casi al terminar el formulario de registro de venta -->
+                <div class="flex items-center mb-3">
+                  <input type="checkbox" id="weppa" class="mr-3 h-4 w-4 text-blue-600" />
+                  <label for="weppa" class="font-medium text-gray-700">weppa</label>
+                </div>
+
+
                 <!-- Botones -->
                 <div class="flex gap-4 pt-6">
                     <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
@@ -941,6 +948,9 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
             e.preventDefault();
             
             const tipoVenta = document.querySelector('input[name="tipoVenta"]:checked').value;
+
+            // Nuevo: agregar propiedad weppa con valor booleano de checkbox
+            const weppa = document.getElementById('weppa').checked;
             
             // Recopilar datos del formulario
             const venta = {
@@ -976,7 +986,8 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
 
     caja: document.getElementById('caja').checked,
     cajaModelo: document.getElementById('caja').checked ? document.querySelector('#cajaModelo select').value : null,
-    cajaColor: document.getElementById('caja').checked ? document.querySelector('#cajaColor select').value : null
+    cajaColor: document.getElementById('caja').checked ? document.querySelector('#cajaColor select').value : null, 
+        weppa: weppa
 }
 ,
                 formaPago: document.querySelector('input[name="formaPago"]:checked').value,
@@ -1262,6 +1273,9 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
                 } else if (venta.formaPago === 'mixto' && venta.pagoMixto && venta.pagoMixto.efectivo > 0) {
                     efectivoDelDia += venta.pagoMixto.efectivo;
                 }
+                const weppaHtml = venta.weppa
+                ? '<span style="font-weight:bold; background-color:yellow; padding:0 4px; margin-left:8px;">WEPPA</span>'
+                : '';
 
                 // ...accesoriosTexto igual que antes...
                 const accesoriosTexto = [];
@@ -1365,7 +1379,7 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
                                     })()}
                                     <!-- ...métodos de pago igual que antes... -->
                                 </div>
-                                <p class="text-lg font-bold text-green-600">Total: $${venta.montoTotal.toFixed(2)}</p>
+                                <p class="text-lg font-bold text-green-600">Total: $${venta.montoTotal.toFixed(2)} ${weppaHtml}</p>
                                 <p class="text-xs text-gray-500">${venta.hora}</p>
                                 <!-- INICIO CAMBIO: Botones edición/eliminación -->
                                 <div class="mt-2 flex gap-2">
@@ -1738,6 +1752,7 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
     </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'982677f1e5479d81',t:'MTc1ODQyNTI2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
+
 
 
 

@@ -951,6 +951,10 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
 
             // Nuevo: agregar propiedad weppa con valor booleano de checkbox
             const weppa = document.getElementById('weppa').checked;
+
+            const weppaHtml = venta.weppa
+                ? '<span style="font-weight:bold; background-color:yellow; padding:0 4px; margin-left:8px;">WEPPA</span>'
+                : '';
             
             // Recopilar datos del formulario
             const venta = {
@@ -1275,9 +1279,9 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
                     efectivoDelDia += venta.pagoMixto.efectivo;
                 }
                 console.log(venta.weppa)
-                const weppaHtml = venta.weppa
+                /* const weppaHtml = venta.weppa
                 ? '<span style="font-weight:bold; background-color:yellow; padding:0 4px; margin-left:8px;">WEPPA</span>'
-                : '';
+                : ''; */
 
                 // ...accesoriosTexto igual que antes...
                 const accesoriosTexto = [];
@@ -1623,7 +1627,7 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
                     <div class="venta">
                         <div class="venta-header">
                             VENTA #${index + 1} - ${venta.hora}
-                            <span style="float: right;">$${venta.montoTotal.toFixed(2)}</span>
+                            ${weppaHtml}<span style="float: right;">$${venta.montoTotal.toFixed(2)}</span>
                         </div>
                         
                         <div class="venta-grid">
@@ -1754,6 +1758,7 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
     </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'982677f1e5479d81',t:'MTc1ODQyNTI2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
+
 
 
 

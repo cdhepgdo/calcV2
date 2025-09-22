@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cierre de Ventas - Tienda iPhone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-4">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 text-center mb-2">📱 Cierre de Ventas Diario</h1>
+            <p class="text-gray-600 text-center">Registro de ventas - <span id="fecha-actual"></span></p>
+        </div>
+
+        <!-- INICIO CAMBIO: Caja Inicial del Día -->
+        <div class="bg-green-50 border-2 border-green-200 rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-green-800 mb-4">💰 Caja Inicial del Día</h2>
+            <div class="flex items-center gap-4">
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-green-700 mb-2">Efectivo disponible hasta el día anterior ($)</label>
+                    <input type="number" id="cajaInicial" step="0.01" class="w-full p-3 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="0.00">
+                </div>
+                <button id="guardarCajaInicial" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                    💾 Guardar
+                </button>
+            </div>
+            <div id="cajaInicialConfirmacion" class="hidden mt-3 p-3 bg-green-100 rounded-lg">
+                <p class="text-green-800 font-medium">✅ Caja inicial guardada: $<span id="cajaInicialMostrar">0.00</span></p>
+            </div>
+        </div>
+        <!-- FIN CAMBIO: Caja Inicial del Día -->
+
+        <!-- Formulario Principal -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <form id="ventaForm" class="space-y-6">
+                <!-- Tipo de Venta -->
+                <div class="border-b pb-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">🛒 Tipo de Venta</h2>
+                    <div class="flex items-center space-x-6">
+                        <div class="flex items-center">
+                            <input type="radio" id="ventaCompleta" name="tipoVenta" value="completa" checked class="mr-2 h-4 w-4 text-blue-600">
+                            <label for="ventaCompleta" class="font-medium text-gray-700">iPhone + Accesorios</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="soloAccesorios" name="tipoVenta" value="accesorios" class="mr-2 h-4 w-4 text-blue-600">
+                            <label for="soloAccesorios" class="font-medium text-gray-700">Solo Accesorios</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información del iPhone -->
+                <div id="infoIphone" class="border-b pb-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">📱 Información del iPhone</h2>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Modelo</label>
+                            <select id="modelo" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                                
+                            </select>
+                        </div>
+                        <div>
+                            <!-- <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
+                            <input type="text" id="color" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Ej: Negro, Blanco, Azul..." required> -->
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
+                            <select id="color" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                                <option value="">Seleccionar Color</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Capacidad de Almacenamiento</label>
+                            <select id="almacenamiento" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                                <option value="">Seleccionar capacidad</option>
+                                <option value="64GB">64GB</option>
+                                <option value="128GB">128GB</option>
+                                <option value="256GB">256GB</option>
+                                <option value="512GB">512GB</option>
+                                <option value="1TB">1TB</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">% de Batería</label>
+                            <input type="number" id="bateria" min="1" max="100" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="85" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Accesorios -->
+                <div class="border-b pb-6 ">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Accesorios</h2>
+
+                    <div class="grid md:grid-cols-4 gap-2">
+
+                        <!-- Forro -->
+                        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                            <div class="flex items-center mb-3">
+                                <input type="checkbox" id="forro" class="mr-3 h-4 w-4 text-blue-600">
+                                <label for="forro" class="font-medium text-gray-700">Forro</label>
+                            </div>
+                            <div id="forroModelo" class="hidden grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Modelo</label>
+                                    <select id="forroModeloSelect" class="w-full p-2 border border-gray-300 rounded-lg">
+                                        
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Cantidad</label>
+                                    <input type="number" min="1" value="1" class="w-full p-2 border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                        </div>
+    
+                        <!-- Cargador -->
+                        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                            <div class="flex items-center mb-3">
+                            <input type="checkbox" id="cargador" class="mr-3 h-4 w-4 text-blue-600">
+                            <label for="cargador" class="font-medium text-gray-700">Cargador</label>
+                            </div>
+                            <div id="cargadorCantidad" class="hidden">
+                            <label class="block text-xs text-gray-600 mb-1">Cantidad</label>
+                            <input type="number" min="1" value="1" class="w-full p-2 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+    
+                        <!-- Vidrio Templado -->
+                        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                            <div class="flex items-center mb-3">
+                                <input type="checkbox" id="vidrio" class="mr-3 h-4 w-4 text-blue-600">
+                                <label for="vidrio" class="font-medium text-gray-700">Vidrio Templado</label>
+                            </div>
+                            <div id="vidrioModelo" class="hidden grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Modelos</label>
+                                    <select id="vidrioModeloSelect" class="w-full p-2 border border-gray-300 rounded-lg">
+                                        
+                                    </select>                                    
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Cantidad</label>
+                                    <input type="number" min="1" value="1" class="w-full p-2 border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                        </div>
+    
+                        <!-- Protector de Cámara -->
+                        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                            <div class="flex items-center mb-3">
+                            <input type="checkbox" id="protectorCamara" class="mr-3 h-4 w-4 text-blue-600">
+                            <label for="protectorCamara" class="font-medium text-gray-700">Protect. Cámara</label>
+                            </div>
+                            <div id="protectorCantidad" class="hidden">
+                            <label class="block text-xs text-gray-600 mb-1">Cantidad</label>
+                            <input type="number" min="1" value="1" class="w-full p-2 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+    
+                        <!-- Nuevo accesorio: Cubo -->
+                        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                            <div class="flex items-center mb-3">
+                            <input type="checkbox" id="cubo" class="mr-3 h-4 w-4 text-blue-600">
+                            <label for="cubo" class="font-medium text-gray-700">Cubo</label>
+                            </div>
+                            <div id="cuboCantidad" class="hidden">
+                            <label class="block text-xs text-gray-600 mb-1">Cantidad</label>
+                            <input type="number" min="1" value="1" class="w-full p-2 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+    
+                        <!-- Nuevo accesorio: Cable Lightning -->
+                        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                            <div class="flex items-center mb-3">
+                            <input type="checkbox" id="cableLightning" class="mr-3 h-4 w-4 text-blue-600">
+                            <label for="cableLightning" class="font-medium text-gray-700">Cable Lightning</label>
+                            </div>
+                            <div id="cableLightningCantidad" class="hidden">
+                            <label class="block text-xs text-gray-600 mb-1">Cantidad</label>
+                            <input type="number" min="1" value="1" class="w-full p-2 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+    
+                        <!-- Nuevo accesorio: Cable C+C -->
+                        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                            <div class="flex items-center mb-3">
+                            <input type="checkbox" id="cableCC" class="mr-3 h-4 w-4 text-blue-600">
+                            <label for="cableCC" class="font-medium text-gray-700">Cable C+C</label>
+                            </div>
+                            <div id="cableCCCantidad" class="hidden">
+                            <label class="block text-xs text-gray-600 mb-1">Cantidad</label>
+                            <input type="number" min="1" value="1" class="w-full p-2 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+    
+                        <!-- Nuevo accesorio: Caja -->
+                        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                            <div class="flex items-center mb-3">
+                                <input type="checkbox" id="caja" class="mr-3 h-4 w-4 text-blue-600">
+                                <label for="caja" class="font-medium text-gray-700">Caja</label>
+                            </div>
+                            <div id="cajaModelo" class="hidden grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Modelo</label>
+                                    <select id="cajaModeloSelect" class="w-full p-2 border border-gray-300 rounded-lg">
+                                    
+                                    </select>
+                                </div>
+                                <div id="cajaColor">
+                                    <label class="block text-xs text-gray-600 mb-1">Color</label>
+                                    <select id="cajaColorSelect" class="w-full p-2 border border-gray-300 rounded-lg">
+                                    
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Forma de Pago -->
+                <div class="border-b pb-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">💳 Forma de Pago</h2>
+                    <div class="space-y-3 grid md:grid-cols-4 gap-2">
+                        <div class="flex items-center">
+                            <input type="radio" id="efectivo" name="formaPago" value="efectivo" class="mr-3 h-4 w-4 text-blue-600">
+                            <label for="efectivo" class="font-medium text-gray-700">Efectivo</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="zelle" name="formaPago" value="zelle" class="mr-3 h-4 w-4 text-blue-600">
+                            <label for="zelle" class="font-medium text-gray-700">Zelle</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="binance" name="formaPago" value="binance" class="mr-3 h-4 w-4 text-blue-600">
+                            <label for="binance" class="font-medium text-gray-700">Binance</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="pagomovil" name="formaPago" value="pagomovil" class="mr-3 h-4 w-4 text-blue-600">
+                            <label for="pagomovil" class="font-medium text-gray-700">Pago Móvil</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="transferencia" name="formaPago" value="transferencia" class="mr-3 h-4 w-4 text-blue-600">
+                            <label for="transferencia" class="font-medium text-gray-700">Transferencia</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="mixto" name="formaPago" value="mixto" class="mr-3 h-4 w-4 text-blue-600">
+                            <label for="mixto" class="font-medium text-gray-700">Mixto</label>
+                        </div>
+
+                    </div>
+
+                    <!-- Detalles de pago mixto -->
+                    <div id="pagoMixto" class="hidden mt-4 bg-blue-50 p-4 rounded-lg">
+                        <h3 class="font-medium text-gray-800 mb-3">Detalles del Pago Mixto</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Efectivo ($)</label>
+                                <input type="number" id="montoEfectivo" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Zelle ($)</label>
+                                <input type="number" id="montoZelle" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Binance ($)</label>
+                                <input type="number" id="montoBinance" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Pago Móvil ($)</label>
+                                <input type="number" id="montoPagoMovilDolares" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Transferencia ($)</label>
+                                <input type="number" id="montoTransferenciaDolares" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="mt-3 p-3 bg-white rounded border">
+                            <p class="text-sm font-medium text-gray-700">Total Calculado: $<span id="totalMixto">0.00</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Detalles de Pago Móvil -->
+                    <div id="pagomovil-detalles" class="hidden mt-4 bg-green-50 p-4 rounded-lg">
+                        <h3 class="font-medium text-gray-800 mb-3">Detalles del Pago Móvil</h3>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Monto en Dólares ($)</label>
+                                <input type="number" id="pagomovilDolares" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Monto en Bolívares (Bs)</label>
+                                <input type="number" id="pagomovilBolivares" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tasa (Bs/$)</label>
+                                <input type="number" id="pagomovilTasa" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detalles de Transferencia -->
+                    <div id="transferencia-detalles" class="hidden mt-4 bg-purple-50 p-4 rounded-lg">
+                        <h3 class="font-medium text-gray-800 mb-3">Detalles de la Transferencia</h3>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Monto en Dólares ($)</label>
+                                <input type="number" id="transferenciaDolares" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Monto en Bolívares (Bs)</label>
+                                <input type="number" id="transferenciaBolivares" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tasa (Bs/$)</label>
+                                <input type="number" id="transferenciaTasa" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Equipo Recibido como Parte de Pago -->
+                <div class="border-b pb-6">
+                    <div class="flex items-center mb-4">
+                        <input type="checkbox" id="recibirEquipo" class="mr-3 h-4 w-4 text-blue-600">
+                        <label for="recibirEquipo" class="text-xl font-semibold text-gray-800">📱➡️ Recibir Equipo como Parte de Pago</label>
+                    </div>
+                    
+                    <div id="equipoRecibidoForm" class="hidden bg-orange-50 p-4 rounded-lg">
+                        <h3 class="font-medium text-gray-800 mb-4">Información del Equipo Recibido</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Modelo</label>
+                                <select id="equipoModelo" class="w-full p-3 border border-gray-300 rounded-lg">
+                                    
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Capacidad</label>
+                                <select id="equipoCapacidad" class="w-full p-3 border border-gray-300 rounded-lg">
+                                    <option value="">Seleccionar capacidad</option>
+                                    <option value="64GB">64GB</option>
+                                    <option value="128GB">128GB</option>
+                                    <option value="256GB">256GB</option>
+                                    <option value="512GB">512GB</option>
+                                    <option value="1TB">1TB</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
+                                <input type="text" id="equipoColor" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="Ej: Negro, Blanco, Azul...">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">% de Batería</label>
+                                <input type="number" id="equipoBateria" min="1" max="100" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="85">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">IMEI</label>
+                                <input type="text" id="equipoImei" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="Número IMEI">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Valor del Equipo ($)</label>
+                                <input type="number" id="equipoValor" step="0.01" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Comentarios</label>
+                                <textarea id="equipoComentarios" rows="3" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="Detalles del estado del equipo, accesorios incluidos, etc."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monto Total -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">💰 Monto Total de la Venta</label>
+                    <input type="number" id="montoTotal" step="0.01" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg font-semibold" placeholder="0.00" required>
+                </div>
+
+                <!-- Botones -->
+                <div class="flex gap-4 pt-6">
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                        ✅ Registrar Venta
+                    </button>
+                    <button type="button" id="limpiarForm" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                        🗑️ Limpiar
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Resumen de Ventas -->
+        <div id="resumenDia" class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">📊 Resumen del Día</h2>
+            <div id="resumenVentas" class="space-y-3">
+                <p class="text-gray-600">No hay ventas registradas hoy.</p>
+            </div>
+            <!-- INICIO CAMBIO: Totales Expandidos -->
+            <div class="mt-4 grid md:grid-cols-3 gap-4">
+                <div class="p-4 bg-green-50 rounded-lg">
+                    <p class="text-lg font-semibold text-green-800">💰 Total del día: $<span id="totalDia">0.00</span></p>
+                </div>
+                <div class="p-4 bg-blue-50 rounded-lg">
+                    <p class="text-lg font-semibold text-blue-800">📱 Equipos vendidos: <span id="equiposVendidos">0</span></p>
+                </div>
+                <div class="p-4 bg-purple-50 rounded-lg">
+                    <p class="text-lg font-semibold text-purple-800">🏦 Caja final: $<span id="cajaFinal">0.00</span></p>
+                </div>
+            </div>
+            <!-- FIN CAMBIO: Totales Expandidos -->
+            <div class="mt-4 p-4 bg-green-50 rounded-lg">
+                <p class="text-lg font-semibold text-green-800">Total del día: $<span id="totalDia">0.00</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- INICIO CAMBIO: Botón Imprimir Resumen Mejorado -->
+    <button id="imprimirResumen" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 mt-6">
+        🖨️ Imprimir Resumen
+    </button>
+    <!-- FIN CAMBIO: Botón Imprimir Resumen Mejorado -->
+<!-- <button id="btnImprimirResumen" class="bg-blue-600 text-white ...">
+  Imprimir Resumen del Día
+</button> -->
+
+
+    <script>
+        // INICIO CAMBIO: Variables de caja inicial y edición
+        let cajaInicialGuardada = 0;
+        let editandoVenta = false;
+        let indiceEditando = -1;
+        // FIN CAMBIO
+
+        // INICIO CAMBIO: Guardar caja inicial
+        document.getElementById('guardarCajaInicial').addEventListener('click', function() {
+            const valor = parseFloat(document.getElementById('cajaInicial').value) || 0;
+            cajaInicialGuardada = valor;
+            document.getElementById('cajaInicialConfirmacion').classList.remove('hidden');
+            document.getElementById('cajaInicialMostrar').textContent = valor.toFixed(2);
+            this.innerHTML = '✅ Guardado';
+            this.classList.remove('bg-green-600', 'hover:bg-green-700');
+            this.classList.add('bg-green-800');
+            setTimeout(() => {
+                this.innerHTML = '💾 Guardar';
+                this.classList.remove('bg-green-800');
+                this.classList.add('bg-green-600', 'hover:bg-green-700');
+            }, 2000);
+            actualizarResumen();
+        });
+        document.getElementById('cajaInicial').addEventListener('input', function() {
+            document.getElementById('cajaInicialConfirmacion').classList.add('hidden');
+            const btn = document.getElementById('guardarCajaInicial');
+            btn.innerHTML = '💾 Guardar';
+            btn.classList.remove('bg-green-800');
+            btn.classList.add('bg-green-600', 'hover:bg-green-700');
+        });
+        // FIN CAMBIO
+
+        // INICIO CAMBIO: Funciones de edición y eliminación de ventas
+        function editarVenta(index) {
+            const venta = ventas[index];
+            editandoVenta = true;
+            indiceEditando = index;
+            const submitBtn = document.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '✏️ Actualizar Venta';
+            submitBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            submitBtn.classList.add('bg-orange-600', 'hover:bg-orange-700');
+            let cancelBtn = document.getElementById('cancelarEdicionBtn');
+            if (!cancelBtn) {
+                cancelBtn = document.createElement('button');
+                cancelBtn.type = 'button';
+                cancelBtn.id = 'cancelarEdicionBtn';
+                cancelBtn.innerHTML = '❌ Cancelar Edición';
+                cancelBtn.className = 'bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 ml-2';
+                cancelBtn.onclick = cancelarEdicion;
+                submitBtn.parentNode.insertBefore(cancelBtn, submitBtn.nextSibling);
+            }
+            llenarFormularioConVenta(venta);
+            document.getElementById('ventaForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function cancelarEdicion() {
+            editandoVenta = false;
+            indiceEditando = -1;
+            const submitBtn = document.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '✅ Registrar Venta';
+            submitBtn.classList.remove('bg-orange-600', 'hover:bg-orange-700');
+            submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            const cancelBtn = document.getElementById('cancelarEdicionBtn');
+            if (cancelBtn) cancelBtn.remove();
+            limpiarFormulario();
+        }
+
+        function eliminarVenta(index) {
+            if (confirm('¿Estás seguro de que quieres eliminar esta venta?')) {
+                ventas.splice(index, 1);
+                actualizarResumen();
+                alert('✅ Venta eliminada exitosamente!');
+            }
+        }
+
+        function llenarFormularioConVenta(venta) {
+            // Aquí debes copiar los valores de venta al formulario, igual que en y.html
+            // Ejemplo:
+            document.querySelector('input[name="tipoVenta"][value="' + venta.tipoVenta + '"]').checked = true;
+            document.getElementById('modelo').value = venta.modelo;
+            document.getElementById('color').value = venta.color;
+            document.getElementById('almacenamiento').value = venta.almacenamiento;
+            document.getElementById('bateria').value = venta.bateria.replace('%','');
+            // Accesorios
+            document.getElementById('forro').checked = !!venta.accesorios.forro;
+            document.getElementById('forroModeloSelect').value = venta.accesorios.forroModelo || '';
+            document.querySelector('#forroModelo input').value = venta.accesorios.forroCantidad || 1;
+            document.getElementById('cargador').checked = !!venta.accesorios.cargador;
+            document.querySelector('#cargadorCantidad input').value = venta.accesorios.cargadorCantidad || 1;
+            document.getElementById('vidrio').checked = !!venta.accesorios.vidrio;
+            document.getElementById('vidrioModeloSelect').value = venta.accesorios.vidrioModelo || '';
+            document.querySelector('#vidrioModelo input').value = venta.accesorios.vidrioCantidad || 1;
+            document.getElementById('protectorCamara').checked = !!venta.accesorios.protectorCamara;
+            document.querySelector('#protectorCantidad input').value = venta.accesorios.protectorCantidad || 1;
+            // Nuevos accesorios
+            document.getElementById('cubo').checked = !!venta.accesorios.cubo;
+            document.querySelector('#cuboCantidad input').value = venta.accesorios.cuboCantidad || 1;
+            document.getElementById('cableLightning').checked = !!venta.accesorios.cableLightning;
+            document.querySelector('#cableLightningCantidad input').value = venta.accesorios.cableLightningCantidad || 1;
+            document.getElementById('cableCC').checked = !!venta.accesorios.cableCC;
+            document.querySelector('#cableCCCantidad input').value = venta.accesorios.cableCCCantidad || 1;
+            document.getElementById('caja').checked = !!venta.accesorios.caja;
+            document.getElementById('cajaModeloSelect').value = venta.accesorios.cajaModelo || '';
+            document.getElementById('cajaColorSelect').value = venta.accesorios.cajaColor || '';
+            // Forma de pago
+            document.querySelector('input[name="formaPago"][value="' + venta.formaPago + '"]').checked = true;
+            document.getElementById('montoTotal').value = venta.montoTotal;
+            // Si tiene equipo recibido
+            if (venta.equipoRecibido) {
+                document.getElementById('recibirEquipo').checked = true;
+                document.getElementById('equipoModelo').value = venta.equipoRecibido.modelo;
+                document.getElementById('equipoCapacidad').value = venta.equipoRecibido.capacidad;
+                document.getElementById('equipoColor').value = venta.equipoRecibido.color;
+                document.getElementById('equipoBateria').value = venta.equipoRecibido.bateria.replace('%','');
+                document.getElementById('equipoImei').value = venta.equipoRecibido.imei;
+                document.getElementById('equipoValor').value = venta.equipoRecibido.valor;
+                document.getElementById('equipoComentarios').value = venta.equipoRecibido.comentarios;
+            } else {
+                document.getElementById('recibirEquipo').checked = false;
+            }
+            // Si tiene detalles de pago mixto, pagomovil, transferencia, etc. (puedes expandir según tu lógica)
+        }
+        // FIN CAMBIO
+
+
+function imprimirResumenDia() {
+  const contenido = document.getElementById('resumenDia').innerHTML;
+  const ventanaImprimir = window.open('', '', 'width=800,height=600');
+  ventanaImprimir.document.write(`
+    <html>
+      <head>
+        <title>Resumen del Día</title>
+        <style>
+          /* Aquí puedes añadir estilos si quieres, para mantener formato */
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          p { font-size: 14px; }
+        </style>
+      </head>
+      <body>
+        <h2>Resumen del Día</h2>
+        ${contenido}
+      </body>
+    </html>`);
+  ventanaImprimir.document.close();
+  ventanaImprimir.focus();
+  ventanaImprimir.print();
+  ventanaImprimir.close();
+}
+
+//document.getElementById('btnImprimirResumen').addEventListener('click', imprimirResumenDia);
+
+const coloresIphone = [
+  { valor: "Negro", etiqueta: "⚫ Negro" },
+  { valor: "Blanco", etiqueta: "⚪ Blanco" },
+  { valor: "Azul", etiqueta: "🔵 Azul" },
+  { valor: "Verde", etiqueta: "🟢 Verde" },
+  { valor: "Morado", etiqueta: "🟣 Morado" },
+  { valor: "Rosa", etiqueta: "🟠 Rosa" },         // No existe círculo rosa, pero naranja puede funcionar visualmente
+  { valor: "Amarillo", etiqueta: "🟡 Amarillo" },
+  { valor: "Rojo", etiqueta: "🔴 Rojo" },
+  { valor: "Azul Pacífico", etiqueta: "🔵 Azul Pacífico" },
+  { valor: "Grafito", etiqueta: "⚫ Grafito" },
+  { valor: "Oro", etiqueta: "🟡 Oro" },
+  { valor: "Plata", etiqueta: "⚪ Plata" },
+  { valor: "Titanio Natural", etiqueta: "⚪ Titanio Natural" },
+  { valor: "Titanio Azul", etiqueta: "🔵 Titanio Azul" },
+  { valor: "Titanio Blanco", etiqueta: "⚪ Titanio Blanco" },
+  { valor: "Titanio Negro", etiqueta: "⚫ Titanio Negro" }
+];
+
+
+const modelosIphone = [
+  { valor: "iPhone 11", etiqueta: "iPhone 11" },
+  { valor: "iPhone 11 Pro", etiqueta: "iPhone 11 Pro" },
+  { valor: "iPhone 11 Pro Max", etiqueta: "iPhone 11 Pro Max" },
+  { valor: "iPhone 12", etiqueta: "iPhone 12" },
+  { valor: "iPhone 12 Pro", etiqueta: "iPhone 12 Pro" },
+  { valor: "iPhone 12 Pro Max", etiqueta: "iPhone 12 Pro Max" },
+  { valor: "iPhone 13", etiqueta: "iPhone 13" },
+  { valor: "iPhone 13 Pro", etiqueta: "iPhone 13 Pro" },
+  { valor: "iPhone 13 Pro Max", etiqueta: "iPhone 13 Pro Max" },
+  { valor: "iPhone 14", etiqueta: "iPhone 14" },
+  { valor: "iPhone 14 Pro", etiqueta: "iPhone 14 Pro" },
+  { valor: "iPhone 14 Plus", etiqueta: "iPhone 14 Plus" },
+  { valor: "iPhone 14 Pro Max", etiqueta: "iPhone 14 Pro Max" },
+  { valor: "iPhone 15", etiqueta: "iPhone 15" },
+  { valor: "iPhone 15 Pro", etiqueta: "iPhone 15 Pro" },
+  { valor: "iPhone 15 Plus", etiqueta: "iPhone 15 Plus" },
+  { valor: "iPhone 15 Pro Max", etiqueta: "iPhone 15 Pro Max" },
+  { valor: "iPhone 16", etiqueta: "iPhone 16" },
+  { valor: "iPhone 16 Pro", etiqueta: "iPhone 16 Pro" },
+  { valor: "iPhone 16 Plus", etiqueta: "iPhone 16 Plus" },
+  { valor: "iPhone 16 Pro Max", etiqueta: "iPhone 16 Pro Max" },
+  { valor: "iPhone 17", etiqueta: "iPhone 17" },
+  { valor: "iPhone 17 Pro", etiqueta: "iPhone 17 Pro" },
+  { valor: "iPhone 17 Plus", etiqueta: "iPhone 17 Plus" },
+  { valor: "iPhone 17 Pro Max", etiqueta: "iPhone 17 Pro Max" }
+];
+
+function llenarSelectModelos(selectorId, md) {
+  const select = document.getElementById(selectorId);
+  if (!select) return;
+
+  // Limpiar opciones previas
+  select.innerHTML = '<option value="">Seleccionar ...</option>';
+
+    if(md == 'modelo'){
+        // Agregar cada modelo del arreglo
+        modelosIphone.forEach(modelo => {
+            const option = document.createElement('option');
+            option.value = modelo.valor;
+            option.textContent = modelo.etiqueta;
+            select.appendChild(option);
+        });
+    } else if(md == 'color'){
+        // Agregar cada color del arreglo
+        coloresIphone.forEach(color => {
+            const option = document.createElement('option');
+            option.value = color.valor;
+            option.textContent = color.etiqueta;
+            select.appendChild(option);
+        });
+    }
+}
+
+// Llamar la función para los selectores correspondientes 
+llenarSelectModelos('modelo', 'modelo'); // selector de modelo en Información del iPhone
+llenarSelectModelos('color', "color"); // selector de modelo en Información del iPhone
+llenarSelectModelos('forroModeloSelect', 'modelo'); // ajusta al ID real en tu código para forro
+llenarSelectModelos('vidrioModeloSelect', 'modelo'); // ajusta al ID real en tu código para vidrio
+llenarSelectModelos('equipoModelo', 'modelo'); // ajusta al ID real en tu código para vidrio
+llenarSelectModelos('cajaColorSelect', 'color'); // caja color
+llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
+
+
+        // Mostrar fecha actual
+        document.getElementById('fecha-actual').textContent = new Date().toLocaleDateString('es-ES', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        // Array para almacenar las ventas
+        let ventas = [];
+
+        // Mostrar/ocultar campos según selecciones
+        document.getElementById('forro').addEventListener('change', function() {
+            document.getElementById('forroModelo').classList.toggle('hidden', !this.checked);
+            if (this.checked) {
+                autoSeleccionarModelo('forroModelo');
+            }
+        });
+
+        document.getElementById('cargador').addEventListener('change', function() {
+            document.getElementById('cargadorCantidad').classList.toggle('hidden', !this.checked);
+        });
+
+        document.getElementById('vidrio').addEventListener('change', function() {
+            document.getElementById('vidrioModelo').classList.toggle('hidden', !this.checked);
+            if (this.checked) {
+                autoSeleccionarModelo('vidrioModelo');
+            }
+        });
+
+        document.getElementById('protectorCamara').addEventListener('change', function() {
+            document.getElementById('protectorCantidad').classList.toggle('hidden', !this.checked);
+        });
+        
+        document.getElementById('cableLightning').addEventListener('change', function() {
+            document.getElementById('cableLightningCantidad').classList.toggle('hidden', !this.checked);
+        });
+
+        document.getElementById('cubo').addEventListener('change', function() {
+            document.getElementById('cuboCantidad').classList.toggle('hidden', !this.checked);
+        });
+
+        document.getElementById('cableCC').addEventListener('change', function() {
+            document.getElementById('cableCCCantidad').classList.toggle('hidden', !this.checked);
+        });
+
+        document.getElementById('caja').addEventListener('change', function() {
+            document.getElementById('cajaModelo').classList.toggle('hidden', !this.checked);
+            if (this.checked) {
+                autoSeleccionarModelo('cajaModelo');
+            }
+        });
+
+        // Función para auto-seleccionar modelo de accesorio basado en el iPhone
+        function autoSeleccionarModelo(contenedorId) {
+            const modeloIphone = document.getElementById('modelo').value;
+            const selectAccesorio = document.querySelector(`#${contenedorId} select`);
+            
+            /* if (modeloIphone && selectAccesorio) {
+                let modeloAccesorio = '';
+                
+                if (modeloIphone.includes('iPhone 15')) {
+                    modeloAccesorio = '15';
+                    if (modeloIphone.includes('Pro')) modeloAccesorio = '15pro';
+                } else if (modeloIphone.includes('iPhone 14')) {
+                    modeloAccesorio = '14';
+                    if (modeloIphone.includes('Pro')) modeloAccesorio = '14pro';
+                } else if (modeloIphone.includes('iPhone 13')) {
+                    modeloAccesorio = '13';
+                    if (modeloIphone.includes('Pro Max')) modeloAccesorio = '13pm';
+                } else if (modeloIphone.includes('iPhone 12')) {
+                    modeloAccesorio = '12';
+                }
+                
+                if (modeloAccesorio) {
+                    selectAccesorio.value = modeloAccesorio;
+                }
+            } */
+            modelosIphone.forEach(modelo => {
+                if(modelo.valor === modeloIphone){
+                    selectAccesorio.value = modelo.valor;
+                }
+            });
+        }
+
+        // Mostrar/ocultar sección iPhone según tipo de venta
+        document.querySelectorAll('input[name="tipoVenta"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const infoIphone = document.getElementById('infoIphone');
+                if (this.value === 'accesorios') {
+                    infoIphone.style.display = 'none';
+                    // Limpiar campos requeridos del iPhone
+                    document.getElementById('modelo').removeAttribute('required');
+                    document.getElementById('almacenamiento').removeAttribute('required');
+                    document.getElementById('bateria').removeAttribute('required');
+                    document.getElementById('color').removeAttribute('required');
+                } else {
+                    infoIphone.style.display = 'block';
+                    document.getElementById('modelo').setAttribute('required', '');
+                    document.getElementById('almacenamiento').setAttribute('required', '');
+                    document.getElementById('bateria').setAttribute('required', '');
+                    document.getElementById('color').setAttribute('required', '');
+                }
+            });
+        });
+
+        document.querySelectorAll('input[name="formaPago"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.getElementById('pagoMixto').classList.toggle('hidden', this.value !== 'mixto');
+                document.getElementById('pagomovil-detalles').classList.toggle('hidden', this.value !== 'pagomovil');
+                document.getElementById('transferencia-detalles').classList.toggle('hidden', this.value !== 'transferencia');
+            });
+        });
+
+        // Control para mostrar/ocultar formulario de equipo recibido
+        document.getElementById('recibirEquipo').addEventListener('change', function() {
+            document.getElementById('equipoRecibidoForm').classList.toggle('hidden', !this.checked);
+        });
+
+        // Calcular total automático en pago mixto
+        const camposMixto = ['montoEfectivo', 'montoZelle', 'montoBinance', 'montoPagoMovilDolares', 'montoTransferenciaDolares'];
+        camposMixto.forEach(campo => {
+            document.getElementById(campo).addEventListener('input', calcularTotalMixto);
+        });
+
+        // Mostrar detalles automáticamente cuando se ingresa monto en pago mixto
+        document.getElementById('montoPagoMovilDolares').addEventListener('input', function() {
+            const valor = parseFloat(this.value) || 0;
+            if (valor > 0) {
+                document.getElementById('pagomovil-detalles').classList.remove('hidden');
+                // Sincronizar el valor
+                document.getElementById('pagomovilDolares').value = valor;
+            } else {
+                document.getElementById('pagomovil-detalles').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('montoTransferenciaDolares').addEventListener('input', function() {
+            const valor = parseFloat(this.value) || 0;
+            if (valor > 0) {
+                document.getElementById('transferencia-detalles').classList.remove('hidden');
+                // Sincronizar el valor
+                document.getElementById('transferenciaDolares').value = valor;
+            } else {
+                document.getElementById('transferencia-detalles').classList.add('hidden');
+            }
+        });
+
+        function calcularTotalMixto() {
+            let total = 0;
+            camposMixto.forEach(campo => {
+                const valor = parseFloat(document.getElementById(campo).value) || 0;
+                total += valor;
+            });
+            document.getElementById('totalMixto').textContent = total.toFixed(2);
+            calcularTotalGeneral();
+        }
+
+        // Calcular total general incluyendo equipo recibido
+        function calcularTotalGeneral() {
+            let total = 0;
+            
+            // Obtener total según método de pago
+            const formaPago = document.querySelector('input[name="formaPago"]:checked');
+            if (formaPago) {
+                if (formaPago.value === 'mixto') {
+                    total = parseFloat(document.getElementById('totalMixto').textContent) || 0;
+                } else if (formaPago.value === 'pagomovil') {
+                    total = parseFloat(document.getElementById('pagomovilDolares').value) || 0;
+                } else if (formaPago.value === 'transferencia') {
+                    total = parseFloat(document.getElementById('transferenciaDolares').value) || 0;
+                } else {
+                    total = parseFloat(document.getElementById('montoTotal').value) || 0;
+                }
+            }
+            
+            // Agregar valor del equipo recibido si existe
+            if (document.getElementById('recibirEquipo').checked) {
+                const valorEquipo = parseFloat(document.getElementById('equipoValor').value) || 0;
+                total += valorEquipo;
+            }
+            
+            document.getElementById('montoTotal').value = total.toFixed(2);
+        }
+
+        // Agregar listeners para cálculo automático
+        document.getElementById('pagomovilDolares').addEventListener('input', calcularTotalGeneral);
+        document.getElementById('transferenciaDolares').addEventListener('input', calcularTotalGeneral);
+        document.getElementById('equipoValor').addEventListener('input', calcularTotalGeneral);
+
+        // Calcular bolívares automáticamente
+        document.getElementById('pagomovilDolares').addEventListener('input', function() {
+            const dolares = parseFloat(this.value) || 0;
+            const tasa = parseFloat(document.getElementById('pagomovilTasa').value) || 0;
+            if (dolares && tasa) {
+                document.getElementById('pagomovilBolivares').value = (dolares * tasa).toFixed(2);
+            }
+        });
+
+        document.getElementById('pagomovilTasa').addEventListener('input', function() {
+            const dolares = parseFloat(document.getElementById('pagomovilDolares').value) || 0;
+            const tasa = parseFloat(this.value) || 0;
+            if (dolares && tasa) {
+                document.getElementById('pagomovilBolivares').value = (dolares * tasa).toFixed(2);
+            }
+        });
+
+        document.getElementById('transferenciaDolares').addEventListener('input', function() {
+            const dolares = parseFloat(this.value) || 0;
+            const tasa = parseFloat(document.getElementById('transferenciaTasa').value) || 0;
+            if (dolares && tasa) {
+                document.getElementById('transferenciaBolivares').value = (dolares * tasa).toFixed(2);
+            }
+        });
+
+        document.getElementById('transferenciaTasa').addEventListener('input', function() {
+            const dolares = parseFloat(document.getElementById('transferenciaDolares').value) || 0;
+            const tasa = parseFloat(this.value) || 0;
+            if (dolares && tasa) {
+                document.getElementById('transferenciaBolivares').value = (dolares * tasa).toFixed(2);
+            }
+        });
+
+        // Manejar envío del formulario
+        document.getElementById('ventaForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const tipoVenta = document.querySelector('input[name="tipoVenta"]:checked').value;
+            
+            // Recopilar datos del formulario
+            const venta = {
+                tipoVenta: tipoVenta,
+                modelo: tipoVenta === 'completa' ? document.getElementById('modelo').value : 'Solo Accesorios',
+                color: tipoVenta === 'completa' ? document.getElementById('color').value : '-',
+                almacenamiento: tipoVenta === 'completa' ? document.getElementById('almacenamiento').value : '-',
+                bateria: tipoVenta === 'completa' ? document.getElementById('bateria').value + '%' : '-',
+                accesorios: {
+    forro: document.getElementById('forro').checked,
+    forroModelo: document.getElementById('forro').checked ? document.querySelector('#forroModelo select').value : null,
+    forroCantidad: document.getElementById('forro').checked ? parseInt(document.querySelector('#forroModelo input').value) : 0,
+    
+    cargador: document.getElementById('cargador').checked,
+    cargadorCantidad: document.getElementById('cargador').checked ? parseInt(document.querySelector('#cargadorCantidad input').value) : 0,
+    
+    vidrio: document.getElementById('vidrio').checked,
+    vidrioModelo: document.getElementById('vidrio').checked ? document.querySelector('#vidrioModelo select').value : null,
+    vidrioCantidad: document.getElementById('vidrio').checked ? parseInt(document.querySelector('#vidrioModelo input').value) : 0,
+    
+    protectorCamara: document.getElementById('protectorCamara').checked,
+    protectorCantidad: document.getElementById('protectorCamara').checked ? parseInt(document.querySelector('#protectorCantidad input').value) : 0,
+    
+    // Nuevos accesorios añadidos
+    cubo: document.getElementById('cubo').checked,
+    cuboCantidad: document.getElementById('cubo').checked ? parseInt(document.querySelector('#cuboCantidad input').value) : 0,
+    
+    cableLightning: document.getElementById('cableLightning').checked,
+    cableLightningCantidad: document.getElementById('cableLightning').checked ? parseInt(document.querySelector('#cableLightningCantidad input').value) : 0,
+    
+    cableCC: document.getElementById('cableCC').checked,
+    cableCCCantidad: document.getElementById('cableCC').checked ? parseInt(document.querySelector('#cableCCCantidad input').value) : 0,
+
+    caja: document.getElementById('caja').checked,
+    cajaModelo: document.getElementById('caja').checked ? document.querySelector('#cajaModelo select').value : null,
+    cajaColor: document.getElementById('caja').checked ? document.querySelector('#cajaColor select').value : null
+}
+,
+                formaPago: document.querySelector('input[name="formaPago"]:checked').value,
+                montoTotal: parseFloat(document.getElementById('montoTotal').value),
+                hora: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+            };
+
+            // Si es pago mixto, agregar detalles
+            if (venta.formaPago === 'mixto') {
+                venta.pagoMixto = {
+                    efectivo: parseFloat(document.getElementById('montoEfectivo').value) || 0,
+                    zelle: parseFloat(document.getElementById('montoZelle').value) || 0,
+                    binance: parseFloat(document.getElementById('montoBinance').value) || 0,
+                    pagoMovil: parseFloat(document.getElementById('montoPagoMovilDolares').value) || 0,
+                    transferencia: parseFloat(document.getElementById('montoTransferenciaDolares').value) || 0
+                };
+                
+                // Agregar detalles de conversión si están disponibles
+                if (venta.pagoMixto.pagoMovil > 0) {
+                    venta.pagoMixto.pagoMovilDetalles = {
+                        dolares: parseFloat(document.getElementById('pagomovilDolares').value) || 0,
+                        bolivares: parseFloat(document.getElementById('pagomovilBolivares').value) || 0,
+                        tasa: parseFloat(document.getElementById('pagomovilTasa').value) || 0
+                    };
+                }
+                
+                if (venta.pagoMixto.transferencia > 0) {
+                    venta.pagoMixto.transferenciaDetalles = {
+                        dolares: parseFloat(document.getElementById('transferenciaDolares').value) || 0,
+                        bolivares: parseFloat(document.getElementById('transferenciaBolivares').value) || 0,
+                        tasa: parseFloat(document.getElementById('transferenciaTasa').value) || 0
+                    };
+                }
+            }
+
+            // Si es pago móvil, agregar detalles
+            if (venta.formaPago === 'pagomovil') {
+                venta.pagoMovilDetalles = {
+                    dolares: parseFloat(document.getElementById('pagomovilDolares').value) || 0,
+                    bolivares: parseFloat(document.getElementById('pagomovilBolivares').value) || 0,
+                    tasa: parseFloat(document.getElementById('pagomovilTasa').value) || 0
+                };
+            }
+
+            // Si es transferencia, agregar detalles
+            if (venta.formaPago === 'transferencia') {
+                venta.transferenciaDetalles = {
+                    dolares: parseFloat(document.getElementById('transferenciaDolares').value) || 0,
+                    bolivares: parseFloat(document.getElementById('transferenciaBolivares').value) || 0,
+                    tasa: parseFloat(document.getElementById('transferenciaTasa').value) || 0
+                };
+            }
+
+            // Si se recibe equipo como parte de pago
+            if (document.getElementById('recibirEquipo').checked) {
+                venta.equipoRecibido = {
+                    modelo: document.getElementById('equipoModelo').value,
+                    capacidad: document.getElementById('equipoCapacidad').value,
+                    color: document.getElementById('equipoColor').value,
+                    bateria: document.getElementById('equipoBateria').value + '%',
+                    imei: document.getElementById('equipoImei').value,
+                    valor: parseFloat(document.getElementById('equipoValor').value) || 0,
+                    comentarios: document.getElementById('equipoComentarios').value
+                };
+            }
+
+            // Agregar venta al array
+            //ventas.push(venta);
+            if (editandoVenta) {
+                ventas[indiceEditando] = venta;
+                cancelarEdicion();
+                alert('✅ Venta actualizada exitosamente!');
+            } else {
+                ventas.push(venta);
+                limpiarFormulario();
+                alert('✅ Venta registrada exitosamente!');
+            }
+            
+            // Actualizar resumen
+            actualizarResumen();
+            
+            // Limpiar formulario
+            //limpiarFormulario();
+            
+            // Mostrar confirmación
+            //alert('✅ Venta registrada exitosamente!');
+        });
+
+        // Limpiar formulario
+        document.getElementById('limpiarForm').addEventListener('click', limpiarFormulario);
+
+        function limpiarFormulario() {
+            document.getElementById('ventaForm').reset();
+            document.getElementById('forroModelo').classList.add('hidden');
+            document.getElementById('vidrioModelo').classList.add('hidden');
+            document.getElementById('cargadorCantidad').classList.add('hidden');
+            document.getElementById('protectorCantidad').classList.add('hidden');
+            document.getElementById('cajaModelo').classList.add('hidden');
+            document.getElementById('pagoMixto').classList.add('hidden');
+            document.getElementById('pagomovil-detalles').classList.add('hidden');
+            document.getElementById('transferencia-detalles').classList.add('hidden');
+            document.getElementById('equipoRecibidoForm').classList.add('hidden');
+            document.getElementById('totalMixto').textContent = '0.00';
+            
+            // Mostrar sección iPhone por defecto
+            document.getElementById('infoIphone').style.display = 'block';
+            document.getElementById('modelo').setAttribute('required', '');
+            document.getElementById('almacenamiento').setAttribute('required', '');
+            document.getElementById('bateria').setAttribute('required', '');
+            document.getElementById('color').setAttribute('required', '');
+        }
+
+        /* function actualizarResumen() {
+            const resumen = document.getElementById('resumenVentas');
+            const totalDia = document.getElementById('totalDia');
+            
+            if (ventas.length === 0) {
+                resumen.innerHTML = '<p class="text-gray-600">No hay ventas registradas hoy.</p>';
+                totalDia.textContent = '0.00';
+                return;
+            }
+
+            let html = '';
+            let total = 0;
+
+            ventas.forEach((venta, index) => {
+    total += venta.montoTotal;
+
+    const accesoriosTexto = [];
+    if (venta.accesorios.forro) accesoriosTexto.push(`Forro ${venta.accesorios.forroModelo || 'N/A'} (${venta.accesorios.forroCantidad})`);
+    if (venta.accesorios.cargador) accesoriosTexto.push(`Cargador (${venta.accesorios.cargadorCantidad})`);
+    if (venta.accesorios.vidrio) accesoriosTexto.push(`Vidrio ${venta.accesorios.vidrioModelo || 'N/A'} (${venta.accesorios.vidrioCantidad})`);
+    if (venta.accesorios.protectorCamara) accesoriosTexto.push(`Protector Cámara (${venta.accesorios.protectorCantidad})`);
+
+    // Nuevos accesorios añadidos
+    if (venta.accesorios.cubo) accesoriosTexto.push(`Cubo (${venta.accesorios.cuboCantidad})`);
+    if (venta.accesorios.cableLightning) accesoriosTexto.push(`Cable Lightning (${venta.accesorios.cableLightningCantidad})`);
+    if (venta.accesorios.cableCC) accesoriosTexto.push(`Cable C+C (${venta.accesorios.cableCCCantidad})`);
+    if (venta.accesorios.caja) accesoriosTexto.push(`Caja ${venta.accesorios.cajaModelo || 'N/A'} ${venta.accesorios.cajaColor || ''}`.trim());
+    //if (venta.accesorios.cableCC) accesoriosTexto.push(`Cable C+C (${venta.accesorios.cableCCCantidad})`);
+
+    let pagoTexto = venta.formaPago.charAt(0).toUpperCase() + venta.formaPago.slice(1);
+
+    // Agregar detalles específicos según método de pago
+    if (venta.formaPago === 'pagomovil' && venta.pagoMovilDetalles) {
+        pagoTexto = `Pago Móvil: $${venta.pagoMovilDetalles.dolares} = ${venta.pagoMovilDetalles.bolivares}Bs (${venta.pagoMovilDetalles.tasa})`;
+    } else if (venta.formaPago === 'transferencia' && venta.transferenciaDetalles) {
+        pagoTexto = `Transferencia: $${venta.transferenciaDetalles.dolares} = ${venta.transferenciaDetalles.bolivares}Bs (${venta.transferenciaDetalles.tasa})`;
+    }
+
+    // Agregar información del equipo recibido si existe
+    if (venta.equipoRecibido) {
+        pagoTexto += ` + Equipo recibido: ${venta.equipoRecibido.modelo} ${venta.equipoRecibido.capacidad} ($${venta.equipoRecibido.valor})`;
+    }
+    html += `
+        <div class="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
+            <div class="grid grid-cols-1 ${venta.equipoRecibido ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4">
+                <div>
+                    <h4 class="font-semibold text-gray-800 mb-2">${venta.tipoVenta === 'accesorios' ? '🛡️ Accesorios' : '📱 Equipo'}</h4>
+                    ${venta.tipoVenta === 'completa' ? `
+                        <p class="text-sm"><span class="font-medium">Modelo:</span> ${venta.modelo}</p>
+                        <p class="text-sm"><span class="font-medium">Capacidad:</span> ${venta.almacenamiento}</p>
+                        <p class="text-sm"><span class="font-medium">Color:</span> ${venta.color}</p>
+                        <p class="text-sm"><span class="font-medium">Batería:</span> ${venta.bateria}</p>
+                    ` : `
+                        <p class="text-sm font-medium text-blue-600">Venta de accesorios únicamente</p>
+                    `}
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-800 mb-2">🛡️ Accesorios</h4>
+                    ${accesoriosTexto.length > 0 ? 
+                        accesoriosTexto.map(acc => `<p class="text-sm">• ${acc}</p>`).join('') : 
+                        '<p class="text-sm text-gray-500">Sin accesorios</p>'
+                    }
+                </div>
+                ${venta.equipoRecibido ? `
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mb-2">📱⬅️ Equipo Recibido</h4>
+                        <p class="text-sm"><span class="font-medium">Modelo:</span> ${venta.equipoRecibido.modelo}</p>
+                        <p class="text-sm"><span class="font-medium">Capacidad:</span> ${venta.equipoRecibido.capacidad}</p>
+                        <p class="text-sm"><span class="font-medium">Color:</span> ${venta.equipoRecibido.color}</p>
+                        <p class="text-sm"><span class="font-medium">Batería:</span> ${venta.equipoRecibido.bateria}</p>
+                        <p class="text-sm"><span class="font-medium">IMEI:</span> ${venta.equipoRecibido.imei}</p>
+                        <p class="text-sm"><span class="font-medium">Valor:</span> $${venta.equipoRecibido.valor}</p>
+                        ${venta.equipoRecibido.comentarios ? `<p class="text-xs text-gray-600 mt-1">${venta.equipoRecibido.comentarios}</p>` : ''}
+                    </div>
+                ` : ''}
+                <div>
+                    <h4 class="font-semibold text-gray-800 mb-2">💳 Pago</h4>
+                    <div class="space-y-2 mb-3">
+                        ${(() => {
+                            let metodosHtml = '';
+                            
+                            // Pago Móvil
+                            if (venta.formaPago === 'pagomovil' && venta.pagoMovilDetalles) {
+                                metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Pago Móvil: $${venta.pagoMovilDetalles.dolares} = ${venta.pagoMovilDetalles.bolivares}Bs (${venta.pagoMovilDetalles.tasa})</div>`;
+                            } else if (venta.formaPago === 'mixto' && venta.pagoMixto.pagoMovil > 0) {
+                                if (venta.pagoMixto.pagoMovilDetalles && venta.pagoMixto.pagoMovilDetalles.bolivares > 0) {
+                                    metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Pago Móvil: $${venta.pagoMixto.pagoMovilDetalles.dolares} = ${venta.pagoMixto.pagoMovilDetalles.bolivares}Bs (${venta.pagoMixto.pagoMovilDetalles.tasa})</div>`;
+                                } else {
+                                    metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Pago Móvil: $${venta.pagoMixto.pagoMovil}</div>`;
+                                }
+                            }
+                            
+                            // Transferencia
+                            if (venta.formaPago === 'transferencia' && venta.transferenciaDetalles) {
+                                metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Transferencia: $${venta.transferenciaDetalles.dolares} = ${venta.transferenciaDetalles.bolivares}Bs (${venta.transferenciaDetalles.tasa})</div>`;
+                            } else if (venta.formaPago === 'mixto' && venta.pagoMixto.transferencia > 0) {
+                                if (venta.pagoMixto.transferenciaDetalles && venta.pagoMixto.transferenciaDetalles.bolivares > 0) {
+                                    metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Transferencia: $${venta.pagoMixto.transferenciaDetalles.dolares} = ${venta.pagoMixto.transferenciaDetalles.bolivares}Bs (${venta.pagoMixto.transferenciaDetalles.tasa})</div>`;
+                                } else {
+                                    metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Transferencia: $${venta.pagoMixto.transferencia}</div>`;
+                                }
+                            }
+                            
+                            // Zelle
+                            if (venta.formaPago === 'zelle') {
+                                metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Zelle: $${venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)}</div>`;
+                            } else if (venta.formaPago === 'mixto' && venta.pagoMixto.zelle > 0) {
+                                metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Zelle: $${venta.pagoMixto.zelle}</div>`;
+                            }
+                            
+                            // Binance
+                            if (venta.formaPago === 'binance') {
+                                metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Binance: $${venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)}</div>`;
+                            } else if (venta.formaPago === 'mixto' && venta.pagoMixto.binance > 0) {
+                                metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Binance: $${venta.pagoMixto.binance}</div>`;
+                            }
+                            
+                            // Equipo Recibido
+                            if (venta.equipoRecibido) {
+                                metodosHtml += `<div class="bg-orange-100 px-2 py-1 rounded text-xs font-medium text-orange-800">Equipo recibido: ${venta.equipoRecibido.modelo} ${venta.equipoRecibido.capacidad} ($${venta.equipoRecibido.valor})</div>`;
+                            }
+                            
+                            // Efectivo
+                            if (venta.formaPago === 'efectivo') {
+                                metodosHtml += `<div class="bg-green-200 px-2 py-1 rounded text-xs font-medium text-green-800">Efectivo: $${venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)}</div>`;
+                            } else if (venta.formaPago === 'mixto' && venta.pagoMixto.efectivo > 0) {
+                                metodosHtml += `<div class="bg-green-200 px-2 py-1 rounded text-xs font-medium text-green-800">Efectivo: $${venta.pagoMixto.efectivo}</div>`;
+                            }
+                            
+                            return metodosHtml;
+                        })()}
+                    </div>
+                    <p class="text-lg font-bold text-green-600">Total: $${venta.montoTotal.toFixed(2)}</p>
+                    <p class="text-xs text-gray-500">${venta.hora}</p>
+                </div>
+            </div>
+        </div>
+    `;
+});
+
+
+            resumen.innerHTML = html;
+            totalDia.textContent = total.toFixed(2);
+        } */
+       // INICIO CAMBIO: Función actualizarResumen con totales expandidos y botones de edición/eliminación
+        function actualizarResumen() {
+            const resumen = document.getElementById('resumenVentas');
+            const totalDia = document.getElementById('totalDia');
+            const equiposVendidos = document.getElementById('equiposVendidos');
+            const cajaFinal = document.getElementById('cajaFinal');
+
+            if (ventas.length === 0) {
+                resumen.innerHTML = '<p class="text-gray-600">No hay ventas registradas hoy.</p>';
+                totalDia.textContent = '0.00';
+                equiposVendidos.textContent = '0';
+                cajaFinal.textContent = cajaInicialGuardada.toFixed(2);
+                return;
+            }
+
+            let html = '';
+            let total = 0;
+            let equipos = 0;
+            let efectivoDelDia = 0;
+
+            ventas.forEach((venta, index) => {
+                total += venta.montoTotal;
+                if (venta.tipoVenta === 'completa') equipos++;
+                // Calcular efectivo del día
+                if (venta.formaPago === 'efectivo') {
+                    efectivoDelDia += venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0);
+                } else if (venta.formaPago === 'mixto' && venta.pagoMixto && venta.pagoMixto.efectivo > 0) {
+                    efectivoDelDia += venta.pagoMixto.efectivo;
+                }
+
+                // ...accesoriosTexto igual que antes...
+                const accesoriosTexto = [];
+                if (venta.accesorios.forro) accesoriosTexto.push(`Forro ${venta.accesorios.forroModelo || 'N/A'} (${venta.accesorios.forroCantidad})`);
+                if (venta.accesorios.cargador) accesoriosTexto.push(`Cargador (${venta.accesorios.cargadorCantidad})`);
+                if (venta.accesorios.vidrio) accesoriosTexto.push(`Vidrio ${venta.accesorios.vidrioModelo || 'N/A'} (${venta.accesorios.vidrioCantidad})`);
+                if (venta.accesorios.protectorCamara) accesoriosTexto.push(`Protector Cámara (${venta.accesorios.protectorCantidad})`);
+                if (venta.accesorios.cubo) accesoriosTexto.push(`Cubo (${venta.accesorios.cuboCantidad})`);
+                if (venta.accesorios.cableLightning) accesoriosTexto.push(`Cable Lightning (${venta.accesorios.cableLightningCantidad})`);
+                if (venta.accesorios.cableCC) accesoriosTexto.push(`Cable C+C (${venta.accesorios.cableCCCantidad})`);
+                if (venta.accesorios.caja) accesoriosTexto.push(`Caja ${venta.accesorios.cajaModelo || 'N/A'} ${venta.accesorios.cajaColor || ''}`.trim());
+
+                html += `
+                    <div class="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
+                        <div class="grid grid-cols-1 ${venta.equipoRecibido ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4">
+                            <div>
+                                <h4 class="font-semibold text-gray-800 mb-2">${venta.tipoVenta === 'accesorios' ? '🛡️ Accesorios' : '📱 Equipo'}</h4>
+                                ${venta.tipoVenta === 'completa' ? `
+                                    <p class="text-sm"><span class="font-medium">Modelo:</span> ${venta.modelo}</p>
+                                    <p class="text-sm"><span class="font-medium">Capacidad:</span> ${venta.almacenamiento}</p>
+                                    <p class="text-sm"><span class="font-medium">Color:</span> ${venta.color}</p>
+                                    <p class="text-sm"><span class="font-medium">Batería:</span> ${venta.bateria}</p>
+                                ` : `
+                                    <p class="text-sm font-medium text-blue-600">Venta de accesorios únicamente</p>
+                                `}
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 mb-2">🛡️ Accesorios</h4>
+                                ${accesoriosTexto.length > 0 ? 
+                                    accesoriosTexto.map(acc => `<p class="text-sm">• ${acc}</p>`).join('') : 
+                                    '<p class="text-sm text-gray-500">Sin accesorios</p>'
+                                }
+                            </div>
+                            ${venta.equipoRecibido ? `
+                                <div>
+                                    <h4 class="font-semibold text-gray-800 mb-2">📱⬅️ Equipo Recibido</h4>
+                                    <p class="text-sm"><span class="font-medium">Modelo:</span> ${venta.equipoRecibido.modelo}</p>
+                                    <p class="text-sm"><span class="font-medium">Capacidad:</span> ${venta.equipoRecibido.capacidad}</p>
+                                    <p class="text-sm"><span class="font-medium">Color:</span> ${venta.equipoRecibido.color}</p>
+                                    <p class="text-sm"><span class="font-medium">Batería:</span> ${venta.equipoRecibido.bateria}</p>
+                                    <p class="text-sm"><span class="font-medium">IMEI:</span> ${venta.equipoRecibido.imei}</p>
+                                    <p class="text-sm"><span class="font-medium">Valor:</span> $${venta.equipoRecibido.valor}</p>
+                                    ${venta.equipoRecibido.comentarios ? `<p class="text-xs text-gray-600 mt-1">${venta.equipoRecibido.comentarios}</p>` : ''}
+                                </div>
+                            ` : ''}
+                            <div>
+                                <h4 class="font-semibold text-gray-800 mb-2">💳 Pago</h4>
+                                <div class="space-y-2 mb-3">
+                                    ${(() => {
+                                        let metodosHtml = '';
+                                        
+                                        // Pago Móvil
+                                        if (venta.formaPago === 'pagomovil' && venta.pagoMovilDetalles) {
+                                            metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Pago Móvil: $${venta.pagoMovilDetalles.dolares} = ${venta.pagoMovilDetalles.bolivares}Bs (${venta.pagoMovilDetalles.tasa})</div>`;
+                                        } else if (venta.formaPago === 'mixto' && venta.pagoMixto.pagoMovil > 0) {
+                                            if (venta.pagoMixto.pagoMovilDetalles && venta.pagoMixto.pagoMovilDetalles.bolivares > 0) {
+                                                metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Pago Móvil: $${venta.pagoMixto.pagoMovilDetalles.dolares} = ${venta.pagoMixto.pagoMovilDetalles.bolivares}Bs (${venta.pagoMixto.pagoMovilDetalles.tasa})</div>`;
+                                            } else {
+                                                metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Pago Móvil: $${venta.pagoMixto.pagoMovil}</div>`;
+                                            }
+                                        }
+                                        
+                                        // Transferencia
+                                        if (venta.formaPago === 'transferencia' && venta.transferenciaDetalles) {
+                                            metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Transferencia: $${venta.transferenciaDetalles.dolares} = ${venta.transferenciaDetalles.bolivares}Bs (${venta.transferenciaDetalles.tasa})</div>`;
+                                        } else if (venta.formaPago === 'mixto' && venta.pagoMixto.transferencia > 0) {
+                                            if (venta.pagoMixto.transferenciaDetalles && venta.pagoMixto.transferenciaDetalles.bolivares > 0) {
+                                                metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Transferencia: $${venta.pagoMixto.transferenciaDetalles.dolares} = ${venta.pagoMixto.transferenciaDetalles.bolivares}Bs (${venta.pagoMixto.transferenciaDetalles.tasa})</div>`;
+                                            } else {
+                                                metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Transferencia: $${venta.pagoMixto.transferencia}</div>`;
+                                            }
+                                        }
+                                        
+                                        // Zelle
+                                        if (venta.formaPago === 'zelle') {
+                                            metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Zelle: $${venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)}</div>`;
+                                        } else if (venta.formaPago === 'mixto' && venta.pagoMixto.zelle > 0) {
+                                            metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Zelle: $${venta.pagoMixto.zelle}</div>`;
+                                        }
+                                        
+                                        // Binance
+                                        if (venta.formaPago === 'binance') {
+                                            metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Binance: $${venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)}</div>`;
+                                        } else if (venta.formaPago === 'mixto' && venta.pagoMixto.binance > 0) {
+                                            metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Binance: $${venta.pagoMixto.binance}</div>`;
+                                        }
+                                        
+                                        // Equipo Recibido
+                                        if (venta.equipoRecibido) {
+                                            metodosHtml += `<div class="bg-orange-100 px-2 py-1 rounded text-xs font-medium text-orange-800">Equipo recibido: ${venta.equipoRecibido.modelo} ${venta.equipoRecibido.capacidad} ($${venta.equipoRecibido.valor})</div>`;
+                                        }
+                                        
+                                        // Efectivo
+                                        if (venta.formaPago === 'efectivo') {
+                                            metodosHtml += `<div class="bg-green-200 px-2 py-1 rounded text-xs font-medium text-green-800">Efectivo: $${venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)}</div>`;
+                                        } else if (venta.formaPago === 'mixto' && venta.pagoMixto.efectivo > 0) {
+                                            metodosHtml += `<div class="bg-green-200 px-2 py-1 rounded text-xs font-medium text-green-800">Efectivo: $${venta.pagoMixto.efectivo}</div>`;
+                                        }
+                                        
+                                        return metodosHtml;
+                                    })()}
+                                    <!-- ...métodos de pago igual que antes... -->
+                                </div>
+                                <p class="text-lg font-bold text-green-600">Total: $${venta.montoTotal.toFixed(2)}</p>
+                                <p class="text-xs text-gray-500">${venta.hora}</p>
+                                <!-- INICIO CAMBIO: Botones edición/eliminación -->
+                                <div class="mt-2 flex gap-2">
+                                    <button onclick="editarVenta(${index})" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded">✏️ Editar</button>
+                                    <button onclick="eliminarVenta(${index})" class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded">🗑️ Eliminar</button>
+                                </div>
+                                <!-- FIN CAMBIO -->
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            resumen.innerHTML = html;
+            totalDia.textContent = total.toFixed(2);
+            equiposVendidos.textContent = equipos;
+            cajaFinal.textContent = (cajaInicialGuardada + efectivoDelDia).toFixed(2);
+        }
+        // FIN CAMBIO
+
+        // INICIO CAMBIO: Botón imprimir resumen profesional
+        /* document.getElementById('imprimirResumen').addEventListener('click', function() {
+            if (ventas.length === 0) {
+                alert('No hay ventas para imprimir');
+                return;
+            }
+            let totalGeneral = 0, equiposCount = 0, efectivoDelDia = 0;
+            ventas.forEach(venta => {
+                totalGeneral += venta.montoTotal;
+                if (venta.tipoVenta === 'completa') equiposCount++;
+                if (venta.formaPago === 'efectivo') {
+                    efectivoDelDia += venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0);
+                } else if (venta.formaPago === 'mixto' && venta.pagoMixto && venta.pagoMixto.efectivo > 0) {
+                    efectivoDelDia += venta.pagoMixto.efectivo;
+                }
+            });
+            let htmlImpresion = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Resumen de Ventas - ${new Date().toLocaleDateString('es-ES')}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+                        .venta { border: 1px solid #ddd; margin-bottom: 15px; padding: 15px; border-radius: 5px; }
+                        .venta-header { background-color: #f5f5f5; padding: 10px; margin: -15px -15px 10px -15px; border-radius: 5px 5px 0 0; }
+                        .detalle { margin: 5px 0; }
+                        .metodo-pago { background-color: #e3f2fd; padding: 5px; border-radius: 3px; margin: 2px 0; font-size: 12px; }
+                        .totales { margin-top: 30px; border-top: 2px solid #333; padding-top: 20px; }
+                        .total-item { display: flex; justify-content: space-between; margin: 10px 0; font-size: 18px; }
+                        .total-final { font-weight: bold; font-size: 20px; color: #2e7d32; }
+                        .fecha-hora { text-align: right; color: #666; font-size: 12px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>📱 RESUMEN DE VENTAS DIARIO</h1>
+                        <p>Fecha: ${new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    </div>
+            `;
+            ventas.forEach((venta, index) => {
+                const accesoriosTexto = [];
+                if (venta.accesorios.forro) accesoriosTexto.push(`Forro ${venta.accesorios.forroModelo || 'N/A'} (${venta.accesorios.forroCantidad})`);
+                if (venta.accesorios.cargador) accesoriosTexto.push(`Cargador (${venta.accesorios.cargadorCantidad})`);
+                if (venta.accesorios.vidrio) accesoriosTexto.push(`Vidrio ${venta.accesorios.vidrioModelo || 'N/A'} (${venta.accesorios.vidrioCantidad})`);
+                if (venta.accesorios.protectorCamara) accesoriosTexto.push(`Protector Cámara (${venta.accesorios.protectorCantidad})`);
+                if (venta.accesorios.cubo) accesoriosTexto.push(`Cubo (${venta.accesorios.cuboCantidad})`);
+                if (venta.accesorios.cableLightning) accesoriosTexto.push(`Cable Lightning (${venta.accesorios.cableLightningCantidad})`);
+                if (venta.accesorios.cableCC) accesoriosTexto.push(`Cable C+C (${venta.accesorios.cableCCCantidad})`);
+                if (venta.accesorios.caja) accesoriosTexto.push(`Caja ${venta.accesorios.cajaModelo || 'N/A'} ${venta.accesorios.cajaColor || ''}`.trim());
+                htmlImpresion += `
+                    <div class="venta">
+                        <div class="venta-header">
+                            <strong>VENTA #${index + 1} - ${venta.hora}</strong>
+                            <span style="float: right;">$${venta.montoTotal.toFixed(2)}</span>
+                        </div>
+                        ${venta.tipoVenta === 'completa' ? `
+                            <div class="detalle"><strong>📱 EQUIPO:</strong></div>
+                            <div class="detalle">• Modelo: ${venta.modelo}</div>
+                            <div class="detalle">• Capacidad: ${venta.almacenamiento}</div>
+                            <div class="detalle">• Color: ${venta.color}</div>
+                            <div class="detalle">• Batería: ${venta.bateria}</div>
+                        ` : `
+                            <div class="detalle"><strong>🛡️ VENTA DE ACCESORIOS ÚNICAMENTE</strong></div>
+                        `}
+                        <div class="detalle"><strong>🛡️ ACCESORIOS:</strong></div>
+                        ${accesoriosTexto.length > 0 ? accesoriosTexto.map(acc => `<div class="detalle">• ${acc}</div>`).join('') : '<div class="detalle">• Sin accesorios</div>'}
+                        ${venta.equipoRecibido ? `
+                            <div class="detalle"><strong>📱⬅️ EQUIPO RECIBIDO:</strong></div>
+                            <div class="detalle">• Modelo: ${venta.equipoRecibido.modelo} ${venta.equipoRecibido.capacidad}</div>
+                            <div class="detalle">• Color: ${venta.equipoRecibido.color}</div>
+                            <div class="detalle">• Batería: ${venta.equipoRecibido.bateria}</div>
+                            <div class="detalle">• IMEI: ${venta.equipoRecibido.imei}</div>
+                            <div class="detalle">• Valor: $${venta.equipoRecibido.valor}</div>
+                            ${venta.equipoRecibido.comentarios ? `<div class="detalle">• Comentarios: ${venta.equipoRecibido.comentarios}</div>` : ''}
+                        ` : ''}
+                        <div class="detalle"><strong>💳 MÉTODO DE PAGO:</strong></div>
+                `;
+                // Métodos de pago detallados
+                if (venta.formaPago === 'efectivo') {
+                    htmlImpresion += `<div class="metodo-pago">💵 Efectivo: $${(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)).toFixed(2)}</div>`;
+                } else if (venta.formaPago === 'zelle') {
+                    htmlImpresion += `<div class="metodo-pago">💳 Zelle: $${(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)).toFixed(2)}</div>`;
+                } else if (venta.formaPago === 'binance') {
+                    htmlImpresion += `<div class="metodo-pago">₿ Binance: $${(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)).toFixed(2)}</div>`;
+                } else if (venta.formaPago === 'pagomovil' && venta.pagoMovilDetalles) {
+                    htmlImpresion += `<div class="metodo-pago">📱 Pago Móvil: $${venta.pagoMovilDetalles.dolares} = ${venta.pagoMovilDetalles.bolivares}Bs (Tasa: ${venta.pagoMovilDetalles.tasa})</div>`;
+                } else if (venta.formaPago === 'transferencia' && venta.transferenciaDetalles) {
+                    htmlImpresion += `<div class="metodo-pago">🏦 Transferencia: $${venta.transferenciaDetalles.dolares} = ${venta.transferenciaDetalles.bolivares}Bs (Tasa: ${venta.transferenciaDetalles.tasa})</div>`;
+                } else if (venta.formaPago === 'mixto' && venta.pagoMixto) {
+                    if (venta.pagoMixto.efectivo > 0) htmlImpresion += `<div class="metodo-pago">💵 Efectivo: $${venta.pagoMixto.efectivo}</div>`;
+                    if (venta.pagoMixto.zelle > 0) htmlImpresion += `<div class="metodo-pago">💳 Zelle: $${venta.pagoMixto.zelle}</div>`;
+                    if (venta.pagoMixto.binance > 0) htmlImpresion += `<div class="metodo-pago">₿ Binance: $${venta.pagoMixto.binance}</div>`;
+                    if (venta.pagoMixto.pagoMovil > 0) {
+                        if (venta.pagoMixto.pagoMovilDetalles && venta.pagoMixto.pagoMovilDetalles.bolivares > 0) {
+                            htmlImpresion += `<div class="metodo-pago">📱 Pago Móvil: $${venta.pagoMixto.pagoMovilDetalles.dolares} = ${venta.pagoMixto.pagoMovilDetalles.bolivares}Bs (${venta.pagoMixto.pagoMovilDetalles.tasa})</div>`;
+                        } else {
+                            htmlImpresion += `<div class="metodo-pago">📱 Pago Móvil: $${venta.pagoMixto.pagoMovil}</div>`;
+                        }
+                    }
+                    if (venta.pagoMixto.transferencia > 0) {
+                        if (venta.pagoMixto.transferenciaDetalles && venta.pagoMixto.transferenciaDetalles.bolivares > 0) {
+                            htmlImpresion += `<div class="metodo-pago">🏦 Transferencia: $${venta.pagoMixto.transferenciaDetalles.dolares} = ${venta.pagoMixto.transferenciaDetalles.bolivares}Bs (${venta.pagoMixto.transferenciaDetalles.tasa})</div>`;
+                        } else {
+                            htmlImpresion += `<div class="metodo-pago">🏦 Transferencia: $${venta.pagoMixto.transferencia}</div>`;
+                        }
+                    }
+                }
+                if (venta.equipoRecibido) {
+                    htmlImpresion += `<div class="metodo-pago">📱⬅️ Equipo Recibido: $${venta.equipoRecibido.valor}</div>`;
+                }
+                htmlImpresion += `</div>`;
+            });
+            htmlImpresion += `
+                    <div class="totales">
+                        <h2>📊 RESUMEN FINAL</h2>
+                        <div class="total-item">
+                            <span>💰 Total del Día:</span>
+                            <span>$${totalGeneral.toFixed(2)}</span>
+                        </div>
+                        <div class="total-item">
+                            <span>📱 Equipos Vendidos:</span>
+                            <span>${equiposCount} equipos</span>
+                        </div>
+                        <div class="total-item">
+                            <span>🏦 Caja Inicial:</span>
+                            <span>$${cajaInicialGuardada.toFixed(2)}</span>
+                        </div>
+                        <div class="total-item">
+                            <span>💵 Efectivo del Día:</span>
+                            <span>$${efectivoDelDia.toFixed(2)}</span>
+                        </div>
+                        <div class="total-item total-final">
+                            <span>🏦 CAJA FINAL:</span>
+                            <span>$${(cajaInicialGuardada + efectivoDelDia).toFixed(2)}</span>
+                        </div>
+                    </div>
+                    <div class="fecha-hora">
+                        Generado el ${new Date().toLocaleString('es-ES')}
+                    </div>
+                </body>
+                </html>
+            `;
+            const ventanaImpresion = window.open('', '_blank');
+            ventanaImpresion.document.write(htmlImpresion);
+            ventanaImpresion.document.close();
+            setTimeout(() => {
+                ventanaImpresion.print();
+            }, 500);
+        }); */
+        // FIN CAMBIO
+        // ========== NUEVA FUNCIONALIDAD: FUNCIÓN IMPRIMIR RESUMEN ========== 
+        document.getElementById('imprimirResumen').addEventListener('click', function() {
+            if (ventas.length === 0) {
+                alert('No hay ventas para imprimir');
+                return;
+            }
+            
+            // Crear ventana de impresión
+            const ventanaImpresion = window.open('', '_blank');
+            
+            // Calcular totales
+            let totalGeneral = 0;
+            let equiposCount = 0;
+            let efectivoDelDia = 0;
+            
+            ventas.forEach(venta => {
+                totalGeneral += venta.montoTotal;
+                if (venta.tipoVenta === 'completa') equiposCount++;
+                if (venta.formaPago === 'efectivo') {
+                    efectivoDelDia += venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0);
+                } else if (venta.formaPago === 'mixto' && venta.pagoMixto && venta.pagoMixto.efectivo > 0) {
+                    efectivoDelDia += venta.pagoMixto.efectivo;
+                }
+            });
+            
+            // Generar HTML para impresión
+            let htmlImpresion = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Resumen de Ventas - ${new Date().toLocaleDateString('es-ES')}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 15px; font-size: 11px; }
+                        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 8px; }
+                        .venta { border: 1px solid #ddd; margin-bottom: 8px; padding: 8px; border-radius: 3px; }
+                        .venta-header { background-color: #f5f5f5; padding: 6px; margin: -8px -8px 6px -8px; border-radius: 3px 3px 0 0; font-size: 12px; font-weight: bold; }
+                        .venta-grid { display: grid; grid-template-columns: 2fr 1.5fr 1.5fr 2fr; gap: 10px; }
+                        .seccion { }
+                        .seccion-titulo { font-weight: bold; margin-bottom: 3px; font-size: 10px; color: #333; }
+                        .detalle { margin: 1px 0; font-size: 10px; }
+                        .metodo-pago { background-color: #e3f2fd; padding: 2px 4px; border-radius: 2px; margin: 1px 0; font-size: 9px; }
+                        .totales { margin-top: 20px; border-top: 2px solid #333; padding-top: 15px; }
+                        .total-item { display: flex; justify-content: space-between; margin: 8px 0; font-size: 14px; }
+                        .total-final { font-weight: bold; font-size: 16px; color: #2e7d32; }
+                        .fecha-hora { text-align: right; color: #666; font-size: 10px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>📱 RESUMEN DE VENTAS DIARIO</h1>
+                        <p>Fecha: ${new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    </div>
+            `;
+            
+            // Agregar cada venta
+            ventas.forEach((venta, index) => {
+                const accesoriosTexto = [];
+                if (venta.accesorios.forro) accesoriosTexto.push(`Forro ${venta.accesorios.forroModelo || 'N/A'} (${venta.accesorios.forroCantidad})`);
+                if (venta.accesorios.cargador) accesoriosTexto.push(`Cargador (${venta.accesorios.cargadorCantidad})`);
+                if (venta.accesorios.vidrio) accesoriosTexto.push(`Vidrio ${venta.accesorios.vidrioModelo || 'N/A'} (${venta.accesorios.vidrioCantidad})`);
+                if (venta.accesorios.protectorCamara) accesoriosTexto.push(`Protector Cámara (${venta.accesorios.protectorCantidad})`);
+                
+                htmlImpresion += `
+                    <div class="venta">
+                        <div class="venta-header">
+                            VENTA #${index + 1} - ${venta.hora}
+                            <span style="float: right;">$${venta.montoTotal.toFixed(2)}</span>
+                        </div>
+                        
+                        <div class="venta-grid">
+                            <div class="seccion">
+                                <div class="seccion-titulo">📱 EQUIPO</div>
+                                ${venta.tipoVenta === 'completa' ? `
+                                    <div class="detalle">${venta.modelo}</div>
+                                    <div class="detalle">${venta.almacenamiento} - ${venta.color}</div>
+                                    <div class="detalle">Batería: ${venta.bateria}</div>
+                                ` : `
+                                    <div class="detalle">Solo Accesorios</div>
+                                `}
+                            </div>
+                            
+                            <div class="seccion">
+                                <div class="seccion-titulo">🛡️ ACCESORIOS</div>
+                                ${accesoriosTexto.length > 0 ? 
+                                    accesoriosTexto.map(acc => `<div class="detalle">${acc}</div>`).join('') : 
+                                    '<div class="detalle">Sin accesorios</div>'
+                                }
+                            </div>
+                            
+                            ${venta.equipoRecibido ? `
+                                <div class="seccion">
+                                    <div class="seccion-titulo">📱⬅️ RECIBIDO</div>
+                                    <div class="detalle">${venta.equipoRecibido.modelo}</div>
+                                    <div class="detalle">${venta.equipoRecibido.capacidad} - ${venta.equipoRecibido.color}</div>
+                                    <div class="detalle">Bat: ${venta.equipoRecibido.bateria}</div>
+                                    <div class="detalle">IMEI: ${venta.equipoRecibido.imei}</div>
+                                    <div class="detalle">Valor: $${venta.equipoRecibido.valor}</div>
+                                    ${venta.equipoRecibido.comentarios ? `<div class="detalle">${venta.equipoRecibido.comentarios}</div>` : ''}
+                                </div>
+                            ` : `
+                                <div class="seccion">
+                                    <div class="seccion-titulo">📱⬅️ RECIBIDO</div>
+                                    <div class="detalle">Sin equipo recibido</div>
+                                </div>
+                            `}
+                            
+                            <div class="seccion">
+                                <div class="seccion-titulo">💳 PAGO</div>
+                `;
+                
+                // Agregar métodos de pago detallados
+                if (venta.formaPago === 'efectivo') {
+                    htmlImpresion += `<div class="metodo-pago">💵 Efectivo: $${(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)).toFixed(2)}</div>`;
+                } else if (venta.formaPago === 'zelle') {
+                    htmlImpresion += `<div class="metodo-pago">💳 Zelle: $${(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)).toFixed(2)}</div>`;
+                } else if (venta.formaPago === 'binance') {
+                    htmlImpresion += `<div class="metodo-pago">₿ Binance: $${(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)).toFixed(2)}</div>`;
+                } else if (venta.formaPago === 'pagomovil' && venta.pagoMovilDetalles) {
+                    htmlImpresion += `<div class="metodo-pago">📱 Pago Móvil: $${venta.pagoMovilDetalles.dolares} = ${venta.pagoMovilDetalles.bolivares}Bs (Tasa: ${venta.pagoMovilDetalles.tasa})</div>`;
+                } else if (venta.formaPago === 'transferencia' && venta.transferenciaDetalles) {
+                    htmlImpresion += `<div class="metodo-pago">🏦 Transferencia: $${venta.transferenciaDetalles.dolares} = ${venta.transferenciaDetalles.bolivares}Bs (Tasa: ${venta.transferenciaDetalles.tasa})</div>`;
+                } else if (venta.formaPago === 'mixto' && venta.pagoMixto) {
+                    if (venta.pagoMixto.efectivo > 0) htmlImpresion += `<div class="metodo-pago">💵 Efectivo: $${venta.pagoMixto.efectivo}</div>`;
+                    if (venta.pagoMixto.zelle > 0) htmlImpresion += `<div class="metodo-pago">💳 Zelle: $${venta.pagoMixto.zelle}</div>`;
+                    if (venta.pagoMixto.binance > 0) htmlImpresion += `<div class="metodo-pago">₿ Binance: $${venta.pagoMixto.binance}</div>`;
+                    if (venta.pagoMixto.pagoMovil > 0) {
+                        if (venta.pagoMixto.pagoMovilDetalles && venta.pagoMixto.pagoMovilDetalles.bolivares > 0) {
+                            htmlImpresion += `<div class="metodo-pago">📱 Pago Móvil: $${venta.pagoMixto.pagoMovilDetalles.dolares} = ${venta.pagoMixto.pagoMovilDetalles.bolivares}Bs (${venta.pagoMixto.pagoMovilDetalles.tasa})</div>`;
+                        } else {
+                            htmlImpresion += `<div class="metodo-pago">📱 Pago Móvil: $${venta.pagoMixto.pagoMovil}</div>`;
+                        }
+                    }
+                    if (venta.pagoMixto.transferencia > 0) {
+                        if (venta.pagoMixto.transferenciaDetalles && venta.pagoMixto.transferenciaDetalles.bolivares > 0) {
+                            htmlImpresion += `<div class="metodo-pago">🏦 Transferencia: $${venta.pagoMixto.transferenciaDetalles.dolares} = ${venta.pagoMixto.transferenciaDetalles.bolivares}Bs (${venta.pagoMixto.transferenciaDetalles.tasa})</div>`;
+                        } else {
+                            htmlImpresion += `<div class="metodo-pago">🏦 Transferencia: $${venta.pagoMixto.transferencia}</div>`;
+                        }
+                    }
+                }
+                
+                if (venta.equipoRecibido) {
+                    htmlImpresion += `<div class="metodo-pago">📱⬅️ Equipo: $${venta.equipoRecibido.valor}</div>`;
+                }
+                
+                htmlImpresion += `
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Agregar totales finales
+            htmlImpresion += `
+                    <div class="totales">
+                        <h2>📊 RESUMEN FINAL</h2>
+                        <div class="total-item">
+                            <span>💰 Total del Día:</span>
+                            <span>$${totalGeneral.toFixed(2)}</span>
+                        </div>
+                        <div class="total-item">
+                            <span>📱 Equipos Vendidos:</span>
+                            <span>${equiposCount} equipos</span>
+                        </div>
+                        <div class="total-item">
+                            <span>🏦 Caja Inicial:</span>
+                            <span>$${cajaInicialGuardada.toFixed(2)}</span>
+                        </div>
+                        <div class="total-item">
+                            <span>💵 Efectivo del Día:</span>
+                            <span>$${efectivoDelDia.toFixed(2)}</span>
+                        </div>
+                        <div class="total-item total-final">
+                            <span>🏦 CAJA FINAL:</span>
+                            <span>$${(cajaInicialGuardada + efectivoDelDia).toFixed(2)}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="fecha-hora">
+                        Generado el ${new Date().toLocaleString('es-ES')}
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            ventanaImpresion.document.write(htmlImpresion);
+            ventanaImpresion.document.close();
+            
+            // Imprimir automáticamente
+            setTimeout(() => {
+                ventanaImpresion.print();
+            }, 500);
+        });
+        // ========== FIN NUEVA FUNCIONALIDAD: FUNCIÓN IMPRIMIR RESUMEN ==========
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'982677f1e5479d81',t:'MTc1ODQyNTI2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

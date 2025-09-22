@@ -11,6 +11,26 @@
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-4">
+    <nav id="globalMenu" 
+         class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white transition-all duration-300 shadow-lg">
+      <!-- <div class="font-bold text-lg">Menú</div> -->
+      <div class="flex gap-2" id="menuOptions">
+        <a href="lista.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">LISTADO PRECIOS</a>
+        <a href="intercambio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cálculo Trading</a>
+        <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Principal</a>
+      </div>
+      <button id="menuToggle" class="hidden text-2xl focus:outline-none relative z-50" aria-label="Abrir menú">
+        ☰
+      </button>
+    
+      <!-- Contenedor menú desplegable para botón flotante -->
+      <div id="floatingMenu" class="hidden fixed bottom-20 right-6 bg-blue-700 text-white rounded-lg shadow-lg py-2 flex flex-col gap-1 z-40">
+        <a href="lista.html" class="px-4 py-2 hover:bg-blue-900 rounded">LISTADO PRECIOS</a>
+        <a href="intercambio.html" class="px-4 py-2 hover:bg-blue-900 rounded">Cálculo Trading</a>
+          <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Principal</a>
+      </div>
+    </nav>
+    
     <div class="max-w-4xl mx-auto">
         <!-- Header -->
         <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
@@ -427,6 +447,36 @@
 
 
     <script>
+
+        const nav = document.getElementById('globalMenu');
+        const menuOptions = document.getElementById('menuOptions');
+        const menuToggle = document.getElementById('menuToggle');
+        const floatingMenu = document.getElementById('floatingMenu');
+        const configSection = document.querySelector('.card-shadow');
+        console.log(configSection)
+        
+        window.addEventListener('scroll', () => {
+        console.log(configSection)
+          const configTop = configSection.getBoundingClientRect().top + window.scrollY;
+          if (window.scrollY >= configTop - nav.offsetHeight) {
+            nav.classList.remove('top-0');
+            nav.classList.add('bottom-6', 'right-6', 'left-auto', 'rounded-full', 'p-0', 'w-14', 'h-14', 'justify-center', 'items-center');
+            menuOptions.classList.add('hidden');
+            menuToggle.classList.remove('hidden');
+            floatingMenu.classList.add('hidden'); // Esconder menú flotante inicialmente
+          } else {
+            nav.classList.add('top-0');
+            nav.classList.remove('bottom-6', 'right-6', 'left-auto', 'rounded-full', 'p-0', 'w-14', 'h-14', 'justify-center', 'items-center');
+            menuOptions.classList.remove('hidden');
+            menuToggle.classList.add('hidden');
+            floatingMenu.classList.add('hidden'); // Asegurar que el menú flotante esté oculto
+          }
+        });
+        
+        menuToggle.addEventListener('click', () => {
+          floatingMenu.classList.toggle('hidden');
+        });
+        
         // INICIO CAMBIO: Variables de caja inicial y edición
         let cajaInicialGuardada = 0;
         let editandoVenta = false;
@@ -1546,6 +1596,10 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
                 if (venta.accesorios.cargador) accesoriosTexto.push(`Cargador (${venta.accesorios.cargadorCantidad})`);
                 if (venta.accesorios.vidrio) accesoriosTexto.push(`Vidrio ${venta.accesorios.vidrioModelo || 'N/A'} (${venta.accesorios.vidrioCantidad})`);
                 if (venta.accesorios.protectorCamara) accesoriosTexto.push(`Protector Cámara (${venta.accesorios.protectorCantidad})`);
+                if (venta.accesorios.cubo) accesoriosTexto.push(`Cubo (${venta.accesorios.cuboCantidad})`);
+                if (venta.accesorios.cableLightning) accesoriosTexto.push(`Cable Lightning (${venta.accesorios.cableLightningCantidad})`);
+                if (venta.accesorios.cableCC) accesoriosTexto.push(`Cable C+C (${venta.accesorios.cableCCCantidad})`);
+                if (venta.accesorios.caja) accesoriosTexto.push(`Caja ${venta.accesorios.cajaModelo || 'N/A'} ${venta.accesorios.cajaColor || ''}`.trim());
                 
                 htmlImpresion += `
                     <div class="venta">
@@ -1682,3 +1736,4 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
     </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'982677f1e5479d81',t:'MTc1ODQyNTI2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
+

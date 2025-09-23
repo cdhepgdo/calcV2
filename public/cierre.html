@@ -33,7 +33,7 @@
     <!-- Espaciador para que el contenido no se oculte tras el menú fijo -->
     <div class="h-14"></div>
     
-    <div class="max-w-4xl mx-auto">
+    <div class="max-w-5x1 mx-auto">
         <!-- Header -->
         <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
             <h1 class="text-3xl font-bold text-gray-800 text-center mb-2">📱 Cierre de Ventas Diario</h1>
@@ -1300,7 +1300,7 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
 
                 html += `
                     <div class="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
-                        <div class="grid grid-cols-1 ${venta.equipoRecibido ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4">
+                        <div class=" ${venta.equipoRecibido ? 'grid grid-cols-[20%_20%_20%_1fr] ' : 'grid grid-cols-[1fr_1fr_1fr] '} gap-1"> //grid grid-cols-1
                             <div>
                                 <h4 class="font-semibold text-gray-800 mb-2">${venta.tipoVenta === 'accesorios' ? '🛡️ Accesorios' : '📱 Equipo'}</h4>
                                 ${venta.tipoVenta === 'completa' ? `
@@ -1629,6 +1629,7 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
                 const weppaHtml = venta.weppa
                 ? '<span style="font-weight:bold; background-color:yellow; padding:0 4px; margin-left:8px;">WEPPA</span>'
                 : '';
+                let inicial = 0;
                 const accesoriosTexto = [];
                 if (venta.accesorios.forro) accesoriosTexto.push(`Forro ${venta.accesorios.forroModelo || 'N/A'} (${venta.accesorios.forroCantidad})`);
                 if (venta.accesorios.cargador) accesoriosTexto.push(`Cargador (${venta.accesorios.cargadorCantidad})`);
@@ -1638,12 +1639,50 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
                 if (venta.accesorios.cableLightning) accesoriosTexto.push(`Cable Lightning (${venta.accesorios.cableLightningCantidad})`);
                 if (venta.accesorios.cableCC) accesoriosTexto.push(`Cable C+C (${venta.accesorios.cableCCCantidad})`);
                 if (venta.accesorios.caja) accesoriosTexto.push(`Caja ${venta.accesorios.cajaModelo || 'N/A'} ${venta.accesorios.cajaColor || ''}`.trim());
+
+                //
+// Agregar métodos de pago detallados
+                if (venta.formaPago === 'efectivo') {
+                    htmlImpresion += `<div class="metodo-pago">💵 Efectivo: $${(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)).toFixed(2)}</div>`;
+                } else if (venta.formaPago === 'zelle') {
+                    htmlImpresion += `<div class="metodo-pago">💳 Zelle: $${(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)).toFixed(2)}</div>`;
+                } else if (venta.formaPago === 'binance') {
+                    htmlImpresion += `<div class="metodo-pago">₿ Binance: $${(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)).toFixed(2)}</div>`;
+                } else if (venta.formaPago === 'pagomovil' && venta.pagoMovilDetalles) {
+                    htmlImpresion += `<div class="metodo-pago">📱 Pago Móvil: $${venta.pagoMovilDetalles.dolares} = ${venta.pagoMovilDetalles.bolivares}Bs (Tasa: ${venta.pagoMovilDetalles.tasa})</div>`;
+                } else if (venta.formaPago === 'transferencia' && venta.transferenciaDetalles) {
+                    htmlImpresion += `<div class="metodo-pago">🏦 Transferencia: $${venta.transferenciaDetalles.dolares} = ${venta.transferenciaDetalles.bolivares}Bs (Tasa: ${venta.transferenciaDetalles.tasa})</div>`;
+                } else if (venta.formaPago === 'mixto' && venta.pagoMixto) {
+                    if (venta.pagoMixto.efectivo > 0) {htmlImpresion += `<div class="metodo-pago">💵 Efectivo: $${venta.pagoMixto.efectivo}</div>`; inicial += venta.pagoMixto.efectivo; }
+                    if (venta.pagoMixto.zelle > 0) {htmlImpresion += `<div class="metodo-pago">💳 Zelle: $${venta.pagoMixto.zelle}</div>`; inicial += venta.pagoMixto.zelle;}
+                    if (venta.pagoMixto.binance > 0) {htmlImpresion += `<div class="metodo-pago">₿ Binance: $${venta.pagoMixto.binance}</div>`; inicial += venta.pagoMixto.binance}
+                    if (venta.pagoMixto.pagoMovil > 0) {
+                        if (venta.pagoMixto.pagoMovilDetalles && venta.pagoMixto.pagoMovilDetalles.bolivares > 0) {
+                            htmlImpresion += `<div class="metodo-pago">📱 Pago Móvil: $${venta.pagoMixto.pagoMovilDetalles.dolares} = ${venta.pagoMixto.pagoMovilDetalles.bolivares}Bs (${venta.pagoMixto.pagoMovilDetalles.tasa})</div>`;
+                            inicial += venta.pagoMixto.pagoMovilDetalles.dolares;
+                        } else {
+                            htmlImpresion += `<div class="metodo-pago">📱 Pago Móvil: $${venta.pagoMixto.pagoMovil}</div>`;
+                        }
+                    }
+                    if (venta.pagoMixto.transferencia > 0) {
+                        if (venta.pagoMixto.transferenciaDetalles && venta.pagoMixto.transferenciaDetalles.bolivares > 0) {
+                            htmlImpresion += `<div class="metodo-pago">🏦 Transferencia: $${venta.pagoMixto.transferenciaDetalles.dolares} = ${venta.pagoMixto.transferenciaDetalles.bolivares}Bs (${venta.pagoMixto.transferenciaDetalles.tasa})</div>`;
+                            inicial += venta.pagoMixto.transferenciaDetalles.dolares;
+                        } else {
+                            htmlImpresion += `<div class="metodo-pago">🏦 Transferencia: $${venta.pagoMixto.transferencia}</div>`;
+                        }
+                    }
+                }
+                
+                if (venta.equipoRecibido) {
+                    htmlImpresion += `<div class="metodo-pago">📱⬅️ Equipo: $${venta.equipoRecibido.valor}</div>`;
+                }
                 
                 htmlImpresion += `
                     <div class="venta">
                         <div class="venta-header">
                             VENTA #${index + 1} - ${venta.hora}
-                            ${weppaHtml}<span style="float: right;">$${venta.montoTotal.toFixed(2)}</span>
+                            ${weppaHtml} (${inicial} - Inicial)<span style="float: right;">$${venta.montoTotal.toFixed(2)}</span>
                         </div>
                         
                         <div class="venta-grid">
@@ -1687,40 +1726,7 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
                                 <div class="seccion-titulo">💳 PAGO</div>
                 `;
                 
-                // Agregar métodos de pago detallados
-                if (venta.formaPago === 'efectivo') {
-                    htmlImpresion += `<div class="metodo-pago">💵 Efectivo: $${(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)).toFixed(2)}</div>`;
-                } else if (venta.formaPago === 'zelle') {
-                    htmlImpresion += `<div class="metodo-pago">💳 Zelle: $${(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)).toFixed(2)}</div>`;
-                } else if (venta.formaPago === 'binance') {
-                    htmlImpresion += `<div class="metodo-pago">₿ Binance: $${(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)).toFixed(2)}</div>`;
-                } else if (venta.formaPago === 'pagomovil' && venta.pagoMovilDetalles) {
-                    htmlImpresion += `<div class="metodo-pago">📱 Pago Móvil: $${venta.pagoMovilDetalles.dolares} = ${venta.pagoMovilDetalles.bolivares}Bs (Tasa: ${venta.pagoMovilDetalles.tasa})</div>`;
-                } else if (venta.formaPago === 'transferencia' && venta.transferenciaDetalles) {
-                    htmlImpresion += `<div class="metodo-pago">🏦 Transferencia: $${venta.transferenciaDetalles.dolares} = ${venta.transferenciaDetalles.bolivares}Bs (Tasa: ${venta.transferenciaDetalles.tasa})</div>`;
-                } else if (venta.formaPago === 'mixto' && venta.pagoMixto) {
-                    if (venta.pagoMixto.efectivo > 0) htmlImpresion += `<div class="metodo-pago">💵 Efectivo: $${venta.pagoMixto.efectivo}</div>`;
-                    if (venta.pagoMixto.zelle > 0) htmlImpresion += `<div class="metodo-pago">💳 Zelle: $${venta.pagoMixto.zelle}</div>`;
-                    if (venta.pagoMixto.binance > 0) htmlImpresion += `<div class="metodo-pago">₿ Binance: $${venta.pagoMixto.binance}</div>`;
-                    if (venta.pagoMixto.pagoMovil > 0) {
-                        if (venta.pagoMixto.pagoMovilDetalles && venta.pagoMixto.pagoMovilDetalles.bolivares > 0) {
-                            htmlImpresion += `<div class="metodo-pago">📱 Pago Móvil: $${venta.pagoMixto.pagoMovilDetalles.dolares} = ${venta.pagoMixto.pagoMovilDetalles.bolivares}Bs (${venta.pagoMixto.pagoMovilDetalles.tasa})</div>`;
-                        } else {
-                            htmlImpresion += `<div class="metodo-pago">📱 Pago Móvil: $${venta.pagoMixto.pagoMovil}</div>`;
-                        }
-                    }
-                    if (venta.pagoMixto.transferencia > 0) {
-                        if (venta.pagoMixto.transferenciaDetalles && venta.pagoMixto.transferenciaDetalles.bolivares > 0) {
-                            htmlImpresion += `<div class="metodo-pago">🏦 Transferencia: $${venta.pagoMixto.transferenciaDetalles.dolares} = ${venta.pagoMixto.transferenciaDetalles.bolivares}Bs (${venta.pagoMixto.transferenciaDetalles.tasa})</div>`;
-                        } else {
-                            htmlImpresion += `<div class="metodo-pago">🏦 Transferencia: $${venta.pagoMixto.transferencia}</div>`;
-                        }
-                    }
-                }
                 
-                if (venta.equipoRecibido) {
-                    htmlImpresion += `<div class="metodo-pago">📱⬅️ Equipo: $${venta.equipoRecibido.valor}</div>`;
-                }
                 
                 htmlImpresion += `
                             </div>
@@ -1774,6 +1780,7 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
     </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'982677f1e5479d81',t:'MTc1ODQyNTI2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
+
 
 
 

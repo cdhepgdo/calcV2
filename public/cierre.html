@@ -1273,6 +1273,7 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
                 const weppaHtml = venta.weppa
                 ? '<span style="font-weight:bold; background-color:yellow; padding:0 4px; margin-left:8px;">WEPPA</span>'
                 : '';
+                let inicial= 0;
                 total += venta.montoTotal;
                 if (venta.tipoVenta === 'completa') equipos++;
                 // Calcular efectivo del día
@@ -1342,6 +1343,7 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
                                         } else if (venta.formaPago === 'mixto' && venta.pagoMixto.pagoMovil > 0) {
                                             if (venta.pagoMixto.pagoMovilDetalles && venta.pagoMixto.pagoMovilDetalles.bolivares > 0) {
                                                 metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Pago Móvil: $${venta.pagoMixto.pagoMovilDetalles.dolares} = ${venta.pagoMixto.pagoMovilDetalles.bolivares}Bs (${venta.pagoMixto.pagoMovilDetalles.tasa})</div>`;
+                                                inicial += venta.pagoMixto.pagoMovilDetalles.dolares;
                                             } else {
                                                 metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Pago Móvil: $${venta.pagoMixto.pagoMovil}</div>`;
                                             }
@@ -1353,6 +1355,7 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
                                         } else if (venta.formaPago === 'mixto' && venta.pagoMixto.transferencia > 0) {
                                             if (venta.pagoMixto.transferenciaDetalles && venta.pagoMixto.transferenciaDetalles.bolivares > 0) {
                                                 metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Transferencia: $${venta.pagoMixto.transferenciaDetalles.dolares} = ${venta.pagoMixto.transferenciaDetalles.bolivares}Bs (${venta.pagoMixto.transferenciaDetalles.tasa})</div>`;
+                                                inicial += venta.pagoMixto.transferenciaDetalles.dolares;
                                             } else {
                                                 metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Transferencia: $${venta.pagoMixto.transferencia}</div>`;
                                             }
@@ -1363,6 +1366,7 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
                                             metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Zelle: $${venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)}</div>`;
                                         } else if (venta.formaPago === 'mixto' && venta.pagoMixto.zelle > 0) {
                                             metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Zelle: $${venta.pagoMixto.zelle}</div>`;
+                                            inicial += venta.pagoMixto.zelle;
                                         }
                                         
                                         // Binance
@@ -1370,11 +1374,13 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
                                             metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Binance: $${venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)}</div>`;
                                         } else if (venta.formaPago === 'mixto' && venta.pagoMixto.binance > 0) {
                                             metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Binance: $${venta.pagoMixto.binance}</div>`;
+                                            inicial += venta.pagoMixto.binance;
                                         }
                                         
                                         // Equipo Recibido
                                         if (venta.equipoRecibido) {
                                             metodosHtml += `<div class="bg-orange-100 px-2 py-1 rounded text-xs font-medium text-orange-800">Equipo recibido: ${venta.equipoRecibido.modelo} ${venta.equipoRecibido.capacidad} ($${venta.equipoRecibido.valor})</div>`;
+                                            inicial += venta.equipoRecibido.valor;
                                         }
                                         
                                         // Efectivo
@@ -1382,13 +1388,14 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
                                             metodosHtml += `<div class="bg-green-200 px-2 py-1 rounded text-xs font-medium text-green-800">Efectivo: $${venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)}</div>`;
                                         } else if (venta.formaPago === 'mixto' && venta.pagoMixto.efectivo > 0) {
                                             metodosHtml += `<div class="bg-green-200 px-2 py-1 rounded text-xs font-medium text-green-800">Efectivo: $${venta.pagoMixto.efectivo}</div>`;
+                                            inicial += venta.pagoMixto.efectivo;
                                         }
                                         
                                         return metodosHtml;
                                     })()}
                                     <!-- ...métodos de pago igual que antes... -->
                                 </div>
-                                <p class="text-lg font-bold text-green-600">Total: $${venta.montoTotal.toFixed(2)} ${weppaHtml}</p>
+                                <p class="text-lg font-bold text-green-600">Total: $${venta.montoTotal.toFixed(2)} ${weppaHtml} (${inicial})</p>
                                 <p class="text-xs text-gray-500">${venta.hora}</p>
                                 <!-- INICIO CAMBIO: Botones edición/eliminación -->
                                 <div class="mt-2 flex gap-2">
@@ -1767,6 +1774,7 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
     </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'982677f1e5479d81',t:'MTc1ODQyNTI2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
+
 
 
 

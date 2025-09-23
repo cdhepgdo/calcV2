@@ -942,7 +942,6 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
                 document.getElementById('transferenciaBolivares').value = (dolares * tasa).toFixed(2);
             }
         });
-        let weppaHtml;
 
         // Manejar envío del formulario
         document.getElementById('ventaForm').addEventListener('submit', function(e) {
@@ -963,45 +962,43 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
                 almacenamiento: tipoVenta === 'completa' ? document.getElementById('almacenamiento').value : '-',
                 bateria: tipoVenta === 'completa' ? document.getElementById('bateria').value + '%' : '-',
                 accesorios: {
-    forro: document.getElementById('forro').checked,
-    forroModelo: document.getElementById('forro').checked ? document.querySelector('#forroModelo select').value : null,
-    forroCantidad: document.getElementById('forro').checked ? parseInt(document.querySelector('#forroModelo input').value) : 0,
-    
-    cargador: document.getElementById('cargador').checked,
-    cargadorCantidad: document.getElementById('cargador').checked ? parseInt(document.querySelector('#cargadorCantidad input').value) : 0,
-    
-    vidrio: document.getElementById('vidrio').checked,
-    vidrioModelo: document.getElementById('vidrio').checked ? document.querySelector('#vidrioModelo select').value : null,
-    vidrioCantidad: document.getElementById('vidrio').checked ? parseInt(document.querySelector('#vidrioModelo input').value) : 0,
-    
-    protectorCamara: document.getElementById('protectorCamara').checked,
-    protectorCantidad: document.getElementById('protectorCamara').checked ? parseInt(document.querySelector('#protectorCantidad input').value) : 0,
-    
-    // Nuevos accesorios añadidos
-    cubo: document.getElementById('cubo').checked,
-    cuboCantidad: document.getElementById('cubo').checked ? parseInt(document.querySelector('#cuboCantidad input').value) : 0,
-    
-    cableLightning: document.getElementById('cableLightning').checked,
-    cableLightningCantidad: document.getElementById('cableLightning').checked ? parseInt(document.querySelector('#cableLightningCantidad input').value) : 0,
-    
-    cableCC: document.getElementById('cableCC').checked,
-    cableCCCantidad: document.getElementById('cableCC').checked ? parseInt(document.querySelector('#cableCCCantidad input').value) : 0,
-
-    caja: document.getElementById('caja').checked,
-    cajaModelo: document.getElementById('caja').checked ? document.querySelector('#cajaModelo select').value : null,
-    cajaColor: document.getElementById('caja').checked ? document.querySelector('#cajaColor select').value : null 
-        
-}
-,
+                    forro: document.getElementById('forro').checked,
+                    forroModelo: document.getElementById('forro').checked ? document.querySelector('#forroModelo select').value : null,
+                    forroCantidad: document.getElementById('forro').checked ? parseInt(document.querySelector('#forroModelo input').value) : 0,
+                    
+                    cargador: document.getElementById('cargador').checked,
+                    cargadorCantidad: document.getElementById('cargador').checked ? parseInt(document.querySelector('#cargadorCantidad input').value) : 0,
+                    
+                    vidrio: document.getElementById('vidrio').checked,
+                    vidrioModelo: document.getElementById('vidrio').checked ? document.querySelector('#vidrioModelo select').value : null,
+                    vidrioCantidad: document.getElementById('vidrio').checked ? parseInt(document.querySelector('#vidrioModelo input').value) : 0,
+                    
+                    protectorCamara: document.getElementById('protectorCamara').checked,
+                    protectorCantidad: document.getElementById('protectorCamara').checked ? parseInt(document.querySelector('#protectorCantidad input').value) : 0,
+                    
+                    // Nuevos accesorios añadidos
+                    cubo: document.getElementById('cubo').checked,
+                    cuboCantidad: document.getElementById('cubo').checked ? parseInt(document.querySelector('#cuboCantidad input').value) : 0,
+                    
+                    cableLightning: document.getElementById('cableLightning').checked,
+                    cableLightningCantidad: document.getElementById('cableLightning').checked ? parseInt(document.querySelector('#cableLightningCantidad input').value) : 0,
+                    
+                    cableCC: document.getElementById('cableCC').checked,
+                    cableCCCantidad: document.getElementById('cableCC').checked ? parseInt(document.querySelector('#cableCCCantidad input').value) : 0,
+                
+                    caja: document.getElementById('caja').checked,
+                    cajaModelo: document.getElementById('caja').checked ? document.querySelector('#cajaModelo select').value : null,
+                    cajaColor: document.getElementById('caja').checked ? document.querySelector('#cajaColor select').value : null 
+                        
+                }
+                ,
                 formaPago: document.querySelector('input[name="formaPago"]:checked').value,
                 montoTotal: parseFloat(document.getElementById('montoTotal').value),
                 hora: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
                 weppa: weppa
             };
 
-             weppaHtml = venta.weppa
-                ? '<span style="font-weight:bold; background-color:yellow; padding:0 4px; margin-left:8px;">WEPPA</span>'
-                : '';
+             
 
             // Si es pago mixto, agregar detalles
             if (venta.formaPago === 'mixto') {
@@ -1273,6 +1270,9 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
             let efectivoDelDia = 0;
 
             ventas.forEach((venta, index) => {
+                const weppaHtml = venta.weppa
+                ? '<span style="font-weight:bold; background-color:yellow; padding:0 4px; margin-left:8px;">WEPPA</span>'
+                : '';
                 total += venta.montoTotal;
                 if (venta.tipoVenta === 'completa') equipos++;
                 // Calcular efectivo del día
@@ -1576,6 +1576,9 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
             let efectivoDelDia = 0;
             
             ventas.forEach(venta => {
+                const weppaHtml = venta.weppa
+                ? '<span style="font-weight:bold; background-color:yellow; padding:0 4px; margin-left:8px;">WEPPA</span>'
+                : '';
                 totalGeneral += venta.montoTotal;
                 if (venta.tipoVenta === 'completa') equiposCount++;
                 if (venta.formaPago === 'efectivo') {
@@ -1761,6 +1764,7 @@ llenarSelectModelos('cajaModeloSelect', 'modelo'); // caja model
     </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'982677f1e5479d81',t:'MTc1ODQyNTI2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
+
 
 
 

@@ -1,0 +1,2967 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cierre de Ventas - Tienda iPhone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-4">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex-1">
+                    <h1 class="text-3xl font-bold text-gray-800 text-center mb-2">📱 Cierre de Ventas Diario</h1>
+                    <p class="text-gray-600 text-center">Registro de ventas - <span id="fecha-actual"></span></p>
+                </div>
+                <!-- ========== NUEVA FUNCIONALIDAD: BOTÓN IMPRIMIR ========== -->
+                <button id="imprimirResumen" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
+                    🖨️ Imprimir Resumen
+                </button>
+                <!-- ========== FIN NUEVA FUNCIONALIDAD: BOTÓN IMPRIMIR ========== -->
+            </div>
+        </div>
+
+        <!-- ========== NUEVA FUNCIONALIDAD: CAJA INICIAL ========== -->
+        <div class="bg-green-50 border-2 border-green-200 rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-green-800 mb-4">💰 Caja Inicial del Día</h2>
+            <div class="flex items-center gap-4">
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-green-700 mb-2">Efectivo disponible hasta el día anterior ($)</label>
+                    <input type="number" id="cajaInicial" step="0.01" class="w-full p-3 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="0.00">
+                </div>
+                <button id="guardarCajaInicial" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                    💾 Guardar
+                </button>
+            </div>
+            <div id="cajaInicialConfirmacion" class="hidden mt-3 p-3 bg-green-100 rounded-lg">
+                <p class="text-green-800 font-medium">✅ Caja inicial guardada: $<span id="cajaInicialMostrar">0.00</span></p>
+            </div>
+        </div>
+        <!-- ========== FIN NUEVA FUNCIONALIDAD: CAJA INICIAL ========== -->
+
+        <!-- Formulario Principal -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <form id="ventaForm" class="space-y-6">
+                <!-- Tipo de Venta -->
+                <div class="border-b pb-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">🛒 Tipo de Venta</h2>
+                    <div class="flex items-center space-x-6">
+                        <div class="flex items-center">
+                            <input type="radio" id="tipoVentaCompleta" name="tipoVenta" value="completa" checked class="mr-2 h-4 w-4 text-blue-600">
+                            <label for="tipoVentaCompleta" class="font-medium text-gray-700">iPhone + Accesorios</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="soloAccesorios" name="tipoVenta" value="accesorios" class="mr-2 h-4 w-4 text-blue-600">
+                            <label for="soloAccesorios" class="font-medium text-gray-700">Solo Accesorios</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información del iPhone -->
+                <div id="infoIphone" class="border-b pb-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">📱 Información del iPhone</h2>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Modelo</label>
+                            <select id="modelo" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                                <!-- 2️⃣0️⃣ Opciones llenadas automáticamente por JavaScript -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
+                            <select id="color" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                                <!-- 2️⃣0️⃣ Opciones llenadas automáticamente por JavaScript -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Capacidad de Almacenamiento</label>
+                            <select id="almacenamiento" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                                <!-- 2️⃣0️⃣ Opciones llenadas automáticamente por JavaScript -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">% de Batería</label>
+                            <input type="number" id="bateria" min="1" max="100" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="85" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accesorios -->
+                <div class="border-b pb-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">🛡️ Accesorios</h2>
+                    <div class="space-y-4">
+                        <!-- Forro -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="flex items-center mb-3">
+                                <input type="checkbox" id="forro" class="mr-3 h-4 w-4 text-blue-600">
+                                <label for="forro" class="font-medium text-gray-700">Forro</label>
+                            </div>
+                            <div id="forroModelo" class="hidden grid grid-cols-2 gap-3">
+                                <select class="p-2 border border-gray-300 rounded-lg accModelo">
+                                    
+                                </select>
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Cantidad</label>
+                                    <input type="number" min="1" value="1" class="w-full p-2 border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cargador -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="flex items-center mb-3">
+                                <input type="checkbox" id="cargador" class="mr-3 h-4 w-4 text-blue-600">
+                                <label for="cargador" class="font-medium text-gray-700">Cargador</label>
+                            </div>
+                            <div id="cargadorCantidad" class="hidden">
+                                <label class="block text-xs text-gray-600 mb-1">Cantidad</label>
+                                <input type="number" min="1" value="1" class="w-full p-2 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+
+                        <!-- Vidrio -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="flex items-center mb-3">
+                                <input type="checkbox" id="vidrio" class="mr-3 h-4 w-4 text-blue-600">
+                                <label for="vidrio" class="font-medium text-gray-700">Vidrio Templado</label>
+                            </div>
+                            <div id="vidrioModelo" class="hidden grid grid-cols-2 gap-3">
+                                <select class="p-2 border border-gray-300 rounded-lg accModelo">
+                                    
+                                </select>
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Cantidad</label>
+                                    <input type="number" min="1" value="1" class="w-full p-2 border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Protector Cámara -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="flex items-center mb-3">
+                                <input type="checkbox" id="protectorCamara" class="mr-3 h-4 w-4 text-blue-600">
+                                <label for="protectorCamara" class="font-medium text-gray-700">Protector de Cámara</label>
+                            </div>
+                            <div id="protectorCantidad" class="hidden">
+                                <label class="block text-xs text-gray-600 mb-1">Cantidad</label>
+                                <input type="number" min="1" value="1" class="w-full p-2 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+
+                        <!-- 2️⃣0️⃣ Cubo -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="flex items-center mb-3">
+                                <input type="checkbox" id="cubo" class="mr-3 h-4 w-4 text-blue-600">
+                                <label for="cubo" class="font-medium text-gray-700">Cubo</label>
+                            </div>
+                            <div id="cuboCantidad" class="hidden">
+                                <label class="block text-xs text-gray-600 mb-1">Cantidad</label>
+                                <input type="number" min="1" value="1" class="w-full p-2 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+
+                        <!-- 2️⃣0️⃣ Cable Lightning -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="flex items-center mb-3">
+                                <input type="checkbox" id="cableLightning" class="mr-3 h-4 w-4 text-blue-600">
+                                <label for="cableLightning" class="font-medium text-gray-700">Cable Lightning</label>
+                            </div>
+                            <div id="cableLightningCantidad" class="hidden">
+                                <label class="block text-xs text-gray-600 mb-1">Cantidad</label>
+                                <input type="number" min="1" value="1" class="w-full p-2 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+
+                        <!-- 2️⃣0️⃣ Cable C+C -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="flex items-center mb-3">
+                                <input type="checkbox" id="cableCC" class="mr-3 h-4 w-4 text-blue-600">
+                                <label for="cableCC" class="font-medium text-gray-700">Cable C+C</label>
+                            </div>
+                            <div id="cableCCCantidad" class="hidden">
+                                <label class="block text-xs text-gray-600 mb-1">Cantidad</label>
+                                <input type="number" min="1" value="1" class="w-full p-2 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+
+                        <!-- 2️⃣0️⃣ Caja -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="flex items-center mb-3">
+                                <input type="checkbox" id="caja" class="mr-3 h-4 w-4 text-blue-600">
+                                <label for="caja" class="font-medium text-gray-700">Caja</label>
+                            </div>
+                            <div id="cajaModelo" class="hidden grid grid-cols-3 gap-3">
+                                <select class="p-2 border border-gray-300 rounded-lg accModelo">
+                                    
+                                </select>
+                                <select class="p-2 border border-gray-300 rounded-lg" id="cajaColorSelect">
+                                    
+                                </select>
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Cantidad</label>
+                                    <input type="number" min="1" value="1" class="w-full p-2 border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Forma de Pago -->
+                <div class="border-b pb-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">💳 Forma de Pago</h2>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <input type="radio" id="efectivo" name="formaPago" value="efectivo" class="mr-3 h-4 w-4 text-blue-600">
+                            <label for="efectivo" class="font-medium text-gray-700">Efectivo</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="zelle" name="formaPago" value="zelle" class="mr-3 h-4 w-4 text-blue-600">
+                            <label for="zelle" class="font-medium text-gray-700">Zelle</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="binance" name="formaPago" value="binance" class="mr-3 h-4 w-4 text-blue-600">
+                            <label for="binance" class="font-medium text-gray-700">Binance</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="pagomovil" name="formaPago" value="pagomovil" class="mr-3 h-4 w-4 text-blue-600">
+                            <label for="pagomovil" class="font-medium text-gray-700">Pago Móvil</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="transferencia" name="formaPago" value="transferencia" class="mr-3 h-4 w-4 text-blue-600">
+                            <label for="transferencia" class="font-medium text-gray-700">Transferencia</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="mixto" name="formaPago" value="mixto" class="mr-3 h-4 w-4 text-blue-600">
+                            <label for="mixto" class="font-medium text-gray-700">Mixto</label>
+                        </div>
+
+                    </div>
+
+                    <!-- Detalles de pago mixto -->
+                    <div id="pagoMixto" class="hidden mt-4 bg-blue-50 p-4 rounded-lg">
+                        <h3 class="font-medium text-gray-800 mb-3">Detalles del Pago Mixto</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Efectivo ($)</label>
+                                <input type="number" id="montoEfectivo" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Zelle ($)</label>
+                                <input type="number" id="montoZelle" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Binance ($)</label>
+                                <input type="number" id="montoBinance" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Pago Móvil ($)</label>
+                                <input type="number" id="montoPagoMovilDolares" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Transferencia ($)</label>
+                                <input type="number" id="montoTransferenciaDolares" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="mt-3 p-3 bg-white rounded border">
+                            <p class="text-sm font-medium text-gray-700">Total Calculado: $<span id="totalMixto">0.00</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Detalles de Pago Móvil -->
+                    <div id="pagomovil-detalles" class="hidden mt-4 bg-green-50 p-4 rounded-lg">
+                        <h3 class="font-medium text-gray-800 mb-3">Detalles del Pago Móvil</h3>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Monto en Dólares ($)</label>
+                                <input type="number" id="pagomovilDolares" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Monto en Bolívares (Bs)</label>
+                                <input type="number" id="pagomovilBolivares" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tasa (Bs/$)</label>
+                                <input type="number" id="pagomovilTasa" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detalles de Transferencia -->
+                    <div id="transferencia-detalles" class="hidden mt-4 bg-purple-50 p-4 rounded-lg">
+                        <h3 class="font-medium text-gray-800 mb-3">Detalles de la Transferencia</h3>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Monto en Dólares ($)</label>
+                                <input type="number" id="transferenciaDolares" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Monto en Bolívares (Bs)</label>
+                                <input type="number" id="transferenciaBolivares" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tasa (Bs/$)</label>
+                                <input type="number" id="transferenciaTasa" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Equipo Recibido como Parte de Pago -->
+                <div class="border-b pb-6">
+                    <div class="flex items-center mb-4">
+                        <input type="checkbox" id="recibirEquipo" class="mr-3 h-4 w-4 text-blue-600">
+                        <label for="recibirEquipo" class="text-xl font-semibold text-gray-800">📱➡️ Recibir Equipo como Parte de Pago</label>
+                    </div>
+                    
+                    <div id="equipoRecibidoForm" class="hidden bg-orange-50 p-4 rounded-lg">
+                        <h3 class="font-medium text-gray-800 mb-4">Información del Equipo Recibido</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Modelo</label>
+                                <select id="equipoModelo" class="w-full p-3 border border-gray-300 rounded-lg">
+                                    
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Capacidad</label>
+                                <select id="equipoCapacidad" class="w-full p-3 border border-gray-300 rounded-lg">
+                                    <option value="">Seleccionar capacidad</option>
+                                    <option value="64GB">64GB</option>
+                                    <option value="128GB">128GB</option>
+                                    <option value="256GB">256GB</option>
+                                    <option value="512GB">512GB</option>
+                                    <option value="1TB">1TB</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
+                                <select id="equipoColor" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="Ej: Negro, Blanco, Azul..."></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">% de Batería</label>
+                                <input type="number" id="equipoBateria" min="1" max="100" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="85">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">IMEI</label>
+                                <input type="text" id="equipoImei" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="Número IMEI">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Valor del Equipo ($)</label>
+                                <input type="number" id="equipoValor" step="0.01" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="0.00">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Comentarios</label>
+                                <textarea id="equipoComentarios" rows="3" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="Detalles del estado del equipo, accesorios incluidos, etc."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tipo de Transacción -->
+                <div class="border-b pb-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">📋 Tipo de Transacción</h2>
+                    <div class="flex items-center space-x-6">
+                        <div class="flex items-center">
+                            <input type="radio" id="transaccionVenta" name="tipoTransaccion" value="venta" checked class="mr-2 h-4 w-4 text-blue-600">
+                            <label for="transaccionVenta" class="font-medium text-gray-700">Venta Completa</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="abono" name="tipoTransaccion" value="abono" class="mr-2 h-4 w-4 text-orange-600">
+                            <label for="abono" class="font-medium text-gray-700">Abono</label>
+                        </div>
+                    </div>
+                    <div id="abonoInfo" class="hidden mt-3 p-3 bg-orange-50 rounded-lg">
+                        <p class="text-sm text-orange-800">
+                            ⚠️ <strong>Abono:</strong> Este monto NO se incluirá en el total de ventas del día, excepto el efectivo que sí afectará la caja final.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Agregar checkbox weppa casi al terminar el formulario de registro de venta -->
+                <div class="flex items-center mb-3">
+                  <input type="checkbox" id="weppa" class="mr-3 h-4 w-4 text-blue-600" />
+                  <label for="weppa" class="font-medium text-gray-700">weppa</label>
+                </div>
+
+                <!-- Monto Total -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">💰 Monto Total de la Venta</label>
+                    <input type="number" id="montoTotal" step="0.01" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg font-semibold" placeholder="0.00" required>
+                </div>
+
+                <!-- Botones -->
+                <div class="flex gap-4 pt-6">
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                        ✅ Registrar Venta
+                    </button>
+                    <button type="button" id="limpiarForm" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                        🗑️ Limpiar
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Nueva Sección: Movimientos de Inventario -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">📦 Movimientos de Inventario</h2>
+            
+            <!-- Selector de Tipo de Movimiento -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-3">Tipo de Movimiento</label>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <button type="button" id="btnSalidaEfectivo" class="movimiento-btn bg-red-100 hover:bg-red-200 text-red-800 p-3 rounded-lg border-2 border-transparent transition-all">
+                        💸 Salida Efectivo
+                    </button>
+                    <button type="button" id="btnSalidaEquipo" class="movimiento-btn bg-orange-100 hover:bg-orange-200 text-orange-800 p-3 rounded-lg border-2 border-transparent transition-all">
+                        📱➡️ Salida Equipo
+                    </button>
+                    <button type="button" id="btnSalidaAccesorio" class="movimiento-btn bg-yellow-100 hover:bg-yellow-200 text-yellow-800 p-3 rounded-lg border-2 border-transparent transition-all">
+                        🛡️➡️ Salida Accesorio
+                    </button>
+                    <button type="button" id="btnCompraEquipo" class="movimiento-btn bg-green-100 hover:bg-green-200 text-green-800 p-3 rounded-lg border-2 border-transparent transition-all">
+                        📱⬅️ Compra Equipo
+                    </button>
+
+                    <button type="button" id="btnIngresoEquipo" class="movimiento-btn bg-teal-100 hover:bg-teal-200 text-teal-800 p-3 rounded-lg border-2 border-transparent transition-all">
+                        📱⬅️ Ingreso Equipo
+                    </button>
+                    <button type="button" id="btnIngresoAccesorio" class="movimiento-btn bg-purple-100 hover:bg-purple-200 text-purple-800 p-3 rounded-lg border-2 border-transparent transition-all">
+                        🛡️⬅️ Ingreso Accesorio
+                    </button>
+                </div>
+            </div>
+
+            <!-- Formularios de Movimientos -->
+            <div id="movimientoForms" class="hidden">
+                <!-- Salida de Efectivo -->
+                <div id="formSalidaEfectivo" class="movimiento-form hidden bg-red-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-red-800 mb-3">💸 Salida de Efectivo</h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Monto ($)</label>
+                            <input type="number" id="salidaEfectivoMonto" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Persona que retira</label>
+                            <input type="text" id="salidaEfectivoPersona" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Nombre completo" required>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Motivo/Nota</label>
+                            <textarea id="salidaEfectivoNota" rows="2" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Descripción del motivo del retiro" required></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Salida de Equipo -->
+                <div id="formSalidaEquipo" class="movimiento-form hidden bg-orange-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-orange-800 mb-3">📱➡️ Salida de Equipo</h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
+                            <select id="salidaEquipoModelo" class="w-full p-2 border border-gray-300 rounded-lg" required>
+                                
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Capacidad</label>
+                            <select id="salidaEquipoCapacidad" class="w-full p-2 border border-gray-300 rounded-lg" required>
+                                <option value="">Seleccionar capacidad</option>
+                                <option value="64GB">64GB</option>
+                                <option value="128GB">128GB</option>
+                                <option value="256GB">256GB</option>
+                                <option value="512GB">512GB</option>
+                                <option value="1TB">1TB</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                            <select id="salidaEquipoColor" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Color del equipo" required></select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
+                            <input type="text" id="salidaEquipoImei" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Número IMEI">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Destino</label>
+                            <select id="salidaEquipoDestino" class="w-full p-2 border border-gray-300 rounded-lg" required>
+                                <option value="">Seleccionar destino</option>
+                                <option value="Aviadores">Aviadores</option>
+                                <option value="Estación Central">Estación Central</option>
+                                <option value="Principal de Valencia">Principal de Valencia</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Destino Personalizado</label>
+                            <input type="text" id="salidaEquipoDestinoPersonalizado" class="w-full p-2 border border-gray-300 rounded-lg hidden" placeholder="Especificar destino">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Persona que retira</label>
+                            <input type="text" id="salidaEquipoPersona" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Nombre completo" required>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Notas adicionales</label>
+                            <textarea id="salidaEquipoNota" rows="2" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Detalles adicionales del movimiento"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Salida de Accesorio -->
+                <div id="formSalidaAccesorio" class="movimiento-form hidden bg-yellow-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-yellow-800 mb-3">🛡️➡️ Salida de Accesorio</h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Accesorio</label>
+                            <select id="salidaAccesorioTipo" class="w-full p-2 border border-gray-300 rounded-lg" required>
+                                <option value="">Seleccionar tipo</option>
+                                <option value="Forro">Forro</option>
+                                <option value="Vidrio Templado">Vidrio Templado</option>
+                                <option value="Cargador">Cargador</option>
+                                <option value="Cable">Cable</option>
+                                <option value="Cubo">Cubo</option>
+                                <option value="Caja">Caja</option>
+                                <option value="Protector de Cámara">Protector de Cámara</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Destino</label>
+                            <select id="salidaAccesorioDestino" class="w-full p-2 border border-gray-300 rounded-lg" required>
+                                <option value="">Seleccionar destino</option>
+                                <option value="Aviadores">Aviadores</option>
+                                <option value="Estación Central">Estación Central</option>
+                                <option value="Principal de Valencia">Principal de Valencia</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Destino Personalizado</label>
+                            <input type="text" id="salidaAccesorioDestinoPersonalizado" class="w-full p-2 border border-gray-300 rounded-lg hidden" placeholder="Especificar destino">
+                        </div>
+                    </div>
+
+                    <!-- Formularios específicos por tipo para salida -->
+                    <!-- Forro Salida -->
+                    <div id="salidaForroDetalles" class="hidden mt-4 bg-white p-4 rounded-lg border">
+                        <h4 class="font-medium text-gray-800 mb-3">Detalles del Forro</h4>
+                        <div class="mb-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">¿Cuántos modelos diferentes?</label>
+                            <select id="salidaForroCantidadModelos" class="w-full p-2 border border-gray-300 rounded-lg">
+                                <option value="1">1 modelo</option>
+                                <option value="2">2 modelos</option>
+                                <option value="3">3 modelos</option>
+                                <option value="4">4 modelos</option>
+                                <option value="5">5 modelos</option>
+                            </select>
+                        </div>
+                        <div id="salidaForroModelos"></div>
+                    </div>
+
+                    <!-- Vidrio Salida -->
+                    <div id="salidaVidrioTempladoDetalles" class="hidden mt-4 bg-white p-4 rounded-lg border">
+                        <h4 class="font-medium text-gray-800 mb-3">Detalles del Vidrio Templado</h4>
+                        <div class="mb-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">¿Cuántos modelos diferentes?</label>
+                            <select id="salidaVidrioTempladoCantidadModelos" class="w-full p-2 border border-gray-300 rounded-lg">
+                                <option value="1">1 modelo</option>
+                                <option value="2">2 modelos</option>
+                                <option value="3">3 modelos</option>
+                                <option value="4">4 modelos</option>
+                                <option value="5">5 modelos</option>
+                                <option value="6">6 modelos</option>
+                                <option value="7">7 modelos</option>
+                                <option value="8">8 modelos</option>
+                                <option value="9">9 modelos</option>
+                                <option value="10">10 modelos</option>
+                            </select>
+                        </div>
+                        <div id="salidaVidrioTempladoModelos"></div>
+                    </div>
+
+                    <!-- Cargador Salida -->
+                    <div id="salidaCargadorDetalles" class="hidden mt-4 bg-white p-4 rounded-lg border">
+                        <h4 class="font-medium text-gray-800 mb-3">Detalles del Cargador</h4>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
+                                <input type="number" id="salidaCargadorCantidad" min="1" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="1">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Modelo/Descripción</label>
+                                <input type="text" id="salidaCargadorModelo" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Ej: 20W USB-C">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cable Salida -->
+                    <div id="salidaCableDetalles" class="hidden mt-4 bg-white p-4 rounded-lg border">
+                        <h4 class="font-medium text-gray-800 mb-3">Detalles del Cable</h4>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Cable</label>
+                                <select id="salidaCableTipo" class="w-full p-2 border border-gray-300 rounded-lg">
+                                    <option value="">Seleccionar tipo</option>
+                                    <option value="USB-C a USB-C">USB-C a USB-C</option>
+                                    <option value="Lightning">Lightning</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
+                                <input type="number" id="salidaCableCantidad" min="1" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cubo Salida -->
+                    <div id="salidaCuboDetalles" class="hidden mt-4 bg-white p-4 rounded-lg border">
+                        <h4 class="font-medium text-gray-800 mb-3">Detalles del Cubo</h4>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
+                                <input type="number" id="salidaCuboCantidad" min="1" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="1">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Descripción adicional</label>
+                                <textarea id="salidaCuboDescripcion" rows="2" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Especificaciones, potencia, etc."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Caja Salida -->
+                    <div id="salidaCajaDetalles" class="hidden mt-4 bg-white p-4 rounded-lg border">
+                        <h4 class="font-medium text-gray-800 mb-3">Detalles de la Caja</h4>
+                        <div class="mb-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">¿Cuántos modelos diferentes?</label>
+                            <select id="salidaCajaCantidadModelos" class="w-full p-2 border border-gray-300 rounded-lg">
+                                <option value="1">1 modelo</option>
+                                <option value="2">2 modelos</option>
+                                <option value="3">3 modelos</option>
+                                <option value="4">4 modelos</option>
+                                <option value="5">5 modelos</option>
+                                <option value="6">6 modelos</option>
+                                <option value="7">7 modelos</option>
+                                <option value="8">8 modelos</option>
+                                <option value="9">9 modelos</option>
+                                <option value="10">10 modelos</option>
+                            </select>
+                        </div>
+                        <div id="salidaCajaModelos"></div>
+                    </div>
+
+                    <!-- Protector de Cámara Salida -->
+                    <div id="salidaProtectordeCámaraDetalles" class="hidden mt-4 bg-white p-4 rounded-lg border">
+                        <h4 class="font-medium text-gray-800 mb-3">Detalles del Protector de Cámara</h4>
+                        <div class="mb-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">¿Cuántos modelos diferentes?</label>
+                            <select id="salidaProtectordeCámaraCantidadModelos" class="w-full p-2 border border-gray-300 rounded-lg">
+                                <option value="1">1 modelo</option>
+                                <option value="2">2 modelos</option>
+                                <option value="3">3 modelos</option>
+                                <option value="4">4 modelos</option>
+                                <option value="5">5 modelos</option>
+                                <option value="6">6 modelos</option>
+                                <option value="7">7 modelos</option>
+                                <option value="8">8 modelos</option>
+                                <option value="9">9 modelos</option>
+                                <option value="10">10 modelos</option>
+                            </select>
+                        </div>
+                        <div id="salidaProtectordeCámaraModelos"></div>
+                    </div>
+
+                    <!-- Otro Salida -->
+                    <div id="salidaOtroDetalles" class="hidden mt-4 bg-white p-4 rounded-lg border">
+                        <h4 class="font-medium text-gray-800 mb-3">Detalles del Accesorio</h4>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
+                                <input type="number" id="salidaOtroCantidad" min="1" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="1">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Descripción completa</label>
+                                <textarea id="salidaOtroDescripcion" rows="3" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Descripción detallada del accesorio"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Compra de Equipo -->
+                <div id="formCompraEquipo" class="movimiento-form hidden bg-green-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-green-800 mb-3">📱⬅️ Compra de Equipo</h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
+                            <select id="compraEquipoModelo" class="w-full p-2 border border-gray-300 rounded-lg" required>
+                                
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Capacidad</label>
+                            <select id="compraEquipoCapacidad" class="w-full p-2 border border-gray-300 rounded-lg" required>
+                                <option value="">Seleccionar capacidad</option>
+                                <option value="64GB">64GB</option>
+                                <option value="128GB">128GB</option>
+                                <option value="256GB">256GB</option>
+                                <option value="512GB">512GB</option>
+                                <option value="1TB">1TB</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                            <select id="compraEquipoColor" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Color del equipo" required></select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">% Batería</label>
+                            <input type="number" id="compraEquipoBateria" min="1" max="100" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="85">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
+                            <input type="text" id="compraEquipoImei" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Número IMEI">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Precio de Compra ($)</label>
+                            <input type="number" id="compraEquipoPrecio" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="0.00" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor/Vendedor</label>
+                            <input type="text" id="compraEquipoProveedor" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Nombre del vendedor" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Estado del Equipo</label>
+                            <select id="compraEquipoEstado" class="w-full p-2 border border-gray-300 rounded-lg" required>
+                                <option value="">Seleccionar estado</option>
+                                <option value="Nuevo">Nuevo</option>
+                                <option value="Usado - Excelente">Usado - Excelente</option>
+                                <option value="Usado - Bueno">Usado - Bueno</option>
+                                <option value="Usado - Regular">Usado - Regular</option>
+                                <option value="Para Reparar">Para Reparar</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
+                            <textarea id="compraEquipoNota" rows="2" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Detalles del estado, accesorios incluidos, etc."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <!-- Ingreso de Equipo -->
+                <div id="formIngresoEquipo" class="movimiento-form hidden bg-teal-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-teal-800 mb-3">📱⬅️ Ingreso de Equipo</h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
+                            <select id="ingresoEquipoModelo" class="w-full p-2 border border-gray-300 rounded-lg" required>
+                               
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Capacidad</label>
+                            <select id="ingresoEquipoCapacidad" class="w-full p-2 border border-gray-300 rounded-lg" required>
+                                
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                            <select id="ingresoEquipoColor" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Color del equipo" required>
+                                
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
+                            <input type="text" id="ingresoEquipoImei" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Número IMEI">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Origen/Procedencia</label>
+                            <select id="ingresoEquipoOrigen" class="w-full p-2 border border-gray-300 rounded-lg" required>
+                                <option value="">Seleccionar origen</option>
+                                <option value="Aviadores">Aviadores</option>
+                                <option value="Estación Central">Estación Central</option>
+                                <option value="Principal de Valencia">Principal de Valencia</option>
+                                <option value="Proveedor Externo">Proveedor Externo</option>
+                                <option value="Cliente">Cliente</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Origen Personalizado</label>
+                            <input type="text" id="ingresoEquipoOrigenPersonalizado" class="w-full p-2 border border-gray-300 rounded-lg hidden" placeholder="Especificar origen">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Notas adicionales</label>
+                            <textarea id="ingresoEquipoNota" rows="2" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Detalles adicionales del ingreso"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ingreso de Accesorio -->
+                <div id="formIngresoAccesorio" class="movimiento-form hidden bg-purple-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-purple-800 mb-3">🛡️⬅️ Ingreso de Accesorio</h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Accesorio</label>
+                            <select id="ingresoAccesorioTipo" class="w-full p-2 border border-gray-300 rounded-lg" required>
+                                <option value="">Seleccionar tipo</option>
+                                <option value="Forro">Forro</option>
+                                <option value="Vidrio Templado">Vidrio Templado</option>
+                                <option value="Cargador">Cargador</option>
+                                <option value="Cable">Cable</option>
+                                <option value="Cubo">Cubo</option>
+                                <option value="Caja">Caja</option>
+                                <option value="Protector de Cámara">Protector de Cámara</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
+                            <input type="text" id="ingresoAccesorioProveedor" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Nombre del proveedor" required>
+                        </div>
+                    </div>
+
+                    <!-- Formularios específicos por tipo -->
+                    <!-- Forro -->
+                    <div id="ingresoForroDetalles" class="hidden mt-4 bg-white p-4 rounded-lg border">
+                        <h4 class="font-medium text-gray-800 mb-3">Detalles del Forro</h4>
+                        <div class="mb-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">¿Cuántos modelos diferentes?</label>
+                            <select id="ingresoForroCantidadModelos" class="w-full p-2 border border-gray-300 rounded-lg">
+                                <option value="1">1 modelo</option>
+                                <option value="2">2 modelos</option>
+                                <option value="3">3 modelos</option>
+                                <option value="4">4 modelos</option>
+                                <option value="5">5 modelos</option>
+                                <option value="6">6 modelos</option>
+                                <option value="7">7 modelos</option>
+                                <option value="8">8 modelos</option>
+                                <option value="9">9 modelos</option>
+                                <option value="10">10 modelos</option>
+                            </select>
+                        </div>
+                        <div id="ingresoForroModelos"></div>
+                    </div>
+
+                    <!-- Vidrio -->
+                    <div id="ingresoVidrioTempladoDetalles" class="hidden mt-4 bg-white p-4 rounded-lg border">
+                        <h4 class="font-medium text-gray-800 mb-3">Detalles del Vidrio Templado</h4>
+                        <div class="mb-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">¿Cuántos modelos diferentes?</label>
+                            <select id="ingresoVidrioTempladoCantidadModelos" class="w-full p-2 border border-gray-300 rounded-lg">
+                                <option value="1">1 modelo</option>
+                                <option value="2">2 modelos</option>
+                                <option value="3">3 modelos</option>
+                                <option value="4">4 modelos</option>
+                                <option value="5">5 modelos</option>
+                                <option value="6">6 modelos</option>
+                                <option value="7">7 modelos</option>
+                                <option value="8">8 modelos</option>
+                                <option value="9">9 modelos</option>
+                                <option value="10">10 modelos</option>
+                            </select>
+                        </div>
+                        <div id="ingresoVidrioTempladoModelos"></div>
+                    </div>
+
+                    <!-- Cargador -->
+                    <div id="ingresoCargadorDetalles" class="hidden mt-4 bg-white p-4 rounded-lg border">
+                        <h4 class="font-medium text-gray-800 mb-3">Detalles del Cargador</h4>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
+                                <input type="number" id="ingresoCargadorCantidad" min="1" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="1">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Modelo/Descripción</label>
+                                <input type="text" id="ingresoCargadorModelo" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Ej: 20W USB-C">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cable -->
+                    <div id="ingresoCableDetalles" class="hidden mt-4 bg-white p-4 rounded-lg border">
+                        <h4 class="font-medium text-gray-800 mb-3">Detalles del Cable</h4>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Cable</label>
+                                <select id="ingresoCableTipo" class="w-full p-2 border border-gray-300 rounded-lg">
+                                    <option value="">Seleccionar tipo</option>
+                                    <option value="USB-C a USB-C">USB-C a USB-C</option>
+                                    <option value="Lightning">Lightning</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
+                                <input type="number" id="ingresoCableCantidad" min="1" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cubo -->
+                    <div id="ingresoCuboDetalles" class="hidden mt-4 bg-white p-4 rounded-lg border">
+                        <h4 class="font-medium text-gray-800 mb-3">Detalles del Cubo</h4>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
+                                <input type="number" id="ingresoCuboCantidad" min="1" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="1">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Descripción adicional</label>
+                                <textarea id="ingresoCuboDescripcion" rows="2" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Especificaciones, potencia, etc."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Caja -->
+                    <div id="ingresoCajaDetalles" class="hidden mt-4 bg-white p-4 rounded-lg border">
+                        <h4 class="font-medium text-gray-800 mb-3">Detalles de la Caja</h4>
+                        <div class="mb-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">¿Cuántos modelos diferentes?</label>
+                            <select id="ingresoCajaCantidadModelos" class="w-full p-2 border border-gray-300 rounded-lg">
+                                <option value="1">1 modelo</option>
+                                <option value="2">2 modelos</option>
+                                <option value="3">3 modelos</option>
+                                <option value="4">4 modelos</option>
+                                <option value="5">5 modelos</option>
+                                <option value="6">6 modelos</option>
+                                <option value="7">7 modelos</option>
+                                <option value="8">8 modelos</option>
+                                <option value="9">9 modelos</option>
+                                <option value="10">10 modelos</option>
+                            </select>
+                        </div>
+                        <div id="ingresoCajaModelos"></div>
+                    </div>
+
+                    <!-- Protector de Cámara -->
+                    <div id="ingresoProtectordeCámaraDetalles" class="hidden mt-4 bg-white p-4 rounded-lg border">
+                        <h4 class="font-medium text-gray-800 mb-3">Detalles del Protector de Cámara</h4>
+                        <div class="mb-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">¿Cuántos modelos diferentes?</label>
+                            <select id="ingresoProtectordeCámaraCantidadModelos" class="w-full p-2 border border-gray-300 rounded-lg">
+                                <option value="1">1 modelo</option>
+                                <option value="2">2 modelos</option>
+                                <option value="3">3 modelos</option>
+                                <option value="4">4 modelos</option>
+                                <option value="5">5 modelos</option>
+                                <option value="6">6 modelos</option>
+                                <option value="7">7 modelos</option>
+                                <option value="8">8 modelos</option>
+                                <option value="9">9 modelos</option>
+                                <option value="10">10 modelos</option>
+                            </select>
+                        </div>
+                        <div id="ingresoProtectordeCámaraModelos"></div>
+                    </div>
+
+                    <!-- Otro -->
+                    <div id="ingresoOtroDetalles" class="hidden mt-4 bg-white p-4 rounded-lg border">
+                        <h4 class="font-medium text-gray-800 mb-3">Detalles del Accesorio</h4>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
+                                <input type="number" id="ingresoOtroCantidad" min="1" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="1">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Descripción completa</label>
+                                <textarea id="ingresoOtroDescripcion" rows="3" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Descripción detallada del accesorio"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="flex gap-4 mt-6">
+                    <button type="button" id="guardarMovimiento" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-200">
+                        ✅ Registrar Movimiento
+                    </button>
+                    <button type="button" id="cancelarMovimiento" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg transition duration-200">
+                        ❌ Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumen de Ventas -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">📊 Resumen del Día</h2>
+            <div id="resumenVentas" class="space-y-3">
+                <p class="text-gray-600">No hay ventas registradas hoy.</p>
+            </div>
+            <!-- ========== NUEVA FUNCIONALIDAD: TOTALES EXPANDIDOS ========== -->
+            <div class="mt-4 grid md:grid-cols-3 gap-4">
+                <div class="p-4 bg-green-50 rounded-lg">
+                    <p class="text-lg font-semibold text-green-800">💰 Total del día: $<span id="totalDia">0.00</span></p>
+                </div>
+                <div class="p-4 bg-blue-50 rounded-lg">
+                    <p class="text-lg font-semibold text-blue-800">📱 Equipos vendidos: <span id="equiposVendidos">0</span></p>
+                </div>
+                <div class="p-4 bg-purple-50 rounded-lg">
+                    <p class="text-lg font-semibold text-purple-800">🏦 Caja final: $<span id="cajaFinal">0.00</span></p>
+                </div>
+            </div>
+            <!-- ========== FIN NUEVA FUNCIONALIDAD: TOTALES EXPANDIDOS ========== -->
+        </div>
+
+        <!-- Resumen de Movimientos -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">📦 Movimientos del Día</h2>
+            <div id="resumenMovimientos" class="space-y-3">
+                <p class="text-gray-600">No hay movimientos registrados hoy.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 2️⃣0️⃣ Arrays de datos para opciones
+        const modelosIphone = [
+            { valor: "iPhone 11", etiqueta: "iPhone 11" },
+            { valor: "iPhone 11 Pro", etiqueta: "iPhone 11 Pro" },
+            { valor: "iPhone 11 Pro Max", etiqueta: "iPhone 11 Pro Max" },
+            { valor: "iPhone 12", etiqueta: "iPhone 12" },
+            { valor: "iPhone 12 Pro", etiqueta: "iPhone 12 Pro" },
+            { valor: "iPhone 12 Pro Max", etiqueta: "iPhone 12 Pro Max" },
+            { valor: "iPhone 13", etiqueta: "iPhone 13" },
+            { valor: "iPhone 13 Pro", etiqueta: "iPhone 13 Pro" },
+            { valor: "iPhone 13 Pro Max", etiqueta: "iPhone 13 Pro Max" },
+            { valor: "iPhone 14", etiqueta: "iPhone 14" },
+            { valor: "iPhone 14 Pro", etiqueta: "iPhone 14 Pro" },
+            { valor: "iPhone 14 Plus", etiqueta: "iPhone 14 Plus" },
+            { valor: "iPhone 14 Pro Max", etiqueta: "iPhone 14 Pro Max" },
+            { valor: "iPhone 15", etiqueta: "iPhone 15" },
+            { valor: "iPhone 15 Pro", etiqueta: "iPhone 15 Pro" },
+            { valor: "iPhone 15 Plus", etiqueta: "iPhone 15 Plus" },
+            { valor: "iPhone 15 Pro Max", etiqueta: "iPhone 15 Pro Max" },
+            { valor: "iPhone 16", etiqueta: "iPhone 16" },
+            { valor: "iPhone 16 Pro", etiqueta: "iPhone 16 Pro" },
+            { valor: "iPhone 16 Plus", etiqueta: "iPhone 16 Plus" },
+            { valor: "iPhone 16 Pro Max", etiqueta: "iPhone 16 Pro Max" },
+            { valor: "iPhone 17", etiqueta: "iPhone 17" },
+            { valor: "iPhone 17 Pro", etiqueta: "iPhone 17 Pro" },
+            { valor: "iPhone 17 Plus", etiqueta: "iPhone 17 Plus" },
+            { valor: "iPhone 17 Pro Max", etiqueta: "iPhone 17 Pro Max" }
+        ];
+
+        const coloresIphone = [
+            { valor: "Negro", etiqueta: "⚫ Negro" },
+            { valor: "Blanco", etiqueta: "⚪ Blanco" },
+            { valor: "Azul", etiqueta: "🔵 Azul" },
+            { valor: "Verde", etiqueta: "🟢 Verde" },
+            { valor: "Morado", etiqueta: "🟣 Morado" },
+            { valor: "Rosa", etiqueta: "🟠 Rosa" },
+            { valor: "Amarillo", etiqueta: "🟡 Amarillo" },
+            { valor: "Rojo", etiqueta: "🔴 Rojo" },
+            { valor: "Azul Pacífico", etiqueta: "🔵 Azul Pacífico" },
+            { valor: "Grafito", etiqueta: "⚫ Grafito" },
+            { valor: "Oro", etiqueta: "🟡 Oro" },
+            { valor: "Plata", etiqueta: "⚪ Plata" },
+            { valor: "Titanio Natural", etiqueta: "⚪ Titanio Natural" },
+            { valor: "Titanio Azul", etiqueta: "🔵 Titanio Azul" },
+            { valor: "Titanio Blanco", etiqueta: "⚪ Titanio Blanco" },
+            { valor: "Titanio Negro", etiqueta: "⚫ Titanio Negro" }
+        ];
+
+        const capacidadesIphone = [
+            { valor: "64GB", etiqueta: "64GB" },
+            { valor: "128GB", etiqueta: "128GB" },
+            { valor: "256GB", etiqueta: "256GB" },
+            { valor: "512GB", etiqueta: "512GB" },
+            { valor: "1TB", etiqueta: "1TB" }
+        ];
+
+        // 2️⃣0️⃣ Función para llenar selectores automáticamente
+        function llenarSelector(selectorId, opciones, textoPlaceholder = "Seleccionar") {
+            const selector = document.getElementById(selectorId);
+            if (!selector) return;
+            
+            selector.innerHTML = `<option value="">${textoPlaceholder}</option>`;
+            opciones.forEach(opcion => {
+                const option = document.createElement('option');
+                option.value = opcion.valor;
+                option.textContent = opcion.etiqueta;
+                selector.appendChild(option);
+            });
+        }
+
+        // 2️⃣0️⃣ Función para llenar todos los selectores con clase específica
+        function llenarSelectoresPorClase(clase, opciones, textoPlaceholder = "Seleccionar") {
+            const selectores = document.querySelectorAll(`.${clase}`);
+            selectores.forEach(selector => {
+                selector.innerHTML = `<option value="">${textoPlaceholder}</option>`;
+                opciones.forEach(opcion => {
+                    const option = document.createElement('option');
+                    option.value = opcion.valor;
+                    option.textContent = opcion.etiqueta;
+                    selector.appendChild(option);
+                });
+            });
+        }
+
+        // Mostrar fecha actual
+        document.getElementById('fecha-actual').textContent = new Date().toLocaleDateString('es-ES', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        // 2️⃣0️⃣ Inicializar selectores al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            llenarSelector('modelo', modelosIphone, "Seleccionar modelo");
+            llenarSelector('color', coloresIphone, "Seleccionar color");
+            llenarSelector('almacenamiento', capacidadesIphone, "Seleccionar capacidad");
+            llenarSelector('ingresoEquipoColor', coloresIphone, "Seleccionar color");
+            llenarSelector('ingresoEquipoCapacidad', capacidadesIphone, "Seleccionar capacidad");
+            llenarSelector('ingresoEquipoModelo', modelosIphone, "Seleccionar capacidad");
+            llenarSelector('salidaForroModelo', modelosIphone, "Seleccionar capacidad");
+            llenarSelectoresPorClase('ingresoForroModelo', modelosIphone, "Seleccionar capacidad");
+            llenarSelector('salidaEquipoColor', coloresIphone, "Seleccionar color");
+            llenarSelector('salidaEquipoModelo', modelosIphone, "Seleccionar modelo");
+            llenarSelector('compraEquipoModelo', modelosIphone, "Seleccionar modelo");
+            llenarSelector('compraEquipoColor', coloresIphone, "Seleccionar color");
+            llenarSelector('cajaColorSelect', coloresIphone, "Seleccionar color");
+            llenarSelector('equipoColor', coloresIphone, "Seleccionar color");
+            llenarSelector('equipoModelo', modelosIphone, "Seleccionar modelo");
+            
+            llenarSelectoresPorClase('accModelo', modelosIphone, "Seleccionar modelo");
+            // Llenar selectores de equipo recibido
+            llenarSelector('equipoModelo', modelosIphone, "Seleccionar modelo");
+            llenarSelector('equipoCapacidad', capacidadesIphone, "Seleccionar capacidad");
+            
+            // Llenar selectores de movimientos (todos los que usen modelos)
+            //llenarSelectoresPorClase('modelo-selector', modelosIphone, "Seleccionar modelo");
+            //llenarSelectoresPorClase('capacidad-selector', capacidadesIphone, "Seleccionar capacidad");
+        });
+
+        // Array para almacenar las ventas
+        let ventas = [];
+
+        // ========== NUEVA FUNCIONALIDAD: VARIABLE CAJA INICIAL ========== 
+        // Variable para almacenar la caja inicial
+        let cajaInicialGuardada = 0;
+        // ========== FIN NUEVA FUNCIONALIDAD: VARIABLE CAJA INICIAL ========== 
+
+        // ========== NUEVA FUNCIONALIDAD: VARIABLES MOVIMIENTOS ========== 
+        // Array para almacenar los movimientos
+        let movimientos = [];
+        let tipoMovimientoActual = '';
+        // ========== FIN NUEVA FUNCIONALIDAD: VARIABLES MOVIMIENTOS ========== 
+
+        // Mostrar/ocultar campos según selecciones
+        document.getElementById('forro').addEventListener('change', function() {
+            document.getElementById('forroModelo').classList.toggle('hidden', !this.checked);
+            if (this.checked) {
+                autoSeleccionarModelo('forroModelo');
+            }
+        });
+
+        document.getElementById('cargador').addEventListener('change', function() {
+            document.getElementById('cargadorCantidad').classList.toggle('hidden', !this.checked);
+        });
+
+        document.getElementById('vidrio').addEventListener('change', function() {
+            document.getElementById('vidrioModelo').classList.toggle('hidden', !this.checked);
+            if (this.checked) {
+                autoSeleccionarModelo('vidrioModelo');
+            }
+        });
+
+        document.getElementById('protectorCamara').addEventListener('change', function() {
+            document.getElementById('protectorCantidad').classList.toggle('hidden', !this.checked);
+        });
+
+        // 2️⃣0️⃣ Eventos para nuevos accesorios
+        document.getElementById('cubo').addEventListener('change', function() {
+            document.getElementById('cuboCantidad').classList.toggle('hidden', !this.checked);
+        });
+
+        document.getElementById('cableLightning').addEventListener('change', function() {
+            document.getElementById('cableLightningCantidad').classList.toggle('hidden', !this.checked);
+        });
+
+        document.getElementById('cableCC').addEventListener('change', function() {
+            document.getElementById('cableCCCantidad').classList.toggle('hidden', !this.checked);
+        });
+
+        document.getElementById('caja').addEventListener('change', function() {
+            document.getElementById('cajaModelo').classList.toggle('hidden', !this.checked);
+            if (this.checked) {
+                autoSeleccionarModelo('cajaModelo');
+                // 2️⃣0️⃣ Llenar selectores de la caja cuando se activa
+                const modeloSelect = document.querySelector('#cajaModelo select:first-child');
+                const colorSelect = document.querySelector('#cajaModelo select:nth-child(2)');
+                
+                /* llenarSelector(modeloSelect.id || 'temp-modelo', modelosIphone, "Modelo de la caja");
+                llenarSelector(colorSelect.id || 'temp-color', coloresIphone, "Color"); */
+                
+                // Asignar IDs temporales si no los tienen
+                /* if (!modeloSelect.id) modeloSelect.id = 'cajaModeloSelect';
+                if (!colorSelect.id) colorSelect.id = 'cajaColorSelect'; */
+            }
+        });
+
+        // Función para auto-seleccionar modelo de accesorio basado en el iPhone
+        function autoSeleccionarModelo(contenedorId) {
+            const modeloIphone = document.getElementById('modelo').value;
+            const selectAccesorio = document.querySelector(`#${contenedorId} select`);
+            
+            /* if (modeloIphone && selectAccesorio) {
+                let modeloAccesorio = '';
+                
+                if (modeloIphone.includes('iPhone 15')) {
+                    modeloAccesorio = '15';
+                    if (modeloIphone.includes('Pro')) modeloAccesorio = '15pro';
+                } else if (modeloIphone.includes('iPhone 14')) {
+                    modeloAccesorio = '14';
+                    if (modeloIphone.includes('Pro')) modeloAccesorio = '14pro';
+                } else if (modeloIphone.includes('iPhone 13')) {
+                    modeloAccesorio = '13';
+                    if (modeloIphone.includes('Pro Max')) modeloAccesorio = '13pm';
+                } else if (modeloIphone.includes('iPhone 12')) {
+                    modeloAccesorio = '12';
+                }
+                
+                if (modeloAccesorio) {
+                    selectAccesorio.value = modeloAccesorio;
+                }
+            } */
+            modelosIphone.forEach(modelo => {
+                if(modelo.valor === modeloIphone){
+                    selectAccesorio.value = modelo.valor;
+                }
+            });
+        }
+
+        // Mostrar/ocultar información de abono
+        document.querySelectorAll('input[name="tipoTransaccion"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const abonoInfo = document.getElementById('abonoInfo');
+                abonoInfo.classList.toggle('hidden', this.value !== 'abono');
+            });
+        });
+
+        // Mostrar/ocultar sección iPhone según tipo de venta
+        document.querySelectorAll('input[name="tipoVenta"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const infoIphone = document.getElementById('infoIphone');
+                if (this.value === 'accesorios') {
+                    infoIphone.style.display = 'none';
+                    // Limpiar campos requeridos del iPhone
+                    document.getElementById('modelo').removeAttribute('required');
+                    document.getElementById('almacenamiento').removeAttribute('required');
+                    document.getElementById('bateria').removeAttribute('required');
+                    document.getElementById('color').removeAttribute('required');
+                } else {
+                    infoIphone.style.display = 'block';
+                    document.getElementById('modelo').setAttribute('required', '');
+                    document.getElementById('almacenamiento').setAttribute('required', '');
+                    document.getElementById('bateria').setAttribute('required', '');
+                    document.getElementById('color').setAttribute('required', '');
+                }
+            });
+        });
+
+        document.querySelectorAll('input[name="formaPago"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.getElementById('pagoMixto').classList.toggle('hidden', this.value !== 'mixto');
+                document.getElementById('pagomovil-detalles').classList.toggle('hidden', this.value !== 'pagomovil');
+                document.getElementById('transferencia-detalles').classList.toggle('hidden', this.value !== 'transferencia');
+            });
+        });
+
+        // Control para mostrar/ocultar formulario de equipo recibido
+        document.getElementById('recibirEquipo').addEventListener('change', function() {
+            document.getElementById('equipoRecibidoForm').classList.toggle('hidden', !this.checked);
+        });
+
+        // ========== NUEVA FUNCIONALIDAD: EVENTOS CAJA INICIAL ========== 
+        // Manejar guardado de caja inicial
+        document.getElementById('guardarCajaInicial').addEventListener('click', function() {
+            const valor = parseFloat(document.getElementById('cajaInicial').value) || 0;
+            cajaInicialGuardada = valor;
+            
+            // Mostrar confirmación
+            document.getElementById('cajaInicialConfirmacion').classList.remove('hidden');
+            document.getElementById('cajaInicialMostrar').textContent = valor.toFixed(2);
+            
+            // Cambiar estilo del botón temporalmente
+            this.innerHTML = '✅ Guardado';
+            this.classList.remove('bg-green-600', 'hover:bg-green-700');
+            this.classList.add('bg-green-800');
+            
+            setTimeout(() => {
+                this.innerHTML = '💾 Guardar';
+                this.classList.remove('bg-green-800');
+                this.classList.add('bg-green-600', 'hover:bg-green-700');
+            }, 2000);
+            
+            // Actualizar caja final
+            actualizarResumen();
+        });
+
+        // Resetear confirmación cuando se cambia el valor
+        document.getElementById('cajaInicial').addEventListener('input', function() {
+            document.getElementById('cajaInicialConfirmacion').classList.add('hidden');
+            const btn = document.getElementById('guardarCajaInicial');
+            btn.innerHTML = '💾 Guardar';
+            btn.classList.remove('bg-green-800');
+            btn.classList.add('bg-green-600', 'hover:bg-green-700');
+        });
+        // ========== FIN NUEVA FUNCIONALIDAD: EVENTOS CAJA INICIAL ========== 
+
+        // ========== NUEVA FUNCIONALIDAD: EVENTOS MOVIMIENTOS ========== 
+        // Eventos para botones de movimientos
+        document.getElementById('btnSalidaEfectivo').addEventListener('click', () => mostrarFormularioMovimiento('salidaEfectivo'));
+        document.getElementById('btnSalidaEquipo').addEventListener('click', () => mostrarFormularioMovimiento('salidaEquipo'));
+        document.getElementById('btnSalidaAccesorio').addEventListener('click', () => mostrarFormularioMovimiento('salidaAccesorio'));
+        document.getElementById('btnCompraEquipo').addEventListener('click', () => mostrarFormularioMovimiento('compraEquipo'));
+
+        document.getElementById('btnIngresoEquipo').addEventListener('click', () => mostrarFormularioMovimiento('ingresoEquipo'));
+        document.getElementById('btnIngresoAccesorio').addEventListener('click', () => mostrarFormularioMovimiento('ingresoAccesorio'));
+
+        // Eventos para botones de acción de movimientos
+        document.getElementById('guardarMovimiento').addEventListener('click', guardarMovimiento);
+        document.getElementById('cancelarMovimiento').addEventListener('click', cancelarMovimiento);
+
+        // Eventos para mostrar campos personalizados de destino
+        document.getElementById('salidaEquipoDestino').addEventListener('change', function() {
+            const personalizado = document.getElementById('salidaEquipoDestinoPersonalizado');
+            personalizado.classList.toggle('hidden', this.value !== 'Otro');
+            if (this.value !== 'Otro') personalizado.value = '';
+        });
+
+        document.getElementById('salidaAccesorioDestino').addEventListener('change', function() {
+            const personalizado = document.getElementById('salidaAccesorioDestinoPersonalizado');
+            personalizado.classList.toggle('hidden', this.value !== 'Otro');
+            if (this.value !== 'Otro') personalizado.value = '';
+        });
+
+        // Evento para mostrar campo personalizado de origen
+        document.getElementById('ingresoEquipoOrigen').addEventListener('change', function() {
+            const personalizado = document.getElementById('ingresoEquipoOrigenPersonalizado');
+            personalizado.classList.toggle('hidden', this.value !== 'Otro');
+            if (this.value !== 'Otro') personalizado.value = '';
+        });
+
+        // Eventos para mostrar formularios específicos de accesorios (INGRESO)
+        document.getElementById('ingresoAccesorioTipo').addEventListener('change', function() {
+            // Ocultar todos los formularios específicos
+            document.querySelectorAll('[id^="ingreso"][id$="Detalles"]').forEach(form => {
+                form.classList.add('hidden');
+            });
+            
+            // Mostrar el formulario correspondiente
+            const tipo = this.value;
+            if (tipo) {
+                const formId = `ingreso${tipo.replace(' ', '')}Detalles`;
+                const form = document.getElementById(formId);
+                if (form) {
+                    form.classList.remove('hidden');
+                    
+                    // Generar campos dinámicos para forro, vidrio, caja y protector de cámara
+                    if (tipo === 'Forro') {
+                        generarCamposModelos('ingresoForro');
+                    } else if (tipo === 'Vidrio Templado') {
+                        generarCamposModelos('ingresoVidrioTemplado');
+                    } else if (tipo === 'Caja') {
+                        generarCamposModelosCaja('ingresoCaja');
+                    } else if (tipo === 'Protector de Cámara') {
+                        generarCamposModelos('ingresoProtectordeCámara');
+                    }
+                }
+            }
+        });
+
+        // Eventos para mostrar formularios específicos de accesorios (SALIDA)
+        document.getElementById('salidaAccesorioTipo').addEventListener('change', function() {
+            // Ocultar todos los formularios específicos
+            document.querySelectorAll('[id^="salida"][id$="Detalles"]').forEach(form => {
+                form.classList.add('hidden');
+            });
+            
+            // Mostrar el formulario correspondiente
+            const tipo = this.value;
+            if (tipo) {
+                const formId = `salida${tipo.replace(' ', '')}Detalles`;
+                const form = document.getElementById(formId);
+                if (form) {
+                    form.classList.remove('hidden');
+                    
+                    // Generar campos dinámicos para forro, vidrio, caja y protector de cámara
+                    if (tipo === 'Forro') {
+                        generarCamposModelos('salidaForro');
+                    } else if (tipo === 'Vidrio Templado') {
+                        generarCamposModelos('salidaVidrioTemplado');
+                    } else if (tipo === 'Caja') {
+                        generarCamposModelosCaja('salidaCaja');
+                    } else if (tipo === 'Protector de Cámara') {
+                        generarCamposModelos('salidaProtectordeCámara');
+                    }
+                }
+            }
+        });
+
+        // Eventos para cambio de cantidad de modelos
+        document.getElementById('ingresoForroCantidadModelos').addEventListener('change', function() {
+            generarCamposModelos('ingresoForro');
+        });
+        document.getElementById('ingresoVidrioTempladoCantidadModelos').addEventListener('change', function() {
+            generarCamposModelos('ingresoVidrioTemplado');
+        });
+        document.getElementById('salidaForroCantidadModelos').addEventListener('change', function() {
+            generarCamposModelos('salidaForro');
+        });
+        document.getElementById('salidaVidrioTempladoCantidadModelos').addEventListener('change', function() {
+            generarCamposModelos('salidaVidrioTemplado');
+        });
+        document.getElementById('ingresoCajaCantidadModelos').addEventListener('change', function() {
+            generarCamposModelosCaja('ingresoCaja');
+        });
+        document.getElementById('salidaCajaCantidadModelos').addEventListener('change', function() {
+            generarCamposModelosCaja('salidaCaja');
+        });
+        document.getElementById('ingresoProtectordeCámaraCantidadModelos').addEventListener('change', function() {
+            generarCamposModelos('ingresoProtectordeCámara');
+        });
+        document.getElementById('salidaProtectordeCámaraCantidadModelos').addEventListener('change', function() {
+            generarCamposModelos('salidaProtectordeCámara');
+        });
+
+        // Función para generar campos dinámicos de modelos
+        function generarCamposModelos(prefijo) {
+            const cantidadSelect = document.getElementById(`${prefijo}CantidadModelos`);
+            const contenedor = document.getElementById(`${prefijo}Modelos`);
+            const cantidad = parseInt(cantidadSelect.value) || 1;
+            
+            let html = '';
+            for (let i = 1; i <= cantidad; i++) {
+                html += `
+                    <div class="grid grid-cols-2 gap-3 mb-3 p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Modelo ${i}</label>
+                            <select class="${prefijo}Modelo" data-index="${i}" class="w-full p-2 border border-gray-300 rounded-lg text-sm">
+                                
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Cantidad</label>
+                            <input type="number" class="${prefijo}Cantidad" data-index="${i}" min="1" class="w-full p-2 border border-gray-300 rounded-lg text-sm" placeholder="1">
+                        </div>
+                    </div>
+                `;
+            }
+            contenedor.innerHTML = html;
+            llenarSelectoresPorClase(`${prefijo}Modelo`, modelosIphone, "Seleccionar ...");
+        }
+
+        // Función para generar campos dinámicos de cajas (con modelo y color)
+        function generarCamposModelosCaja(prefijo) {
+            const cantidadSelect = document.getElementById(`${prefijo}CantidadModelos`);
+            const contenedor = document.getElementById(`${prefijo}Modelos`);
+            const cantidad = parseInt(cantidadSelect.value) || 1;
+            
+            let html = '';
+            for (let i = 1; i <= cantidad; i++) {
+                html += `
+                    <div class="grid grid-cols-3 gap-3 mb-3 p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Modelo ${i}</label>
+                            <select class="${prefijo}Modelo" data-index="${i}" class="w-full p-2 border border-gray-300 rounded-lg text-sm">
+                                
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Color</label>
+                            <select class="${prefijo}Color" data-index="${i}" class="w-full p-2 border border-gray-300 rounded-lg text-sm" placeholder="Color"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Cantidad</label>
+                            <input type="number" class="${prefijo}Cantidad" data-index="${i}" min="1" class="w-full p-2 border border-gray-300 rounded-lg text-sm" placeholder="1">
+                        </div>
+                    </div>
+                `;
+            }
+            contenedor.innerHTML = html;
+            llenarSelectoresPorClase(`${prefijo}Modelo`, modelosIphone, "Seleccionar ...");
+            llenarSelectoresPorClase(`${prefijo}Color`, coloresIphone, "Seleccionar ...");
+        }
+
+        // Función para mostrar formulario de movimiento
+        function mostrarFormularioMovimiento(tipo) {
+            tipoMovimientoActual = tipo;
+            
+            // Ocultar todos los formularios
+            document.querySelectorAll('.movimiento-form').forEach(form => {
+                form.classList.add('hidden');
+            });
+            
+            // Remover selección de todos los botones
+            document.querySelectorAll('.movimiento-btn').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'bg-blue-200');
+            });
+            
+            // Mostrar el formulario seleccionado
+            document.getElementById(`form${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`).classList.remove('hidden');
+            document.getElementById('movimientoForms').classList.remove('hidden');
+            
+            // Marcar botón como seleccionado
+            document.getElementById(`btn${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`).classList.add('border-blue-500', 'bg-blue-200');
+        }
+
+        // Función para guardar movimiento
+        function guardarMovimiento() {
+            if (!tipoMovimientoActual) return;
+            
+            let movimiento = {
+                tipo: tipoMovimientoActual,
+                fecha: new Date().toLocaleDateString('es-ES'),
+                hora: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+            };
+            
+            let esValido = true;
+            
+            try {
+                switch (tipoMovimientoActual) {
+                    case 'salidaEfectivo':
+                        const monto = parseFloat(document.getElementById('salidaEfectivoMonto').value);
+                        const persona = document.getElementById('salidaEfectivoPersona').value.trim();
+                        const nota = document.getElementById('salidaEfectivoNota').value.trim();
+                        
+                        if (!monto || monto <= 0 || !persona || !nota) {
+                            alert('Por favor complete todos los campos requeridos');
+                            return;
+                        }
+                        
+                        movimiento.datos = { monto, persona, nota };
+                        break;
+                        
+                    case 'salidaEquipo':
+                        const modelo = document.getElementById('salidaEquipoModelo').value;
+                        const capacidad = document.getElementById('salidaEquipoCapacidad').value;
+                        const color = document.getElementById('salidaEquipoColor').value.trim();
+                        const imei = document.getElementById('salidaEquipoImei').value.trim();
+                        let destino = document.getElementById('salidaEquipoDestino').value;
+                        const personaEquipo = document.getElementById('salidaEquipoPersona').value.trim();
+                        const notaEquipo = document.getElementById('salidaEquipoNota').value.trim();
+                        
+                        // Si es "Otro", usar el destino personalizado
+                        if (destino === 'Otro') {
+                            const destinoPersonalizado = document.getElementById('salidaEquipoDestinoPersonalizado').value.trim();
+                            if (!destinoPersonalizado) {
+                                alert('Por favor especifique el destino personalizado');
+                                return;
+                            }
+                            destino = destinoPersonalizado;
+                        }
+                        
+                        if (!modelo || !capacidad || !color || !destino || !personaEquipo) {
+                            alert('Por favor complete todos los campos requeridos');
+                            return;
+                        }
+                        
+                        movimiento.datos = { modelo, capacidad, color, imei, destino, persona: personaEquipo, nota: notaEquipo };
+                        break;
+                        
+                    case 'salidaAccesorio':
+                        const tipoAcc = document.getElementById('salidaAccesorioTipo').value;
+                        let destinoAcc = document.getElementById('salidaAccesorioDestino').value;
+                        
+                        // Si es "Otro", usar el destino personalizado
+                        if (destinoAcc === 'Otro') {
+                            const destinoPersonalizado = document.getElementById('salidaAccesorioDestinoPersonalizado').value.trim();
+                            if (!destinoPersonalizado) {
+                                alert('Por favor especifique el destino personalizado');
+                                return;
+                            }
+                            destinoAcc = destinoPersonalizado;
+                        }
+                        
+                        if (!tipoAcc || !destinoAcc) {
+                            alert('Por favor complete todos los campos requeridos');
+                            return;
+                        }
+                        
+                        // Recopilar datos específicos según el tipo
+                        let datosEspecificos = {};
+                        
+                        if (tipoAcc === 'Forro' || tipoAcc === 'Vidrio Templado' || tipoAcc === 'Protector de Cámara') {
+                            let prefijo = '';
+                            if (tipoAcc === 'Forro') prefijo = 'salidaForro';
+                            else if (tipoAcc === 'Vidrio Templado') prefijo = 'salidaVidrioTemplado';
+                            else if (tipoAcc === 'Protector de Cámara') prefijo = 'salidaProtectordeCámara';
+                            
+                            const modelos = document.querySelectorAll(`.${prefijo}Modelo`);
+                            const cantidades = document.querySelectorAll(`.${prefijo}Cantidad`);
+                            
+                            datosEspecificos.modelos = [];
+                            for (let i = 0; i < modelos.length; i++) {
+                                const modelo = modelos[i].value;
+                                const cantidad = parseInt(cantidades[i].value) || 0;
+                                if (modelo && cantidad > 0) {
+                                    datosEspecificos.modelos.push({ modelo, cantidad });
+                                }
+                            }
+                            
+                            if (datosEspecificos.modelos.length === 0) {
+                                alert('Por favor complete al menos un modelo con cantidad');
+                                return;
+                            }
+                        } else if (tipoAcc === 'Cargador') {
+                            datosEspecificos.cantidad = parseInt(document.getElementById('salidaCargadorCantidad').value) || 0;
+                            datosEspecificos.modelo = document.getElementById('salidaCargadorModelo').value.trim();
+                            if (datosEspecificos.cantidad <= 0) {
+                                alert('Por favor ingrese una cantidad válida');
+                                return;
+                            }
+                        } else if (tipoAcc === 'Cable') {
+                            datosEspecificos.tipo = document.getElementById('salidaCableTipo').value;
+                            datosEspecificos.cantidad = parseInt(document.getElementById('salidaCableCantidad').value) || 0;
+                            if (!datosEspecificos.tipo || datosEspecificos.cantidad <= 0) {
+                                alert('Por favor complete el tipo y cantidad del cable');
+                                return;
+                            }
+                        } else if (tipoAcc === 'Cubo') {
+                            datosEspecificos.cantidad = parseInt(document.getElementById('salidaCuboCantidad').value) || 0;
+                            datosEspecificos.descripcion = document.getElementById('salidaCuboDescripcion').value.trim();
+                            if (datosEspecificos.cantidad <= 0) {
+                                alert('Por favor ingrese una cantidad válida');
+                                return;
+                            }
+                        } else if (tipoAcc === 'Caja') {
+                            const modelos = document.querySelectorAll('.salidaCajaModelo');
+                            const colores = document.querySelectorAll('.salidaCajaColor');
+                            const cantidades = document.querySelectorAll('.salidaCajaCantidad');
+                            
+                            datosEspecificos.modelos = [];
+                            for (let i = 0; i < modelos.length; i++) {
+                                const modelo = modelos[i].value;
+                                const color = colores[i].value.trim();
+                                const cantidad = parseInt(cantidades[i].value) || 0;
+                                if (modelo && color && cantidad > 0) {
+                                    datosEspecificos.modelos.push({ modelo, color, cantidad });
+                                }
+                            }
+                            
+                            if (datosEspecificos.modelos.length === 0) {
+                                alert('Por favor complete al menos un modelo con color y cantidad');
+                                return;
+                            }
+                        } else if (tipoAcc === 'Otro') {
+                            datosEspecificos.cantidad = parseInt(document.getElementById('salidaOtroCantidad').value) || 0;
+                            datosEspecificos.descripcion = document.getElementById('salidaOtroDescripcion').value.trim();
+                            if (datosEspecificos.cantidad <= 0 || !datosEspecificos.descripcion) {
+                                alert('Por favor complete la cantidad y descripción');
+                                return;
+                            }
+                        }
+                        
+                        movimiento.datos = { tipo: tipoAcc, destino: destinoAcc, ...datosEspecificos };
+                        break;
+                        
+                    case 'compraEquipo':
+                        const modeloCompra = document.getElementById('compraEquipoModelo').value;
+                        const capacidadCompra = document.getElementById('compraEquipoCapacidad').value;
+                        const colorCompra = document.getElementById('compraEquipoColor').value.trim();
+                        const bateriaCompra = document.getElementById('compraEquipoBateria').value;
+                        const imeiCompra = document.getElementById('compraEquipoImei').value.trim();
+                        const precioCompra = parseFloat(document.getElementById('compraEquipoPrecio').value);
+                        const proveedorCompra = document.getElementById('compraEquipoProveedor').value.trim();
+                        const estadoCompra = document.getElementById('compraEquipoEstado').value;
+                        const notaCompra = document.getElementById('compraEquipoNota').value.trim();
+                        
+                        if (!modeloCompra || !capacidadCompra || !colorCompra || !precioCompra || precioCompra <= 0 || !proveedorCompra || !estadoCompra) {
+                            alert('Por favor complete todos los campos requeridos');
+                            return;
+                        }
+                        
+                        movimiento.datos = { 
+                            modelo: modeloCompra, 
+                            capacidad: capacidadCompra, 
+                            color: colorCompra, 
+                            bateria: bateriaCompra, 
+                            imei: imeiCompra, 
+                            precio: precioCompra, 
+                            proveedor: proveedorCompra, 
+                            estado: estadoCompra, 
+                            nota: notaCompra 
+                        };
+                        break;
+                        
+                    case 'ingresoEquipo':
+                        const modeloIngreso = document.getElementById('ingresoEquipoModelo').value;
+                        const capacidadIngreso = document.getElementById('ingresoEquipoCapacidad').value;
+                        const colorIngreso = document.getElementById('ingresoEquipoColor').value.trim();
+                        const imeiIngreso = document.getElementById('ingresoEquipoImei').value.trim();
+                        let origenIngreso = document.getElementById('ingresoEquipoOrigen').value;
+                        const notaIngreso = document.getElementById('ingresoEquipoNota').value.trim();
+                        
+                        // Si es "Otro", usar el origen personalizado
+                        if (origenIngreso === 'Otro') {
+                            const origenPersonalizado = document.getElementById('ingresoEquipoOrigenPersonalizado').value.trim();
+                            if (!origenPersonalizado) {
+                                alert('Por favor especifique el origen personalizado');
+                                return;
+                            }
+                            origenIngreso = origenPersonalizado;
+                        }
+                        
+                        if (!modeloIngreso || !capacidadIngreso || !colorIngreso || !origenIngreso) {
+                            alert('Por favor complete todos los campos requeridos');
+                            return;
+                        }
+                        
+                        movimiento.datos = { 
+                            modelo: modeloIngreso, 
+                            capacidad: capacidadIngreso, 
+                            color: colorIngreso, 
+                            imei: imeiIngreso, 
+                            origen: origenIngreso, 
+                            nota: notaIngreso 
+                        };
+                        break;
+                        
+                    case 'ingresoAccesorio':
+                        const tipoAccIngreso = document.getElementById('ingresoAccesorioTipo').value;
+                        const proveedorAccIngreso = document.getElementById('ingresoAccesorioProveedor').value.trim();
+                        
+                        if (!tipoAccIngreso || !proveedorAccIngreso) {
+                            alert('Por favor complete el tipo de accesorio y proveedor');
+                            return;
+                        }
+                        
+                        // Recopilar datos específicos según el tipo
+                        let datosEspecificosIngreso = {};
+                        
+                        if (tipoAccIngreso === 'Forro' || tipoAccIngreso === 'Vidrio Templado' || tipoAccIngreso === 'Protector de Cámara') {
+                            let prefijo = '';
+                            if (tipoAccIngreso === 'Forro') prefijo = 'ingresoForro';
+                            else if (tipoAccIngreso === 'Vidrio Templado') prefijo = 'ingresoVidrioTemplado';
+                            else if (tipoAccIngreso === 'Protector de Cámara') prefijo = 'ingresoProtectordeCámara';
+                            
+                            const modelos = document.querySelectorAll(`.${prefijo}Modelo`);
+                            const cantidades = document.querySelectorAll(`.${prefijo}Cantidad`);
+                            
+                            datosEspecificosIngreso.modelos = [];
+                            for (let i = 0; i < modelos.length; i++) {
+                                const modelo = modelos[i].value;
+                                const cantidad = parseInt(cantidades[i].value) || 0;
+                                if (modelo && cantidad > 0) {
+                                    datosEspecificosIngreso.modelos.push({ modelo, cantidad });
+                                }
+                            }
+                            
+                            if (datosEspecificosIngreso.modelos.length === 0) {
+                                alert('Por favor complete al menos un modelo con cantidad');
+                                return;
+                            }
+                        } else if (tipoAccIngreso === 'Cargador') {
+                            datosEspecificosIngreso.cantidad = parseInt(document.getElementById('ingresoCargadorCantidad').value) || 0;
+                            datosEspecificosIngreso.modelo = document.getElementById('ingresoCargadorModelo').value.trim();
+                            if (datosEspecificosIngreso.cantidad <= 0) {
+                                alert('Por favor ingrese una cantidad válida');
+                                return;
+                            }
+                        } else if (tipoAccIngreso === 'Cable') {
+                            datosEspecificosIngreso.tipo = document.getElementById('ingresoCableTipo').value;
+                            datosEspecificosIngreso.cantidad = parseInt(document.getElementById('ingresoCableCantidad').value) || 0;
+                            if (!datosEspecificosIngreso.tipo || datosEspecificosIngreso.cantidad <= 0) {
+                                alert('Por favor complete el tipo y cantidad del cable');
+                                return;
+                            }
+                        } else if (tipoAccIngreso === 'Cubo') {
+                            datosEspecificosIngreso.cantidad = parseInt(document.getElementById('ingresoCuboCantidad').value) || 0;
+                            datosEspecificosIngreso.descripcion = document.getElementById('ingresoCuboDescripcion').value.trim();
+                            if (datosEspecificosIngreso.cantidad <= 0) {
+                                alert('Por favor ingrese una cantidad válida');
+                                return;
+                            }
+                        } else if (tipoAccIngreso === 'Caja') {
+                            const modelos = document.querySelectorAll('.ingresoCajaModelo');
+                            const colores = document.querySelectorAll('.ingresoCajaColor');
+                            const cantidades = document.querySelectorAll('.ingresoCajaCantidad');
+                            
+                            datosEspecificosIngreso.modelos = [];
+                            for (let i = 0; i < modelos.length; i++) {
+                                const modelo = modelos[i].value;
+                                const color = colores[i].value.trim();
+                                const cantidad = parseInt(cantidades[i].value) || 0;
+                                if (modelo && color && cantidad > 0) {
+                                    datosEspecificosIngreso.modelos.push({ modelo, color, cantidad });
+                                }
+                            }
+                            
+                            if (datosEspecificosIngreso.modelos.length === 0) {
+                                alert('Por favor complete al menos un modelo con color y cantidad');
+                                return;
+                            }
+                        } else if (tipoAccIngreso === 'Otro') {
+                            datosEspecificosIngreso.cantidad = parseInt(document.getElementById('ingresoOtroCantidad').value) || 0;
+                            datosEspecificosIngreso.descripcion = document.getElementById('ingresoOtroDescripcion').value.trim();
+                            if (datosEspecificosIngreso.cantidad <= 0 || !datosEspecificosIngreso.descripcion) {
+                                alert('Por favor complete la cantidad y descripción');
+                                return;
+                            }
+                        }
+                        
+                        movimiento.datos = { 
+                            tipo: tipoAccIngreso, 
+                            proveedor: proveedorAccIngreso, 
+                            ...datosEspecificosIngreso 
+                        };
+                        break;
+                }
+                
+                // Agregar movimiento al array
+                movimientos.push(movimiento);
+                
+                // Limpiar formulario y ocultar
+                cancelarMovimiento();
+                
+                // Actualizar resumen
+                actualizarResumenMovimientos();
+                actualizarResumen(); // Para actualizar caja final si es salida de efectivo
+                
+                alert('✅ Movimiento registrado exitosamente!');
+                
+            } catch (error) {
+                alert('❌ Error al registrar el movimiento. Verifique los datos.');
+                console.error(error);
+            }
+        }
+
+        // Función para cancelar movimiento
+        function cancelarMovimiento() {
+            // Limpiar todos los formularios
+            document.querySelectorAll('.movimiento-form input, .movimiento-form select, .movimiento-form textarea').forEach(field => {
+                field.value = '';
+            });
+            
+            // Ocultar formularios
+            document.getElementById('movimientoForms').classList.add('hidden');
+            document.querySelectorAll('.movimiento-form').forEach(form => {
+                form.classList.add('hidden');
+            });
+            
+            // Remover selección de botones
+            document.querySelectorAll('.movimiento-btn').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'bg-blue-200');
+            });
+            
+            tipoMovimientoActual = '';
+        }
+
+        // Función para actualizar resumen de movimientos
+        function actualizarResumenMovimientos() {
+            const resumen = document.getElementById('resumenMovimientos');
+            
+            if (movimientos.length === 0) {
+                resumen.innerHTML = '<p class="text-gray-600">No hay movimientos registrados hoy.</p>';
+                return;
+            }
+            
+            let html = '';
+            
+            movimientos.forEach((mov, index) => {
+                let icono = '';
+                let colorClass = '';
+                let titulo = '';
+                let detalles = '';
+                
+                switch (mov.tipo) {
+                    case 'salidaEfectivo':
+                        icono = '💸';
+                        colorClass = 'bg-red-50 border-red-200';
+                        titulo = `Salida de Efectivo - $${mov.datos.monto}`;
+                        detalles = `<p><strong>Retirado por:</strong> ${mov.datos.persona}</p><p><strong>Motivo:</strong> ${mov.datos.nota}</p>`;
+                        break;
+                    case 'salidaEquipo':
+                        icono = '📱➡️';
+                        colorClass = 'bg-orange-50 border-orange-200';
+                        titulo = `Salida de Equipo - ${mov.datos.modelo}`;
+                        detalles = `<p><strong>Equipo:</strong> ${mov.datos.modelo} ${mov.datos.capacidad} ${mov.datos.color}</p><p><strong>Destino:</strong> ${mov.datos.destino}</p><p><strong>Retirado por:</strong> ${mov.datos.persona}</p>${mov.datos.imei ? `<p><strong>IMEI:</strong> ${mov.datos.imei}</p>` : ''}${mov.datos.nota ? `<p><strong>Nota:</strong> ${mov.datos.nota}</p>` : ''}`;
+                        break;
+                    case 'salidaAccesorio':
+                        icono = '🛡️➡️';
+                        colorClass = 'bg-yellow-50 border-yellow-200';
+                        titulo = `Salida de Accesorio - ${mov.datos.tipo}`;
+                        
+                        // Generar detalles específicos para accesorios con múltiples modelos
+                        let detallesAccesorios = '';
+                        if (mov.datos.modelos && mov.datos.modelos.length > 0) {
+                            if (mov.datos.tipo === 'Caja') {
+                                // Para cajas mostrar modelo, color y cantidad
+                                const modelosTexto = mov.datos.modelos.map(m => `${m.modelo} ${m.color} (${m.cantidad})`).join(', ');
+                                detallesAccesorios = `<p><strong>Modelos:</strong> ${modelosTexto}</p>`;
+                            } else {
+                                // Para forro, vidrio templado y protector de cámara
+                                const modelosTexto = mov.datos.modelos.map(m => `${m.modelo} (${m.cantidad})`).join(', ');
+                                detallesAccesorios = `<p><strong>Modelos:</strong> ${modelosTexto}</p>`;
+                            }
+                        } else if (mov.datos.cantidad) {
+                            detallesAccesorios = `<p><strong>Cantidad:</strong> ${mov.datos.cantidad}</p>`;
+                        }
+                        
+                        detalles = `<p><strong>Tipo:</strong> ${mov.datos.tipo}</p>${detallesAccesorios}<p><strong>Destino:</strong> ${mov.datos.destino}</p>${mov.datos.descripcion ? `<p><strong>Descripción:</strong> ${mov.datos.descripcion}</p>` : ''}`;
+                        break;
+                    case 'compraEquipo':
+                        icono = '📱⬅️';
+                        colorClass = 'bg-green-50 border-green-200';
+                        titulo = `Compra de Equipo - ${mov.datos.modelo}`;
+                        detalles = `<p><strong>Equipo:</strong> ${mov.datos.modelo} ${mov.datos.capacidad} ${mov.datos.color}</p><p><strong>Precio:</strong> $${mov.datos.precio}</p><p><strong>Proveedor:</strong> ${mov.datos.proveedor}</p><p><strong>Estado:</strong> ${mov.datos.estado}</p>${mov.datos.bateria ? `<p><strong>Batería:</strong> ${mov.datos.bateria}%</p>` : ''}${mov.datos.imei ? `<p><strong>IMEI:</strong> ${mov.datos.imei}</p>` : ''}${mov.datos.nota ? `<p><strong>Observaciones:</strong> ${mov.datos.nota}</p>` : ''}`;
+                        break;
+                    case 'ingresoEquipo':
+                        icono = '📱⬅️';
+                        colorClass = 'bg-teal-50 border-teal-200';
+                        titulo = `Ingreso de Equipo - ${mov.datos.modelo}`;
+                        detalles = `<p><strong>Equipo:</strong> ${mov.datos.modelo} ${mov.datos.capacidad} ${mov.datos.color}</p><p><strong>Origen:</strong> ${mov.datos.origen}</p>${mov.datos.imei ? `<p><strong>IMEI:</strong> ${mov.datos.imei}</p>` : ''}${mov.datos.nota ? `<p><strong>Notas:</strong> ${mov.datos.nota}</p>` : ''}`;
+                        break;
+                    case 'ingresoAccesorio':
+                        icono = '🛡️⬅️';
+                        colorClass = 'bg-purple-50 border-purple-200';
+                        titulo = `Ingreso de Accesorio - ${mov.datos.tipo}`;
+                        
+                        // Generar detalles específicos para accesorios con múltiples modelos
+                        let detallesAccesoriosIngreso = '';
+                        if (mov.datos.modelos && mov.datos.modelos.length > 0) {
+                            if (mov.datos.tipo === 'Caja') {
+                                // Para cajas mostrar modelo, color y cantidad
+                                const modelosTexto = mov.datos.modelos.map(m => `${m.modelo} ${m.color} (${m.cantidad})`).join(', ');
+                                detallesAccesoriosIngreso = `<p><strong>Modelos:</strong> ${modelosTexto}</p>`;
+                            } else {
+                                // Para forro, vidrio templado y protector de cámara
+                                const modelosTexto = mov.datos.modelos.map(m => `${m.modelo} (${m.cantidad})`).join(', ');
+                                detallesAccesoriosIngreso = `<p><strong>Modelos:</strong> ${modelosTexto}</p>`;
+                            }
+                        } else if (mov.datos.cantidad) {
+                            detallesAccesoriosIngreso = `<p><strong>Cantidad:</strong> ${mov.datos.cantidad}</p>`;
+                        }
+                        
+                        detalles = `<p><strong>Tipo:</strong> ${mov.datos.tipo}</p>${detallesAccesoriosIngreso}<p><strong>Proveedor:</strong> ${mov.datos.proveedor}</p>${mov.datos.descripcion ? `<p><strong>Descripción:</strong> ${mov.datos.descripcion}</p>` : ''}`;
+                        break;
+                }
+                
+                html += `
+                    <div class="border rounded-lg p-4 ${colorClass}">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-semibold text-gray-800">${icono} ${titulo}</h4>
+                            <span class="text-xs text-gray-500">${mov.hora}</span>
+                        </div>
+                        <div class="text-sm text-gray-700">
+                            ${detalles}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            resumen.innerHTML = html;
+        }
+        // ========== FIN NUEVA FUNCIONALIDAD: EVENTOS MOVIMIENTOS ========== 
+
+        // Calcular total automático en pago mixto
+        const camposMixto = ['montoEfectivo', 'montoZelle', 'montoBinance', 'montoPagoMovilDolares', 'montoTransferenciaDolares'];
+        camposMixto.forEach(campo => {
+            document.getElementById(campo).addEventListener('input', calcularTotalMixto);
+        });
+
+        // Mostrar detalles automáticamente cuando se ingresa monto en pago mixto
+        document.getElementById('montoPagoMovilDolares').addEventListener('input', function() {
+            const valor = parseFloat(this.value) || 0;
+            if (valor > 0) {
+                document.getElementById('pagomovil-detalles').classList.remove('hidden');
+                // Sincronizar el valor
+                document.getElementById('pagomovilDolares').value = valor;
+            } else {
+                document.getElementById('pagomovil-detalles').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('montoTransferenciaDolares').addEventListener('input', function() {
+            const valor = parseFloat(this.value) || 0;
+            if (valor > 0) {
+                document.getElementById('transferencia-detalles').classList.remove('hidden');
+                // Sincronizar el valor
+                document.getElementById('transferenciaDolares').value = valor;
+            } else {
+                document.getElementById('transferencia-detalles').classList.add('hidden');
+            }
+        });
+
+        function calcularTotalMixto() {
+            let total = 0;
+            camposMixto.forEach(campo => {
+                const valor = parseFloat(document.getElementById(campo).value) || 0;
+                total += valor;
+            });
+            document.getElementById('totalMixto').textContent = total.toFixed(2);
+            calcularTotalGeneral();
+        }
+
+        let anterior = 0;
+        // Calcular total general incluyendo equipo recibido
+        function calcularTotalGeneral() {
+            let total = 0;
+            
+            // Obtener total según método de pago
+            const formaPago = document.querySelector('input[name="formaPago"]:checked');
+            if (formaPago) {
+                if (formaPago.value === 'mixto') {
+                    total = parseFloat(document.getElementById('totalMixto').textContent) || 0;
+                } else if (formaPago.value === 'pagomovil') {
+                    total = parseFloat(document.getElementById('pagomovilDolares').value) || 0;
+                } else if (formaPago.value === 'transferencia') {
+                    total = parseFloat(document.getElementById('transferenciaDolares').value) || 0;
+                } else {
+                    total = parseFloat(document.getElementById('montoTotal').value) || 0;
+                }
+            }
+            
+            // Agregar valor del equipo recibido si existe
+            if (document.getElementById('recibirEquipo').checked) {
+                //const valorEquipo = parseFloat(document.getElementById('equipoValor').value) || 0;
+                //total += valorEquipo;
+                //document.getElementById('equipoValor').addEventListener('input', function() {
+                    const valorEquipo = parseFloat(this.value) || 0;
+                    console.log(total);
+                    let ttotal = total
+                    //ttotal += valorEquipo;
+                    document.getElementById('montoTotal').value = (ttotal - anterior + valorEquipo).toFixed(2);
+                    anterior = valorEquipo;
+                //});
+            }
+            
+            //document.getElementById('montoTotal').value = total.toFixed(2);
+        }
+
+        // Agregar listeners para cálculo automático
+        document.getElementById('pagomovilDolares').addEventListener('input', calcularTotalGeneral);
+        document.getElementById('transferenciaDolares').addEventListener('input', calcularTotalGeneral);
+        document.getElementById('equipoValor').addEventListener('input', calcularTotalGeneral);
+
+        // Calcular bolívares automáticamente
+        document.getElementById('pagomovilDolares').addEventListener('input', function() {
+            const dolares = parseFloat(this.value) || 0;
+            const tasa = parseFloat(document.getElementById('pagomovilTasa').value) || 0;
+            if (dolares && tasa) {
+                document.getElementById('pagomovilBolivares').value = (dolares * tasa).toFixed(2);
+            }
+        });
+
+        document.getElementById('pagomovilTasa').addEventListener('input', function() {
+            const dolares = parseFloat(document.getElementById('pagomovilDolares').value) || 0;
+            const tasa = parseFloat(this.value) || 0;
+            if (dolares && tasa) {
+                document.getElementById('pagomovilBolivares').value = (dolares * tasa).toFixed(2);
+            }
+        });
+
+        document.getElementById('transferenciaDolares').addEventListener('input', function() {
+            const dolares = parseFloat(this.value) || 0;
+            const tasa = parseFloat(document.getElementById('transferenciaTasa').value) || 0;
+            if (dolares && tasa) {
+                document.getElementById('transferenciaBolivares').value = (dolares * tasa).toFixed(2);
+            }
+        });
+
+        document.getElementById('transferenciaTasa').addEventListener('input', function() {
+            const dolares = parseFloat(document.getElementById('transferenciaDolares').value) || 0;
+            const tasa = parseFloat(this.value) || 0;
+            if (dolares && tasa) {
+                document.getElementById('transferenciaBolivares').value = (dolares * tasa).toFixed(2);
+            }
+        });
+
+        // Manejar envío del formulario
+        document.getElementById('ventaForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const tipoVenta = document.querySelector('input[name="tipoVenta"]:checked').value;
+            
+            // Recopilar datos del formulario
+            const tipoTransaccion = document.querySelector('input[name="tipoTransaccion"]:checked').value;
+
+            // Nuevo: agregar propiedad weppa con valor booleano de checkbox
+            const weppa = document.getElementById('weppa').checked;
+            
+            const venta = {
+                tipoVenta: tipoVenta,
+                tipoTransaccion: tipoTransaccion,
+                modelo: tipoVenta === 'completa' ? document.getElementById('modelo').value : 'Solo Accesorios',
+                color: tipoVenta === 'completa' ? document.getElementById('color').value : '-',
+                almacenamiento: tipoVenta === 'completa' ? document.getElementById('almacenamiento').value : '-',
+                bateria: tipoVenta === 'completa' ? document.getElementById('bateria').value + '%' : '-',
+                accesorios: {
+                    forro: document.getElementById('forro').checked,
+                    forroModelo: document.getElementById('forro').checked ? document.querySelector('#forroModelo select').value : null,
+                    forroCantidad: document.getElementById('forro').checked ? parseInt(document.querySelector('#forroModelo input').value) : 0,
+                    cargador: document.getElementById('cargador').checked,
+                    cargadorCantidad: document.getElementById('cargador').checked ? parseInt(document.querySelector('#cargadorCantidad input').value) : 0,
+                    vidrio: document.getElementById('vidrio').checked,
+                    vidrioModelo: document.getElementById('vidrio').checked ? document.querySelector('#vidrioModelo select').value : null,
+                    vidrioCantidad: document.getElementById('vidrio').checked ? parseInt(document.querySelector('#vidrioModelo input').value) : 0,
+                    protectorCamara: document.getElementById('protectorCamara').checked,
+                    protectorCantidad: document.getElementById('protectorCamara').checked ? parseInt(document.querySelector('#protectorCantidad input').value) : 0,
+                    // 2️⃣0️⃣ Nuevos accesorios
+                    cubo: document.getElementById('cubo').checked,
+                    cuboCantidad: document.getElementById('cubo').checked ? parseInt(document.querySelector('#cuboCantidad input').value) : 0,
+                    cableLightning: document.getElementById('cableLightning').checked,
+                    cableLightningCantidad: document.getElementById('cableLightning').checked ? parseInt(document.querySelector('#cableLightningCantidad input').value) : 0,
+                    cableCC: document.getElementById('cableCC').checked,
+                    cableCCCantidad: document.getElementById('cableCC').checked ? parseInt(document.querySelector('#cableCCCantidad input').value) : 0,
+                    caja: document.getElementById('caja').checked,
+                    cajaModelo: document.getElementById('caja').checked ? document.querySelector('#cajaModelo select:first-child').value : null,
+                    cajaColor: document.getElementById('caja').checked ? document.querySelector('#cajaModelo select:nth-child(2)').value : null,
+                    cajaCantidad: document.getElementById('caja').checked ? parseInt(document.querySelector('#cajaModelo input').value) : 0
+                },
+                formaPago: document.querySelector('input[name="formaPago"]:checked').value,
+                montoTotal: parseFloat(document.getElementById('montoTotal').value),
+                hora: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+                weppa: weppa
+            };
+
+            // Si es pago mixto, agregar detalles
+            if (venta.formaPago === 'mixto') {
+                venta.pagoMixto = {
+                    efectivo: parseFloat(document.getElementById('montoEfectivo').value) || 0,
+                    zelle: parseFloat(document.getElementById('montoZelle').value) || 0,
+                    binance: parseFloat(document.getElementById('montoBinance').value) || 0,
+                    pagoMovil: parseFloat(document.getElementById('montoPagoMovilDolares').value) || 0,
+                    transferencia: parseFloat(document.getElementById('montoTransferenciaDolares').value) || 0
+                };
+                
+                // Agregar detalles de conversión si están disponibles
+                if (venta.pagoMixto.pagoMovil > 0) {
+                    venta.pagoMixto.pagoMovilDetalles = {
+                        dolares: parseFloat(document.getElementById('pagomovilDolares').value) || 0,
+                        bolivares: parseFloat(document.getElementById('pagomovilBolivares').value) || 0,
+                        tasa: parseFloat(document.getElementById('pagomovilTasa').value) || 0
+                    };
+                }
+                
+                if (venta.pagoMixto.transferencia > 0) {
+                    venta.pagoMixto.transferenciaDetalles = {
+                        dolares: parseFloat(document.getElementById('transferenciaDolares').value) || 0,
+                        bolivares: parseFloat(document.getElementById('transferenciaBolivares').value) || 0,
+                        tasa: parseFloat(document.getElementById('transferenciaTasa').value) || 0
+                    };
+                }
+            }
+
+            // Si es pago móvil, agregar detalles
+            if (venta.formaPago === 'pagomovil') {
+                venta.pagoMovilDetalles = {
+                    dolares: parseFloat(document.getElementById('pagomovilDolares').value) || 0,
+                    bolivares: parseFloat(document.getElementById('pagomovilBolivares').value) || 0,
+                    tasa: parseFloat(document.getElementById('pagomovilTasa').value) || 0
+                };
+            }
+
+            // Si es transferencia, agregar detalles
+            if (venta.formaPago === 'transferencia') {
+                venta.transferenciaDetalles = {
+                    dolares: parseFloat(document.getElementById('transferenciaDolares').value) || 0,
+                    bolivares: parseFloat(document.getElementById('transferenciaBolivares').value) || 0,
+                    tasa: parseFloat(document.getElementById('transferenciaTasa').value) || 0
+                };
+            }
+
+            // Si se recibe equipo como parte de pago
+            if (document.getElementById('recibirEquipo').checked) {
+                venta.equipoRecibido = {
+                    modelo: document.getElementById('equipoModelo').value,
+                    capacidad: document.getElementById('equipoCapacidad').value,
+                    color: document.getElementById('equipoColor').value,
+                    bateria: document.getElementById('equipoBateria').value + '%',
+                    imei: document.getElementById('equipoImei').value,
+                    valor: parseFloat(document.getElementById('equipoValor').value) || 0,
+                    comentarios: document.getElementById('equipoComentarios').value
+                };
+            }
+
+            // Si estamos editando, actualizar la venta existente
+            if (editandoVenta) {
+                ventas[indiceEditando] = venta;
+                cancelarEdicion();
+                alert('✅ Venta actualizada exitosamente!');
+            } else {
+                // Agregar nueva venta al array
+                ventas.push(venta);
+                // Limpiar formulario
+                limpiarFormulario();
+                alert('✅ Venta registrada exitosamente!');
+            }
+            
+            // Actualizar resumen
+            actualizarResumen();
+        });
+
+        // Limpiar formulario
+        document.getElementById('limpiarForm').addEventListener('click', limpiarFormulario);
+
+        function limpiarFormulario() {
+            document.getElementById('ventaForm').reset();
+            document.getElementById('forroModelo').classList.add('hidden');
+            document.getElementById('vidrioModelo').classList.add('hidden');
+            document.getElementById('cargadorCantidad').classList.add('hidden');
+            document.getElementById('protectorCantidad').classList.add('hidden');
+            // 2️⃣0️⃣ Ocultar nuevos accesorios
+            document.getElementById('cuboCantidad').classList.add('hidden');
+            document.getElementById('cableLightningCantidad').classList.add('hidden');
+            document.getElementById('cableCCCantidad').classList.add('hidden');
+            document.getElementById('cajaModelo').classList.add('hidden');
+            
+            document.getElementById('pagoMixto').classList.add('hidden');
+            document.getElementById('pagomovil-detalles').classList.add('hidden');
+            document.getElementById('transferencia-detalles').classList.add('hidden');
+            document.getElementById('equipoRecibidoForm').classList.add('hidden');
+            document.getElementById('totalMixto').textContent = '0.00';
+            
+            // Mostrar sección iPhone por defecto
+            document.getElementById('infoIphone').style.display = 'block';
+            document.getElementById('modelo').setAttribute('required', '');
+            document.getElementById('almacenamiento').setAttribute('required', '');
+            document.getElementById('bateria').setAttribute('required', '');
+            document.getElementById('color').setAttribute('required', '');
+        }
+
+        // ========== FUNCIONALIDAD DE EDICIÓN: VARIABLES DE CONTROL ========== 
+        // Variable para controlar si estamos editando
+        let editandoVenta = false;
+        let indiceEditando = -1;
+        // ========== FIN FUNCIONALIDAD DE EDICIÓN: VARIABLES DE CONTROL ========== 
+
+        // ========== FUNCIONALIDAD DE EDICIÓN: FUNCIÓN EDITAR VENTA ========== 
+        // Función para editar una venta
+        function editarVenta(index) {
+            const venta = ventas[index];
+            editandoVenta = true;
+            indiceEditando = index;
+            
+            // Cambiar el texto del botón de submit
+            const submitBtn = document.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '✏️ Actualizar Venta';
+            submitBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            submitBtn.classList.add('bg-orange-600', 'hover:bg-orange-700');
+            
+            // Agregar botón de cancelar
+            const cancelBtn = document.createElement('button');
+            cancelBtn.type = 'button';
+            cancelBtn.innerHTML = '❌ Cancelar Edición';
+            cancelBtn.className = 'bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-200';
+            cancelBtn.onclick = cancelarEdicion;
+            submitBtn.parentNode.insertBefore(cancelBtn, submitBtn.nextSibling);
+            
+            // Llenar el formulario con los datos de la venta
+            llenarFormularioConVenta(venta);
+            
+            // Scroll al formulario
+            document.getElementById('ventaForm').scrollIntoView({ behavior: 'smooth' });
+        }
+        // ========== FIN FUNCIONALIDAD DE EDICIÓN: FUNCIÓN EDITAR VENTA ========== 
+
+        // ========== FUNCIONALIDAD DE EDICIÓN: FUNCIÓN CANCELAR EDICIÓN ========== 
+        // Función para cancelar la edición
+        function cancelarEdicion() {
+            editandoVenta = false;
+            indiceEditando = -1;
+            
+            // Restaurar botón de submit
+            const submitBtn = document.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '✅ Registrar Venta';
+            submitBtn.classList.remove('bg-orange-600', 'hover:bg-orange-700');
+            submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            
+            // Eliminar botón de cancelar
+            const cancelBtn = submitBtn.nextSibling;
+            if (cancelBtn && cancelBtn.innerHTML.includes('Cancelar')) {
+                cancelBtn.remove();
+            }
+            
+            // Limpiar formulario
+            limpiarFormulario();
+        }
+        // ========== FIN FUNCIONALIDAD DE EDICIÓN: FUNCIÓN CANCELAR EDICIÓN ========== 
+
+        // ========== FUNCIONALIDAD DE EDICIÓN: FUNCIÓN ELIMINAR VENTA ========== 
+        // Función para eliminar una venta
+        function eliminarVenta(index) {
+            if (confirm('¿Estás seguro de que quieres eliminar esta venta?')) {
+                ventas.splice(index, 1);
+                actualizarTotales();
+                alert('✅ Venta eliminada exitosamente!');
+            }
+        }
+        // ========== FIN FUNCIONALIDAD DE EDICIÓN: FUNCIÓN ELIMINAR VENTA ========== 
+
+        // ========== FUNCIONALIDAD DE EDICIÓN: FUNCIÓN LLENAR FORMULARIO ========== 
+        // Función para llenar el formulario con datos de una venta
+        function llenarFormularioConVenta(venta) {
+            // Tipo de venta
+            document.querySelector(`input[name="tipoVenta"][value="${venta.tipoVenta}"]`).checked = true;
+            document.querySelector(`input[name="tipoVenta"][value="${venta.tipoVenta}"]`).dispatchEvent(new Event('change'));
+            
+            // Datos del iPhone (si es venta completa)
+            if (venta.tipoVenta === 'completa') {
+                document.getElementById('modelo').value = venta.modelo;
+                document.getElementById('color').value = venta.color;
+                document.getElementById('almacenamiento').value = venta.almacenamiento;
+                document.getElementById('bateria').value = venta.bateria.replace('%', '');
+            }
+            
+            // Accesorios
+            if (venta.accesorios.forro) {
+                document.getElementById('forro').checked = true;
+                document.getElementById('forro').dispatchEvent(new Event('change'));
+                setTimeout(() => {
+                    document.querySelector('#forroModelo select').value = venta.accesorios.forroModelo || '';
+                    document.querySelector('#forroModelo input').value = venta.accesorios.forroCantidad;
+                }, 100);
+            }
+            
+            if (venta.accesorios.cargador) {
+                document.getElementById('cargador').checked = true;
+                document.getElementById('cargador').dispatchEvent(new Event('change'));
+                setTimeout(() => {
+                    document.querySelector('#cargadorCantidad input').value = venta.accesorios.cargadorCantidad;
+                }, 100);
+            }
+            
+            if (venta.accesorios.vidrio) {
+                document.getElementById('vidrio').checked = true;
+                document.getElementById('vidrio').dispatchEvent(new Event('change'));
+                setTimeout(() => {
+                    document.querySelector('#vidrioModelo select').value = venta.accesorios.vidrioModelo || '';
+                    document.querySelector('#vidrioModelo input').value = venta.accesorios.vidrioCantidad;
+                }, 100);
+            }
+            
+            if (venta.accesorios.protectorCamara) {
+                document.getElementById('protectorCamara').checked = true;
+                document.getElementById('protectorCamara').dispatchEvent(new Event('change'));
+                setTimeout(() => {
+                    document.querySelector('#protectorCantidad input').value = venta.accesorios.protectorCantidad;
+                }, 100);
+            }
+            
+            // 2️⃣0️⃣ Llenar nuevos accesorios en edición
+            if (venta.accesorios.cubo) {
+                document.getElementById('cubo').checked = true;
+                document.getElementById('cubo').dispatchEvent(new Event('change'));
+                setTimeout(() => {
+                    document.querySelector('#cuboCantidad input').value = venta.accesorios.cuboCantidad;
+                }, 100);
+            }
+            
+            if (venta.accesorios.cableLightning) {
+                document.getElementById('cableLightning').checked = true;
+                document.getElementById('cableLightning').dispatchEvent(new Event('change'));
+                setTimeout(() => {
+                    document.querySelector('#cableLightningCantidad input').value = venta.accesorios.cableLightningCantidad;
+                }, 100);
+            }
+            
+            if (venta.accesorios.cableCC) {
+                document.getElementById('cableCC').checked = true;
+                document.getElementById('cableCC').dispatchEvent(new Event('change'));
+                setTimeout(() => {
+                    document.querySelector('#cableCCCantidad input').value = venta.accesorios.cableCCCantidad;
+                }, 100);
+            }
+            
+            if (venta.accesorios.caja) {
+                document.getElementById('caja').checked = true;
+                document.getElementById('caja').dispatchEvent(new Event('change'));
+                setTimeout(() => {
+                    document.querySelector('#cajaModelo select:first-child').value = venta.accesorios.cajaModelo || '';
+                    document.querySelector('#cajaModelo select:nth-child(2)').value = venta.accesorios.cajaColor || '';
+                    document.querySelector('#cajaModelo input').value = venta.accesorios.cajaCantidad;
+                }, 200);
+            }
+            
+            // Forma de pago
+            document.querySelector(`input[name="formaPago"][value="${venta.formaPago}"]`).checked = true;
+            document.querySelector(`input[name="formaPago"][value="${venta.formaPago}"]`).dispatchEvent(new Event('change'));
+            
+            // Detalles específicos de pago
+            setTimeout(() => {
+                if (venta.formaPago === 'mixto' && venta.pagoMixto) {
+                    document.getElementById('montoEfectivo').value = venta.pagoMixto.efectivo || '';
+                    document.getElementById('montoZelle').value = venta.pagoMixto.zelle || '';
+                    document.getElementById('montoBinance').value = venta.pagoMixto.binance || '';
+                    document.getElementById('montoPagoMovilDolares').value = venta.pagoMixto.pagoMovil || '';
+                    document.getElementById('montoTransferenciaDolares').value = venta.pagoMixto.transferencia || '';
+                    
+                    // Detalles de conversión en pago mixto
+                    if (venta.pagoMixto.pagoMovilDetalles) {
+                        document.getElementById('pagomovilDolares').value = venta.pagoMixto.pagoMovilDetalles.dolares || '';
+                        document.getElementById('pagomovilBolivares').value = venta.pagoMixto.pagoMovilDetalles.bolivares || '';
+                        document.getElementById('pagomovilTasa').value = venta.pagoMixto.pagoMovilDetalles.tasa || '';
+                    }
+                    
+                    if (venta.pagoMixto.transferenciaDetalles) {
+                        document.getElementById('transferenciaDolares').value = venta.pagoMixto.transferenciaDetalles.dolares || '';
+                        document.getElementById('transferenciaBolivares').value = venta.pagoMixto.transferenciaDetalles.bolivares || '';
+                        document.getElementById('transferenciaTasa').value = venta.pagoMixto.transferenciaDetalles.tasa || '';
+                    }
+                    
+                    calcularTotalMixto();
+                } else if (venta.formaPago === 'pagomovil' && venta.pagoMovilDetalles) {
+                    document.getElementById('pagomovilDolares').value = venta.pagoMovilDetalles.dolares || '';
+                    document.getElementById('pagomovilBolivares').value = venta.pagoMovilDetalles.bolivares || '';
+                    document.getElementById('pagomovilTasa').value = venta.pagoMovilDetalles.tasa || '';
+                } else if (venta.formaPago === 'transferencia' && venta.transferenciaDetalles) {
+                    document.getElementById('transferenciaDolares').value = venta.transferenciaDetalles.dolares || '';
+                    document.getElementById('transferenciaBolivares').value = venta.transferenciaDetalles.bolivares || '';
+                    document.getElementById('transferenciaTasa').value = venta.transferenciaDetalles.tasa || '';
+                }
+            }, 200);
+            
+            // Equipo recibido
+            if (venta.equipoRecibido) {
+                document.getElementById('recibirEquipo').checked = true;
+                document.getElementById('recibirEquipo').dispatchEvent(new Event('change'));
+                setTimeout(() => {
+                    document.getElementById('equipoModelo').value = venta.equipoRecibido.modelo || '';
+                    document.getElementById('equipoCapacidad').value = venta.equipoRecibido.capacidad || '';
+                    document.getElementById('equipoColor').value = venta.equipoRecibido.color || '';
+                    document.getElementById('equipoBateria').value = venta.equipoRecibido.bateria.replace('%', '') || '';
+                    document.getElementById('equipoImei').value = venta.equipoRecibido.imei || '';
+                    document.getElementById('equipoValor').value = venta.equipoRecibido.valor || '';
+                    document.getElementById('equipoComentarios').value = venta.equipoRecibido.comentarios || '';
+                }, 200);
+            }
+            
+            // Monto total
+            document.getElementById('montoTotal').value = venta.montoTotal;
+        }
+        // ========== FIN FUNCIONALIDAD DE EDICIÓN: FUNCIÓN LLENAR FORMULARIO ========== 
+
+        // ========== FUNCIONALIDAD ACTUALIZADA: FUNCIÓN ACTUALIZAR RESUMEN ========== 
+        function actualizarResumen() {
+            const resumen = document.getElementById('resumenVentas');
+            const totalDia = document.getElementById('totalDia');
+            const equiposVendidos = document.getElementById('equiposVendidos');
+            const cajaFinal = document.getElementById('cajaFinal');
+            
+            if (ventas.length === 0) {
+                resumen.innerHTML = '<p class="text-gray-600">No hay ventas registradas hoy.</p>';
+                totalDia.textContent = '0.00';
+                equiposVendidos.textContent = '0';
+                cajaFinal.textContent = cajaInicialGuardada.toFixed(2);
+                return;
+            }
+
+            let html = '';
+            let total = 0;
+            let equiposCount = 0;
+            let efectivoDelDia = 0;
+
+            ventas.forEach((venta, index) => {
+                const weppaHtml = venta.weppa
+                ? '<span style="font-weight:bold; background-color:yellow; padding:0 4px; margin-left:8px;">WEPPA</span>'
+                : '';
+                let inicial= 0;
+                // Solo sumar al total si NO es abono
+                if (venta.tipoTransaccion !== 'abono') {
+                    total += venta.montoTotal;
+                }
+                
+                // Contar equipos vendidos (solo ventas completas que no sean abonos)
+                if (venta.tipoVenta === 'completa' && venta.tipoTransaccion !== 'abono') {
+                    equiposCount++;
+                }
+                
+                // Calcular efectivo del día (incluye abonos en efectivo)
+                if (venta.formaPago === 'efectivo') {
+                    efectivoDelDia += venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0);
+                } else if (venta.formaPago === 'mixto' && venta.pagoMixto && venta.pagoMixto.efectivo > 0) {
+                    efectivoDelDia += venta.pagoMixto.efectivo;
+                }
+                
+                const accesoriosTexto = [];
+                if (venta.accesorios.forro) accesoriosTexto.push(`Forro ${venta.accesorios.forroModelo || 'N/A'} (${venta.accesorios.forroCantidad})`);
+                if (venta.accesorios.cargador) accesoriosTexto.push(`Cargador (${venta.accesorios.cargadorCantidad})`);
+                if (venta.accesorios.vidrio) accesoriosTexto.push(`Vidrio ${venta.accesorios.vidrioModelo || 'N/A'} (${venta.accesorios.vidrioCantidad})`);
+                if (venta.accesorios.protectorCamara) accesoriosTexto.push(`Protector Cámara (${venta.accesorios.protectorCantidad})`);
+                // 2️⃣0️⃣ Mostrar nuevos accesorios
+                if (venta.accesorios.cubo) accesoriosTexto.push(`Cubo (${venta.accesorios.cuboCantidad})`);
+                if (venta.accesorios.cableLightning) accesoriosTexto.push(`Cable Lightning (${venta.accesorios.cableLightningCantidad})`);
+                if (venta.accesorios.cableCC) accesoriosTexto.push(`Cable C+C (${venta.accesorios.cableCCCantidad})`);
+                if (venta.accesorios.caja) accesoriosTexto.push(`Caja ${venta.accesorios.cajaModelo || 'N/A'} ${venta.accesorios.cajaColor || 'N/A'} (${venta.accesorios.cajaCantidad})`);
+
+                html += `
+                    <div class="border border-gray-200 rounded-lg p-4 ${venta.tipoTransaccion === 'abono' ? 'bg-orange-50 border-orange-300' : 'bg-white'} shadow-sm">
+                        <div class="grid grid-cols-1 ${venta.equipoRecibido ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4">
+                            <div>
+                                <h4 class="font-semibold text-gray-800 mb-2">
+                                    ${venta.tipoTransaccion === 'abono' ? '💰 ABONO - ' : ''}${venta.tipoVenta === 'accesorios' ? '🛡️ Accesorios' : '📱 Equipo'}
+                                </h4>
+                                ${venta.tipoVenta === 'completa' ? `
+                                    <p class="text-sm"><span class="font-medium">Modelo:</span> ${venta.modelo}</p>
+                                    <p class="text-sm"><span class="font-medium">Capacidad:</span> ${venta.almacenamiento}</p>
+                                    <p class="text-sm"><span class="font-medium">Color:</span> ${venta.color}</p>
+                                    <p class="text-sm"><span class="font-medium">Batería:</span> ${venta.bateria}</p>
+                                ` : `
+                                    <p class="text-sm font-medium text-blue-600">Venta de accesorios únicamente</p>
+                                `}
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 mb-2">🛡️ Accesorios</h4>
+                                ${accesoriosTexto.length > 0 ? 
+                                    accesoriosTexto.map(acc => `<p class="text-sm">• ${acc}</p>`).join('') : 
+                                    '<p class="text-sm text-gray-500">Sin accesorios</p>'
+                                }
+                            </div>
+                            ${venta.equipoRecibido ? `
+                                <div>
+                                    <h4 class="font-semibold text-gray-800 mb-2">📱⬅️ Equipo Recibido</h4>
+                                    <p class="text-sm"><span class="font-medium">Modelo:</span> ${venta.equipoRecibido.modelo}</p>
+                                    <p class="text-sm"><span class="font-medium">Capacidad:</span> ${venta.equipoRecibido.capacidad}</p>
+                                    <p class="text-sm"><span class="font-medium">Color:</span> ${venta.equipoRecibido.color}</p>
+                                    <p class="text-sm"><span class="font-medium">Batería:</span> ${venta.equipoRecibido.bateria}</p>
+                                    <p class="text-sm"><span class="font-medium">IMEI:</span> ${venta.equipoRecibido.imei}</p>
+                                    <p class="text-sm"><span class="font-medium">Valor:</span> $${venta.equipoRecibido.valor}</p>
+                                    ${venta.equipoRecibido.comentarios ? `<p class="text-xs text-gray-600 mt-1">${venta.equipoRecibido.comentarios}</p>` : ''}
+                                </div>
+                            ` : ''}
+                            <div>
+                                <h4 class="font-semibold text-gray-800 mb-2">💳 Pago</h4>
+                                <div class="space-y-2 mb-3">
+                                    ${(() => {
+                                        let metodosHtml = '';
+                                        
+                                        // Pago Móvil
+                                        if (venta.formaPago === 'pagomovil' && venta.pagoMovilDetalles) {
+                                            metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Pago Móvil: $${venta.pagoMovilDetalles.dolares} = ${venta.pagoMovilDetalles.bolivares}Bs (${venta.pagoMovilDetalles.tasa})</div>`;
+                                        } else if (venta.formaPago === 'mixto' && venta.pagoMixto.pagoMovil > 0) {
+                                            if (venta.pagoMixto.pagoMovilDetalles && venta.pagoMixto.pagoMovilDetalles.bolivares > 0) {
+                                                inicial += venta.pagoMixto.pagoMovilDetalles.dolares;
+                                                metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Pago Móvil: $${venta.pagoMixto.pagoMovilDetalles.dolares} = ${venta.pagoMixto.pagoMovilDetalles.bolivares}Bs (${venta.pagoMixto.pagoMovilDetalles.tasa})</div>`;
+                                            } else {
+                                                metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Pago Móvil: $${venta.pagoMixto.pagoMovil}</div>`;
+                                            }
+                                        }
+                                        
+                                        // Transferencia
+                                        if (venta.formaPago === 'transferencia' && venta.transferenciaDetalles) {
+                                            metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Transferencia: $${venta.transferenciaDetalles.dolares} = ${venta.transferenciaDetalles.bolivares}Bs (${venta.transferenciaDetalles.tasa})</div>`;
+                                        } else if (venta.formaPago === 'mixto' && venta.pagoMixto.transferencia > 0) {
+                                            if (venta.pagoMixto.transferenciaDetalles && venta.pagoMixto.transferenciaDetalles.bolivares > 0) {
+                                                inicial += venta.pagoMixto.transferenciaDetalles.dolares;
+                                                metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Transferencia: $${venta.pagoMixto.transferenciaDetalles.dolares} = ${venta.pagoMixto.transferenciaDetalles.bolivares}Bs (${venta.pagoMixto.transferenciaDetalles.tasa})</div>`;
+                                            } else {
+                                                metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Transferencia: $${venta.pagoMixto.transferencia}</div>`;
+                                            }
+                                        }
+                                        
+                                        // Zelle
+                                        if (venta.formaPago === 'zelle') {
+                                            metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Zelle: $${venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)}</div>`;
+                                        } else if (venta.formaPago === 'mixto' && venta.pagoMixto.zelle > 0) {
+                                            inicial += venta.pagoMixto.zelle;
+                                            metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Zelle: $${venta.pagoMixto.zelle}</div>`;
+                                        }
+                                        
+                                        // Binance
+                                        if (venta.formaPago === 'binance') {
+                                            metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Binance: $${venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)}</div>`;
+                                        } else if (venta.formaPago === 'mixto' && venta.pagoMixto.binance > 0) {
+                                            inicial += venta.pagoMixto.binance;
+                                            metodosHtml += `<div class="bg-blue-100 px-2 py-1 rounded text-xs font-medium text-blue-800">Binance: $${venta.pagoMixto.binance}</div>`;
+                                        }
+                                        
+                                        // Equipo Recibido
+                                        if (venta.equipoRecibido) {
+                                            inicial += venta.equipoRecibido.valor;
+                                            metodosHtml += `<div class="bg-orange-100 px-2 py-1 rounded text-xs font-medium text-orange-800">Equipo recibido: ${venta.equipoRecibido.modelo} ${venta.equipoRecibido.capacidad} ($${venta.equipoRecibido.valor})</div>`;
+                                        }
+                                        
+                                        // Efectivo
+                                        if (venta.formaPago === 'efectivo') {
+                                            metodosHtml += `<div class="bg-green-200 px-2 py-1 rounded text-xs font-medium text-green-800">Efectivo: $${venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)}</div>`;
+                                        } else if (venta.formaPago === 'mixto' && venta.pagoMixto.efectivo > 0) {
+                                            inicial += venta.pagoMixto.efectivo;
+                                            metodosHtml += `<div class="bg-green-200 px-2 py-1 rounded text-xs font-medium text-green-800">Efectivo: $${venta.pagoMixto.efectivo}</div>`;
+                                        }
+                                        
+                                        console.log(inicial);
+                                        return metodosHtml;
+                                    })()}
+                                </div>
+                                <p class="text-lg font-bold text-green-600">Total: $${venta.montoTotal.toFixed(2)} ${weppaHtml} ${venta.weppa ? '(Inicial -'+ inicial + ')' : '' }</p>
+                                <p class="text-xs text-gray-500">${venta.hora}</p>
+                                <div class="mt-2 flex gap-2">
+                                    <button onclick="editarVenta(${index})" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded">✏️ Editar</button>
+                                    <button onclick="eliminarVenta(${index})" class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded">🗑️ Eliminar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            resumen.innerHTML = html;
+            // Calcular salidas de efectivo y compras de equipos de los movimientos
+            let salidasEfectivo = 0;
+            let comprasEquipos = 0;
+            movimientos.forEach(mov => {
+                if (mov.tipo === 'salidaEfectivo') {
+                    salidasEfectivo += mov.datos.monto;
+                } else if (mov.tipo === 'compraEquipo') {
+                    comprasEquipos += mov.datos.precio;
+                }
+            });
+
+            totalDia.textContent = total.toFixed(2);
+            equiposVendidos.textContent = equiposCount;
+            cajaFinal.textContent = (cajaInicialGuardada + efectivoDelDia - salidasEfectivo - comprasEquipos).toFixed(2);
+        }
+        // ========== FIN FUNCIONALIDAD ACTUALIZADA: FUNCIÓN ACTUALIZAR RESUMEN ========== 
+
+        // ========== NUEVA FUNCIONALIDAD: FUNCIÓN IMPRIMIR RESUMEN ========== 
+        document.getElementById('imprimirResumen').addEventListener('click', function() {
+            // Permitir impresión incluso sin ventas
+            // if (ventas.length === 0) {
+            //     alert('No hay ventas para imprimir');
+            //     return;
+            // }
+            
+            // Crear ventana de impresión
+            const ventanaImpresion = window.open('', '_blank');
+            
+            // Calcular totales
+            let totalGeneral = 0;
+            let equiposCount = 0;
+            let efectivoDelDia = 0;
+            let salidasEfectivo = 0;
+            
+            ventas.forEach(venta => {
+                const weppaHtml = venta.weppa
+                ? '<span style="font-weight:bold; background-color:yellow; padding:0 4px; margin-left:8px;">WEPPA</span>'
+                : '';
+                let inicial= 0;
+                // Solo sumar al total si NO es abono
+                if (venta.tipoTransaccion !== 'abono') {
+                    totalGeneral += venta.montoTotal;
+                }
+                
+                // Solo contar equipos si NO es abono
+                if (venta.tipoVenta === 'completa' && venta.tipoTransaccion !== 'abono') {
+                    equiposCount++;
+                }
+                
+                // Calcular efectivo (incluye abonos)
+                if (venta.formaPago === 'efectivo') {
+                    efectivoDelDia += venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0);
+                } else if (venta.formaPago === 'mixto' && venta.pagoMixto && venta.pagoMixto.efectivo > 0) {
+                    efectivoDelDia += venta.pagoMixto.efectivo;
+                }
+            });
+            
+            // Calcular salidas de efectivo y compras de equipos
+            movimientos.forEach(mov => {
+                if (mov.tipo === 'salidaEfectivo') {
+                    salidasEfectivo += mov.datos.monto;
+                } else if (mov.tipo === 'compraEquipo') {
+                    salidasEfectivo += mov.datos.precio; // Las compras también reducen el efectivo
+                }
+            });
+            let tailwindcssCdn = '<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">';
+            // Generar HTML para impresión
+            let htmlImpresion = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Resumen de Ventas - ${new Date().toLocaleDateString('es-ES')}</title>
+                    
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 15px; font-size: 11px; }
+                        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 8px; }
+                        .venta { border: 1px solid #ddd; margin-bottom: 8px; padding: 8px; border-radius: 3px; }
+                        .venta-header { background-color: #f5f5f5; padding: 6px; margin: -8px -8px 6px -8px; border-radius: 3px 3px 0 0; font-size: 12px; font-weight: bold; }
+                        .venta-grid { display: grid; grid-template-columns: 2fr 1.5fr 1.5fr 2fr; gap: 10px; }
+                        .seccion { }
+                        .seccion-titulo { font-weight: bold; margin-bottom: 3px; font-size: 10px; color: #333; }
+                        .detalle { margin: 1px 0; font-size: 10px; }
+                        .metodo-pago { background-color: #e3f2fd; padding: 2px 4px; border-radius: 2px; margin: 1px 0; font-size: 9px; }
+                        .totales { margin-top: 20px; border-top: 2px solid #333; padding-top: 15px; }
+                        .total-item { display: flex; justify-content: space-between; margin: 8px 0; font-size: 14px; }
+                        .total-final { font-weight: bold; font-size: 16px; color: #2e7d32; }
+                        .fecha-hora { text-align: right; color: #666; font-size: 10px; }
+                    </style>
+                    ${tailwindcssCdn}
+
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>📱 RESUMEN DE VENTAS DIARIO</h1>
+                        <p>Fecha: ${new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    </div>
+            `;
+            
+            // Agregar cada venta o mensaje si no hay ventas
+            if (ventas.length === 0) {
+                htmlImpresion += `
+                    <div style="text-align: center; padding: 40px; background-color: #f5f5f5; border-radius: 8px; margin: 20px 0;">
+                        <h3 style="color: #666; margin-bottom: 10px;">📋 No se registraron ventas en este día</h3>
+                        <p style="color: #888; font-size: 12px;">El resumen incluye únicamente los movimientos de inventario y el estado de caja.</p>
+                    </div>
+                `;
+            } else {
+                ventas.forEach((venta, index) => {
+                let inicial= 0;
+                const accesoriosTexto = [];
+                if (venta.accesorios.forro) accesoriosTexto.push(`Forro ${venta.accesorios.forroModelo || 'N/A'} (${venta.accesorios.forroCantidad})`);
+                if (venta.accesorios.cargador) accesoriosTexto.push(`Cargador (${venta.accesorios.cargadorCantidad})`);
+                if (venta.accesorios.vidrio) accesoriosTexto.push(`Vidrio ${venta.accesorios.vidrioModelo || 'N/A'} (${venta.accesorios.vidrioCantidad})`);
+                if (venta.accesorios.protectorCamara) accesoriosTexto.push(`Protector Cámara (${venta.accesorios.protectorCantidad})`);
+                // 2️⃣0️⃣ Mostrar nuevos accesorios
+                if (venta.accesorios.cubo) accesoriosTexto.push(`Cubo (${venta.accesorios.cuboCantidad})`);
+                if (venta.accesorios.cableLightning) accesoriosTexto.push(`Cable Lightning (${venta.accesorios.cableLightningCantidad})`);
+                if (venta.accesorios.cableCC) accesoriosTexto.push(`Cable C+C (${venta.accesorios.cableCCCantidad})`);
+                if (venta.accesorios.caja) accesoriosTexto.push(`Caja ${venta.accesorios.cajaModelo || 'N/A'} ${venta.accesorios.cajaColor || 'N/A'} (${venta.accesorios.cajaCantidad})`);
+                
+                //
+                if (venta.formaPago === 'mixto' && venta.pagoMixto) {
+                    if (venta.pagoMixto.efectivo > 0) { inicial += venta.pagoMixto.efectivo; }
+                    if (venta.pagoMixto.zelle > 0) {inicial += venta.pagoMixto.zelle;}
+                    if (venta.pagoMixto.binance > 0) {inicial += venta.pagoMixto.binance}
+                    if (venta.pagoMixto.pagoMovil > 0) {
+                        if (venta.pagoMixto.pagoMovilDetalles && venta.pagoMixto.pagoMovilDetalles.bolivares > 0) {
+                           
+                            inicial += venta.pagoMixto.pagoMovilDetalles.dolares;
+                        } else {
+                            inicial += 0;
+                        }
+                    }
+                    if (venta.pagoMixto.transferencia > 0) {
+                        if (venta.pagoMixto.transferenciaDetalles && venta.pagoMixto.transferenciaDetalles.bolivares > 0) {
+                            inicial += venta.pagoMixto.transferenciaDetalles.dolares;
+                        } else {
+                            inicial += 0;
+                        }
+                    }
+                }
+                
+                if (venta.equipoRecibido) {
+                    inicial += venta.equipoRecibido.valor;
+                }
+
+                htmlImpresion += `
+                    <div class="venta">
+                        <div class="venta-header">
+                            ${venta.tipoTransaccion === 'abono' ? 'ABONO' : 'VENTA'} #${index + 1} - ${venta.hora}
+                            ${weppaHtml} ${venta.weppa ? '(Inicial -'+ inicial + ')' : '' }
+                            <span style="float: right;">$${venta.montoTotal.toFixed(2)}</span>
+                        </div>
+                        
+                        <div class="venta-grid">
+                            <div class="seccion">
+                                <div class="seccion-titulo">📱 EQUIPO</div>
+                                ${venta.tipoVenta === 'completa' ? `
+                                    <div class="detalle">${venta.modelo}</div>
+                                    <div class="detalle">${venta.almacenamiento} - ${venta.color}</div>
+                                    <div class="detalle">Batería: ${venta.bateria}</div>
+                                ` : `
+                                    <div class="detalle">Solo Accesorios</div>
+                                `}
+                            </div>
+                            
+                            <div class="seccion">
+                                <div class="seccion-titulo">🛡️ ACCESORIOS</div>
+                                ${accesoriosTexto.length > 0 ? 
+                                    accesoriosTexto.map(acc => `<div class="detalle">${acc}</div>`).join('') : 
+                                    '<div class="detalle">Sin accesorios</div>'
+                                }
+                            </div>
+                            
+                            ${venta.equipoRecibido ? `
+                                <div class="seccion">
+                                    <div class="seccion-titulo">📱⬅️ RECIBIDO</div>
+                                    <div class="detalle">${venta.equipoRecibido.modelo}</div>
+                                    <div class="detalle">${venta.equipoRecibido.capacidad} - ${venta.equipoRecibido.color}</div>
+                                    <div class="detalle">Bat: ${venta.equipoRecibido.bateria}</div>
+                                    <div class="detalle">IMEI: ${venta.equipoRecibido.imei}</div>
+                                    <div class="detalle">Valor: $${venta.equipoRecibido.valor}</div>
+                                    ${venta.equipoRecibido.comentarios ? `<div class="detalle">${venta.equipoRecibido.comentarios}</div>` : ''}
+                                </div>
+                            ` : `
+                                <div class="seccion">
+                                    <div class="seccion-titulo">📱⬅️ RECIBIDO</div>
+                                    <div class="detalle">Sin equipo recibido</div>
+                                </div>
+                            `}
+                            
+                            <div class="seccion">
+                                <div class="seccion-titulo">💳 PAGO</div>
+                `;
+                
+                // Agregar métodos de pago detallados
+                if (venta.formaPago === 'efectivo') {
+                    htmlImpresion += `<div class="metodo-pago bg-green-200 px-2 py-1 rounded text-xs font-medium text-green-800">💵 Efectivo: $${(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)).toFixed(2)}</div>`;
+                } else if (venta.formaPago === 'zelle') {
+                    htmlImpresion += `<div class="metodo-pago">💳 Zelle: $${(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)).toFixed(2)}</div>`;
+                } else if (venta.formaPago === 'binance') {
+                    htmlImpresion += `<div class="metodo-pago">₿ Binance: $${(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)).toFixed(2)}</div>`;
+                } else if (venta.formaPago === 'pagomovil' && venta.pagoMovilDetalles) {
+                    htmlImpresion += `<div class="metodo-pago">📱 Pago Móvil: $${venta.pagoMovilDetalles.dolares} = ${venta.pagoMovilDetalles.bolivares}Bs (Tasa: ${venta.pagoMovilDetalles.tasa})</div>`;
+                } else if (venta.formaPago === 'transferencia' && venta.transferenciaDetalles) {
+                    htmlImpresion += `<div class="metodo-pago">🏦 Transferencia: $${venta.transferenciaDetalles.dolares} = ${venta.transferenciaDetalles.bolivares}Bs (Tasa: ${venta.transferenciaDetalles.tasa})</div>`;
+                } else if (venta.formaPago === 'mixto' && venta.pagoMixto) {
+                    if (venta.pagoMixto.efectivo > 0) htmlImpresion += `<div class="metodo-pago">💵 Efectivo: $${venta.pagoMixto.efectivo}</div>`;
+                    if (venta.pagoMixto.zelle > 0) htmlImpresion += `<div class="metodo-pago">💳 Zelle: $${venta.pagoMixto.zelle}</div>`;
+                    if (venta.pagoMixto.binance > 0) htmlImpresion += `<div class="metodo-pago">₿ Binance: $${venta.pagoMixto.binance}</div>`;
+                    if (venta.pagoMixto.pagoMovil > 0) {
+                        if (venta.pagoMixto.pagoMovilDetalles && venta.pagoMixto.pagoMovilDetalles.bolivares > 0) {
+                            htmlImpresion += `<div class="metodo-pago">📱 Pago Móvil: $${venta.pagoMixto.pagoMovilDetalles.dolares} = ${venta.pagoMixto.pagoMovilDetalles.bolivares}Bs (${venta.pagoMixto.pagoMovilDetalles.tasa})</div>`;
+                        } else {
+                            htmlImpresion += `<div class="metodo-pago">📱 Pago Móvil: $${venta.pagoMixto.pagoMovil}</div>`;
+                        }
+                    }
+                    if (venta.pagoMixto.transferencia > 0) {
+                        if (venta.pagoMixto.transferenciaDetalles && venta.pagoMixto.transferenciaDetalles.bolivares > 0) {
+                            htmlImpresion += `<div class="metodo-pago">🏦 Transferencia: $${venta.pagoMixto.transferenciaDetalles.dolares} = ${venta.pagoMixto.transferenciaDetalles.bolivares}Bs (${venta.pagoMixto.transferenciaDetalles.tasa})</div>`;
+                        } else {
+                            htmlImpresion += `<div class="metodo-pago">🏦 Transferencia: $${venta.pagoMixto.transferencia}</div>`;
+                        }
+                    }
+                }
+                
+                if (venta.equipoRecibido) {
+                    htmlImpresion += `<div class="metodo-pago">📱⬅️ Equipo: $${venta.equipoRecibido.valor}</div>`;
+                }
+                
+                htmlImpresion += `
+                            </div>
+                        </div>
+                    </div>
+                `;
+                });
+            }
+            
+            // Agregar sección de movimientos (siempre mostrar)
+            htmlImpresion += `
+                <div style="page-break-before: auto; margin-top: 30px;">
+                    <h2 style="border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 15px;">📦 MOVIMIENTOS DEL DÍA</h2>
+            `;
+            
+            if (movimientos.length > 0) {
+                
+                movimientos.forEach((mov, index) => {
+                    let titulo = '';
+                    let detalles = '';
+                    
+                    switch (mov.tipo) {
+                        case 'salidaEfectivo':
+                            titulo = `💸 Salida de Efectivo - $${mov.datos.monto}`;
+                            detalles = `Retirado por: ${mov.datos.persona} | Motivo: ${mov.datos.nota}`;
+                            break;
+                        case 'salidaEquipo':
+                            titulo = `📱➡️ Salida de Equipo - ${mov.datos.modelo}`;
+                            detalles = `${mov.datos.modelo} ${mov.datos.capacidad} ${mov.datos.color} | Destino: ${mov.datos.destino} | Retirado por: ${mov.datos.persona}`;
+                            break;
+                        case 'salidaAccesorio':
+                            titulo = `🛡️➡️ Salida de Accesorio - ${mov.datos.tipo}`;
+                            detalles = `${mov.datos.tipo} (${mov.datos.cantidad}) | Destino: ${mov.datos.destino}`;
+                            break;
+                        case 'compraEquipo':
+                            titulo = `📱⬅️ Compra de Equipo - ${mov.datos.modelo}`;
+                            detalles = `${mov.datos.modelo} ${mov.datos.capacidad} ${mov.datos.color} | Precio: $${mov.datos.precio} | Proveedor: ${mov.datos.proveedor}`;
+                            break;
+                        case 'ingresoEquipo':
+                            titulo = `📱⬅️ Ingreso de Equipo - ${mov.datos.modelo}`;
+                            detalles = `${mov.datos.modelo} ${mov.datos.capacidad} ${mov.datos.color} | Origen: ${mov.datos.origen}${mov.datos.imei ? ` | IMEI: ${mov.datos.imei}` : ''}`;
+                            break;
+                        case 'ingresoAccesorio':
+                            titulo = `🛡️⬅️ Ingreso de Accesorio - ${mov.datos.tipo}`;
+                            let detallesImpresion = '';
+                            if (mov.datos.modelos && mov.datos.modelos.length > 0) {
+                                if (mov.datos.tipo === 'Caja') {
+                                    const modelosTexto = mov.datos.modelos.map(m => `${m.modelo} ${m.color} (${m.cantidad})`).join(', ');
+                                    detallesImpresion = `Modelos: ${modelosTexto}`;
+                                } else {
+                                    const modelosTexto = mov.datos.modelos.map(m => `${m.modelo} (${m.cantidad})`).join(', ');
+                                    detallesImpresion = `Modelos: ${modelosTexto}`;
+                                }
+                            } else if (mov.datos.cantidad) {
+                                detallesImpresion = `Cantidad: ${mov.datos.cantidad}`;
+                            }
+                            detalles = `${mov.datos.tipo} | ${detallesImpresion} | Proveedor: ${mov.datos.proveedor}`;
+                            break;
+                    }
+                    
+                    htmlImpresion += `
+                        <div style="border: 1px solid #ddd; margin-bottom: 8px; padding: 8px; border-radius: 3px;">
+                            <div style="font-weight: bold; margin-bottom: 3px;">${titulo} - ${mov.hora}</div>
+                            <div style="font-size: 10px; color: #666;">${detalles}</div>
+                        </div>
+                    `;
+                });
+                
+            } else {
+                htmlImpresion += `
+                    <div style="text-align: center; padding: 30px; background-color: #f9f9f9; border-radius: 8px; margin: 15px 0;">
+                        <p style="color: #666; font-size: 12px;">📦 No se registraron movimientos de inventario en este día</p>
+                    </div>
+                `;
+            }
+            
+            htmlImpresion += `</div>`;
+
+            // Agregar totales finales
+            htmlImpresion += `
+                    <div class="totales">
+                        <h2>📊 RESUMEN FINAL</h2>
+                        <div class="total-item">
+                            <span>💰 Total del Día:</span>
+                            <span>$${totalGeneral.toFixed(2)}</span>
+                        </div>
+                        <div class="total-item">
+                            <span>📱 Equipos Vendidos:</span>
+                            <span>${equiposCount} equipos</span>
+                        </div>
+                        <div class="total-item">
+                            <span>🏦 Caja Inicial:</span>
+                            <span>$${cajaInicialGuardada.toFixed(2)}</span>
+                        </div>
+                        <div class="total-item">
+                            <span>💵 Efectivo del Día:</span>
+                            <span>$${efectivoDelDia.toFixed(2)}</span>
+                        </div>
+                        <div class="total-item">
+                            <span>💸 Salidas de Efectivo (incluye compras):</span>
+                            <span>$${salidasEfectivo.toFixed(2)}</span>
+                        </div>
+                        <div class="total-item total-final">
+                            <span>🏦 CAJA FINAL:</span>
+                            <span>$${(cajaInicialGuardada + efectivoDelDia - salidasEfectivo).toFixed(2)}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="fecha-hora">
+                        Generado el ${new Date().toLocaleString('es-ES')}
+                    </div>
+                </body>
+                </html>
+            `; // <-- ESTA COMILLA CIERRA EL TEMPLATE LITERAL
+            
+            ventanaImpresion.document.write(htmlImpresion);
+            ventanaImpresion.document.close();
+            
+            // Imprimir automáticamente
+            setTimeout(() => {
+                ventanaImpresion.print();
+            }, 500);
+        });
+        // ========== FIN NUEVA FUNCIONALIDAD: FUNCIÓN IMPRIMIR RESUMEN ========== 
+        </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9853525880d72fa9',t:'MTc1ODg5NTU4NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+
+</html>

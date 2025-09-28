@@ -2716,6 +2716,9 @@
                 `;
             } else {
                 ventas.forEach((venta, index) => {
+                const weppaHtml = venta.weppa
+                ? '<span style="font-weight:bold; background-color:yellow; padding:0 4px; margin-left:8px;">WEPPA</span>'
+                : '';
                 let inicial= 0;
                 const accesoriosTexto = [];
                 if (venta.accesorios.forro) accesoriosTexto.push(`Forro ${venta.accesorios.forroModelo || 'N/A'} (${venta.accesorios.forroCantidad})`);

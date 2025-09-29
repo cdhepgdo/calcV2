@@ -22,9 +22,9 @@
                     <p class="text-gray-600 text-center">Registro de ventas - <span id="fecha-actual"></span></p>
                 </div>
                 <!-- ========== NUEVA FUNCIONALIDAD: BOTÓN IMPRIMIR ========== -->
-                <button id="imprimirResumen" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
+                <!-- <button id="imprimirResumen" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
                     🖨️ Imprimir Resumen
-                </button>
+                </button> -->
                 <!-- ========== FIN NUEVA FUNCIONALIDAD: BOTÓN IMPRIMIR ========== -->
             </div>
         </div>
@@ -97,7 +97,7 @@
                 <!-- Accesorios -->
                 <div class="border-b pb-6">
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">🛡️ Accesorios</h2>
-                    <div class="space-y-4">
+                    <div class="grid md:grid-cols-4 gap-2">
                         <!-- Forro -->
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <div class="flex items-center mb-3">
@@ -217,7 +217,7 @@
                 <!-- Forma de Pago -->
                 <div class="border-b pb-6">
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">💳 Forma de Pago</h2>
-                    <div class="space-y-3">
+                    <div class="space-y-3 grid md:grid-cols-4 gap-2">
                         <div class="flex items-center">
                             <input type="radio" id="efectivo" name="formaPago" value="efectivo" class="mr-3 h-4 w-4 text-blue-600">
                             <label for="efectivo" class="font-medium text-gray-700">Efectivo</label>
@@ -781,6 +781,12 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
                             <input type="text" id="ingresoEquipoImei" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Número IMEI">
                         </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">% Batería</label>
+                            <input type="number" id="ingresoEquipoBateria" min="1" max="100" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="85">
+                        </div>
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Origen/Procedencia</label>
                             <select id="ingresoEquipoOrigen" class="w-full p-2 border border-gray-300 rounded-lg" required>
@@ -1009,6 +1015,14 @@
                 </div>
             </div>
             <!-- ========== FIN NUEVA FUNCIONALIDAD: TOTALES EXPANDIDOS ========== -->
+            <div class="mt-4 grid md:grid-cols-3 gap-4">
+
+                <button id="imprimirResumen" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
+                        🖨️ Imprimir Resumen
+                </button>
+            </div>
+
+            
         </div>
 
         <!-- Resumen de Movimientos -->
@@ -1700,6 +1714,7 @@
                         const capacidadIngreso = document.getElementById('ingresoEquipoCapacidad').value;
                         const colorIngreso = document.getElementById('ingresoEquipoColor').value.trim();
                         const imeiIngreso = document.getElementById('ingresoEquipoImei').value.trim();
+                        const bateriaIngreso = document.getElementById('ingresoEquipoBateria').value;
                         let origenIngreso = document.getElementById('ingresoEquipoOrigen').value;
                         const notaIngreso = document.getElementById('ingresoEquipoNota').value.trim();
                         
@@ -1713,7 +1728,7 @@
                             origenIngreso = origenPersonalizado;
                         }
                         
-                        if (!modeloIngreso || !capacidadIngreso || !colorIngreso || !origenIngreso) {
+                        if (!modeloIngreso || !capacidadIngreso || !colorIngreso || !origenIngreso || !bateriaIngreso) {
                             alert('Por favor complete todos los campos requeridos');
                             return;
                         }
@@ -1723,6 +1738,7 @@
                             capacidad: capacidadIngreso, 
                             color: colorIngreso, 
                             imei: imeiIngreso, 
+                            porcentajeBateria: bateriaIngreso, // No se recopila en ingreso
                             origen: origenIngreso, 
                             nota: notaIngreso 
                         };
@@ -1921,7 +1937,7 @@
                         icono = '📱⬅️';
                         colorClass = 'bg-teal-50 border-teal-200';
                         titulo = `Ingreso de Equipo - ${mov.datos.modelo}`;
-                        detalles = `<p><strong>Equipo:</strong> ${mov.datos.modelo} ${mov.datos.capacidad} ${mov.datos.color}</p><p><strong>Origen:</strong> ${mov.datos.origen}</p>${mov.datos.imei ? `<p><strong>IMEI:</strong> ${mov.datos.imei}</p>` : ''}${mov.datos.nota ? `<p><strong>Notas:</strong> ${mov.datos.nota}</p>` : ''}`;
+                        detalles = `<p><strong>Equipo:</strong> ${mov.datos.modelo} ${mov.datos.capacidad} ${mov.datos.color}</p><p><strong>Origen:</strong> ${mov.datos.origen}</p>${mov.datos.imei ? `<p><strong>IMEI:</strong> ${mov.datos.imei}</p>` : ''} ${mov.datos.porcentajeBateria ? `<p><strong>% Bateria:</strong> ${mov.datos.porcentajeBateria}%</p>` : ''} ${mov.datos.nota ? `<p><strong>Notas:</strong> ${mov.datos.nota}</p>` : ''}`;
                         break;
                     case 'ingresoAccesorio':
                         icono = '🛡️⬅️';
@@ -2716,7 +2732,7 @@
                 `;
             } else {
                 ventas.forEach((venta, index) => {
-                const weppaHtml = venta.weppa
+                    const weppaHtml = venta.weppa
                 ? '<span style="font-weight:bold; background-color:yellow; padding:0 4px; margin-left:8px;">WEPPA</span>'
                 : '';
                 let inicial= 0;
@@ -2876,11 +2892,11 @@
                             break;
                         case 'compraEquipo':
                             titulo = `📱⬅️ Compra de Equipo - ${mov.datos.modelo}`;
-                            detalles = `${mov.datos.modelo} ${mov.datos.capacidad} ${mov.datos.color} | Precio: $${mov.datos.precio} | Proveedor: ${mov.datos.proveedor}`;
+                            detalles = `${mov.datos.modelo} | ${mov.datos.capacidad} | ${mov.datos.color} | ${mov.datos.bateria}% | Precio: $${mov.datos.precio} | Proveedor: ${mov.datos.proveedor}`;
                             break;
                         case 'ingresoEquipo':
                             titulo = `📱⬅️ Ingreso de Equipo - ${mov.datos.modelo}`;
-                            detalles = `${mov.datos.modelo} ${mov.datos.capacidad} ${mov.datos.color} | Origen: ${mov.datos.origen}${mov.datos.imei ? ` | IMEI: ${mov.datos.imei}` : ''}`;
+                            detalles = `${mov.datos.modelo} | ${mov.datos.capacidad} | ${mov.datos.color} | ${mov.datos.porcentajeBateria}% | Origen: ${mov.datos.origen}${mov.datos.imei ? ` | IMEI: ${mov.datos.imei}` : ''}`;
                             break;
                         case 'ingresoAccesorio':
                             titulo = `🛡️⬅️ Ingreso de Accesorio - ${mov.datos.tipo}`;

@@ -2313,7 +2313,7 @@
         function eliminarVenta(index) {
             if (confirm('¿Estás seguro de que quieres eliminar esta venta?')) {
                 ventas.splice(index, 1);
-                actualizarTotales();
+                actualizarResumen();
                 alert('✅ Venta eliminada exitosamente!');
             }
         }

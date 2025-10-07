@@ -378,6 +378,20 @@
                             <input type="radio" id="abono" name="tipoTransaccion" value="abono" class="mr-2 h-4 w-4 text-orange-600">
                             <label for="abono" class="font-medium text-gray-700">Abono</label>
                         </div>
+                        <!-- Agregar checkbox weppa casi al terminar el formulario de registro de venta -->
+                        <div class="flex items-center mb-3">
+                          <input type="checkbox" id="weppa" class="mr-3 h-4 w-4 text-blue-600" />
+                          <label for="weppa" class="font-medium text-gray-700">weppa</label>
+                        </div>
+                        <!-- ...dentro de la sección Tipo de Transacción... -->
+                        <div class="flex items-center">
+                            <input type="checkbox" id="notaVenta" name="tipoTransaccion" value="notaVenta" class="mr-2 h-4 w-4 text-purple-600">
+                            <label for="notaVenta" class="font-medium text-gray-700">Nota de Venta</label>
+                        </div>
+                    </div>
+                    <div id="notaVentaInfo" class="hidden mt-3 p-3 bg-purple-50 rounded-lg">
+                        <label class="block text-sm font-medium text-purple-800 mb-1">Detalles de la Nota de Venta</label>
+                        <input type="text" id="notaVentaDetalles" class="w-full p-2 border border-purple-300 rounded-lg" placeholder="Escribe los detalles aquí...">
                     </div>
                     <div id="abonoInfo" class="hidden mt-3 p-3 bg-orange-50 rounded-lg">
                         <p class="text-sm text-orange-800">
@@ -386,11 +400,6 @@
                     </div>
                 </div>
 
-                <!-- Agregar checkbox weppa casi al terminar el formulario de registro de venta -->
-                <div class="flex items-center mb-3">
-                  <input type="checkbox" id="weppa" class="mr-3 h-4 w-4 text-blue-600" />
-                  <label for="weppa" class="font-medium text-gray-700">weppa</label>
-                </div>
 
                 <!-- Monto Total -->
                 <div>
@@ -1271,7 +1280,16 @@
             });
         }
 
-        // Mostrar/ocultar información de abono
+        // Mostrar/ocultar información de abono y notas de venta
+
+
+        // Mostrar/ocultar input de nota de venta
+        const notaVentaInfo = document.getElementById('notaVentaInfo');
+        const notaVenta = document.getElementById('notaVenta');
+        notaVenta.addEventListener('change', function() {
+            notaVentaInfo.classList.toggle('hidden', !this.checked);
+        });
+        //notaVentaInfo.classList.remove('hidden', notaVenta.checked  );
         document.querySelectorAll('input[name="tipoTransaccion"]').forEach(radio => {
             radio.addEventListener('change', function() {
                 const abonoInfo = document.getElementById('abonoInfo');
@@ -1573,6 +1591,7 @@
                         }
                         
                         movimiento.datos = { monto, persona, nota };
+                        //actualizarResumen();
                         break;
                         
                     case 'salidaEquipo':
@@ -1858,7 +1877,8 @@
                             alert('Por favor complete todos los campos requeridos');
                             return;
                         }
-                        console.log(montoIngreso, tipoMovimientoActual);
+                        //console.log(montoIngreso, tipoMovimientoActual);
+                        //actualizarResumen();
                         movimiento.datos = { monto: montoIngreso, nota: notaIngresoEfectivo };
                         break;
                 }
@@ -2142,10 +2162,13 @@
 
             // Nuevo: agregar propiedad weppa con valor booleano de checkbox
             const weppa = document.getElementById('weppa').checked;
+            const notaVentaDetalles = document.getElementById('notaVentaDetalles').value;
             
             const venta = {
                 tipoVenta: tipoVenta,
                 tipoTransaccion: tipoTransaccion,
+                //nota de venta detalles solo si es nota de venta
+                notaVentaDetalles: notaVenta.checked ? notaVentaDetalles : null,
                 modelo: tipoVenta === 'completa' ? document.getElementById('modelo').value : 'Solo Accesorios',
                 color: tipoVenta === 'completa' ? document.getElementById('color').value : '-',
                 almacenamiento: tipoVenta === 'completa' ? document.getElementById('almacenamiento').value : '-',
@@ -2499,26 +2522,50 @@
         // ========== FUNCIONALIDAD ACTUALIZADA: FUNCIÓN ACTUALIZAR RESUMEN ========== 
         function actualizarResumen() {
             const montoIngreso = parseFloat(document.getElementById('ingresoEfectivoMonto').value);
+            const montoCompra = parseFloat(document.getElementById('compraEquipoPrecio').value);
+
             const resumen = document.getElementById('resumenVentas');
             const totalDia = document.getElementById('totalDia');
             const equiposVendidos = document.getElementById('equiposVendidos');
             const cajaFinal = document.getElementById('cajaFinal');
-            console.log(montoIngreso, movimientos.tipo);
-            console.log(document.getElementById('ingresoEfectivoMonto'))
+            /* console.log(montoIngreso, movimientos.tipo);
+            console.log(document.getElementById('ingresoEfectivoMonto')) */
+            let calc = 0;
+            let efectivoDelDia = 0 + montoIngreso? montoIngreso : 0;
             if (ventas.length === 0) {
                 resumen.innerHTML = '<p class="text-gray-600">No hay ventas registradas hoy.</p>';
                 totalDia.textContent = '0.00';
                 equiposVendidos.textContent = '0';
-                cajaFinal.textContent = (cajaInicialGuardada + montoIngreso? montoIngreso : 0).toFixed(2);
+                /* console.log(montoIngreso? montoIngreso : 0); */
+
+                let ingresosEfectivo = 0;
+                let salidasEfectivo = 0;
+                let comprasEquipos = 0;
+                movimientos.forEach(mov => {
+                    if (mov.tipo === 'salidaEfectivo') {
+                        salidasEfectivo += mov.datos.monto;
+                    } else if (mov.tipo === 'compraEquipo') {
+                        comprasEquipos += mov.datos.precio;
+                    } else if (mov.tipo === 'ingresoEfectivo') {
+                        ingresosEfectivo += mov.datos.monto;
+                    }
+                });
+                calc = cajaInicialGuardada + (montoIngreso ? montoIngreso : 0);
+                //cajaFinal.textContent = `${calc /* + 2 */}`;
+                cajaFinal.textContent = (cajaInicialGuardada + efectivoDelDia + ingresosEfectivo - salidasEfectivo - comprasEquipos).toFixed(2);
+                /* console.log(cajaFinal);
+                console.log(montoIngreso? montoIngreso : 0, calc); */
+
                 return;
             }
 
             let html = '';
             let total = 0;
             let equiposCount = 0;
-            let efectivoDelDia = 0;
+            //let efectivoDelDia = 0 + montoIngreso? montoIngreso : 0;
 
             ventas.forEach((venta, index) => {
+                console.log(0);
                 const weppaHtml = venta.weppa
                 ? '<span style="font-weight:bold; background-color:yellow; padding:0 4px; margin-left:8px;">WEPPA</span>'
                 : '';
@@ -2650,6 +2697,11 @@
                                         return metodosHtml;
                                     })()}
                                 </div>
+                                ${venta.notaVentaDetalles ? `
+                                    <div class="bg-purple-100 text-purple-800 font-semibold rounded px-2 py-1 mb-2">
+                                        📝 Nota de Venta: ${venta.notaVentaDetalles}
+                                    </div>
+                                ` : ''}
                                 <p class="text-lg font-bold text-green-600">Total: $${venta.montoTotal.toFixed(2)} ${weppaHtml} ${venta.weppa ? '(Inicial -'+ inicial + ')' : '' }</p>
                                 <p class="text-xs text-gray-500">${venta.hora}</p>
                                 <div class="mt-2 flex gap-2">
@@ -2690,6 +2742,13 @@
             equiposVendidos.textContent = equiposCount;
             /* cajaFinal.textContent = (cajaInicialGuardada + efectivoDelDia - salidasEfectivo - comprasEquipos).toFixed(2); */
             cajaFinal.textContent = (cajaInicialGuardada + efectivoDelDia + ingresosEfectivo - salidasEfectivo - comprasEquipos).toFixed(2);
+            const abonoInfo = document.getElementById('abonoInfo');
+            const notaVentaInfo = document.getElementById('notaVentaInfo');
+            const transaccionVenta = document.getElementById('transaccionVenta');
+            if(transaccionVenta.checked){
+                abonoInfo.classList.add('hidden');
+                notaVentaInfo.classList.add('hidden');
+            }
         }
         // ========== FIN FUNCIONALIDAD ACTUALIZADA: FUNCIÓN ACTUALIZAR RESUMEN ========== 
 
@@ -2917,6 +2976,15 @@
                 
                 if (venta.equipoRecibido) {
                     htmlImpresion += `<div class="metodo-pago">📱⬅️ Equipo: $${venta.equipoRecibido.valor}</div>`;
+                }
+
+                // AQUI AGREGA EL BLOQUE NUEVO:
+                if (venta.notaVentaDetalles) {
+                    htmlImpresion += `
+                        <div class="bg-purple-100 text-purple-800 font-semibold rounded px-2 py-1 mb-2" style="margin:6px 0;">
+                            📝 Nota de Venta: ${venta.notaVentaDetalles}
+                        </div>
+                    `;
                 }
                 
                 htmlImpresion += `

@@ -6,7 +6,7 @@ export const handler = async (event) => {
 
   const asset = params.get("asset") || "USDT";
   const fiat = params.get("fiat") || "VES";
-  const tradeType = (params.get("tradeType") || "BUY").toUpperCase(); // SELL: anunciante vende USDT (típico para comprar USDT)
+  const tradeType = (/* params.get("tradeType") || */ "BUY").toUpperCase(); // SELL: anunciante vende USDT (típico para comprar USDT)
   const rows = Math.max(1, Math.min(parseInt(params.get("rows") || "20", 10), 50)); // 1..50
   //console.log("rows:", rows);
   const trim = Math.min(Math.max(Number(params.get("trim") || "0.1"), 0), 0.4); // 0..0.4 (0%..40%)
@@ -120,6 +120,7 @@ function response(statusCode, data, cacheSeconds = 0) {
     body: JSON.stringify(data)
   };
 }
+
 
 
 

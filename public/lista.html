@@ -140,7 +140,7 @@
     
     async function fetchTasaBCV() {
       try {
-        const res = await fetch("https://open.er-api.com/v6/latest/USD");
+        const res = await fetch("https://open.er-api.com/v6/latest/EUR");
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         // El valor viene como string, lo convertimos a número
@@ -272,7 +272,7 @@
   { nombre: "iPhone 16 (128gb)", usd: 799 },
   { nombre: "iPhone 16 (256gb)", usd: 820 },
   { nombre: "iPhone 16 Plus (128gb)", usd: 840 },
-  { nombre: "iPhone 16 Plus (256gb)", usd: 700 },
+  { nombre: "iPhone 16 Plus (256gb)", usd: 900 },
   { nombre: "iPhone 16 Pro (128gb)", usd: 970 },
   { nombre: "iPhone 16 Pro (512gb)", usd: 1120 },
   { nombre: "iPhone 16 Pro (1TB)", usd: 1160 },

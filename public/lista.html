@@ -99,7 +99,7 @@
       <tr>
         <th>Producto</th>
         <th>Precio Bs</th>
-        <th>Estimado $ BCV</th>
+        <th>Estimado € BCV</th>
         <th>Oferta Divisas</th>
       </tr>
     </thead>
@@ -340,7 +340,7 @@
           const fila = `<tr>
             <td>${p.nombre}</td>
             <td class="bs">Bs ${/* precioBs.toFixed(2) */precioFormateado} --></td>
-            <td>$${estimadoBCV.toFixed(2)}(BCV)</td>
+            <td>€${estimadoBCV.toFixed(2)}(BCV)</td>
             <td>*$${ofertaDivisas.toFixed(2)}(Divisas/Zelle/Binance)*</td>
           </tr>`;
           tbody.innerHTML += fila;

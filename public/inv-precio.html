@@ -260,27 +260,48 @@
 
         // Función original para parsear productos
         function parseProductosCompleto(texto) {
-            const productos = [];
-            const lineas = texto.split(/\r?\n/).filter(l => l.trim() && !l.toLowerCase().includes("actualización de precios"));
-            const regexPrecio = /(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d+)?)(?:\s*\$)/;
-
-            for (const linea of lineas) {
-                const precioMatch = linea.match(regexPrecio);
-
-                if (precioMatch) {
-                    let precioStr = precioMatch[1].replace(/\./g, '').replace(',', '.');
-                    let precio = parseFloat(precioStr);
-
-                    let nombre = linea
-                        .replace(regexPrecio, '')
-                        .replace(/(\$|PROMO|clase\s?[a-zA-Z]+|baterías\s?bajas|\s*\d{1,3}\s?\$\s*)/gi, '')
-                        .replace(/[\u{1F300}-\u{1F6FF}]/gu, '')
-                        .trim();
-
-                    productos.push({ nombre, precio });
-                }
-            }
-            return { productos };
+          const productos = [];
+        
+          // Dividir líneas, eliminar vacías y la cabecera
+          const lineas = texto
+            .split(/\r?\n/)
+            .filter(l => l.trim() && !l.toLowerCase().includes("actualización de precios"));
+        
+          // Precio: número (cualquier longitud) + posibles miles/decimales + justo antes de $
+          // Ejemplos válidos: 1040$, 1.040$, 1,040$, 1.040,50$, 1040.50$
+          const regexPrecio = /(\d+(?:[.,]\d{3})*(?:[.,]\d+)?)(?=\s*\$)/;
+        
+          for (const linea of lineas) {
+            const precioMatch = linea.match(regexPrecio);
+        
+            if (!precioMatch) continue;
+        
+            // Normalizar a formato parseable por JS
+            // Regla: quitar separadores de miles y convertir coma decimal en punto
+            let precioStr = precioMatch[1].replace(/\./g, '').replace(',', '.');
+            let precio = parseFloat(precioStr);
+        
+            // Quitar del nombre el precio y el símbolo $
+            // Nota: removemos SOLO el primer precio encontrado + $ cercano, para evitar tocar números útiles del nombre
+            const nombreSinPrecio = linea
+              .replace(regexPrecio, '')      // quita el número
+              .replace(/\s*\$/,'')           // quita el $
+              .trim();
+        
+            // Limpieza del nombre:
+            // - Quitar emojis
+            // - Quitar palabras de promo/noise comunes sin eliminar especificaciones (GB, TB, mm)
+            let nombre = nombreSinPrecio
+              .replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{1F1E6}-\u{1F1FF}]/gu, '') // emojis + flags
+              .replace(/\s{2,}/g, ' ') // espacios múltiples
+              .replace(/\b(promo|oferta|clase\s?[a-z]|bater[ií]as?\s?bajas|100%\b)/gi, '') // noise típico
+              .replace(/\s{2,}/g, ' ')
+              .trim();
+        
+            productos.push({ nombre, usd: precio });
+          }
+        
+          return { productos };
         }
 
         // Textos de ejemplo

@@ -1,3 +1,101 @@
+const productos = [
+  { nombre: "Apple Watch Serie 8 45mm", usd: 280 },
+  { nombre: "Apple Watch Serie 9 45mm", usd: 299 },
+  { nombre: "Apple Watch Serie X 42mm", usd: 440 },
+  { nombre: "Apple Watch Serie X 46mm", usd: 480 },
+  { nombre: "Apple Watch Ultra 3", usd: 1040 },
+  { nombre: "AirPods 4", usd: 250 },
+  { nombre: "AirPods Pro 3", usd: 420 },
+  { nombre: "Apple Watch Series 11", usd: 590 },
+  { nombre: "iPhone 11 (64gb)", usd: 249 },
+  { nombre: "iPhone 11 (128gb)", usd: 279 },
+  { nombre: "iPhone 11 (256gb)", usd: 299 },
+  { nombre: "iPhone 11 Pro (64gb)", usd: 290 },
+  { nombre: "iPhone 11 Pro (256gb)", usd: 349 },
+  { nombre: "iPhone 11 Pro Max (64gb)", usd: 340 },
+  { nombre: "iPhone 11 Pro Max (256gb)", usd: 350 },
+  { nombre: "iPhone 12 (64gb)", usd: 285 },
+  { nombre: "iPhone 12 (128gb)", usd: 310 },
+  { nombre: "iPhone 12 (256gb)", usd: 340 },
+  { nombre: "iPhone 12 Pro (128gb)", usd: 359 },
+  { nombre: "iPhone 12 Pro (256gb)", usd: 390 },
+  { nombre: "iPhone 12 Pro (512gb)", usd: 410 },
+  { nombre: "iPhone 12 Pro Max (128gb)", usd: 439 },
+  { nombre: "iPhone 12 Pro Max (256gb)", usd: 470 },
+  { nombre: "iPhone 12 Pro Max (512gb)", usd: 520 },
+  { nombre: "iPhone 13 (128gb)", usd: 390 }, // clase A
+  { nombre: "iPhone 13 (256gb)", usd: 419 },
+  { nombre: "iPhone 13 (512gb)", usd: 429 },
+  { nombre: "iPhone 13 Pro (128gb)", usd: 489 },
+  { nombre: "iPhone 13 Pro (256gb)", usd: 529 },
+  { nombre: "iPhone 13 Pro (512gb)", usd: 559 },
+  { nombre: "iPhone 13 Pro (1TB)", usd: 580 },
+  { nombre: "iPhone 13 Pro Max (128gb)", usd: 560 },
+  { nombre: "iPhone 13 Pro Max (256gb)", usd: 590 },
+  { nombre: "iPhone 13 Pro Max (512gb)", usd: 649 },
+  { nombre: "iPhone 13 Pro Max (1TB)", usd: 669 },
+  { nombre: "iPhone 14 (128gb)", usd: 429 },
+  { nombre: "iPhone 14 (256gb)", usd: 459 },
+  { nombre: "iPhone 14 (512gb)", usd: 489 },
+  { nombre: "iPhone 14 Plus (128gb)", usd: 439 },
+  { nombre: "iPhone 14 Plus (256gb)", usd: 479 },
+  { nombre: "iPhone 14 Pro (128gb)", usd: 599 },
+  { nombre: "iPhone 14 Pro (256gb)", usd: 629 },
+  { nombre: "iPhone 14 Pro (512gb)", usd: 649 },
+  { nombre: "iPhone 14 Pro Max (128gb)", usd: 699 },
+  { nombre: "iPhone 14 Pro Max (256gb)", usd: 729 },
+  { nombre: "iPhone 14 Pro Max (512gb)", usd: 779 },
+  { nombre: "iPhone 15 (128gb)", usd: 610 },
+  { nombre: "iPhone 15 (256gb)", usd: 650 },
+  { nombre: "iPhone 15 (512gb)", usd: 689 },
+  { nombre: "iPhone 15 Plus (128gb)", usd: 670 },
+  { nombre: "iPhone 15 Plus (256gb)", usd: 699 },
+  { nombre: "iPhone 15 Pro (128gb)", usd: 760 },
+  { nombre: "iPhone 15 Pro (256gb)", usd: 799 },
+  { nombre: "iPhone 15 Pro Max (256gb)", usd: 850 },
+  { nombre: "iPhone 15 Pro Max (512gb)", usd: 920 },
+  { nombre: "iPhone 15 Pro Max (1TB)", usd: 940 },
+  { nombre: "iPhone 16 (128gb)", usd: 799 },
+  { nombre: "iPhone 16 (256gb)", usd: 820 },
+  { nombre: "iPhone 16 Plus (128gb)", usd: 840 },
+  { nombre: "iPhone 16 Plus (256gb)", usd: 900 },
+  { nombre: "iPhone 16 Pro (128gb)", usd: 970 },
+  { nombre: "iPhone 16 Pro (512gb)", usd: 1120 },
+  { nombre: "iPhone 16 Pro (1TB)", usd: 1160 },
+  { nombre: "iPhone 16 Pro Max (256gb) 100%", usd: 1240 },
+  { nombre: "iPhone 16 Pro Max (512gb) NO 100%", usd: 1240 },
+  { nombre: "iPhone 16 Pro Max (1TB)", usd: 1350 },
+  { nombre: "iPhone 17 (256gb)", usd: 1180 },
+  { nombre: "iPhone 17 (512gb)", usd: 1330 },
+  { nombre: "iPhone 17 Air", usd: 1330 },
+  { nombre: "iPhone 17 Pro (1TB)", usd: 1890 },
+  { nombre: "iPhone 17 Pro (256gb)", usd: 1560 },
+  { nombre: "iPhone 17 Pro Max (256gb)", usd: 1690 },
+  { nombre: "iPhone 17 Pro Max (512gb)", usd: 1980 },
+  { nombre: "iPhone 17 Pro Max (1TB)", usd: 2199 },
+  { nombre: "iPhone 17 Pro Max (2TB)", usd: 2699 }
+];
+// Generar HTML <option> dinámicamente
+const optionsHTML = productos.map(p => {
+  const value = p.nombre
+    .toLowerCase()
+    .replace(/\\s+/g, "_")
+    .replace(/[()%.]/g, "")
+    .replace(/__+/g, "_");
+  const emoji = p.nombre.toLowerCase().includes("watch") || p.nombre.toLowerCase().includes("airpods") ? "⌚" : "📱";
+  return `<option value="${value}" data-price="${p.usd}" data-currency="USD">${emoji} ${p.nombre} - $${p.usd} USD</option>`;
+}).join("\\n");
+
+// Insertarlo en un <select> existente
+const select = document.createElement("select");
+select.id = "productSelect";
+select.className = "w-full p-3 border border-gray-300 rounded-lg input-focus transition-all";
+select.innerHTML = `<option value="">Seleccionar producto...</option>\\n${optionsHTML}\\n<option value="custom">✏️ Producto personalizado</option>`;
+
+document.body.appendChild(select); // o puedes usar document.querySelector("#selectContainer").appendChild(select);
+
+
+
 // scripts/main.js
 let currentPrice = 0;
 let currentCurrency = 'USD';
@@ -560,6 +658,7 @@ function updatePrice() {
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
+
 
 
 

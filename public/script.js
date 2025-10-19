@@ -88,11 +88,11 @@ const optionsHTML = productos.map(p => {
 
 // Insertarlo en un <select> existente
 const select = document.getElementById("productSelect");
-select.id = "productSelect";
+//select.id = "productSelect";
 select.className = "w-full p-3 border border-gray-300 rounded-lg input-focus transition-all";
 select.innerHTML = `<option value="">Seleccionar producto...</option>\\n${optionsHTML}\\n<option value="custom">✏️ Producto personalizado</option>`;
 
-document.body.appendChild(select); // o puedes usar document.querySelector("#selectContainer").appendChild(select);
+//document.body.appendChild(select); // o puedes usar document.querySelector("#selectContainer").appendChild(select);
 
 
 
@@ -658,6 +658,7 @@ function updatePrice() {
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
+
 
 
 

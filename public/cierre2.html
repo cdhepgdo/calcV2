@@ -13,32 +13,6 @@
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-4">
-    <!-- Añade un contenedor para el menú flotante debajo del botón toggle -->
-<nav id="globalMenu" 
-     class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white transition-all duration-300 shadow-lg">
-  <!-- <div class="font-bold text-lg">Menú</div> -->
-  <div class="flex gap-2" id="menuOptions">
-    <a href="lista.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">LISTADO PRECIOS</a>
-    <a href="intercambio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cálculo Trading</a>
-    <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Principal</a>
-    <a href="inv-precio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Inv</a>
-  </div>
-  <button id="menuToggle" class="hidden text-2xl focus:outline-none relative z-50" aria-label="Abrir menú">
-    ☰
-  </button>
-
-  <!-- Contenedor menú desplegable para botón flotante -->
-  <div id="floatingMenu" class="hidden fixed bottom-20 right-6 bg-blue-700 text-white rounded-lg shadow-lg py-2 flex flex-col gap-1 z-40">
-    <a href="lista.html" class="px-4 py-2 hover:bg-blue-900 rounded">LISTADO PRECIOS</a>
-    <a href="intercambio.html" class="px-4 py-2 hover:bg-blue-900 rounded">Cálculo Trading</a>
-    <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Principal</a>
-    <a href="inv-precio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Inv</a>
-  </div>
-</nav>
-
-
-<!-- Espaciador para que el contenido no se oculte tras el menú fijo -->
-<div class="h-14"></div>
     <div class="max-w-6xl mx-auto">
         <!-- Header -->
         <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
@@ -90,6 +64,32 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Datos del Cliente -->
+                <div class="border-b pb-6" id="datosClienteSection">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">👤 Datos del Cliente</h2>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="clienteNombre"  class="block text-sm font-medium text-gray-700 mb-2">Nombre y Apellido</label> 
+                        <input type="text" id="clienteNombre" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Nombre completo del cliente" required>
+                    </div>
+
+                    <div>
+                        <label for="clienteCedula"  class="block text-sm font-medium text-gray-700 mb-2">Cédula</label> 
+                        <input type="text" id="clienteCedula" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="V-12345678" required>
+                    </div>
+
+                    <div>
+                        <label for="clienteCelular"  class="block text-sm font-medium text-gray-700 mb-2">Número Celular</label> 
+                        <input type="tel" id="clienteTelefono" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0414-1234567" required>
+                    </div>
+
+                    <div>
+                        <label for="equipoImei"  class="block text-sm font-medium text-gray-700 mb-2">IMEI del Equipo</label> 
+                        <input type="text" id="clienteImei" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Número IMEI (opcional)">
+                    </div>
+                </div>
+                </div><!-- Información del Cliente -->
 
                 <!-- Información del iPhone -->
                 <div id="infoIphone" class="border-b rounded-xl p-6 bg-blue-50 hover:bg-blue-200">
@@ -1086,7 +1086,15 @@
         </div>
     </div>
 
+    
+    <!-- ✅ NUEVO BOTÓN: Venta + Garantía --> 
+    <button type="button" id="ventaConGarantia" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200"> 📋 Venta + Garantía </button>
+
     <script>
+        /* const clienteNombre = document.getElementById('clienteNombre');
+        const clienteCedula = document.getElementById('clienteCedula');
+        const clienteTelefono = document.getElementById('clienteTelefono');
+        const clienteImei = document.getElementById('clienteImei'); */
         // 2️⃣0️⃣ Arrays de datos para opciones
         const modelosIphone = [
             { valor: "iPhone 11", etiqueta: "iPhone 11" },
@@ -1116,7 +1124,7 @@
             { valor: "iPhone 17 Pro Max", etiqueta: "iPhone 17 Pro Max" }
         ];
 
-        /* const coloresIphone = [
+        const coloresIphone = [
             { valor: "Negro", etiqueta: "⚫ Negro" },
             { valor: "Blanco", etiqueta: "⚪ Blanco" },
             { valor: "Azul", etiqueta: "🔵 Azul" },
@@ -1133,38 +1141,14 @@
             { valor: "Titanio Azul", etiqueta: "🔵 Titanio Azul" },
             { valor: "Titanio Blanco", etiqueta: "⚪ Titanio Blanco" },
             { valor: "Titanio Negro", etiqueta: "⚫ Titanio Negro" }
-        ]; */
-        const coloresIphone = [
-    { valor: "Negro", etiqueta: "⚫ Negro" },
-    { valor: "Blanco", etiqueta: "⚪ Blanco" },
-    { valor: "Verde", etiqueta: "🟢 Verde" },
-    { valor: "Morado", etiqueta: "🟣 Morado" },
-    { valor: "Amarillo", etiqueta: "🟡 Amarillo" },
-    { valor: "Rojo", etiqueta: "🔴 Rojo (PRODUCT)RED" },
-    { valor: "Azul", etiqueta: "🔵 Azul" },
-    { valor: "Grafito", etiqueta: "⚫ Grafito (Pro)" },
-    { valor: "Oro", etiqueta: "🟡 Oro (Pro)" },
-    { valor: "Plata", etiqueta: "⚪ Plata (Pro)" },
-    { valor: "Azul Pacífico", etiqueta: "🔵 Azul Pacífico (Pro)" },
-    { valor: "Rosa", etiqueta: "🟠 Rosa" },
-    { valor: "Verde (Alpine Green)", etiqueta: "🟢 Verde Alpine" },
-    { valor: "Blanco Estrella", etiqueta: "⚪ Blanco Estrella" },
-    { valor: "Púrpura", etiqueta: "🟣 Púrpura" },
-    { valor: "Negro Medianoche", etiqueta: "⚫ Negro Medianoche" },
-    { valor: "Verde Azulado", etiqueta: "🟦 Verde Azulado" },
-    { valor: "Azul Ultramar", etiqueta: "🔵 Azul Ultramar" },
-    { valor: "Naranja Cósmico", etiqueta: "🟠 Naranja Cósmico" },
-    { valor: "Azul Profundo", etiqueta: "🔵 Azul Profundo" }
-];
-
+        ];
 
         const capacidadesIphone = [
             { valor: "64GB", etiqueta: "64GB" },
             { valor: "128GB", etiqueta: "128GB" },
             { valor: "256GB", etiqueta: "256GB" },
             { valor: "512GB", etiqueta: "512GB" },
-            { valor: "1TB", etiqueta: "1TB" },
-            { valor: "2TB", etiqueta: "2TB" }
+            { valor: "1TB", etiqueta: "1TB" }
         ];
 
         // 2️⃣0️⃣ Función para llenar selectores automáticamente
@@ -1351,8 +1335,10 @@
         document.querySelectorAll('input[name="tipoVenta"]').forEach(radio => {
             radio.addEventListener('change', function() {
                 const infoIphone = document.getElementById('infoIphone');
+                const datosClienteSection = document.getElementById('datosClienteSection');
                 if (this.value === 'accesorios') {
                     infoIphone.style.display = 'none';
+                    datosClienteSection.style.display = 'none';
                     // Limpiar campos requeridos del iPhone
                     document.getElementById('modelo').removeAttribute('required');
                     document.getElementById('almacenamiento').removeAttribute('required');
@@ -1360,6 +1346,7 @@
                     document.getElementById('color').removeAttribute('required');
                 } else {
                     infoIphone.style.display = 'block';
+                    datosClienteSection.style.display = 'block';
                     document.getElementById('modelo').setAttribute('required', '');
                     document.getElementById('almacenamiento').setAttribute('required', '');
                     document.getElementById('bateria').setAttribute('required', '');
@@ -1600,6 +1587,7 @@
             
             // Ocultar todos los formularios
             document.querySelectorAll('.movimiento-form').forEach(form => {
+                //console.log(form)
                 form.classList.add('hidden');
             });
             
@@ -2213,6 +2201,12 @@
             // Nuevo: agregar propiedad weppa con valor booleano de checkbox
             const weppa = document.getElementById('weppa').checked;
             const notaVentaDetalles = document.getElementById('notaVentaDetalles').value;
+
+            // Datos del cliente
+            const clienteNombre = document.getElementById('clienteNombre');
+            const clienteCedula = document.getElementById('clienteCedula');
+            const clienteTelefono = document.getElementById('clienteTelefono');
+            const clienteImei = document.getElementById('clienteImei');
             
             const venta = {
                 tipoVenta: tipoVenta,
@@ -2249,7 +2243,13 @@
                 formaPago: document.querySelector('input[name="formaPago"]:checked').value,
                 montoTotal: parseFloat(document.getElementById('montoTotal').value),
                 hora: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-                weppa: weppa
+                weppa: weppa,
+                cliente: {
+                    nombre: clienteNombre.value,
+                    cedula: clienteCedula.value,
+                    telefono: clienteTelefono.value,
+                    imei: clienteImei.value
+                }
             };
 
             // Si es pago mixto, agregar detalles
@@ -2310,6 +2310,418 @@
                     comentarios: document.getElementById('equipoComentarios').value
                 };
             }
+
+            let modelo = `${venta.modelo + ' | ' + venta.almacenamiento + ' | ' + venta.color + ' | ' + venta.bateria}`;
+            console.log(modelo);
+
+            const accesoriosTexto = [];
+                if (venta.accesorios.forro) accesoriosTexto.push(`Forro ${venta.accesorios.forroModelo || 'N/A'} ${venta.accesorios.forroCantidad > 1 ? `(${venta.accesorios.forroCantidad})` : ''}`);
+                if (venta.accesorios.cargador) accesoriosTexto.push(`Cargador ${venta.accesorios.cargadorCantidad > 1 ? `(${venta.accesorios.cargadorCantidad})` : ''}`);
+                if (venta.accesorios.vidrio) accesoriosTexto.push(`Vidrio ${venta.accesorios.vidrioModelo || 'N/A'} ${venta.accesorios.vidrioCantidad > 1 ? `(${venta.accesorios.vidrioCantidad})` : ''}`);
+                if (venta.accesorios.protectorCamara) accesoriosTexto.push(`Protector Cámara ${venta.accesorios.protectorCantidad > 1 ? `(${venta.accesorios.protectorCantidad})` : ''}`);
+                // 2️⃣0️⃣ Mostrar nuevos accesorios
+                if (venta.accesorios.cubo) accesoriosTexto.push(`Cubo ${venta.accesorios.cuboCantidad > 1 ? `(${venta.accesorios.cuboCantidad})` : ''}`);
+                if (venta.accesorios.cableLightning) accesoriosTexto.push(`Cable Lightning ${venta.accesorios.cableLightningCantidad > 1 ? `(${venta.accesorios.cableLightningCantidad})` : ''}`);
+                if (venta.accesorios.cableCC) accesoriosTexto.push(`Cable C+C ${venta.accesorios.cableCCCantidad > 1 ? `(${venta.accesorios.cableCCCantidad})` : ''}`);
+                if (venta.accesorios.caja) accesoriosTexto.push(`Caja ${venta.accesorios.cajaModelo || 'N/A'} ${venta.accesorios.cajaColor || 'N/A'} ${venta.accesorios.cajaCantidad > 1 ? `(${venta.accesorios.cajaCantidad})` : ''}`);
+            const ventanaImpresion = window.open('', '_blank');
+            const garantiaImpresion = `
+            <!DOCTYPE html>
+                <html lang="es"><head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <title>Garantía Equipos Celulares</title>
+                <link rel="preconnect" href="https://fonts.googleapis.com">
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+                <style>
+                /* Configuración de impresión */
+                @page {
+                    size: A4;
+                    margin: 18mm;
+                }
+                @media print {
+                    .no-print {
+                    display: none !important;
+                    }
+                    body {
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                    }
+                }
+
+                /* Base tipográfica y layout */
+                html, body {
+                    background: #f5f5f5;
+                }
+                body {
+                    font-family: "Noto Sans", sans-serif;
+                font-optical-sizing: auto;
+                    font-weight: 400;
+                font-style: normal;
+                    line-height: 1.2;
+                    margin: 0;
+                    padding: 0;
+                }
+                .sheet {
+                    background: #fff;
+                    /* width: 210mm;
+                    min-height: 297mm;
+                    margin: 10px auto;
+                    box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 4px 24px rgba(0,0,0,0.14); */
+                }
+                /* .content {
+                    padding: 18mm;
+                } */
+
+                /* Encabezado */
+                .title-row {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: baseline;
+                    justify-content: space-between;
+                    margin-bottom: 5px;
+                }
+                .doc-title {
+                    font-size: 18px;
+                    font-weight: 700;
+                    letter-spacing: 0.3px;
+                    text-transform: none;
+                }
+                .date-block {
+                    font-size: 15px;
+                    font-weight: 600;
+                }
+                .date-line {
+                    display: inline-block;
+                    min-width: 20px;
+                    /* height: 20px; */
+                    vertical-align: bottom;
+                    margin-left: 6px;
+                }
+
+                /* Figura/Logo simple */
+                .figure {
+                    margin: 0 0 0 5px;
+                    display: inline-block;
+                    text-align: center;
+                    font-weight: 700;
+                    letter-spacing: 0.8px;
+                }
+                .figure .line {
+                    font-size: 18px;
+                }
+
+                /* Cuerpo del texto */
+                .paragraph {
+                    margin: 0 0 0 0;
+                    font-size: 13px;
+                    padding: 1px;
+                }
+                .bullet {
+                    margin-left: 4mm;
+                    text-indent: -4mm; /* para que el punto quede “al margen” */
+                }
+                .bullet::before {
+                    content: "•  ";
+                    font-weight: bold;
+                    font-size: 15px;
+                }
+
+                /* Bloque de “Todos nuestros equipos…” (párrafo con punto inicial) */
+                .dot-paragraph {
+                    margin: 0 0 0 0;
+                    font-size: 13px;
+                    margin-left: 4mm;
+                    text-indent: -4mm; /* para que el punto quede “al margen” */
+                }
+                .paragraph.h {
+                    margin: 0 0 10px 0;
+                    font-size: 13px;
+                }
+                .dot-paragraph::before {
+                    content: "•  ";
+                    font-weight: bold;
+                    font-size: 15px;
+                }
+
+                /* Nota importante */
+                .note {
+                    /* margin: 8mm 0; */
+                    font-size: 13px;
+                    font-weight: 700;
+                }
+
+                /* Figura inferior con formulario */
+                .figure-form {
+                    /* border: 1px solid #000;
+                    padding: 8mm 10mm;
+                    margin-top: 8mm; */
+                    margin-left: 10px;
+                }
+
+                .form-row {
+                    display: flex;
+                    flex-wrap: wrap;
+                    column-gap: 8mm;
+                    row-gap: 5px;
+                    /* margin-bottom: 5mm; */
+                }
+
+                .field {
+                    min-width: 60mm;
+                    font-size: 14px;
+                }
+                .field .label {
+                    display: inline-block;
+                    min-width: 36mm;
+                    font-weight: 700;
+                }
+                .field .line {
+                    display: inline-block;
+                    border-bottom: 1px solid #000;
+                    min-width: 60mm;
+                    height: 18px;
+                    vertical-align: bottom;
+                }
+
+                /* Bloque “USA= IMPORT” intermedio */
+                .usa-import {
+                    font-weight: 700;
+                    letter-spacing: 0.6px;
+                    margin: 6mm 0;
+                }
+
+                /* Firma, sello y huella */
+                .sign-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: end;
+                    margin-top: 10px;
+                    gap: 8mm;
+                    height: 135px;
+                }
+                .box {
+                    /* border: 1px dashed #000; */
+                    /* padding: 6mm; */
+                    flex: 1;
+                    /* min-height: 28mm; */
+                    position: relative;
+                }
+                .box-label {
+                    position: absolute;
+                    top: -6mm;
+                    left: 6mm;
+                    background: #fff;
+                    padding: 0 3mm;
+                    font-size: 12px;
+                    font-weight: 700;
+                }
+                .signature-line {
+                    border-top: 1px solid #000;
+                    margin-top: 14mm;
+                    width: 70%;
+                }
+                .signature-caption {
+                    font-size: 12px;
+                    margin-top: 3mm;
+                    font-weight: 700;
+                }
+                .fingerprint {
+                    border: 1px solid #000;
+                    min-height: 28mm;
+                    background:
+                    radial-gradient(ellipse at center, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.06) 60%, rgba(0,0,0,0.02) 100%);
+                }
+
+                /* Pie de página visible en impresión */
+                .footer {
+                    border-top: 1px solid #000;
+                    margin-top: 10px;
+                    padding-top: 4mm;
+                    font-size: 12px;
+                }
+
+                /* Botón de impresión */
+                .actions {
+                    padding: 10px 18mm;
+                    text-align: right;
+                }
+                .btn {
+                    display: inline-block;
+                    background: #111;
+                    color: #fff;
+                    border: none;
+                    padding: 8px 14px;
+                    font-size: 14px;
+                    cursor: pointer;
+                    border-radius: 4px;
+                }
+                .btn:active {
+                    transform: translateY(1px);
+                }
+
+                .juntos {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 10px;
+                }
+                .text-logo {
+                    display: flex;
+                    /* flex-direction: column; */
+                    justify-content: space-between;
+                }
+                </style>
+                </head>
+                <body>
+
+                <div class="actions no-print">
+                <button class="btn" onclick="window.print()">Imprimir / Guardar PDF</button>
+                </div>
+
+                <div class="sheet">
+                <div class="content" style="
+                    position: relative;
+                ">
+                    <!-- Encabezado -->
+                    <div class="title-row">
+                    <div class="doc-title">Garantía Equipos Celulares.</div>
+                    <div class="date-block">
+                        Fecha: ${new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                        <span class="date-line"></span>
+                    </div>
+                    </div>
+
+                    <div class="juntos">
+
+                        <!-- Cuerpo -->
+                        <p class="paragraph">
+                        Nuestros equipos condición <strong> Like New (usado poco uso)</strong> cuentan con una garantía de <strong> 180 días continuos por tienda </strong>estrictamente desde la fecha. Dicha garantía no será válida en caso de que el equipo presente mal estado <strong> (rayones, manchas en la pantalla, rasguños, desgaste en alguna de sus piezas ocasionadas por el cliente, sulfatación o humedad, indicios de caída, violación a los tornillos de seguridad),</strong> perdiendo la garantía.
+                        </p>
+                        <!-- Figura superior -->
+                        <div class="figure" style="
+                        
+                        right: 79px;
+                    ">
+                        <img src="width_200.webp" alt="logo">
+                        </div>
+                    
+                    </div>
+
+                    <p class="paragraph bullet">
+                    No se cubre garantía por defectos de pantalla ni por defectos causados por que se moje el teléfono. La empresa cubre los <strong>180 días</strong> haciéndose únicamente responsable por equipos que presenten defectos de fábrica y estén dentro del periodo de tiempo establecido, siempre y cuando no se violen las condiciones anteriormente mencionadas, mas no se devolverá dinero; en caso extremo se le hará un cambio de equipo por otro que no presente falla alguna.
+                    </p>
+
+                    <p class="paragraph bullet">
+                    No se cubre garantía por disminución del porcentaje de batería ya que las causas que lo disminuyen va a depender del uso del cliente EJEMPLO: Cargar el teléfono toda la noche, usar un cargador no recomendado, usar el teléfono mientras está cargando. Ya que para nosotros es incierto saber el uso que le da el cliente a su equipo.
+                    </p>
+
+                    <p class="paragraph bullet">
+                    No se cubrirá la garantía si el equipo posee vidrio templado astillado o quebrado. Esto indicaría que dicho equipo sufrió un daño por parte del cliente.
+                    </p>
+
+                    <p class="dot-paragraph">
+                    Todos nuestros equipos son inspeccionados antes de ser entregados al cliente para asegurarnos de que estén en perfectas condiciones tanto físicas como operativas. No obstante, recomendamos que el cliente inspeccione y verifique el funcionamiento del equipo al momento de la entrega, confirmando tambien la presencia y funcionamiento de todos los accesorios incluidos en la compra.
+                    </p>
+
+                    <p class="paragraph bullet">
+                    Para acceder a la garantía todos los equipos deberán ser enviados dentro de su empaque original y estos no deberán estar en mal estado.
+                    </p>
+
+                    <p class="paragraph h">
+                    Nuestros equipos incluyen Caja Original Apple sin Imei, para dar a entender que el equipo ya fue usado. El imei del equipo iría en la hoja de garantía en caso de poder reportarlo por robo o extravío.
+                    </p>
+
+                    <p class="paragraph">
+                    Dicho documento deberá ser presentado para poder acceder a la garantía, de lo contrario, no se podrá dar la misma.
+                    </p>
+
+                    <p class="note">
+                    NOTA IMPORTANTE: Las Garantías serán atendidas de Lunes a Jueves de 10am a 3pm.
+                    </p>
+
+                    <!-- Figura/formulario inferior -->
+                    <div class="figure-form">
+
+                        <div class="text-logo">
+
+                            <div class="form-row">
+                            <div class="field">
+                                <span class="label">•  Cedula:</span> <span class="line">${venta.cliente.cedula}</span>
+                            </div>
+                            <div class="field">
+                                <span class="label">•  Nombre y Apellido:</span> <span class="line">${venta.cliente.nombre}</span>
+                            </div>
+                            <div class="field">
+                                <span class="label">•  Teléfono contacto:</span> <span class="line">${venta.cliente.telefono}</span>
+                            </div>
+                            </div>
+                    
+                            <!-- <div class="usa-import">USA= IMPORT</div> -->
+                            <div class="figure" style="right: 79px;">
+                                <img src="width_200.webp" alt="logo">
+                            </div>
+                        </div>
+
+                    <div class="form-row">
+                        <div class="field">
+                        <span class="label">•  Modelo del equipo:</span> <span class="line">${modelo}</span>
+                        </div>
+                        <div class="field">
+                        <span class="label">•  Accesorio:</span> <span class="line">${accesoriosTexto.length > 0 ? 
+                                                    accesoriosTexto.map(acc => `<span class="text-sm"> ${acc} | </span>`).join('') : 
+                                                    '<p class="text-sm text-gray-500">Sin accesorios</p>'
+                                                }</span>
+                        </div>
+                        <div class="field">
+                        <span class="label">•  Imei:</span> <span class="line">${venta.cliente.imei}</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="field">
+                        <span class="label">•  Precio del Equipo:</span> <span class="line"></span>
+                        </div>
+                        <div class="field">
+                        <span class="label">•  Total venta:</span> <span class="line">${venta.montoTotal.toFixed(2)}</span>
+                        </div>
+                    </div>
+
+                    <div class="sign-row">
+                        <div class="box">
+                        <div class="box-label">· Sello del Establecimiento</div>
+                        </div>
+                        <div class="box" style="flex:1.2">
+                        <div class="signature-line"></div>
+                        <div class="signature-caption">Firma del Cliente</div>
+                        </div>
+                        <div class="box fingerprint" style="flex:0.8">
+                        <div class="box-label">Huella del Cliente</div>
+                        </div>
+                    </div>
+                    </div>
+
+                    <!-- Pie de página -->
+                    <div class="footer">
+                    Instagram: @usaimports.ve &nbsp;&nbsp;&nbsp; Contacto: 0424-3445840
+                    </div>
+                </div>
+                </div>
+
+
+
+                </body></html>
+            `;
+
+            ventanaImpresion.document.write(garantiaImpresion);
+            ventanaImpresion.document.close();
+            
+            // Imprimir automáticamente
+            setTimeout(() => {
+                ventanaImpresion.print();
+            }, 500);
 
             // Si estamos editando, actualizar la venta existente
             if (editandoVenta) {
@@ -2776,6 +3188,7 @@
                 }
             }); */
             let ingresosEfectivo = 0;
+            console.log(movimientos[0], 'primer movimiento');
             movimientos.forEach(mov => {
                 if (mov.tipo === 'salidaEfectivo') {
                     salidasEfectivo += mov.datos.monto;
@@ -2786,6 +3199,7 @@
                     console.log(ingresosEfectivo, 'si');//esto no se esta imprimiendo
                 }
                 console.log(mov.tipo, 'no' );
+                /* ingresosEfectivo = 10 */
             });
             console.log(movimientos.length, 'movimientos');
             totalDia.textContent = total.toFixed(2);

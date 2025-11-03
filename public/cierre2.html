@@ -107,17 +107,17 @@
                     </div>
 
                     <div>
-                        <label for="clienteCelular"  class="block text-sm font-medium text-gray-700 mb-2">Número Celular</label> 
+                        <label for="clienteTelefono"  class="block text-sm font-medium text-gray-700 mb-2">Número Celular</label> 
                         <input type="tel" id="clienteTelefono" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0414-1234567" required>
                     </div>
 
                     <div>
-                        <label for="equipoImei"  class="block text-sm font-medium text-gray-700 mb-2">IMEI del Equipo</label> 
+                        <label for="clienteImei"  class="block text-sm font-medium text-gray-700 mb-2">IMEI del Equipo</label> 
                         <input type="text" id="clienteImei" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Número IMEI (opcional)">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Garantia</label>
-                        <select id="garantia" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                        <label for="clienteGarantia" class="block text-sm font-medium text-gray-700 mb-2">Garantia</label>
+                        <select id="clienteGarantia" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
                             <!-- 2️⃣0️⃣ Opciones llenadas automáticamente por JavaScript -->
                         </select>
                     </div>
@@ -2261,6 +2261,7 @@
             const clienteCedula = document.getElementById('clienteCedula');
             const clienteTelefono = document.getElementById('clienteTelefono');
             const clienteImei = document.getElementById('clienteImei');
+            const clienteGarantia = document.getElementById('clienteGarantia');
             
             const venta = {
                 tipoVenta: tipoVenta,
@@ -2302,7 +2303,8 @@
                     nombre: clienteNombre.value,
                     cedula: clienteCedula.value,
                     telefono: clienteTelefono.value,
-                    imei: clienteImei.value
+                    imei: clienteImei.value,
+                    garantia: clienteGarantia.value
                 }
             };
 
@@ -2652,7 +2654,7 @@
 
                         <!-- Cuerpo -->
                         <p class="paragraph">
-                        Nuestros equipos condición <strong> Like New (usado poco uso)</strong> cuentan con una garantía de <strong> 180 días continuos por tienda </strong>estrictamente desde la fecha. Dicha garantía no será válida en caso de que el equipo presente mal estado <strong> (rayones, manchas en la pantalla, rasguños, desgaste en alguna de sus piezas ocasionadas por el cliente, sulfatación o humedad, indicios de caída, violación a los tornillos de seguridad),</strong> perdiendo la garantía.
+                        Nuestros equipos condición <strong> Like New (usado poco uso)</strong> cuentan con una garantía de <strong> ${venta.cliente.garantia} continuos por tienda </strong>estrictamente desde la fecha. Dicha garantía no será válida en caso de que el equipo presente mal estado <strong> (rayones, manchas en la pantalla, rasguños, desgaste en alguna de sus piezas ocasionadas por el cliente, sulfatación o humedad, indicios de caída, violación a los tornillos de seguridad),</strong> perdiendo la garantía.
                         </p>
                         <!-- Figura superior -->
                         <div class="figure" style="
@@ -2665,7 +2667,7 @@
                     </div>
 
                     <p class="paragraph bullet">
-                    No se cubre garantía por defectos de pantalla ni por defectos causados por que se moje el teléfono. La empresa cubre los <strong>180 días</strong> haciéndose únicamente responsable por equipos que presenten defectos de fábrica y estén dentro del periodo de tiempo establecido, siempre y cuando no se violen las condiciones anteriormente mencionadas, mas no se devolverá dinero; en caso extremo se le hará un cambio de equipo por otro que no presente falla alguna.
+                    No se cubre garantía por defectos de pantalla ni por defectos causados por que se moje el teléfono. La empresa cubre los <strong>${venta.cliente.garantia} días</strong> haciéndose únicamente responsable por equipos que presenten defectos de fábrica y estén dentro del periodo de tiempo establecido, siempre y cuando no se violen las condiciones anteriormente mencionadas, mas no se devolverá dinero; en caso extremo se le hará un cambio de equipo por otro que no presente falla alguna.
                     </p>
 
                     <p class="paragraph bullet">

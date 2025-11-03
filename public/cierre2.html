@@ -115,6 +115,12 @@
                         <label for="equipoImei"  class="block text-sm font-medium text-gray-700 mb-2">IMEI del Equipo</label> 
                         <input type="text" id="clienteImei" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Número IMEI (opcional)">
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Garantia</label>
+                        <select id="garantia" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            <!-- 2️⃣0️⃣ Opciones llenadas automáticamente por JavaScript -->
+                        </select>
+                    </div>
                 </div>
                 </div><!-- Información del Cliente -->
 
@@ -550,6 +556,10 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
                             <select id="salidaEquipoColor" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Color del equipo" required></select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">% Batería</label>
+                            <input type="number" id="salidaEquipoBateria" min="1" max="100" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="85">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
@@ -1183,6 +1193,16 @@
             { valor: "2TB", etiqueta: "2TB" }
         ];
 
+        const garantias = [
+            { valor: "Sin Garantía", etiqueta: "Sin Garantía" },
+            { valor: "30 Días", etiqueta: "30 Días" },
+            { valor: "60 Días", etiqueta: "60 Días" },
+            { valor: "90 Días", etiqueta: "90 Días" },
+            { valor: "180 Días", etiqueta: "6 Meses" },
+            { valor: "240 Días", etiqueta: "8 Meses" },
+            { valor: "365 Días", etiqueta: "1 Año" }
+        ];
+
         // 2️⃣0️⃣ Función para llenar selectores automáticamente
         function llenarSelector(selectorId, opciones, textoPlaceholder = "Seleccionar") {
             const selector = document.getElementById(selectorId);
@@ -1236,6 +1256,7 @@
             llenarSelector('cajaColorSelect', coloresIphone, "Seleccionar color");
             llenarSelector('equipoColor', coloresIphone, "Seleccionar color");
             llenarSelector('equipoModelo', modelosIphone, "Seleccionar modelo");
+            llenarSelector('garantia', garantias, "Seleccionar garantía");
             
             llenarSelectoresPorClase('accModelo', modelosIphone, "Seleccionar modelo");
             // Llenar selectores de equipo recibido
@@ -1668,6 +1689,7 @@
                         const modelo = document.getElementById('salidaEquipoModelo').value;
                         const capacidad = document.getElementById('salidaEquipoCapacidad').value;
                         const color = document.getElementById('salidaEquipoColor').value.trim();
+                        const bateria = document.getElementById('salidaEquipoBateria').value.trim();
                         const imei = document.getElementById('salidaEquipoImei').value.trim();
                         let destino = document.getElementById('salidaEquipoDestino').value;
                         const personaEquipo = document.getElementById('salidaEquipoPersona').value.trim();
@@ -1683,12 +1705,12 @@
                             destino = destinoPersonalizado;
                         }
                         
-                        if (!modelo || !capacidad || !color || !destino || !personaEquipo) {
+                        if (!modelo || !capacidad || !color || !destino || !personaEquipo || !imei || !bateria) {
                             alert('Por favor complete todos los campos requeridos');
                             return;
                         }
                         
-                        movimiento.datos = { modelo, capacidad, color, imei, destino, persona: personaEquipo, nota: notaEquipo };
+                        movimiento.datos = { modelo, capacidad, color, imei, bateria, destino, persona: personaEquipo, nota: notaEquipo };
                         break;
                         
                     case 'salidaAccesorio':
@@ -2020,7 +2042,7 @@
                         icono = '📱➡️';
                         colorClass = 'bg-orange-50 border-orange-200';
                         titulo = `Salida de Equipo - ${mov.datos.modelo}`;
-                        detalles = `<p><strong>Equipo:</strong> ${mov.datos.modelo} ${mov.datos.capacidad} ${mov.datos.color}</p><p><strong>Destino:</strong> ${mov.datos.destino}</p><p><strong>Retirado por:</strong> ${mov.datos.persona}</p>${mov.datos.imei ? `<p><strong>IMEI:</strong> ${mov.datos.imei}</p>` : ''}${mov.datos.nota ? `<p><strong>Nota:</strong> ${mov.datos.nota}</p>` : ''}`;
+                        detalles = `<p><strong>Equipo:</strong> ${mov.datos.modelo} | ${mov.datos.capacidad} | ${mov.datos.color} | ${mov.datos.bateria}%</p><p><strong>Destino:</strong> ${mov.datos.destino}</p><p><strong>Retirado por:</strong> ${mov.datos.persona}</p>${mov.datos.imei ? `<p><strong>IMEI:</strong> ${mov.datos.imei}</p>` : ''}${mov.datos.nota ? `<p><strong>Nota:</strong> ${mov.datos.nota}</p>` : ''}`;
                         break;
                     case 'salidaAccesorio':
                         icono = '🛡️➡️';

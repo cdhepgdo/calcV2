@@ -98,17 +98,17 @@
                 <div class="grid md:grid-cols-2 gap-4">
                     <div>
                         <label for="clienteNombre"  class="block text-sm font-medium text-gray-700 mb-2">Nombre y Apellido</label> 
-                        <input type="text" id="clienteNombre" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Nombre completo del cliente" >
+                        <input type="text" id="clienteNombre" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Nombre completo del cliente" required>
                     </div>
 
                     <div>
                         <label for="clienteCedula"  class="block text-sm font-medium text-gray-700 mb-2">Cédula</label> 
-                        <input type="text" id="clienteCedula" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="V-12345678" >
+                        <input type="text" id="clienteCedula" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="V-12345678" required>
                     </div>
 
                     <div>
                         <label for="clienteTelefono"  class="block text-sm font-medium text-gray-700 mb-2">Número Celular</label> 
-                        <input type="tel" id="clienteTelefono" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0414-1234567" >
+                        <input type="tel" id="clienteTelefono" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0414-1234567" required>
                     </div>
 
                     <div>
@@ -117,7 +117,7 @@
                     </div>
                     <div>
                         <label for="clienteGarantia" class="block text-sm font-medium text-gray-700 mb-2">Garantia</label>
-                        <select id="clienteGarantia" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" >
+                        <select id="clienteGarantia" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
                             <!-- 2️⃣0️⃣ Opciones llenadas automáticamente por JavaScript -->
                         </select>
                     </div>
@@ -1389,21 +1389,39 @@
             radio.addEventListener('change', function() {
                 const infoIphone = document.getElementById('infoIphone');
                 const datosClienteSection = document.getElementById('datosClienteSection');
+                
                 if (this.value === 'accesorios') {
+                    // Ocultar secciones de iPhone y Cliente
                     infoIphone.style.display = 'none';
                     datosClienteSection.style.display = 'none';
-                    // Limpiar campos requeridos del iPhone
+                    
+                    // Remover campos requeridos del iPhone
                     document.getElementById('modelo').removeAttribute('required');
                     document.getElementById('almacenamiento').removeAttribute('required');
                     document.getElementById('bateria').removeAttribute('required');
                     document.getElementById('color').removeAttribute('required');
+                    
+                    // Remover campos requeridos del Cliente
+                    document.getElementById('clienteNombre').removeAttribute('required');
+                    document.getElementById('clienteCedula').removeAttribute('required');
+                    document.getElementById('clienteTelefono').removeAttribute('required');
+                    document.getElementById('clienteGarantia').removeAttribute('required');
                 } else {
+                    // Mostrar secciones de iPhone y Cliente
                     infoIphone.style.display = 'block';
                     datosClienteSection.style.display = 'block';
+                    
+                    // Restaurar campos requeridos del iPhone
                     document.getElementById('modelo').setAttribute('required', '');
                     document.getElementById('almacenamiento').setAttribute('required', '');
                     document.getElementById('bateria').setAttribute('required', '');
                     document.getElementById('color').setAttribute('required', '');
+                    
+                    // Restaurar campos requeridos del Cliente
+                    document.getElementById('clienteNombre').setAttribute('required', '');
+                    document.getElementById('clienteCedula').setAttribute('required', '');
+                    document.getElementById('clienteTelefono').setAttribute('required', '');
+                    document.getElementById('clienteGarantia').setAttribute('required', '');
                 }
             });
         });
@@ -2247,6 +2265,20 @@
         document.getElementById('ventaForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
+            // ========== VALIDACIÓN CRÍTICA: Verificar que se seleccionó forma de pago ==========
+            const formaPagoSeleccionada = document.querySelector('input[name="formaPago"]:checked');
+            if (!formaPagoSeleccionada) {
+                alert('⚠️ Por favor selecciona una forma de pago antes de registrar la venta.');
+                return;
+            }
+            
+            // ========== VALIDACIÓN CRÍTICA: Verificar que el monto total es válido ==========
+            const montoTotalInput = parseFloat(document.getElementById('montoTotal').value);
+            if (!montoTotalInput || montoTotalInput <= 0 || isNaN(montoTotalInput)) {
+                alert('⚠️ Por favor ingresa un monto total válido mayor a $0.00');
+                return;
+            }
+            
             const tipoVenta = document.querySelector('input[name="tipoVenta"]:checked').value;
             
             // Recopilar datos del formulario
@@ -2274,26 +2306,26 @@
                 bateria: tipoVenta === 'completa' ? document.getElementById('bateria').value + '%' : '-',
                 accesorios: {
                     forro: document.getElementById('forro').checked,
-                    forroModelo: document.getElementById('forro').checked ? document.querySelector('#forroModelo select').value : null,
-                    forroCantidad: document.getElementById('forro').checked ? parseInt(document.querySelector('#forroModelo input').value) : 0,
+                    forroModelo: document.getElementById('forro').checked ? (document.querySelector('#forroModelo select')?.value || null) : null,
+                    forroCantidad: document.getElementById('forro').checked ? parseInt(document.querySelector('#forroModelo input')?.value || 0) : 0,
                     cargador: document.getElementById('cargador').checked,
-                    cargadorCantidad: document.getElementById('cargador').checked ? parseInt(document.querySelector('#cargadorCantidad input').value) : 0,
+                    cargadorCantidad: document.getElementById('cargador').checked ? parseInt(document.querySelector('#cargadorCantidad input')?.value || 0) : 0,
                     vidrio: document.getElementById('vidrio').checked,
-                    vidrioModelo: document.getElementById('vidrio').checked ? document.querySelector('#vidrioModelo select').value : null,
-                    vidrioCantidad: document.getElementById('vidrio').checked ? parseInt(document.querySelector('#vidrioModelo input').value) : 0,
+                    vidrioModelo: document.getElementById('vidrio').checked ? (document.querySelector('#vidrioModelo select')?.value || null) : null,
+                    vidrioCantidad: document.getElementById('vidrio').checked ? parseInt(document.querySelector('#vidrioModelo input')?.value || 0) : 0,
                     protectorCamara: document.getElementById('protectorCamara').checked,
-                    protectorCantidad: document.getElementById('protectorCamara').checked ? parseInt(document.querySelector('#protectorCantidad input').value) : 0,
+                    protectorCantidad: document.getElementById('protectorCamara').checked ? parseInt(document.querySelector('#protectorCantidad input')?.value || 0) : 0,
                     // 2️⃣0️⃣ Nuevos accesorios
                     cubo: document.getElementById('cubo').checked,
-                    cuboCantidad: document.getElementById('cubo').checked ? parseInt(document.querySelector('#cuboCantidad input').value) : 0,
+                    cuboCantidad: document.getElementById('cubo').checked ? parseInt(document.querySelector('#cuboCantidad input')?.value || 0) : 0,
                     cableLightning: document.getElementById('cableLightning').checked,
-                    cableLightningCantidad: document.getElementById('cableLightning').checked ? parseInt(document.querySelector('#cableLightningCantidad input').value) : 0,
+                    cableLightningCantidad: document.getElementById('cableLightning').checked ? parseInt(document.querySelector('#cableLightningCantidad input')?.value || 0) : 0,
                     cableCC: document.getElementById('cableCC').checked,
-                    cableCCCantidad: document.getElementById('cableCC').checked ? parseInt(document.querySelector('#cableCCCantidad input').value) : 0,
+                    cableCCCantidad: document.getElementById('cableCC').checked ? parseInt(document.querySelector('#cableCCCantidad input')?.value || 0) : 0,
                     caja: document.getElementById('caja').checked,
-                    cajaModelo: document.getElementById('caja').checked ? document.querySelector('#cajaModelo select:first-child').value : null,
-                    cajaColor: document.getElementById('caja').checked ? document.querySelector('#cajaModelo select:nth-child(2)').value : null,
-                    cajaCantidad: document.getElementById('caja').checked ? parseInt(document.querySelector('#cajaModelo input').value) : 0
+                    cajaModelo: document.getElementById('caja').checked ? (document.querySelector('#cajaModelo select:first-child')?.value || null) : null,
+                    cajaColor: document.getElementById('caja').checked ? (document.querySelector('#cajaModelo select:nth-child(2)')?.value || null) : null,
+                    cajaCantidad: document.getElementById('caja').checked ? parseInt(document.querySelector('#cajaModelo input')?.value || 0) : 0
                 },
                 formaPago: document.querySelector('input[name="formaPago"]:checked').value,
                 montoTotal: parseFloat(document.getElementById('montoTotal').value),
@@ -2317,6 +2349,21 @@
                     pagoMovil: parseFloat(document.getElementById('montoPagoMovilDolares').value) || 0,
                     transferencia: parseFloat(document.getElementById('montoTransferenciaDolares').value) || 0
                 };
+                
+                // ========== VALIDACIÓN CRÍTICA: Verificar que el pago mixto suma correctamente ==========
+                const totalPagoMixto = venta.pagoMixto.efectivo + venta.pagoMixto.zelle + 
+                                       venta.pagoMixto.binance + venta.pagoMixto.pagoMovil + 
+                                       venta.pagoMixto.transferencia;
+                
+                const montoTotalVenta = venta.montoTotal;
+                const diferencia = Math.abs(totalPagoMixto - montoTotalVenta);
+                
+                // Permitir una diferencia de hasta 0.01 por redondeo
+                if (/* diferencia > 0.01 && */ !venta.weppa) {
+                    //alert(`⚠️ ERROR: El total del pago mixto ($${totalPagoMixto.toFixed(2)}) no coincide con el monto total de la venta ($${montoTotalVenta.toFixed(2)}).\n\nDiferencia: $${diferencia.toFixed(2)}\n\nPor favor ajusta los montos antes de continuar.`);
+                    alert(`⚠️ ERROR: Asegurate de marcar la casilla de 'WEPPA' para pago mixto distinto del monto total de la venta.`);
+                    return;
+                }
                 
                 // Agregar detalles de conversión si están disponibles
                 if (venta.pagoMixto.pagoMovil > 0) {
@@ -2823,6 +2870,13 @@
             document.getElementById('almacenamiento').setAttribute('required', '');
             document.getElementById('bateria').setAttribute('required', '');
             document.getElementById('color').setAttribute('required', '');
+            
+            // Mostrar sección Datos del Cliente por defecto
+            document.getElementById('datosClienteSection').style.display = 'block';
+            document.getElementById('clienteNombre').setAttribute('required', '');
+            document.getElementById('clienteCedula').setAttribute('required', '');
+            document.getElementById('clienteTelefono').setAttribute('required', '');
+            document.getElementById('clienteGarantia').setAttribute('required', '');
         }
 
         // ========== FUNCIONALIDAD DE EDICIÓN: VARIABLES DE CONTROL ========== 

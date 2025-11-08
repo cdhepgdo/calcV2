@@ -2359,7 +2359,7 @@
                 const diferencia = Math.abs(totalPagoMixto - montoTotalVenta);
                 
                 // Permitir una diferencia de hasta 0.01 por redondeo
-                if (/* diferencia > 0.01 && */ !venta.weppa) {
+                if (diferencia > 0.01 && !venta.weppa) {
                     //alert(`⚠️ ERROR: El total del pago mixto ($${totalPagoMixto.toFixed(2)}) no coincide con el monto total de la venta ($${montoTotalVenta.toFixed(2)}).\n\nDiferencia: $${diferencia.toFixed(2)}\n\nPor favor ajusta los montos antes de continuar.`);
                     alert(`⚠️ ERROR: Asegurate de marcar la casilla de 'WEPPA' para pago mixto distinto del monto total de la venta.`);
                     return;

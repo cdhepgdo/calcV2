@@ -3468,7 +3468,73 @@
                     inicial += venta.equipoRecibido.valor;
                 }
 
+                // ========== MEJORA: Generar layout dinámico según contenido ==========
+                let numColumnas = 0;
+                let columnasHtml = '';
+                
+                // Columna 1: EQUIPO (solo si es venta completa)
+                if (venta.tipoVenta === 'completa') {
+                    numColumnas++;
+                    columnasHtml += `
+                        <div class="seccion">
+                            <div class="seccion-titulo" style="background-color: #1976d2; color: white; padding: 4px 6px; border-radius: 3px; font-size: 11px;">📱 EQUIPO</div>
+                            <div class="detalle" style="font-size: 13px; font-weight: bold; color: #1565c0; margin-top: 4px;">${venta.modelo}</div>
+                            <div class="detalle" style="font-size: 12px; color: #424242;">${venta.almacenamiento} - ${venta.color}</div>
+                            <div class="detalle" style="font-size: 12px; color: #666;">Batería: ${venta.bateria}</div>
+                        </div>
+                    `;
+                }
+                
+                // Columna 2: ACCESORIOS (solo si hay accesorios)
+                if (accesoriosTexto.length > 0) {
+                    numColumnas++;
+                    columnasHtml += `
+                        <div class="seccion">
+                            <div class="seccion-titulo" style="background-color: #f57c00; color: white; padding: 4px 6px; border-radius: 3px; font-size: 11px;">🛡️ ACCESORIOS</div>
+                            ${accesoriosTexto.map(acc => `<div class="detalle" style="font-size: 12px; font-weight: 600; color: #e65100; margin-top: 3px;">${acc}</div>`).join('')}
+                        </div>
+                    `;
+                }
+                
+                // Columna 3: EQUIPO RECIBIDO (solo si hay equipo recibido)
+                if (venta.equipoRecibido) {
+                    numColumnas++;
+                    columnasHtml += `
+                        <div class="seccion">
+                            <div class="seccion-titulo" style="background-color: #0288d1; color: white; padding: 4px 6px; border-radius: 3px; font-size: 11px;">📱⬅️ RECIBIDO</div>
+                            <div class="detalle" style="font-size: 12px; font-weight: bold; color: #01579b; margin-top: 4px;">${venta.equipoRecibido.modelo}</div>
+                            <div class="detalle" style="font-size: 12px; color: #424242;">${venta.equipoRecibido.capacidad} - ${venta.equipoRecibido.color}</div>
+                            <div class="detalle" style="font-size: 12px; color: #666;">Bat: ${venta.equipoRecibido.bateria}%</div>
+                            <div class="detalle" style="font-size: 12px; color: #666;">IMEI: ${venta.equipoRecibido.imei}</div>
+                            <div class="detalle" style="font-size: 12px; font-weight: bold; color: #d32f2f;">Valor: $${venta.equipoRecibido.valor}</div>
+                            ${venta.equipoRecibido.comentarios ? `<div class="detalle" style="font-size: 10px; color: #757575; font-style: italic;">${venta.equipoRecibido.comentarios}</div>` : ''}
+                        </div>
+                    `;
+                }
+                
+                // Columna 4: PAGO (siempre se muestra)
+                numColumnas++;
+                let pagosHtml = '<div class="seccion"><div class="seccion-titulo" style="background-color: #388e3c; color: white; padding: 4px 6px; border-radius: 3px; font-size: 11px;">💳 PAGO</div>';
+                
+                // Ajustar grid según número de columnas
+                const gridTemplate = numColumnas === 1 ? '1fr' : 
+                                    numColumnas === 2 ? '1fr 1fr' : 
+                                    numColumnas === 3 ? '1.5fr 1.5fr 1fr' : 
+                                    '1.5fr 1.5fr 1.2fr 1fr';
+
                 htmlImpresion += `
+                    <div class="venta">
+                        <div class="venta-header">
+                            ${venta.tipoTransaccion === 'abono' ? '🔸 ABONO' : '✅ VENTA'} #${index + 1} - ${venta.hora}
+                            ${weppaHtml} ${venta.weppa ? '<span style="font-size: 10px; color: #666;">(Inicial: $'+ inicial.toFixed(2) + ')</span>' : '' }
+                            <span style="float: right; font-size: 14px; color: #2e7d32; font-weight: bold;">$${venta.montoTotal.toFixed(2)}</span>
+                        </div>
+                        
+                        <div class="venta-grid" style="grid-template-columns: ${gridTemplate};">
+                            ${columnasHtml}
+                            ${pagosHtml}
+                `;
+                /* htmlImpresion += `
                     <div class="venta">
                         <div class="venta-header">
                             ${venta.tipoTransaccion === 'abono' ? 'ABONO' : 'VENTA'} #${index + 1} - ${venta.hora}
@@ -3515,41 +3581,45 @@
                             
                             <div class="seccion">
                                 <div class="seccion-titulo">💳 PAGO</div>
-                `;
+                `; */
                 
-                // Agregar métodos de pago detallados
+                // Agregar métodos de pago detallados con estilos mejorados
                 if (venta.formaPago === 'efectivo') {
-                    htmlImpresion += `<div class="metodo-pago bg-green-200 px-2 py-1 rounded text-xs font-medium text-green-800">💵 Efectivo: $${(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)).toFixed(2)}</div>`;
+                    htmlImpresion += `<div class="detalle" style="font-size: 12px; font-weight: bold; color: #2e7d32; margin-top: 4px;">💵 Efectivo: $${(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)).toFixed(2)}</div>`;
                 } else if (venta.formaPago === 'zelle') {
-                    htmlImpresion += `<div class="metodo-pago">💳 Zelle: $${(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)).toFixed(2)}</div>`;
+                    htmlImpresion += `<div class="detalle" style="font-size: 12px; font-weight: bold; color: #1565c0; margin-top: 4px;">💳 Zelle: $${(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)).toFixed(2)}</div>`;
                 } else if (venta.formaPago === 'binance') {
-                    htmlImpresion += `<div class="metodo-pago">₿ Binance: $${(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)).toFixed(2)}</div>`;
+                    htmlImpresion += `<div class="detalle" style="font-size: 12px; font-weight: bold; color: #f57c00; margin-top: 4px;">₿ Binance: $${(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0)).toFixed(2)}</div>`;
                 } else if (venta.formaPago === 'pagomovil' && venta.pagoMovilDetalles) {
-                    htmlImpresion += `<div class="metodo-pago">📱 Pago Móvil: $${venta.pagoMovilDetalles.dolares} = ${venta.pagoMovilDetalles.bolivares}Bs (Tasa: ${venta.pagoMovilDetalles.tasa})</div>`;
+                    htmlImpresion += `<div class="detalle" style="font-size: 12px; font-weight: bold; color: #0288d1; margin-top: 4px;">📱 Pago Móvil: $${venta.pagoMovilDetalles.dolares}</div>`;
+                    htmlImpresion += `<div class="detalle" style="font-size: 9px; color: #666; margin-left: 20px;">= ${venta.pagoMovilDetalles.bolivares.toLocaleString()}Bs (Tasa: ${venta.pagoMovilDetalles.tasa})</div>`;
                 } else if (venta.formaPago === 'transferencia' && venta.transferenciaDetalles) {
-                    htmlImpresion += `<div class="metodo-pago">🏦 Transferencia: $${venta.transferenciaDetalles.dolares} = ${venta.transferenciaDetalles.bolivares}Bs (Tasa: ${venta.transferenciaDetalles.tasa})</div>`;
+                    htmlImpresion += `<div class="detalle" style="font-size: 12px; font-weight: bold; color: #7b1fa2; margin-top: 4px;">🏦 Transferencia: $${venta.transferenciaDetalles.dolares}</div>`;
+                    htmlImpresion += `<div class="detalle" style="font-size: 9px; color: #666; margin-left: 20px;">= ${venta.transferenciaDetalles.bolivares.toLocaleString()}Bs (Tasa: ${venta.transferenciaDetalles.tasa})</div>`;
                 } else if (venta.formaPago === 'mixto' && venta.pagoMixto) {
-                    if (venta.pagoMixto.efectivo > 0) htmlImpresion += `<div class="metodo-pago">💵 Efectivo: $${venta.pagoMixto.efectivo}</div>`;
-                    if (venta.pagoMixto.zelle > 0) htmlImpresion += `<div class="metodo-pago">💳 Zelle: $${venta.pagoMixto.zelle}</div>`;
-                    if (venta.pagoMixto.binance > 0) htmlImpresion += `<div class="metodo-pago">₿ Binance: $${venta.pagoMixto.binance}</div>`;
+                    if (venta.pagoMixto.efectivo > 0) htmlImpresion += `<div class="detalle" style="font-size: 11px; font-weight: 600; color: #2e7d32; margin-top: 3px;">💵 Efectivo: $${venta.pagoMixto.efectivo.toFixed(2)}</div>`;
+                    if (venta.pagoMixto.zelle > 0) htmlImpresion += `<div class="detalle" style="font-size: 11px; font-weight: 600; color: #1565c0; margin-top: 3px;">💳 Zelle: $${venta.pagoMixto.zelle.toFixed(2)}</div>`;
+                    if (venta.pagoMixto.binance > 0) htmlImpresion += `<div class="detalle" style="font-size: 11px; font-weight: 600; color: #f57c00; margin-top: 3px;">₿ Binance: $${venta.pagoMixto.binance.toFixed(2)}</div>`;
                     if (venta.pagoMixto.pagoMovil > 0) {
                         if (venta.pagoMixto.pagoMovilDetalles && venta.pagoMixto.pagoMovilDetalles.bolivares > 0) {
-                            htmlImpresion += `<div class="metodo-pago">📱 Pago Móvil: $${venta.pagoMixto.pagoMovilDetalles.dolares} = ${venta.pagoMixto.pagoMovilDetalles.bolivares}Bs (${venta.pagoMixto.pagoMovilDetalles.tasa})</div>`;
+                            htmlImpresion += `<div class="detalle" style="font-size: 11px; font-weight: 600; color: #0288d1; margin-top: 3px;">📱 Pago Móvil: $${venta.pagoMixto.pagoMovilDetalles.dolares.toFixed(2)}</div>`;
+                            htmlImpresion += `<div class="detalle" style="font-size: 9px; color: #666; margin-left: 20px;">= ${venta.pagoMixto.pagoMovilDetalles.bolivares.toLocaleString()}Bs (${venta.pagoMixto.pagoMovilDetalles.tasa})</div>`;
                         } else {
-                            htmlImpresion += `<div class="metodo-pago">📱 Pago Móvil: $${venta.pagoMixto.pagoMovil}</div>`;
+                            htmlImpresion += `<div class="detalle" style="font-size: 11px; font-weight: 600; color: #0288d1; margin-top: 3px;">📱 Pago Móvil: $${venta.pagoMixto.pagoMovil.toFixed(2)}</div>`;
                         }
                     }
                     if (venta.pagoMixto.transferencia > 0) {
                         if (venta.pagoMixto.transferenciaDetalles && venta.pagoMixto.transferenciaDetalles.bolivares > 0) {
-                            htmlImpresion += `<div class="metodo-pago">🏦 Transferencia: $${venta.pagoMixto.transferenciaDetalles.dolares} = ${venta.pagoMixto.transferenciaDetalles.bolivares}Bs (${venta.pagoMixto.transferenciaDetalles.tasa})</div>`;
+                            htmlImpresion += `<div class="detalle" style="font-size: 11px; font-weight: 600; color: #7b1fa2; margin-top: 3px;">🏦 Transferencia: $${venta.pagoMixto.transferenciaDetalles.dolares.toFixed(2)}</div>`;
+                            htmlImpresion += `<div class="detalle" style="font-size: 9px; color: #666; margin-left: 20px;">= ${venta.pagoMixto.transferenciaDetalles.bolivares.toLocaleString()}Bs (${venta.pagoMixto.transferenciaDetalles.tasa})</div>`;
                         } else {
-                            htmlImpresion += `<div class="metodo-pago">🏦 Transferencia: $${venta.pagoMixto.transferencia}</div>`;
+                            htmlImpresion += `<div class="detalle" style="font-size: 11px; font-weight: 600; color: #7b1fa2; margin-top: 3px;">🏦 Transferencia: $${venta.pagoMixto.transferencia.toFixed(2)}</div>`;
                         }
                     }
                 }
                 
                 if (venta.equipoRecibido) {
-                    htmlImpresion += `<div class="metodo-pago">📱⬅️ Equipo: $${venta.equipoRecibido.valor}</div>`;
+                    htmlImpresion += `<div class="detalle" style="font-size: 11px; font-weight: bold; color: #d32f2f; margin-top: 4px;">📱⬅️ Equipo: $${venta.equipoRecibido.valor.toFixed(2)}</div>`;
                 }
 
                 // AQUI AGREGA EL BLOQUE NUEVO:

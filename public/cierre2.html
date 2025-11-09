@@ -3393,16 +3393,17 @@
                     <title>Resumen de Ventas - ${new Date().toLocaleDateString('es-ES')}</title>
                     
                     <style>
-                        body { font-family: Arial, sans-serif; margin: 15px; font-size: 11px; }
-                        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 8px; }
-                        .venta { border: 1px solid #ddd; margin-bottom: 8px; padding: 8px; border-radius: 3px; }
-                        .venta-header { background-color: #f5f5f5; padding: 6px; margin: -8px -8px 6px -8px; border-radius: 3px 3px 0 0; font-size: 12px; font-weight: bold; }
-                        .venta-grid { display: grid; grid-template-columns: 2fr 1.5fr 1.5fr 2fr; gap: 10px; }
-                        .seccion { }
-                        .seccion-titulo { font-weight: bold; margin-bottom: 3px; font-size: 10px; color: #333; }
-                        .detalle { margin: 1px 0; font-size: 10px; }
-                        .metodo-pago { background-color: #e3f2fd; padding: 2px 4px; border-radius: 2px; margin: 1px 0; font-size: 9px; }
-                        .totales { margin-top: 20px; border-top: 2px solid #333; padding-top: 15px; }
+                        body { font-family: Arial, sans-serif; margin: 15px; font-size: 11px; background-color: #fafafa; }
+                        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 8px; background-color: white; padding: 15px; border-radius: 5px; }
+                        .venta { border: 1px solid #ddd; margin-bottom: 10px; padding: 8px; border-radius: 5px; background-color: white; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+                        .venta:nth-child(even) { background-color: #f8f9fa; }
+                        .venta-header {  padding: 8px; margin: -8px -8px 8px -8px; border-radius: 5px 5px 0 0; font-size: 12px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+                        .venta-grid { display: grid; grid-template-columns: 2fr 1.5fr 1.5fr 2fr; gap: 12px; }
+                        .seccion { background-color: #fafafa; padding: 8px; border-radius: 4px; }
+                        .seccion-titulo { font-weight: bold; margin-bottom: 5px; font-size: 10px; color: #333; }
+                        .detalle { margin: 2px 0; font-size: 10px; line-height: 1.4; }
+                        .metodo-pago { background-color: #e8f5e9; padding: 3px 6px; border-radius: 3px; margin: 2px 0; font-size: 10px; border-left: 3px solid #4caf50; }
+                        .totales { margin-top: 20px; border-top: 2px solid #333; padding-top: 15px; background-color: white; padding: 20px; border-radius: 5px; }
                         .total-item { display: flex; justify-content: space-between; margin: 8px 0; font-size: 14px; }
                         .total-final { font-weight: bold; font-size: 16px; color: #2e7d32; }
                         .fecha-hora { text-align: right; color: #666; font-size: 10px; }

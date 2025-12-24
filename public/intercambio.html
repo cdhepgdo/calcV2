@@ -104,67 +104,249 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
     // === DATA ORIGINAL, AJUSTAR SEGÚN TU NECESIDAD ===
-    const recibidos = [
-  { nombre: "iPhone 11 (64gb)", usd: 120 },
-  { nombre: "iPhone 11 (128gb)", usd: 140 },
-  { nombre: "iPhone 11 (256gb)", usd: 150 },
-  { nombre: "iPhone 11 Pro (64gb)", usd: 180 },
-  { nombre: "iPhone 11 Pro (256gb)", usd: 200 },
-  { nombre: "iPhone 11 Pro Max (64gb)", usd: 180 },
-  { nombre: "iPhone 11 Pro Max (256gb)", usd: 220 },
-  { nombre: "iPhone 12 (64gb)", usd: 180 },
-  { nombre: "iPhone 12 (128gb)", usd: 200 },
-  { nombre: "iPhone 12 (256gb)", usd: 200 },
-  { nombre: "iPhone 12 Pro (128gb)", usd: 260 },
-  { nombre: "iPhone 12 Pro (256gb)", usd: 270 },
-  { nombre: "iPhone 12 Pro (512gb)", usd: 280 },
-  { nombre: "iPhone 12 Pro Max (128gb)", usd: 310 },
-  { nombre: "iPhone 12 Pro Max (256gb)", usd: 330 },
-  { nombre: "iPhone 12 Pro Max (512gb)", usd: 350 },
-  { nombre: "iPhone 13 (128gb)", usd: 270 },
-  { nombre: "iPhone 13 (256gb)", usd: 290 },
-  { nombre: "iPhone 13 (512gb)", usd: 300 },
-  { nombre: "iPhone 13 Pro (128gb)", usd: 370 },
-  { nombre: "iPhone 13 Pro (256gb)", usd: 390 },
-  { nombre: "iPhone 13 Pro (512gb)", usd: 420 },
-  { nombre: "iPhone 13 Pro (1TB)", usd: 430 },
-  { nombre: "iPhone 13 Pro Max (128gb)", usd: 440 },
-  { nombre: "iPhone 13 Pro Max (256gb)", usd: 460 },
-  { nombre: "iPhone 13 Pro Max (512gb)", usd: 500 },
-  { nombre: "iPhone 13 Pro Max (1TB)", usd: 530 },
-  { nombre: "iPhone 14 (128gb)", usd: 300 },
-  { nombre: "iPhone 14 (256gb)", usd: 340 },
-  { nombre: "iPhone 14 (512gb)", usd: 350 },
-  { nombre: "iPhone 14 Plus (128gb)", usd: 300 },
-  { nombre: "iPhone 14 Plus (256gb)", usd: 320 },
-  { nombre: "iPhone 14 Pro (128gb)", usd: 470 },
-  { nombre: "iPhone 14 Pro (256gb)", usd: 480 },
-  { nombre: "iPhone 14 Pro (512gb)", usd: 500 },
-  { nombre: "iPhone 14 Pro Max (128gb)", usd: 570 },
-  { nombre: "iPhone 14 Pro Max (256gb)", usd: 600 },
-  { nombre: "iPhone 14 Pro Max (512gb)", usd: 600 },
-  { nombre: "iPhone 15 (128gb)", usd: 460 },
-  { nombre: "iPhone 15 (256gb)", usd: 500 },
-  { nombre: "iPhone 15 (512gb)", usd: 500 },
-  { nombre: "iPhone 15 Plus (128gb)", usd: 520 },
-  { nombre: "iPhone 15 Plus (256gb)", usd: 550 },
-  { nombre: "iPhone 15 Pro (128gb)", usd: 480 },
-  { nombre: "iPhone 15 Pro (256gb)", usd: 500 },
-  { nombre: "iPhone 15 Pro Max (256gb)", usd: 700 },
-  { nombre: "iPhone 15 Pro Max (512gb)", usd: 730 },
-  { nombre: "iPhone 15 Pro Max (1TB)", usd: 740 },
-  { nombre: "iPhone 16 (128gb)", usd: 640 },
-  { nombre: "iPhone 16 (256gb)", usd: 650 },
-  { nombre: "iPhone 16 Plus (128gb)", usd: 650 },
-  { nombre: "iPhone 16 Plus (256gb)", usd: 670 },
-  { nombre: "iPhone 16 Pro (128gb)", usd: 720 },
-  { nombre: "iPhone 16 Pro (512gb)", usd: 790 },
-  { nombre: "iPhone 16 Pro (1TB)", usd: 830 },
-  { nombre: "iPhone 16 Pro Max (256gb)", usd: 900 },
-  { nombre: "iPhone 16 Pro Max (512gb)", usd: 940 },
-  { nombre: "iPhone 16 Pro Max (1TB)", usd: 960 },
+    
+const recibidos = [
+  {
+    "nombre": "iPhone 11 (64)gb",
+    "usd": 120
+  },
+  {
+    "nombre": "IPhone 11(128)gb",
+    "usd": 140
+  },
+  {
+    "nombre": "IPhone 11(256)gb",
+    "usd": 150
+  },
+  {
+    "nombre": "IPhone 11 Pro (64gb)",
+    "usd": 150
+  },
+  {
+    "nombre": "IPhone 11 pro (256gb)",
+    "usd": 190
+  },
+  {
+    "nombre": "IPhone 11 Pro Max(64gb)",
+    "usd": 170
+  },
+  {
+    "nombre": "IPhone 11ProMax(256gb)",
+    "usd": 200
+  },
+  {
+    "nombre": "IPhone 12 (64gb)",
+    "usd": 170
+  },
+  {
+    "nombre": "IPhone 12 (128gb)",
+    "usd": 180
+  },
+  {
+    "nombre": "IPhone 12 (256gb)",
+    "usd": 190
+  },
+  {
+    "nombre": "Iphone 12 pro (128gb)",
+    "usd": 240
+  },
+  {
+    "nombre": "IPhone 12 pro (256gb)",
+    "usd": 250
+  },
+  {
+    "nombre": "IPhone 12 pro (512gb)",
+    "usd": 260
+  },
+  {
+    "nombre": "IPhone 12proMax128gb",
+    "usd": 290
+  },
+  {
+    "nombre": "IPhone 12proMax(256gb)",
+    "usd": 320
+  },
+  {
+    "nombre": "IPhone 12promax(512gb)",
+    "usd": 330
+  },
+  {
+    "nombre": "IPhone 13 ( 128gb)",
+    "usd": 260
+  },
+  {
+    "nombre": "IPhone 13 (256gb)",
+    "usd": 280
+  },
+  {
+    "nombre": "IPhone 13 (512gb)",
+    "usd": 280
+  },
+  {
+    "nombre": "IPhone 13 pro (128)gb",
+    "usd": 360
+  },
+  {
+    "nombre": "IPhone 13 pro (256)gb",
+    "usd": 380
+  },
+  {
+    "nombre": "IPhone 13 pro (512)gb",
+    "usd": 390
+  },
+  {
+    "nombre": "IPhone 13 pro (1TB)gb",
+    "usd": 400
+  },
+  {
+    "nombre": "IPhone 13 pro Max (128gb)",
+    "usd": 420
+  },
+  {
+    "nombre": "IPhone 13 pro Max (256gb)",
+    "usd": 440
+  },
+  {
+    "nombre": "IPhone 13 pro Max (512gb)",
+    "usd": 450
+  },
+  {
+    "nombre": "IPhone 13 pro Max (1TBgb)",
+    "usd": 460
+  },
+  {
+    "nombre": "IPhone 14 (128gb)",
+    "usd": 300
+  },
+  {
+    "nombre": "IPhone 14 (256gb)",
+    "usd": 320
+  },
+  {
+    "nombre": "IPhone 14 (512gb)",
+    "usd": 340
+  },
+  {
+    "nombre": "IPhone 14 plus(128gb)",
+    "usd": 300
+  },
+  {
+    "nombre": "IPhone 14 plus(256gb)",
+    "usd": 320
+  },
+  {
+    "nombre": "IPhone 14 pro(128gb)",
+    "usd": 470
+  },
+  {
+    "nombre": "IPhone 14 pro (256gb)",
+    "usd": 480
+  },
+  {
+    "nombre": "IPhone 14 pro (512gb)",
+    "usd": 490
+  },
+  {
+    "nombre": "IPhone 14 pro Max (128gb)",
+    "usd": 560
+  },
+  {
+    "nombre": "IPhone 14 pro Max (256gb)",
+    "usd": 580
+  },
+  {
+    "nombre": "IPhone 15 (128gb)",
+    "usd": 400
+  },
+  {
+    "nombre": "IPhone 15 (256gb)",
+    "usd": 430
+  },
+  {
+    "nombre": "IPhone 15 (512gb)",
+    "usd": 440
+  },
+  {
+    "nombre": "Iphone 15 plus (128gb)",
+    "usd": 500
+  },
+  {
+    "nombre": "Iphone 15 plus (256gb)",
+    "usd": 520
+  },
+  {
+    "nombre": "IPhone 15 pro (128gb)",
+    "usd": 480
+  },
+  {
+    "nombre": "IPhone 15 pro (256gb)",
+    "usd": 500
+  },
+  {
+    "nombre": "IPhone 15 pro Max (256gb)",
+    "usd": 680
+  },
+  {
+    "nombre": "Iphone 15 pro Max (512gb)",
+    "usd": 700
+  },
+  {
+    "nombre": "Iphone 15 pro Max (1TB)",
+    "usd": 740
+  },
+  {
+    "nombre": "IPhone 16 (128gb)",
+    "usd": 600
+  },
+  {
+    "nombre": "IPhone 16 (256gb)",
+    "usd": 640
+  },
+  {
+    "nombre": "IPhone 16 PLUS (128gb)",
+    "usd": 650
+  },
+  {
+    "nombre": "IPhone 16 PLUS (256gb)",
+    "usd": 670
+  },
+  {
+    "nombre": "IPhone 16 pro (128gb)",
+    "usd": 720
+  },
+  {
+    "nombre": "IPhone 16 pro (512)",
+    "usd": 750
+  },
+  {
+    "nombre": "IPhone 16 pro (1TB)",
+    "usd": 800
+  },
+  {
+    "nombre": "IPhone 16 pro Max (256gb)",
+    "usd": 880
+  },
+  {
+    "nombre": "IPhone 16 pro Max (512gb)",
+    "usd": 900
+  },
+  {
+    "nombre": "IPhone 16 pro Max (1TB)",
+    "usd": 940
+  },
+  {
+    "nombre": "IPhone 17 256",
+    "usd": 900
+  },
+  {
+    "nombre": "IPhone 17 pro 256",
+    "usd": 1000
+  },
+  {
+    "nombre": "IPhone 17 pro Max 256",
+    "usd": 1200
+  }
 ];
-
     /* const ventas = [
   { nombre: "Apple Watch Serie 8 45mm", usd: 280 },
   { nombre: "Apple Watch Serie 9 45mm", usd: 299 },

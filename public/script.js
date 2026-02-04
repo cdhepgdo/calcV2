@@ -545,7 +545,7 @@ async function fetchBinanceP2PAverage() {
     // Asignamos el valor al input (sin el bitwise, que no es necesario aquí)
     transferRate.value = valorFinal.toFixed(2);
 
-    return valorFinal - 4;
+    return maximo;
 
   } catch (err) {
     console.error('Error obteniendo tasa:', err);
@@ -968,6 +968,7 @@ function updatePrice() {
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
+
 
 
 

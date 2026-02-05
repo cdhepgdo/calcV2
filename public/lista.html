@@ -623,10 +623,7 @@ function renderTable(p, bcv) {
               const precioFormateado = Math.round(precioBs).toLocaleString("es-VE"); */
               if (batteryFullCheckbox && batteryFullCheckbox.checked) {
                 p.usd += 20;
-              }else{
-                p.usd = p.usd;
-              }
-              const precioBs = p.usd * p;
+                const precioBs = p.usd * p;
               const precioFormateado = Math.round(precioBs).toLocaleString("es-VE");
               const estimadoBCV = precioBs / bcv; // Bs → USD usando BCV
               const ofertaDivisas = p.usd; // USD base
@@ -638,6 +635,22 @@ function renderTable(p, bcv) {
                 <td>*$${ofertaDivisas.toFixed(2)}(Divisas/Zelle/Binance)*</td>
               </tr>`;
               tbody.innerHTML += fila;
+              }else{
+                p.usd = p.usd;
+                const precioBs = p.usd * p;
+                const precioFormateado = Math.round(precioBs).toLocaleString("es-VE");
+                const estimadoBCV = precioBs / bcv; // Bs → USD usando BCV
+                const ofertaDivisas = p.usd; // USD base
+      
+                const fila = `<tr>
+                  <td>${p.nombre}</td>
+                  <td class="bs">Bs ${/* precioBs.toFixed(2) */precioFormateado} --></td>
+                  <td>€${estimadoBCV.toFixed(2)}(BCV)</td>
+                  <td>*$${ofertaDivisas.toFixed(2)}(Divisas/Zelle/Binance)*</td>
+                </tr>`;
+                tbody.innerHTML += fila;
+              }
+              
     })
 }
 

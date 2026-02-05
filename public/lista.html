@@ -632,7 +632,7 @@ function renderTable(promedioActual, bcv) {
               /* const precioBs = p.usd * promedio;
               const precioFormateado = Math.round(precioBs).toLocaleString("es-VE"); */
               
-              const precioFinalUSD = getPrecioAjustado(producto.usd);
+              const precioFinalUSD = getPrecioAjustado(p.usd);
               const precioBs = precioFinalUSD * promedioActual;
               const precioFormateado = Math.round(precioBs).toLocaleString("es-VE");
               const estimadoBCV = precioBs / bcv; // Bs → USD usando BCV

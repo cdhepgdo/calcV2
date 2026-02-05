@@ -653,6 +653,8 @@
           const precioFormateado = Math.round(precioBs).toLocaleString("es-VE"); */
           if (batteryFullCheckbox && batteryFullCheckbox.checked) {
             p.usd += 20;
+          }else{
+            p.usd = p.usd;
           }
           const precioBs = p.usd * promedio;
           const precioFormateado = Math.round(precioBs).toLocaleString("es-VE");

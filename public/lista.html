@@ -674,7 +674,7 @@ function renderTable(p, bcv) {
         
         document.getElementById('tasa').textContent = ` BNC: ${parseInt(promedio.toFixed(2))}`;
 
-        renderTable(promedio)
+        renderTable(promedio, bcv)
         
         } catch (err) {
           console.error(err);
@@ -711,7 +711,7 @@ function renderTable(p, bcv) {
 
     fetchTasaYCalcular();
     batteryFullCheckbox.addEventListener('change', () => {
-      renderTable(prom);
+      renderTable(prom, bcv);
     });
   </script>
 </body>

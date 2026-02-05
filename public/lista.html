@@ -93,6 +93,13 @@
         <a href="/">💱 Volver a Calculadora...</a>
     </button>
   </div>
+
+  <div class="mt-3 flex items-center">
+          <input type="checkbox" id="batteryFullCheckbox" class="mr-2">
+          <label for="batteryFullCheckbox" class="select-none cursor-pointer">
+            Equipo del 95% al 100% de batería (+$20 USD)
+          </label>
+  </div>
   
   <table>
     <thead>
@@ -113,6 +120,8 @@
       const menuToggle = document.getElementById('menuToggle');
       const floatingMenu = document.getElementById('floatingMenu');
       const configSection = document.querySelector('.card-shadow');
+
+      const batteryFullCheckbox = document.getElementById('batteryFullCheckbox');
       
       window.addEventListener('scroll', () => {
         const configTop = configSection.getBoundingClientRect().top + window.scrollY;
@@ -642,6 +651,9 @@
           //const precioBs = p.usd * promedio;
           /* const precioBs = p.usd * promedio;
           const precioFormateado = Math.round(precioBs).toLocaleString("es-VE"); */
+          if (batteryFullCheckbox && batteryFullCheckbox.checked) {
+            p.usd += 20;
+          }
           const precioBs = p.usd * promedio;
           const precioFormateado = Math.round(precioBs).toLocaleString("es-VE");
           const estimadoBCV = precioBs / tasaBCV; // Bs → USD usando BCV
@@ -689,6 +701,9 @@
     });
 
     fetchTasaYCalcular();
+    batteryFullCheckbox.addEventListener('change', () => {
+      fetchTasaYCalcular();
+    });
   </script>
 </body>
 </html>

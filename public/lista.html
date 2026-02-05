@@ -121,6 +121,9 @@
       const floatingMenu = document.getElementById('floatingMenu');
       const configSection = document.querySelector('.card-shadow');
 
+      // Variables globales
+      let promedioActual = 0;
+      let tasaBCVActual = 0;
       const batteryFullCheckbox = document.getElementById('batteryFullCheckbox');
       
       window.addEventListener('scroll', () => {
@@ -610,10 +613,17 @@
   }
 ];
 
-    let prom= 0;
-    let bcv= 0;
+  function getPrecioAjustado(precioBase) {
+      let precioFinal = precioBase;
+      
+      if (batteryFullCheckbox && batteryFullCheckbox.checked) {
+        precioFinal += 20;
+      }
+      
+      return precioFinal;
+    }
 
-function renderTable(p, bcv) {
+function renderTable(promedioActual, bcv) {
   const tbody = document.getElementById('tabla-productos');
             tbody.innerHTML = '';
     
@@ -621,12 +631,12 @@ function renderTable(p, bcv) {
               //const precioBs = p.usd * promedio;
               /* const precioBs = p.usd * promedio;
               const precioFormateado = Math.round(precioBs).toLocaleString("es-VE"); */
-              if (batteryFullCheckbox && batteryFullCheckbox.checked) {
-                p.usd += 20;
-                const precioBs = p.usd * p;
+              
+              const precioFinalUSD = getPrecioAjustado(producto.usd);
+              const precioBs = precioFinalUSD * promedioActual;
               const precioFormateado = Math.round(precioBs).toLocaleString("es-VE");
               const estimadoBCV = precioBs / bcv; // Bs → USD usando BCV
-              const ofertaDivisas = p.usd; // USD base
+              const ofertaDivisas = precioFinalUSD; // USD base
     
               const fila = `<tr>
                 <td>${p.nombre}</td>
@@ -635,21 +645,7 @@ function renderTable(p, bcv) {
                 <td>*$${ofertaDivisas.toFixed(2)}(Divisas/Zelle/Binance)*</td>
               </tr>`;
               tbody.innerHTML += fila;
-              }else{
-                p.usd = p.usd;
-                const precioBs = p.usd * p;
-                const precioFormateado = Math.round(precioBs).toLocaleString("es-VE");
-                const estimadoBCV = precioBs / bcv; // Bs → USD usando BCV
-                const ofertaDivisas = p.usd; // USD base
-      
-                const fila = `<tr>
-                  <td>${p.nombre}</td>
-                  <td class="bs">Bs ${/* precioBs.toFixed(2) */precioFormateado} --></td>
-                  <td>€${estimadoBCV.toFixed(2)}(BCV)</td>
-                  <td>*$${ofertaDivisas.toFixed(2)}(Divisas/Zelle/Binance)*</td>
-                </tr>`;
-                tbody.innerHTML += fila;
-              }
+              
               
     })
 }
@@ -673,7 +669,7 @@ function renderTable(p, bcv) {
 
     // Si la diferencia es menor a 1.8 usamos el promedio, si no, el máximo
     let promedio = /* diferencia < 1.8 ? promedioo : maximo */maximo;
-        prom= promedio;
+        promedioActual = promedio;
 
         //let promedio = /* data.stats.trimmedAverage || */ data.stats.average;
         console.log(promedio.toFixed(2));
@@ -683,11 +679,11 @@ function renderTable(p, bcv) {
         // 2️⃣ Obtener tasa BCV en vivo
         const tasaBCV = await fetchTasaBCV();
         if (!tasaBCV) throw new Error("No se pudo obtener la tasa BCV");
-        bcv=tasaBCV
+        tasaBCVActual = tasaBCV;
         
         document.getElementById('tasa').textContent = ` BNC: ${parseInt(promedio.toFixed(2))}`;
 
-        renderTable(promedio, bcv)
+        renderTable(promedioActual, tasaBCVActual)
         
         } catch (err) {
           console.error(err);
@@ -724,8 +720,7 @@ function renderTable(p, bcv) {
 
     fetchTasaYCalcular();
     batteryFullCheckbox.addEventListener('change', () => {
-      renderTable(prom, bcv);
-      console.log('cb')
+      renderTable(promedioActual, tasaBCVActual);
     });
   </script>
 </body>

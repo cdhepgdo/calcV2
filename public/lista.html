@@ -611,8 +611,9 @@
 ];
 
     let prom= 0;
+    let bcv= 0;
 
-function renderTable(p) {
+function renderTable(p, bcv) {
   const tbody = document.getElementById('tabla-productos');
             tbody.innerHTML = '';
     
@@ -627,7 +628,7 @@ function renderTable(p) {
               }
               const precioBs = p.usd * p;
               const precioFormateado = Math.round(precioBs).toLocaleString("es-VE");
-              const estimadoBCV = precioBs / tasaBCV; // Bs → USD usando BCV
+              const estimadoBCV = precioBs / bcv; // Bs → USD usando BCV
               const ofertaDivisas = p.usd; // USD base
     
               const fila = `<tr>
@@ -669,6 +670,7 @@ function renderTable(p) {
         // 2️⃣ Obtener tasa BCV en vivo
         const tasaBCV = await fetchTasaBCV();
         if (!tasaBCV) throw new Error("No se pudo obtener la tasa BCV");
+        bcv=tasaBCV
         
         document.getElementById('tasa').textContent = ` BNC: ${parseInt(promedio.toFixed(2))}`;
 

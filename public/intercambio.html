@@ -81,8 +81,8 @@
     const configSection = document.querySelector('.card-shadow');
     
     window.addEventListener('scroll', () => {
-      const configTop = configSection.getBoundingClientRect().top + window.scrollY;
-      if (window.scrollY >= configTop - nav.offsetHeight) {
+      //const configTop = configSection.getBoundingClientRect().top + window.scrollY;
+      if (window.scrollY >/* = configTop - nav.offsetHeight */100) {
         nav.classList.remove('top-0');
         nav.classList.add('bottom-6', 'right-6', 'left-auto', 'rounded-full', 'p-0', 'w-14', 'h-14', 'justify-center', 'items-center');
         menuOptions.classList.add('hidden');
@@ -755,7 +755,7 @@ const recibidos = [
         if (tasa === "BCV"){
             return parseFloat(data.rates.VES);
         } else if (tasa === "BNC"){
-            return /* data.stats.trimmedAverage || */ data.stats.average - 4;
+            return /* data.stats.trimmedAverage || */ data.stats.max;
         }
         //return parseFloat(data.rates.VES);
         } catch (err) {

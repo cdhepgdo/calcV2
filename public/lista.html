@@ -671,7 +671,7 @@ function renderTable() {
         document.getElementById('tasa').textContent = ` BNC: ${parseInt(promedio.toFixed(2))}`;
 
         renderTable()
-        });
+        
         } catch (err) {
           console.error(err);
           document.getElementById('tasa').textContent = 'Error al obtener tasa';

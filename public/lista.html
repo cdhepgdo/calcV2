@@ -610,8 +610,9 @@
   }
 ];
 
+    let prom= 0;
 
-function renderTable() {
+function renderTable(p) {
   const tbody = document.getElementById('tabla-productos');
             tbody.innerHTML = '';
     
@@ -624,7 +625,7 @@ function renderTable() {
               }else{
                 p.usd = p.usd;
               }
-              const precioBs = p.usd * promedio;
+              const precioBs = p.usd * p;
               const precioFormateado = Math.round(precioBs).toLocaleString("es-VE");
               const estimadoBCV = precioBs / tasaBCV; // Bs → USD usando BCV
               const ofertaDivisas = p.usd; // USD base
@@ -658,6 +659,7 @@ function renderTable() {
 
     // Si la diferencia es menor a 1.8 usamos el promedio, si no, el máximo
     let promedio = /* diferencia < 1.8 ? promedioo : maximo */maximo;
+        prom= promedio;
 
         //let promedio = /* data.stats.trimmedAverage || */ data.stats.average;
         console.log(promedio.toFixed(2));
@@ -670,7 +672,7 @@ function renderTable() {
         
         document.getElementById('tasa').textContent = ` BNC: ${parseInt(promedio.toFixed(2))}`;
 
-        renderTable()
+        renderTable(promedio)
         
         } catch (err) {
           console.error(err);
@@ -707,7 +709,7 @@ function renderTable() {
 
     fetchTasaYCalcular();
     batteryFullCheckbox.addEventListener('change', () => {
-      renderTable();
+      renderTable(prom);
     });
   </script>
 </body>

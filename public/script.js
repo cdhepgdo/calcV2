@@ -142,7 +142,7 @@ const productos = [
   },
   {
     "nombre": "IPhone 12 (128gb)",
-    "usd": 299
+    "usd": 289
   },
   {
     "nombre": "IPhone 12 (256gb)",
@@ -206,11 +206,11 @@ const productos = [
   },
   {
     "nombre": "IPhone 13 pro Max (128gb)",
-    "usd": 560
+    "usd": 549
   },
   {
     "nombre": "IPhone 13 pro Max (256gb)",
-    "usd": 599
+    "usd": 589
   },
   {
     "nombre": "IPhone 13 pro Max (512gb)",
@@ -238,27 +238,27 @@ const productos = [
   },
   {
     "nombre": "IPhone 14 plus(256gb)",
-    "usd": 479
+    "usd": 489
   },
   {
     "nombre": "IPhone 14 pro(128gb)",
-    "usd": 599
+    "usd": 529
   },
   {
     "nombre": "IPhone 14 pro (256gb)",
-    "usd": 629
+    "usd": 589
   },
   {
     "nombre": "IPhone 14 pro (512gb)",
-    "usd": 649
+    "usd": 610
   },
   {
     "nombre": "IPhone 14 pro Max (128gb)",
-    "usd": 699
+    "usd": 649
   },
   {
     "nombre": "IPhone 14 pro Max (256gb)",
-    "usd": 729
+    "usd": 699
   },
   {
     "nombre": "IPhone 14 pro Max (512gb)",
@@ -269,7 +269,7 @@ const productos = [
     "usd": 499
   },
   {
-    "nombre": "IPhone 15 (256gb) $",
+    "nombre": "IPhone 15 (256gb)",
     "usd": 559
   },
   {
@@ -286,11 +286,11 @@ const productos = [
   },
   {
     "nombre": "IPhone 15 pro (128gb)",
-    "usd": 739
+    "usd": 719
   },
   {
     "nombre": "IPhone 15 pro (256gb)",
-    "usd": 799
+    "usd": 770
   },
   {
     "nombre": "IPhone 15 pro Max (256gb)",
@@ -298,7 +298,7 @@ const productos = [
   },
   {
     "nombre": "Iphone 15 pro Max (512gb)",
-    "usd": 920
+    "usd": 890
   },
   {
     "nombre": "Iphone 15 pro Max (1TB)",
@@ -314,15 +314,19 @@ const productos = [
   },
   {
     "nombre": "IPhone 16 PLUS (128gb)",
-    "usd": 840
+    "usd": 790
   },
   {
     "nombre": "IPhone 16 PLUS (256gb)",
-    "usd": 700
+    "usd": 840
   },
   {
     "nombre": "IPhone 16 pro (128gb)",
-    "usd": 940
+    "usd": 869
+  },
+  {
+    "nombre": "IPhone 16 pro (256gb)",
+    "usd": 919
   },
   {
     "nombre": "IPhone 16 pro (512)",
@@ -342,7 +346,7 @@ const productos = [
   },
   {
     "nombre": "IPhone 16 pro Max (1TB)",
-    "usd": 1200
+    "usd": 1170
   },
   {
     "nombre": "iphone 17 256",
@@ -350,27 +354,23 @@ const productos = [
   },
   {
     "nombre": "Iphone 17 512",
-    "usd": 1299
+    "usd": 1320
   },
   {
     "nombre": "Iphone 17 Air 256",
-    "usd": 1199
+    "usd": 1220
   },
   {
     "nombre": "Iphone 17 Air 512",
-    "usd": 1299
-  },
-  {
-    "nombre": "Iphone 17 pro 1TB",
-    "usd": 1790
+    "usd": 1320
   },
   {
     "nombre": "Iphone 17 pro 256gb",
-    "usd": 1400
+    "usd": 1419
   },
   {
     "nombre": "Iphone 17 pro Max 256gb",
-    "usd": 1550
+    "usd": 1580
   },
   {
     "nombre": "Iphone 17 pro Max 512gb",
@@ -968,6 +968,7 @@ function updatePrice() {
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
+
 
 
 

@@ -74,7 +74,7 @@
   { nombre: "iPhone 17 Pro Max (512gb)", usd: 1980 },
   { nombre: "iPhone 17 Pro Max (1TB)", usd: 2199 },
   { nombre: "iPhone 17 Pro Max (2TB)", usd: 2699 }
-]; */
+];*/
 const productos = [
   {
     "nombre": "Apple Watch serie 9 41 mm open box",
@@ -968,6 +968,7 @@ function updatePrice() {
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
+
 
 
 

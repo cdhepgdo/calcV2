@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro Diario - Sistema de Inventario</title>
+    <link rel="stylesheet" href="css/registro.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Registro Diario de Operaciones</h1>
+            <div class="header-actions">
+                <button id="btnExportar" class="btn-secondary">📥 Exportar</button>
+                <button id="btnVolver" class="btn-primary">← Volver</button>
+            </div>
+        </header>
+
+        <div class="filtros">
+            <div class="filtro-grupo">
+                <label>Período:</label>
+                <select id="filtroPeriodo">
+                    <option value="7">Últimos 7 días</option>
+                    <option value="15">Últimos 15 días</option>
+                    <option value="30" selected>Últimos 30 días</option>
+                    <option value="60">Últimos 60 días</option>
+                    <option value="90">Últimos 90 días</option>
+                    <option value="todos">Todos</option>
+                </select>
+            </div>
+            <div class="filtro-grupo">
+                <label>Buscar fecha:</label>
+                <input type="date" id="filtroFecha">
+            </div>
+        </div>
+
+        <div class="resumen-general">
+            <div class="stat-card">
+                <div class="stat-label">Total Días</div>
+                <div class="stat-value" id="totalDias">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Ventas</div>
+                <div class="stat-value" id="totalVentas">$0.00</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Operaciones</div>
+                <div class="stat-value" id="totalOperaciones">0</div>
+            </div>
+        </div>
+
+        <!-- Resumen de Accesorios del Período -->
+        <div class="accesorios-periodo">
+            <h2 class="accesorios-periodo-titulo">🛡️ Resumen de Accesorios del Período</h2>
+            <div id="resumenAccesoriosPeriodo" class="accesorios-periodo-contenido">
+                <p class="text-gray-500 text-center">Cargando...</p>
+            </div>
+        </div>
+
+        <div id="contenedorRegistro" class="registro-container">
+            <!-- Aquí se generarán las tablas por día -->
+        </div>
+    </div>
+
+    <script type="module" src="js/registro.js"></script>
+</body>
+</html>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial e Inventario</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .historial-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        
+        .seccion {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .botones-accion {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: black;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .estadistica {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .stat-card .valor {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .tabla-movimientos {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .tabla-movimientos th,
+        .tabla-movimientos td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tabla-movimientos th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        .tabla-movimientos tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .filtros {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .filtros input,
+        .filtros select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="historial-container">
+        <h1>📊 Historial e Inventario</h1>
+        
+        <!-- Botones de Acción -->
+        <div class="seccion">
+            <h2>Acciones Rápidas</h2>
+            <div class="botones-accion">
+                <button class="btn btn-primary" onclick="generarReporteSemanal()">
+                    📅 Reporte Semanal
+                </button>
+                <button class="btn btn-success" onclick="exportarHistorial()">
+                    💾 Exportar Historial JSON
+                </button>
+                <button class="btn btn-success" onclick="exportarCSV()">
+                    📄 Exportar CSV
+                </button>
+                <button class="btn btn-warning" onclick="realizarCorte()">
+                    ✂️ Realizar Corte
+                </button>
+                <button class="btn btn-danger" onclick="limpiarAntiguo()">
+                    🗑️ Limpiar Antiguo (90 días)
+                </button>
+            </div>
+        </div>
+        
+        <!-- Estadísticas Generales -->
+        <div class="seccion">
+            <h2>Estadísticas Generales</h2>
+            <div class="estadistica" id="estadisticas">
+                <!-- Se llenará dinámicamente -->
+            </div>
+        </div>
+        
+        <!-- Reporte Semanal -->
+        <div class="seccion">
+            <h2>Reporte Semanal</h2>
+            <div id="reporte-semanal">
+                <!-- Se llenará dinámicamente -->
+            </div>
+        </div>
+        
+        <!-- Filtros -->
+        <div class="seccion">
+            <h2>Movimientos Recientes</h2>
+            <div class="filtros">
+                <input type="date" id="fechaInicio" placeholder="Fecha Inicio">
+                <input type="date" id="fechaFin" placeholder="Fecha Fin">
+                <select id="tipoFiltro">
+                    <option value="">Todos los tipos</option>
+                    <option value="Venta">Ventas</option>
+                    <option value="Entrada">Entradas</option>
+                    <option value="Salida">Salidas</option>
+                    <option value="Cambio Garantía">Cambios Garantía</option>
+                </select>
+                <button class="btn btn-primary" onclick="aplicarFiltros()">Filtrar</button>
+            </div>
+            
+            <div id="tabla-container">
+                <!-- Se llenará dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { historialService } from './js/services/HistorialService.js';
+        
+        // Hacer disponible globalmente
+        window.historialService = historialService;
+        
+        // Cargar datos al iniciar
+        cargarDatos();
+        
+        function cargarDatos() {
+            cargarEstadisticas();
+            cargarReporteSemanal();
+            cargarMovimientos();
+        }
+        
+        function cargarEstadisticas() {
+            const historial = historialService.obtenerHistorial();
+            const reporte = historialService.generarReporteInventario();
+            
+            const html = `
+                <div class="stat-card">
+                    <h3>Total Movimientos</h3>
+                    <div class="valor">${historial.movimientos.length}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Ventas Realizadas</h3>
+                    <div class="valor">${reporte.ventasRealizadas}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Entradas</h3>
+                    <div class="valor">${reporte.entradas}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Salidas</h3>
+                    <div class="valor">${reporte.salidas}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Movimiento Neto</h3>
+                    <div class="valor">${reporte.movimientoNeto}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Efectivo Total</h3>
+                    <div class="valor">$${reporte.movimientoEfectivo.toLocaleString()}</div>
+                </div>
+            `;
+            
+            document.getElementById('estadisticas').innerHTML = html;
+        }
+        
+        function cargarReporteSemanal() {
+            const reporte = historialService.generarReporteSemanal();
+            
+            let html = `
+                <p><strong>Período:</strong> ${reporte.periodo.inicio} - ${reporte.periodo.fin}</p>
+                <p><strong>Total Movimientos:</strong> ${reporte.totalMovimientos}</p>
+                <p><strong>Impacto Efectivo:</strong> $${reporte.impactoEfectivo.toLocaleString()}</p>
+                
+                <h3>Por Tipo de Movimiento:</h3>
+                <ul>
+            `;
+            
+            for (const [tipo, datos] of Object.entries(reporte.porTipo)) {
+                html += `<li><strong>${tipo}:</strong> ${datos.cantidad} movimientos (Impacto: $${datos.impacto.toLocaleString()})</li>`;
+            }
+            
+            html += '</ul>';
+            
+            document.getElementById('reporte-semanal').innerHTML = html;
+        }
+        
+        function cargarMovimientos(movimientos = null) {
+            const historial = movimientos || historialService.obtenerHistorial().movimientos;
+            const movimientosOrdenados = [...historial].reverse(); // Más recientes primero
+            
+            let html = `
+                <table class="tabla-movimientos">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Tipo</th>
+                            <th>Impacto Efectivo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            movimientosOrdenados.slice(0, 50).forEach(mov => {
+                html += `
+                    <tr>
+                        <td>${mov.fecha}</td>
+                        <td>${mov.hora}</td>
+                        <td>${mov.tipo}</td>
+                        <td>$${mov.impactoEfectivo.toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                    </tbody>
+                </table>
+                <p style="margin-top: 10px; color: #666;">
+                    Mostrando ${Math.min(50, movimientosOrdenados.length)} de ${movimientosOrdenados.length} movimientos
+                </p>
+            `;
+            
+            document.getElementById('tabla-container').innerHTML = html;
+        }
+        
+        // Funciones globales
+        window.generarReporteSemanal = function() {
+            const reporte = historialService.generarReporteSemanal();
+            alert(`Reporte Semanal Generado:\n\nPeríodo: ${reporte.periodo.inicio} - ${reporte.periodo.fin}\nTotal Movimientos: ${reporte.totalMovimientos}\nImpacto Efectivo: $${reporte.impactoEfectivo.toLocaleString()}`);
+            cargarReporteSemanal();
+        };
+        
+        window.exportarHistorial = function() {
+            historialService.exportarHistorial();
+            alert('✅ Historial exportado correctamente');
+        };
+        
+        window.exportarCSV = function() {
+            historialService.exportarReporteSemanalCSV();
+            alert('✅ CSV exportado correctamente');
+        };
+        
+        window.realizarCorte = function() {
+            if (confirm('¿Deseas realizar un corte de inventario? Esto guardará el estado actual como punto de referencia.')) {
+                const corte = historialService.realizarCorteInventario();
+                alert(`✅ Corte realizado correctamente\n\nFecha: ${new Date(corte.fecha).toLocaleString()}\nMovimientos: ${corte.totalMovimientos}`);
+                cargarDatos();
+            }
+        };
+        
+        window.limpiarAntiguo = function() {
+            if (confirm('¿Deseas limpiar movimientos antiguos? Se mantendrán los últimos 90 días.')) {
+                const resultado = historialService.limpiarHistorialAntiguo(90);
+                alert(`✅ Limpieza completada\n\nMovimientos restantes: ${resultado.movimientosRestantes}`);
+                cargarDatos();
+            }
+        };
+        
+        window.aplicarFiltros = function() {
+            const fechaInicio = document.getElementById('fechaInicio').value;
+            const fechaFin = document.getElementById('fechaFin').value;
+            const tipo = document.getElementById('tipoFiltro').value;
+            
+            let movimientos = historialService.obtenerHistorial().movimientos;
+            
+            if (fechaInicio && fechaFin) {
+                movimientos = historialService.obtenerPorRango(fechaInicio, fechaFin);
+            }
+            
+            if (tipo) {
+                movimientos = movimientos.filter(m => m.tipo === tipo);
+            }
+            
+            cargarMovimientos(movimientos);
+        };
+        
+        window.cargarDatos = cargarDatos;
+    </script>
+</body>
+</html>

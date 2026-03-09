@@ -332,7 +332,7 @@ class PrintService {
                 
                 <!-- Figura superior -->
                 <div class="figure" style="right: 79px;">
-                    <img src="width_200.webp" alt="logo">
+                    <img src="./width_200.webp" alt="logo">
                 </div>
             </div>
             
@@ -399,7 +399,7 @@ class PrintService {
                     </div>
                     
                     <div class="figure" style="right: 79px;">
-                        <img src="width_200.webp" alt="logo">
+                        <img src="./width_200.webp" alt="logo">
                     </div>
                 </div>
                 
@@ -936,3 +936,4 @@ class PrintService {
 
 // Exportar una instancia única (Singleton)
 export const printService = new PrintService();
+

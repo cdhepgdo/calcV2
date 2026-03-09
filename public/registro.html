@@ -7,6 +7,27 @@
     <link rel="stylesheet" href="css/registro.css">
 </head>
 <body>
+    <!-- Menú de Navegación -->
+    <nav class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white shadow-lg">
+        <div class="flex gap-2" id="menuOptions">
+            <a href="lista.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">LISTADO PRECIOS</a>
+            <a href="intercambio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cálculo Trading</a>
+            <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Principal</a>
+            <a href="registro.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">📊 Registro</a>
+            <a href="inv-precio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Inv</a>
+        </div>
+        <button id="menuToggle" class="hidden text-2xl focus:outline-none relative z-50">☰</button>
+        <div id="floatingMenu" class="hidden fixed bottom-20 right-6 bg-blue-700 text-white rounded-lg shadow-lg py-2 flex flex-col gap-1 z-40">
+            <a href="lista.html" class="px-4 py-2 hover:bg-blue-900 rounded">LISTADO PRECIOS</a>
+            <a href="intercambio.html" class="px-4 py-2 hover:bg-blue-900 rounded">Cálculo Trading</a>
+            <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Principal</a>
+            <a href="cierree.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cierre</a>
+            <a href="inv-precio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Inv</a>
+        </div>
+    </nav>
+
+    <!-- Espaciador -->
+    <div class="h-14"></div>
     <div class="container">
         <header>
             <h1>📊 Registro Diario de Operaciones</h1>
@@ -65,3 +86,4 @@
     <script type="module" src="js/registro.js"></script>
 </body>
 </html>
+

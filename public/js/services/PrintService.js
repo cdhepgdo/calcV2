@@ -59,7 +59,7 @@ class PrintService {
      */
     generarHTMLGarantia(venta) {
         const accesoriosTexto = venta.obtenerResumenAccesorios();
-        const modelo = `${venta.equipo.modelo} | ${venta.equipo.almacenamiento} | ${venta.equipo.color} | ${venta.equipo.bateria}%`;
+        const modelo = `${venta.equipo.modelo} | ${venta.equipo.almacenamiento} | ${venta.equipo.color} | ${venta.equipo.bateria}`;
         
         return `
 <!DOCTYPE html>
@@ -936,4 +936,5 @@ class PrintService {
 
 // Exportar una instancia única (Singleton)
 export const printService = new PrintService();
+
 

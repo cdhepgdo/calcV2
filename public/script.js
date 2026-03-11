@@ -206,11 +206,11 @@ const productos = [
   },
   {
     "nombre": "IPhone 13 pro Max (128gb)",
-    "usd": 519
+    "usd": 499
   },
   {
     "nombre": "IPhone 13 pro Max (256gb)",
-    "usd": 589
+    "usd": 569
   },
   {
     "nombre": "IPhone 13 pro Max (512gb)",
@@ -246,11 +246,11 @@ const productos = [
   },
   {
     "nombre": "IPhone 14 pro (256gb)",
-    "usd": 570
+    "usd": 539
   },
   {
     "nombre": "IPhone 14 pro (512gb)",
-    "usd": 610
+    "usd": 559
   },
   {
     "nombre": "IPhone 14 pro Max (128gb)",
@@ -258,18 +258,18 @@ const productos = [
   },
   {
     "nombre": "IPhone 14 pro Max (256gb)",
-    "usd": 690
+    "usd": 645
   },
   {
     "nombre": "IPhone 14 pro Max (512gb)",
-    "usd": 720
+    "usd": 670
   },
   {
     "nombre": "IPhone 15 (128gb)",
     "usd": 499
   },
   {
-    "nombre": "IPhone 15 (256gb) $",
+    "nombre": "IPhone 15 (256gb)",
     "usd": 559
   },
   {
@@ -278,27 +278,27 @@ const productos = [
   },
   {
     "nombre": "Iphone 15 plus (128gb)",
-    "usd": 670
+    "usd": 590
   },
   {
     "nombre": "Iphone 15 plus (256gb)",
-    "usd": 699
+    "usd": 620
   },
   {
     "nombre": "IPhone 15 pro (128gb)",
-    "usd": 680
+    "usd": 630
   },
   {
     "nombre": "IPhone 15 pro (256gb)",
-    "usd": 730
+    "usd": 699
   },
   {
     "nombre": "IPhone 15 pro Max (256gb)",
-    "usd": 809
+    "usd": 799
   },
   {
     "nombre": "Iphone 15 pro Max (512gb)",
-    "usd": 890
+    "usd": 850
   },
   {
     "nombre": "Iphone 15 pro Max (1TB)",
@@ -314,11 +314,11 @@ const productos = [
   },
   {
     "nombre": "IPhone 16 PLUS (128gb)",
-    "usd": 790
+    "usd": 750
   },
   {
     "nombre": "IPhone 16 PLUS (256gb)",
-    "usd": 840
+    "usd": 799
   },
   {
     "nombre": "IPhone 16 pro (128gb)",
@@ -358,15 +358,15 @@ const productos = [
   },
   {
     "nombre": "Iphone 17 pro 256gb",
-    "usd": 1419
+    "usd": 1380
   },
   {
     "nombre": "Iphone 17 pro Max 256gb",
-    "usd": 1550
+    "usd": 1520
   },
   {
     "nombre": "Iphone 17 pro Max 512gb",
-    "usd": 1809
+    "usd": 1759
   },
   {
     "nombre": "IPhone 17 pro Max 1TB",
@@ -960,6 +960,7 @@ function updatePrice() {
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
+
 
 
 

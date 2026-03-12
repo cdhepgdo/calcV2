@@ -101,9 +101,17 @@ class MovimientoService {
     /**
      * Calcula el impacto total en efectivo de todos los movimientos
      */
-    calcularImpactoEfectivo() {
+    /* calcularImpactoEfectivo() {
         const movimientos = this.obtenerMovimientos();
         return movimientos.reduce((total, mov) => total + mov.calcularImpactoEfectivo(), 0);
+    } */
+    calcularImpactoEfectivo() {
+        const movimientos = this.obtenerMovimientos();
+        const fechaHoy = new Date().toLocaleDateString('es-ES');
+        
+        return movimientos
+            .filter(mov => mov.fecha === fechaHoy) // Filtramos por hoy antes de sumar
+            .reduce((total, mov) => total + mov.calcularImpactoEfectivo(), 0);
     }
     
     /**
@@ -137,3 +145,4 @@ class MovimientoService {
 
 // Exportar una instancia única (Singleton)
 export const movimientoService = new MovimientoService();
+

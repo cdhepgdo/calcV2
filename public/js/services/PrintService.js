@@ -11,20 +11,20 @@ class PrintService {
      */
     calcularTotalInicialVenta(venta) {
         let totalInicial = 0;
-        
+
         if (venta.formaPago === 'mixto' && venta.pagoMixto) {
             // Sumar todos los métodos de pago del mixto
             totalInicial += venta.pagoMixto.efectivo || 0;
             totalInicial += venta.pagoMixto.zelle || 0;
             totalInicial += venta.pagoMixto.binance || 0;
-            
+
             // Para pago móvil y transferencia, usar los dólares
             if (venta.pagoMixto.pagoMovilDetalles) {
                 totalInicial += venta.pagoMixto.pagoMovilDetalles.dolares || 0;
             } else {
                 totalInicial += venta.pagoMixto.pagoMovil || 0;
             }
-            
+
             if (venta.pagoMixto.transferenciaDetalles) {
                 totalInicial += venta.pagoMixto.transferenciaDetalles.dolares || 0;
             } else {
@@ -32,35 +32,35 @@ class PrintService {
             }
         } else {
             // Para pagos simples, el total menos el equipo recibido
-            totalInicial = venta.montoTotal ;
+            totalInicial = venta.montoTotal;
         }
-        
+
         return totalInicial + (venta.equipoRecibido ? venta.equipoRecibido.valor : 0);
     }
-    
+
     /**
      * Genera e imprime la garantía de una venta
      */
     imprimirGarantia(venta) {
         const ventanaImpresion = window.open('', '_blank');
         const html = this.generarHTMLGarantia(venta);
-        
+
         ventanaImpresion.document.write(html);
         ventanaImpresion.document.close();
-        
+
         // Imprimir automáticamente después de cargar
         setTimeout(() => {
             ventanaImpresion.print();
         }, 500);
     }
-    
+
     /**
      * Genera el HTML de la garantía
      */
     generarHTMLGarantia(venta) {
         const accesoriosTexto = venta.obtenerResumenAccesorios();
         const modelo = `${venta.equipo.modelo} | ${venta.equipo.almacenamiento} | ${venta.equipo.color} | ${venta.equipo.bateria}`;
-        
+
         return `
 <!DOCTYPE html>
 <html lang="es">
@@ -458,31 +458,31 @@ class PrintService {
 </html>
         `;
     }
-    
+
     /**
      * Genera e imprime el resumen del día
      */
     imprimirResumenDia(ventas, movimientos, caja) {
         const ventanaImpresion = window.open('', '_blank');
         const html = this.generarHTMLResumen(ventas, movimientos, caja);
-        
+
         ventanaImpresion.document.write(html);
         ventanaImpresion.document.close();
-        
+
         setTimeout(() => {
             ventanaImpresion.print();
         }, 500);
     }
-    
+
     /**
      * Genera el HTML del resumen del día
      */
     generarHTMLResumen(ventas, movimientos, caja) {
         const desglose = caja.obtenerDesglose(ventas, movimientos);
-        
+
         let totalVentas = 0;
         let equiposVendidos = 0;
-        
+
         ventas.forEach(venta => {
             if (venta.tipoTransaccion !== 'abono') {
                 totalVentas += venta.montoTotal;
@@ -491,7 +491,7 @@ class PrintService {
                 equiposVendidos++;
             }
         });
-        
+
         return `
 <!DOCTYPE html>
 <html lang="es">
@@ -582,25 +582,45 @@ class PrintService {
         }
         
         .venta-item {
-            border: 1px solid #d1d5db;
-            padding: 10px;
-            margin: 8px 0;
-            border-radius: 5px;
-            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            margin: 15px 0;
+            border-radius: 8px;
+            background: #ffffff;
+            page-break-inside: avoid;
         }
-        
+        .venta-item.abono {
+            border-color: #fbd38d;
+            background-color: #fffaf0;
+        }
         .venta-header {
             display: flex;
             justify-content: space-between;
             font-weight: bold;
-            margin-bottom: 5px;
-            color: #1e40af;
+            padding: 10px 15px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 12px;
+            color: #1f2937;
         }
-        
-        .venta-details {
-            font-size: 10px;
-            color: #4b5563;
+        .venta-header-title { display: flex; flex-direction: column; }
+        .weppa-badge { background: #fef08a; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #854d0e; margin-left: 8px; font-weight: bold; }
+        .venta-cliente { font-size: 10px; color: #4b5563; font-weight: normal; margin-top: 4px; }
+        .venta-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding: 12px 15px;
         }
+        .venta-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+        .venta-box { padding: 10px; border-radius: 6px; font-size: 10px; }
+        .venta-box h5 { margin: 0 0 8px 0; font-size: 11px; }
+        .box-blue { background: #eff6ff; } .box-blue h5 { color: #1e40af; }
+        .box-green { background: #f0fdf4; } .box-green h5 { color: #166534; }
+        .box-orange { background: #fff7ed; } .box-orange h5 { color: #9a3412; }
+        .box-purple { background: #faf5ff; } .box-purple h5 { color: #6b21a8; }
+        .venta-box p { margin: 4px 0; color: #374151; }
+        .pago-tag { background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 3px; }
+        .total-pago { margin-top: 8px !important; padding-top: 8px; border-top: 1px solid rgba(0,0,0,0.1); font-weight: bold; font-size: 11px; }
+        .nota-box { margin: 0 15px 15px 15px; padding: 8px 12px; background: #f3e8ff; border-radius: 4px; font-size: 10px; color: #581c87; }
         
         .totales-table {
             width: 100%;
@@ -673,16 +693,16 @@ class PrintService {
     
     <div class="section">
         <div class="section-title">📱 VENTAS DEL DÍA (${ventas.length})</div>
-        ${ventas.length === 0 ? '<p style="text-align: center; color: #6b7280;">No hay ventas registradas</p>' : 
-            ventas.map((venta, index) => this.generarItemVenta(venta, index + 1)).join('')
-        }
+        ${ventas.length === 0 ? '<p style="text-align: center; color: #6b7280;">No hay ventas registradas</p>' :
+                ventas.map((venta, index) => this.generarItemVenta(venta, index + 1)).join('')
+            }
     </div>
     
     <div class="section">
         <div class="section-title">📦 MOVIMIENTOS DEL DÍA (${movimientos.length})</div>
-        ${movimientos.length === 0 ? '<p style="text-align: center; color: #6b7280;">No hay movimientos registrados</p>' : 
-            movimientos.map(mov => this.generarItemMovimiento(mov)).join('')
-        }
+        ${movimientos.length === 0 ? '<p style="text-align: center; color: #6b7280;">No hay movimientos registrados</p>' :
+                movimientos.map(mov => this.generarItemMovimiento(mov)).join('')
+            }
     </div>
     
     <div class="section">
@@ -722,32 +742,147 @@ class PrintService {
 </html>
         `;
     }
-    
+
     /**
      * Genera el HTML de un item de venta
      */
     generarItemVenta(venta, numero) {
         const accesorios = venta.obtenerResumenAccesorios();
         
+        const formatearBs = (monto) => {
+            const numeroStr = typeof monto === 'string' ? parseFloat(monto) : monto;
+            if (isNaN(numeroStr)) return monto + ' Bs';
+            return numeroStr.toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' Bs';
+        };
+
+        // Calcular HTML del WEPPA
+        let weppaHtml = '';
+        if (venta.weppa) {
+            weppaHtml = `<span class="weppa-badge">WEPPA (Inicial $${this.calcularTotalInicialVenta(venta).toFixed(2)})</span>`;
+        }
+
+        // Construir secciones solo si hay datos
+        let seccionEquipo = '';
+        let seccionAccesorios = '';
+        let seccionEquipoRecibido = '';
+        let seccionPago = '';
+
+        // Sección Equipo
+        if (venta.tipoVenta === 'completa') {
+            seccionEquipo = `
+                <div class="venta-box box-blue">
+                    <h5>📱 Equipo</h5>
+                    <p><strong>Modelo:</strong> ${venta.equipo.modelo}</p>
+                    <p><strong>Cap:</strong> ${venta.equipo.almacenamiento}</p>
+                    <p><strong>Color:</strong> ${venta.equipo.color}</p>
+                    <p><strong>Bat:</strong> ${venta.equipo.bateria}</p>
+                    <p><strong>Imei:</strong> ${venta.equipo.imei}</p>
+                </div>
+            `;
+        }
+
+        // Sección Accesorios
+        if (accesorios.length > 0) {
+            seccionAccesorios = `
+                <div class="venta-box box-green">
+                    <h5>🛡️ Accesorios</h5>
+                    ${accesorios.map(acc => `<p>• ${acc}</p>`).join('')}
+                </div>
+            `;
+        }
+
+        // Sección Equipo Recibido
+        if (venta.equipoRecibido) {
+            seccionEquipoRecibido = `
+                <div class="venta-box box-orange">
+                    <h5>📱⬅️ Eq. Recibido</h5>
+                    <p><strong>Mod:</strong> ${venta.equipoRecibido.modelo}</p>
+                    <p><strong>Cap:</strong> ${venta.equipoRecibido.capacidad}</p>
+                    <p><strong>Color:</strong> ${venta.equipoRecibido.color}</p>
+                    <p><strong>Bat:</strong> ${venta.equipoRecibido.bateria}</p>
+                    <p><strong>IMEI:</strong> ${venta.equipoRecibido.imei || 'N/A'}</p>
+                    <p><strong>Valor:</strong> ${formatearMoneda(venta.equipoRecibido.valor)}</p>
+                </div>
+            `;
+        }
+
+        // Sección Pago
+        let detallesPago = [];
+        if (venta.formaPago === 'mixto' && venta.pagoMixto) {
+            if (venta.pagoMixto.efectivo > 0) {
+                detallesPago.push(`<span class="pago-tag">Efc: ${formatearMoneda(venta.pagoMixto.efectivo)}</span>`);
+            }
+            if (venta.pagoMixto.zelle > 0) {
+                detallesPago.push(`<span class="pago-tag">Zelle: ${formatearMoneda(venta.pagoMixto.zelle)}</span>`);
+            }
+            if (venta.pagoMixto.binance > 0) {
+                detallesPago.push(`<span class="pago-tag">Binance: ${formatearMoneda(venta.pagoMixto.binance)}</span>`);
+            }
+            if (venta.pagoMixto.pagoMovil > 0) {
+                if (venta.pagoMixto.pagoMovilDetalles) {
+                    detallesPago.push(`<span class="pago-tag">PagM: ${formatearMoneda(venta.pagoMixto.pagoMovilDetalles.dolares)} = ${formatearBs(venta.pagoMixto.pagoMovilDetalles.bolivares)} (${venta.pagoMixto.pagoMovilDetalles.tasa})</span>`);
+                } else {
+                    detallesPago.push(`<span class="pago-tag">PagM: ${formatearMoneda(venta.pagoMixto.pagoMovil)}</span>`);
+                }
+            }
+            if (venta.pagoMixto.transferencia > 0) {
+                if (venta.pagoMixto.transferenciaDetalles) {
+                    detallesPago.push(`<span class="pago-tag">Transf: ${formatearMoneda(venta.pagoMixto.transferenciaDetalles.dolares)} = ${formatearBs(venta.pagoMixto.transferenciaDetalles.bolivares)} (${venta.pagoMixto.transferenciaDetalles.tasa})</span>`);
+                } else {
+                    detallesPago.push(`<span class="pago-tag">Transf: ${formatearMoneda(venta.pagoMixto.transferencia)}</span>`);
+                }
+            }
+        } else if (venta.formaPago === 'pagomovil' && venta.pagoMovilDetalles) {
+            detallesPago.push(`<span class="pago-tag">PagM: ${formatearMoneda(venta.pagoMovilDetalles.dolares)} = ${formatearBs(venta.pagoMovilDetalles.bolivares)} (${venta.pagoMovilDetalles.tasa})</span>`);
+        } else if (venta.formaPago === 'transferencia' && venta.transferenciaDetalles) {
+            detallesPago.push(`<span class="pago-tag">Transf: ${formatearMoneda(venta.transferenciaDetalles.dolares)} = ${formatearBs(venta.transferenciaDetalles.bolivares)} (${venta.transferenciaDetalles.tasa})</span>`);
+        } else {
+            detallesPago.push(`<span class="pago-tag">${venta.formaPago.toUpperCase()}: ${formatearMoneda(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0))}</span>`);
+        }
+        
+        if (venta.equipoRecibido) {
+            detallesPago.push(`<span class="pago-tag">Eq. rev: ${venta.equipoRecibido.modelo} (${formatearMoneda(venta.equipoRecibido.valor)})</span>`);
+        }
+        
+        seccionPago = `
+            <div class="venta-box box-purple">
+                <h5>💳 Pago</h5>
+                ${detallesPago.map(d => `<p>${d}</p>`).join('')}
+                <p class="total-pago">Total: ${formatearMoneda(venta.montoTotal)}</p>
+            </div>
+        `;
+
+        const esAbono = venta.tipoTransaccion === 'abono';
+        
         return `
-            <div class="venta-item">
+            <div class="venta-item ${esAbono ? 'abono' : ''}">
                 <div class="venta-header">
-                    <span>#${numero} - ${venta.tipoTransaccion === 'abono' ? '💰 ABONO' : '💳 VENTA'} - ${venta.hora}</span>
-                    <span>${formatearMoneda(venta.montoTotal)}</span>
+                    <div class="venta-header-title">
+                        <div>
+                            <span>#${numero} - ${esAbono ? '💰 ABONO' : '💳 VENTA'}</span>
+                            ${weppaHtml}
+                        </div>
+                        <span class="venta-cliente">${venta.tipoVenta === 'completa' ? `${venta.cliente.nombre} (${venta.cliente.cedula})` : 'Solo Accesorios'}</span>
+                    </div>
+                    <span>${venta.hora}</span>
                 </div>
-                <div class="venta-details">
-                    ${venta.tipoVenta === 'completa' ? 
-                        `<p><strong>📱 Equipo:</strong> ${venta.equipo.modelo} ${venta.equipo.almacenamiento} ${venta.equipo.color}</p>` : 
-                        '<p><strong>🛡️ Solo Accesorios</strong></p>'
-                    }
-                    ${accesorios.length > 0 ? `<p><strong>Accesorios:</strong> ${accesorios.join(', ')}</p>` : ''}
-                    <p><strong>Pago:</strong> ${venta.formaPago.toUpperCase()}</p>
-                    ${venta.weppa ? `<p style="background: yellow; display: inline-block; padding: 2px 5px; border-radius: 3px;"><strong>WEPPA (Inicial $${this.calcularTotalInicialVenta(venta).toFixed(2)})</strong></p>` : ''}
+                
+                <div class="venta-grid ${venta.equipoRecibido ? 'cols-4' : ''}">
+                    ${seccionEquipo}
+                    ${seccionAccesorios}
+                    ${seccionEquipoRecibido}
+                    ${seccionPago}
                 </div>
+                
+                ${venta.notaVentaDetalles ? `
+                    <div class="nota-box">
+                        <strong>📝 Nota:</strong> ${venta.notaVentaDetalles}
+                    </div>
+                ` : ''}
             </div>
         `;
     }
-    
+
     /**
      * Genera el HTML de un item de movimiento
      */
@@ -755,16 +890,18 @@ class PrintService {
         return `
             <div class="venta-item">
                 <div class="venta-header">
-                    <span>${movimiento.obtenerTitulo()}</span>
+                    <div class="venta-header-title">
+                        <span>📦 ${movimiento.obtenerTitulo()}</span>
+                    </div>
                     <span>${movimiento.hora}</span>
                 </div>
-                <div class="venta-details">
+                <div style="padding: 15px; font-size: 11px; color: #374151;">
                     <p>${movimiento.obtenerDetalles()}</p>
                 </div>
             </div>
         `;
     }
-    
+
     /**
      * Genera e imprime la garantía de un cambio por garantía
      */
@@ -927,7 +1064,7 @@ class PrintService {
             </body>
             </html>
         `;
-        
+
         const ventana = window.open('', '_blank');
         ventana.document.write(contenido);
         ventana.document.close();

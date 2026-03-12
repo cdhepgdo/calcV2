@@ -1070,8 +1070,11 @@ class App {
      * Actualiza el resumen de ventas
      */
     actualizarResumenVentas() {
-        const ventas = ventaService.obtenerVentas();
-        const movimientos = movimientoService.obtenerMovimientos();
+        const fechaHoy = new Date().toLocaleDateString('es-ES'); // 1. Obtenemos la fecha
+        
+        // 2. Filtramos al instante por la fecha de hoy
+        const ventas = ventaService.obtenerVentas().filter(v => v.fecha === fechaHoy);
+        const movimientos = movimientoService.obtenerMovimientos().filter(m => m.fecha === fechaHoy);
         const resumenElement = document.getElementById('resumenVentas');
         
         if (ventas.length === 0) {
@@ -1392,7 +1395,10 @@ class App {
             return;
         }
         
-        const movimientos = movimientoService.obtenerMovimientos();
+        const fechaHoy = new Date().toLocaleDateString('es-ES'); // 1. Obtenemos la fecha
+        
+        // 2. Filtramos los movimientos al instante
+        const movimientos = movimientoService.obtenerMovimientos().filter(m => m.fecha === fechaHoy);
         console.log('📦 Movimientos obtenidos:', movimientos.length, movimientos);
         
         if (movimientos.length === 0) {
@@ -2383,3 +2389,4 @@ class App {
 document.addEventListener('DOMContentLoaded', () => {
     window.app = new App();
 });
+

@@ -1803,8 +1803,11 @@ class App {
      * Imprime el resumen del día
      */
     imprimirResumenDia() {
-        const ventas = ventaService.obtenerVentas();
-        const movimientos = movimientoService.obtenerMovimientos();
+        const fechaHoy = new Date().toLocaleDateString('es-ES'); // 1. Obtenemos la fecha
+        
+        // 2. Filtramos al instante por la fecha de hoy
+        const ventas = ventaService.obtenerVentas().filter(v => v.fecha === fechaHoy);
+        const movimientos = movimientoService.obtenerMovimientos().filter(m => m.fecha === fechaHoy);
         
         printService.imprimirResumenDia(ventas, movimientos, this.cajaActual);
     }
@@ -2389,4 +2392,5 @@ class App {
 document.addEventListener('DOMContentLoaded', () => {
     window.app = new App();
 });
+
 

@@ -109,9 +109,22 @@ class VentaService {
     /**
      * Calcula el total de ventas del día (excluyendo abonos)
      */
-    calcularTotalDia() {
+    /* calcularTotalDia() {
         const ventas = this.obtenerVentas();
         return ventas
+            .filter(v => v.tipoTransaccion !== 'abono')
+            .reduce((total, venta) => total + venta.montoTotal, 0);
+    } */
+    /**
+     * Calcula el total de ventas del día de HOY (excluyendo abonos)
+     */
+    calcularTotalDia() {
+        const ventas = this.obtenerVentas();
+        const fechaHoy = new Date().toLocaleDateString('es-ES'); // 1. Obtenemos la fecha de hoy
+        
+        return ventas
+            // 2. FILTRO NUEVO: Solo dejamos pasar las ventas cuya fecha coincida con hoy
+            .filter(v => v.fecha === fechaHoy) 
             .filter(v => v.tipoTransaccion !== 'abono')
             .reduce((total, venta) => total + venta.montoTotal, 0);
     }
@@ -119,10 +132,20 @@ class VentaService {
     /**
      * Cuenta los equipos vendidos (excluyendo abonos y ventas solo de accesorios)
      */
-    contarEquiposVendidos() {
+    /* contarEquiposVendidos() {
         const ventas = this.obtenerVentas();
         return ventas.filter(v => 
             v.tipoVenta === 'completa' && v.tipoTransaccion !== 'abono'
+        ).length;
+    } */
+    contarEquiposVendidos() {
+        const ventas = this.obtenerVentas();
+        const fechaHoy = new Date().toLocaleDateString('es-ES');
+        
+        return ventas.filter(v => 
+            v.fecha === fechaHoy && // <- El nuevo filtro mágico
+            v.tipoVenta === 'completa' && 
+            v.tipoTransaccion !== 'abono'
         ).length;
     }
     
@@ -206,3 +229,4 @@ class VentaService {
 
 // Exportar una instancia única (Singleton)
 export const ventaService = new VentaService();
+

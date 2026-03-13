@@ -156,10 +156,10 @@ export class Venta {
                 const totalEsperado = this.transferenciaDetalles.dolares + equipoRecibidoValor;
                 const diferencia = this.montoTotal - totalEsperado;
                 
-                if (diferencia > 0.01 && !this.weppa && diferencia < 0.01) {
+                if (diferencia > 0.01 && !this.weppa) {
                     errores.push(`El monto total ($${this.montoTotal.toFixed(2)}) no puede ser mayor a la transferencia ($${this.transferenciaDetalles.dolares.toFixed(2)}) + equipo recibido ($${equipoRecibidoValor.toFixed(2)}). Active WEPPA si es intencional.`);
                 }else if (diferencia < 0 && !this.weppa) {
-                    errores.push(`El monto total ($${this.montoTotal.toFixed(2)}) no puede ser menor a la transferencia ($${this.pagoMovilDetalles.dolares.toFixed(2)}) + equipo recibido ($${equipoRecibidoValor.toFixed(2)}). Active WEPPA si es intencional.`);                    
+                    errores.push(`El monto total ($${this.montoTotal.toFixed(2)}) no puede ser menor a la transferencia ($${this.transferenciaDetalles.dolares.toFixed(2)}) + equipo recibido ($${equipoRecibidoValor.toFixed(2)}). Active WEPPA si es intencional.`);                    
                 }
             }
             
@@ -268,3 +268,4 @@ export class Venta {
         return new Venta(json);
     }
 }
+

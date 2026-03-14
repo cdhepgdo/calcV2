@@ -282,11 +282,11 @@ Movimiento.prototype.obtenerDetalles = function() {
     }
     
     if (tipoLower.includes('salida') && tipoLower.includes('equipo')) {
-        return `${this.datos.modelo || ''} ${this.datos.capacidad || ''} ${this.datos.color || ''} ${this.datos.bateria || ''} ${this.datos.imei || ''} | Destino: ${this.datos.destino || 'N/A'} | Retirado por: ${this.datos.persona || 'N/A'}`;
+        return `${this.datos.modelo || ''} ${this.datos.capacidad || ''} ${this.datos.color || ''} ${this.datos.bateria || ''}% ${this.datos.imei || ''} | Destino: ${this.datos.destino || 'N/A'} | Retirado por: ${this.datos.persona || 'N/A'}`;
     }
 
     if (tipoLower.includes('ingreso') && tipoLower.includes('equipo')) {
-        return `${this.datos.modelo || ''} ${this.datos.capacidad || ''} ${this.datos.color || ''} ${this.datos.bateria || ''} ${this.datos.imei || ''} | Origen: ${this.datos.origen || 'N/A'}`;
+        return `${this.datos.modelo || ''} ${this.datos.capacidad || ''} ${this.datos.color || ''} ${this.datos.bateria || ''}% ${this.datos.imei || ''} | Origen: ${this.datos.origen || 'N/A'}`;
     }
     
     if (tipoLower.includes('compra')) {
@@ -338,4 +338,5 @@ Movimiento.prototype.obtenerDetalles = function() {
     
     return 'Sin detalles';
 };
+
 

@@ -233,31 +233,9 @@
                 <!-- Forma de Pago -->
                 <div class="border-b pb-6 bg-blue-50 rounded-xl p-6" id="formaPagoSection">
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">💳 Forma de Pago</h2>
-                    <div class="grid md:grid-cols-3 gap-3">
-                        <label class="flex items-center">
-                            <input type="radio" name="formaPago" value="efectivo" class="mr-3">
-                            <span>Efectivo</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="radio" name="formaPago" value="zelle" class="mr-3">
-                            <span>Zelle</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="radio" name="formaPago" value="binance" class="mr-3">
-                            <span>Binance</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="radio" name="formaPago" value="pagomovil" class="mr-3">
-                            <span>Pago Móvil</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="radio" name="formaPago" value="transferencia" class="mr-3">
-                            <span>Transferencia</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="radio" name="formaPago" value="mixto" class="mr-3">
-                            <span>Mixto</span>
-                        </label>
+                    <!-- ESTO PONES: -->
+                    <div id="formaPagoRadios" class="grid md:grid-cols-3 gap-3">
+                        <!-- Los radios se generan automáticamente desde FORMAS_PAGO en constants.js -->
                     </div>
 
                     <!-- Formulario EFECTIVO -->
@@ -381,6 +359,23 @@
                             <div>
                                 <label class="block text-sm mb-1">Tasa (Bs/$)</label>
                                 <input type="number" id="transferenciaTasa" step="0.01" class="w-full p-2 border rounded-lg">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formulario PAYPAL -->
+                    <div id="paypal-form" class="hidden mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <h3 class="font-semibold mb-3 text-blue-800">🅿️ Pago por PayPal</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Monto en Dólares ($)</label>
+                                <input type="number" id="paypalMonto" step="0.01"
+                                    class="w-full p-3 border rounded-lg text-lg" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Email PayPal del cliente</label>
+                                <input type="email" id="paypalEmail" class="w-full p-3 border rounded-lg"
+                                    placeholder="cliente@email.com">
                             </div>
                         </div>
                     </div>
@@ -980,3 +975,4 @@
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
+

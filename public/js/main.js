@@ -99,6 +99,16 @@ class App {
         llenarSelect(document.getElementById('defectuosoColor'), COLORES_IPHONE, 'Seleccionar color');
         llenarSelect(document.getElementById('nuevoModelo'), MODELOS_IPHONE, 'Seleccionar modelo');
         llenarSelect(document.getElementById('nuevoColor'), COLORES_IPHONE, 'Seleccionar color');
+
+        const contenedorPago = document.getElementById('formaPagoRadios');
+        if (contenedorPago) {
+            contenedorPago.innerHTML = FORMAS_PAGO.map(fp => `
+                <label class="flex items-center">
+                    <input type="radio" name="formaPago" value="${fp.valor}" class="mr-3">
+                    <span>${fp.icono} ${fp.etiqueta}</span>
+                </label>
+            `).join('');
+        }
     
     }
     
@@ -169,16 +179,30 @@ class App {
             this.calcularBolivaresPagoMovil();
             this.calcularYMostrarTotal();
         });
-        document.getElementById('pagomovilTasa').addEventListener('input', () => this.calcularBolivaresPagoMovil());
-        document.getElementById('pagomovilBolivares').addEventListener('input', () => this.calcularDolaresPagoMovil());
-        
+        document.getElementById('pagomovilTasa').addEventListener('input', () => {
+            this.calcularBolivaresPagoMovil();
+            this.calcularYMostrarTotal();
+        });
+        document.getElementById('pagomovilBolivares').addEventListener('input', () => {
+            this.calcularDolaresPagoMovil();
+            this.calcularYMostrarTotal();
+        });
+
         // Cálculo automático de bolívares en Transferencia (formulario principal)
         document.getElementById('transferenciaDolares').addEventListener('input', () => {
             this.calcularBolivaresTransferencia();
             this.calcularYMostrarTotal();
         });
-        document.getElementById('transferenciaTasa').addEventListener('input', () => this.calcularBolivaresTransferencia());
-        document.getElementById('transferenciaBolivares').addEventListener('input', () => this.calcularDolaresTransferencia());
+        document.getElementById('transferenciaTasa').addEventListener('input', () => {
+            this.calcularBolivaresTransferencia();
+            this.calcularYMostrarTotal();
+        });
+        document.getElementById('transferenciaBolivares').addEventListener('input', () => {
+            this.calcularDolaresTransferencia();
+            this.calcularYMostrarTotal();
+        });
+
+        document.getElementById('paypalMonto').addEventListener('input', () => this.calcularYMostrarTotal());
         
         // Cálculo automático de bolívares en Pago Móvil DENTRO de Pago Mixto
         document.getElementById('montoPagoMovilDolares').addEventListener('input', () => this.calcularBolivaresPagoMovilMixto());
@@ -399,6 +423,8 @@ class App {
         document.getElementById('pagomovil-detalles')?.classList.add('hidden');
         document.getElementById('transferencia-detalles')?.classList.add('hidden');
         document.getElementById('pagoMixto')?.classList.add('hidden');
+        // Agregar esta línea al bloque de "ocultar todos"
+        document.getElementById('paypal-form')?.classList.add('hidden');
         
         // Mostrar el formulario correspondiente
         if (formaPago === 'efectivo') {
@@ -413,6 +439,10 @@ class App {
             document.getElementById('transferencia-detalles')?.classList.remove('hidden');
         } else if (formaPago === 'mixto') {
             document.getElementById('pagoMixto')?.classList.remove('hidden');
+        }
+        // Agregar esta condición al final del bloque
+        else if (formaPago === 'paypal') {
+            document.getElementById('paypal-form')?.classList.remove('hidden');
         }
         
         // Recalcular total
@@ -530,6 +560,8 @@ class App {
             const pagoMovil = parseFloat(document.getElementById('montoPagoMovilDolares')?.value) || 0;
             const transferencia = parseFloat(document.getElementById('montoTransferenciaDolares')?.value) || 0;
             subtotalPago = efectivo + zelle + binance + pagoMovil + transferencia;
+        } else if (formaPago === 'paypal') {
+            subtotalPago = parseFloat(document.getElementById('paypalMonto')?.value) || 0;
         }
         
         // Agregar equipo recibido si existe
@@ -938,6 +970,16 @@ class App {
             // BINANCE SIMPLE - Guardar el monto del pago
             const montoPago = parseFloat(document.getElementById('binanceMonto').value) || 0;
             datos.montoPago = montoPago;
+        } else if (formaPago === 'paypal') {
+            // Capturar el monto
+            const montoPago = parseFloat(document.getElementById('paypalMonto').value) || 0;
+            datos.montoPago = montoPago;
+            
+            // Capturar datos adicionales específicos de PayPal
+            datos.paypalDetalles = {
+                email: document.getElementById('paypalEmail').value,
+                monto: montoPago
+            };
         }
         
         // Equipo recibido (si aplica)
@@ -1024,6 +1066,7 @@ class App {
         document.getElementById('equipoRecibidoDetalles').classList.add('hidden');
         document.getElementById('abonoInfo').classList.add('hidden');
         document.getElementById('notaVentaInfo').classList.add('hidden');
+        document.getElementById('paypal-form')?.classList.add('hidden');
         
         // Ocultar formularios de pago individuales
         document.getElementById('efectivo-form')?.classList.add('hidden');
@@ -2392,5 +2435,6 @@ class App {
 document.addEventListener('DOMContentLoaded', () => {
     window.app = new App();
 });
+
 
 

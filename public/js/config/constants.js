@@ -48,10 +48,12 @@ export const COLORES_IPHONE = [
     { valor: "Púrpura", etiqueta: "🟣 Púrpura" },
     { valor: "Titanio Azul", etiqueta: "🔵 Titanio Azul" },
     { valor: "Titanio Blanco", etiqueta: "⚪ Titanio Blanco" },
+    { valor: "Natural", etiqueta: "⚪ Natural" },
     { valor: "Titanio Negro", etiqueta: "⚫ Titanio Negro" },
     { valor: "Negro Medianoche", etiqueta: "⚫ Negro Medianoche" },
     { valor: "Azul Ultramar", etiqueta: "🔵 Azul Ultramar" },
-    { valor: "Naranja Cósmico", etiqueta: "🟠 Naranja Cósmico" }
+    { valor: "Naranja Cósmico", etiqueta: "🟠 Naranja Cósmico" },
+    { valor: "Desert", etiqueta: "🟠 Desert" }
 ];
 
 export const CAPACIDADES_IPHONE = [

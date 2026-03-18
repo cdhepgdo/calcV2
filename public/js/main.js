@@ -59,36 +59,20 @@ class App {
     cargarDatosIniciales() {
     this.cajaActual = storageService.obtenerCajaInicial();
     const hoy = new Date().toLocaleDateString('es-ES');
-
     if (this.cajaActual.cajaInicial > 0 && this.cajaActual.fecha === hoy) {
-        // ✅ Ya se configuró la caja HOY → mostrar normalmente
+        // Ya se guardó la caja HOY → mostrar normalmente
         document.getElementById('cajaInicial').value = this.cajaActual.cajaInicial;
         document.getElementById('cajaInicialMostrar').textContent = this.cajaActual.cajaInicial.toFixed(2);
         document.getElementById('cajaInicialConfirmacion').classList.remove('hidden');
-
-    } else if (this.cajaActual.cajaInicial > 0 && this.cajaActual.fecha !== hoy) {
-        // ✅ NUEVO: La caja es de un día ANTERIOR → calcular el cierre de ese día
-        const ventas = ventaService.obtenerVentas();
-        const movimientos = movimientoService.obtenerMovimientos();
-        const desglose = this.cajaActual.obtenerDesglose(ventas, movimientos);
-        const cajaFinalAyer = desglose.cajaFinal;
-        console.log(desglose, cajaFinalAyer, hoy)
-        console.log("hoy:", hoy)
-
-        // Pre-rellenar el input con el cierre del día anterior
-        document.getElementById('cajaInicial').value = cajaFinalAyer.toFixed(2);
-
-        // Mostrar aviso visual (borde amarillo y tooltip)
-        const input = document.getElementById('cajaInicial');
-        input.style.borderColor = '#f59e0b';
-        input.title = `Cierre del día ${this.cajaActual.fecha}: $${cajaFinalAyer.toFixed(2)}`;
-
-        // Mostrar mensaje informativo en la confirmación
-        document.getElementById('cajaInicialMostrar').textContent = cajaFinalAyer.toFixed(2);
-        const confirmacion = document.getElementById('cajaInicialConfirmacion');
-        confirmacion.classList.remove('hidden');
-        confirmacion.querySelector('p').innerHTML = 
-            `⚠️ Sugerido del cierre del ${this.cajaActual.fecha}: $<span id="cajaInicialMostrar">${cajaFinalAyer.toFixed(2)}</span> — Presiona 💾 Guardar para confirmar`;
+    } else {
+        // Es un día nuevo → buscar el cierre del día anterior
+        const cierreGuardado = localStorage.getItem('caja_cierre_iphone');
+        if (cierreGuardado) {
+            const datos = JSON.parse(cierreGuardado);
+            document.getElementById('cajaInicial').value = parseFloat(datos.monto).toFixed(2);
+            // Borde amarillo para indicar que es un valor sugerido
+            document.getElementById('cajaInicial').style.borderColor = '#f59e0b';
+        }
     }
 }
 
@@ -1213,6 +1197,13 @@ class App {
                     </div>
                 `;
             }
+
+            // Guardar la caja final actual para el próximo día
+            localStorage.setItem('caja_cierre_iphone', JSON.stringify({
+                monto: desgloseCaja.cajaFinal,
+                fecha: new Date().toLocaleDateString('es-ES')
+            }));
+
             
             resumenElement.innerHTML = html;
         }

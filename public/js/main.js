@@ -1807,7 +1807,7 @@ class App {
                 document.getElementById('equipoCapacidad').value = venta.equipoRecibido.capacidad || '';
                 document.getElementById('equipoColor').value = venta.equipoRecibido.color || '';
                 document.getElementById('equipoBateria').value = venta.equipoRecibido.bateria.replace('%', '') || '';
-                document.getElementById('equipoImei').value = venta.equipoRecibido.imei || '';
+                document.getElementById('equipoImeiR').value = venta.equipoRecibido.imei || '';
                 document.getElementById('equipoValor').value = venta.equipoRecibido.valor || 0;
                 document.getElementById('equipoComentarios').value = venta.equipoRecibido.comentarios || '';
             }, 150);

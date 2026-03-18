@@ -72,6 +72,7 @@ class App {
         const movimientos = movimientoService.obtenerMovimientos();
         const desglose = this.cajaActual.obtenerDesglose(ventas, movimientos);
         const cajaFinalAyer = desglose.cajaFinal;
+        console.log(desglose, cajaFinalAyer)
 
         // Pre-rellenar el input con el cierre del día anterior
         document.getElementById('cajaInicial').value = cajaFinalAyer.toFixed(2);

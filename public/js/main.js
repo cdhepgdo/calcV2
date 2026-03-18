@@ -46,7 +46,7 @@ class App {
     /**
      * Carga los datos iniciales desde el storage
      */
-    cargarDatosIniciales() {
+    /* cargarDatosIniciales() {
         this.cajaActual = storageService.obtenerCajaInicial();
         
         // Mostrar caja inicial si existe
@@ -55,7 +55,41 @@ class App {
             document.getElementById('cajaInicialMostrar').textContent = this.cajaActual.cajaInicial.toFixed(2);
             document.getElementById('cajaInicialConfirmacion').classList.remove('hidden');
         }
+    } */
+    cargarDatosIniciales() {
+    this.cajaActual = storageService.obtenerCajaInicial();
+    const hoy = new Date().toLocaleDateString('es-ES');
+
+    if (this.cajaActual.cajaInicial > 0 && this.cajaActual.fecha === hoy) {
+        // ✅ Ya se configuró la caja HOY → mostrar normalmente
+        document.getElementById('cajaInicial').value = this.cajaActual.cajaInicial;
+        document.getElementById('cajaInicialMostrar').textContent = this.cajaActual.cajaInicial.toFixed(2);
+        document.getElementById('cajaInicialConfirmacion').classList.remove('hidden');
+
+    } else if (this.cajaActual.cajaInicial > 0 && this.cajaActual.fecha !== hoy) {
+        // ✅ NUEVO: La caja es de un día ANTERIOR → calcular el cierre de ese día
+        const ventas = ventaService.obtenerVentas();
+        const movimientos = movimientoService.obtenerMovimientos();
+        const desglose = this.cajaActual.obtenerDesglose(ventas, movimientos);
+        const cajaFinalAyer = desglose.cajaFinal;
+
+        // Pre-rellenar el input con el cierre del día anterior
+        document.getElementById('cajaInicial').value = cajaFinalAyer.toFixed(2);
+
+        // Mostrar aviso visual (borde amarillo y tooltip)
+        const input = document.getElementById('cajaInicial');
+        input.style.borderColor = '#f59e0b';
+        input.title = `Cierre del día ${this.cajaActual.fecha}: $${cajaFinalAyer.toFixed(2)}`;
+
+        // Mostrar mensaje informativo en la confirmación
+        document.getElementById('cajaInicialMostrar').textContent = cajaFinalAyer.toFixed(2);
+        const confirmacion = document.getElementById('cajaInicialConfirmacion');
+        confirmacion.classList.remove('hidden');
+        confirmacion.querySelector('p').innerHTML = 
+            `⚠️ Sugerido del cierre del ${this.cajaActual.fecha}: $<span id="cajaInicialMostrar">${cajaFinalAyer.toFixed(2)}</span> — Presiona 💾 Guardar para confirmar`;
     }
+}
+
     
     /**
      * Inicializa todos los selectores con sus opciones

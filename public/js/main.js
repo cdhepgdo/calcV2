@@ -17,7 +17,7 @@ import {
     FORMAS_PAGO 
 } from './config/constants.js';
 import { llenarSelect, mostrarAlerta, confirmar } from './utils/domHelpers.js';
-import { formatearMoneda, formatearFecha } from './utils/formatters.js';
+import { formatearMoneda, formatearFecha, sanitizar } from './utils/formatters.js';
 
 class App {
     constructor() {
@@ -1320,7 +1320,7 @@ class App {
                         <p><strong>Capacidad:</strong> ${venta.equipo.almacenamiento}</p>
                         <p><strong>Color:</strong> ${venta.equipo.color}</p>
                         <p><strong>Batería:</strong> ${venta.equipo.bateria}</p>
-                        <p><strong>Imei:</strong> ${venta.equipo.imei}</p>
+                        <p><strong>Imei:</strong> ${sanitizar(venta.equipo.imei)}</p>
                     </div>
                 </div>
             `;
@@ -1352,7 +1352,7 @@ class App {
                         <p><strong>Capacidad:</strong> ${venta.equipoRecibido.capacidad}</p>
                         <p><strong>Color:</strong> ${venta.equipoRecibido.color}</p>
                         <p><strong>Batería:</strong> ${venta.equipoRecibido.bateria}</p>
-                        <p><strong>IMEI:</strong> ${venta.equipoRecibido.imei || 'N/A'}</p>
+                        <p><strong>IMEI:</strong> ${sanitizar(venta.equipoRecibido.imei) || 'N/A'}</p>
                         <p><strong>Valor:</strong> ${formatearMoneda(venta.equipoRecibido.valor)}</p>
                     </div>
                 </div>
@@ -1419,7 +1419,7 @@ class App {
                             ${venta.tipoTransaccion === 'abono' ? '💰 ABONO' : '💳 VENTA'}
                             ${weppaHtml}
                         </h4>
-                        ${venta.tipoVenta === 'completa' ? `<p class="text-xs text-gray-600 mt-1">${venta.cliente.nombre} (${venta.cliente.cedula})</p>` : '<p class="text-xs text-gray-600 mt-1">Solo Accesorios</p>'}
+                        ${venta.tipoVenta === 'completa' ? `<p class="text-xs text-gray-600 mt-1">${sanitizar(venta.cliente.nombre)} (${sanitizar(venta.cliente.cedula)})</p>` : '<p class="text-xs text-gray-600 mt-1">Solo Accesorios</p>'}
                     </div>
                     <span class="text-xs text-gray-500">${venta.hora}</span>
                 </div>
@@ -1434,7 +1434,7 @@ class App {
                 
                 ${venta.notaVentaDetalles ? `
                     <div class="bg-purple-100 p-2 rounded text-xs mb-3">
-                        <strong>📝 Nota:</strong> ${venta.notaVentaDetalles}
+                        <strong>📝 Nota:</strong> ${sanitizar(venta.notaVentaDetalles)}
                     </div>
                 ` : ''}
                 

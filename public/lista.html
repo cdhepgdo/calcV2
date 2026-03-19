@@ -152,7 +152,7 @@
     
     async function fetchTasaBCV() {
       try {
-        const res = await fetch("https://open.er-api.com/v6/latest/EUR");
+        const res = await fetch("https://open.er-api.com/v6/latest/USD");
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         // El valor viene como string, lo convertimos a número

@@ -107,3 +107,17 @@ export function formatearPorcentaje(valor) {
     const numero = parseFloat(valor) || 0;
     return `${numero}%`;
 }
+
+/**
+ * Sanitiza texto para evitar XSS al insertar en innerHTML
+ * Convierte caracteres HTML peligrosos en entidades seguras
+ */
+export function sanitizar(texto) {
+    if (texto === null || texto === undefined) return '';
+    return String(texto)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;');
+}

@@ -4,6 +4,8 @@
  */
 
 import { TIPOS_MOVIMIENTO } from '../config/constants.js';
+import { sanitizar } from '../utils/formatters.js';
+
 
 export class Movimiento {
     constructor(data = {}) {
@@ -274,23 +276,23 @@ Movimiento.prototype.obtenerDetalles = function() {
     
     if (tipoLower.includes('salida') && tipoLower.includes('efectivo')) {
         console.log(this.datos)
-        return `💵-${this.datos.monto}$ | Retirado por: ${this.datos.persona || 'N/A'} | 📝Motivo: ${this.datos.nota || 'N/A'}`;
+        return `💵-${this.datos.monto}$ | Retirado por: ${sanitizar(this.datos.persona) || 'N/A'} | 📝Motivo: ${sanitizar(this.datos.nota) || 'N/A'}`;
     }
     
     if (tipoLower.includes('ingreso') && tipoLower.includes('efectivo')) {
-        return `💵+${this.datos.monto}$ | 📝Motivo: ${this.datos.nota || 'N/A'}`;
+        return `💵+${this.datos.monto}$ | 📝Motivo: ${sanitizar(this.datos.nota) || 'N/A'}`;
     }
     
     if (tipoLower.includes('salida') && tipoLower.includes('equipo')) {
-        return `${this.datos.modelo || ''} ${this.datos.capacidad || ''} ${this.datos.color || ''} ${this.datos.bateria || ''}% ${this.datos.imei || ''} | Destino: ${this.datos.destino || 'N/A'} | Retirado por: ${this.datos.persona || 'N/A'}`;
+        return `${this.datos.modelo || ''} ${this.datos.capacidad || ''} ${this.datos.color || ''} | Destino: ${this.datos.destino || 'N/A'} | Retirado por: ${sanitizar(this.datos.persona) || 'N/A'}`;
     }
-
+    
     if (tipoLower.includes('ingreso') && tipoLower.includes('equipo')) {
-        return `${this.datos.modelo || ''} ${this.datos.capacidad || ''} ${this.datos.color || ''} ${this.datos.bateria || ''}% ${this.datos.imei || ''} | Origen: ${this.datos.origen || 'N/A'}`;
+        return `${this.datos.modelo || ''} ${this.datos.capacidad || ''} ${this.datos.color || ''} | Origen: ${this.datos.origen || 'N/A'}`;
     }
     
     if (tipoLower.includes('compra')) {
-        return `${this.datos.modelo || ''} ${this.datos.capacidad || ''} ${this.datos.color || ''} | Precio: $${this.datos.precio || 0} | Proveedor: ${this.datos.proveedor || 'N/A'}`;
+        return `${this.datos.modelo || ''} ${this.datos.capacidad || ''} ${this.datos.color || ''} | Precio: $${this.datos.precio || 0} | Proveedor: ${sanitizar(this.datos.proveedor) || 'N/A'}`;
     }
     
     if (tipoLower.includes('accesorio')) {
@@ -308,7 +310,7 @@ Movimiento.prototype.obtenerDetalles = function() {
             detalles += ` | Destino: ${this.datos.destino}`;
         }
         if (tipoLower.includes('ingreso') && this.datos.proveedor) {
-            detalles += ` | Proveedor: ${this.datos.proveedor}`;
+            detalles += ` | Proveedor: ${sanitizar(this.datos.proveedor)}`;
         }
         return detalles;
     }
@@ -321,8 +323,8 @@ Movimiento.prototype.obtenerDetalles = function() {
         const diferencia = this.datos.diferencia || {};
         
         let detalles = `👤 ${cliente.nombre || 'N/A'} (${cliente.cedula || 'N/A'})`;
-        detalles += ` | 📱❌ ${equipoDefectuoso.modelo || 'N/A'} ${equipoDefectuoso.capacidad || ''} ${equipoDefectuoso.color || ''}"${equipoDefectuoso.imei || ''}" | `;
-        detalles += ` ➡️ 📱✅ ${equipoNuevo.modelo || 'N/A'} ${equipoNuevo.capacidad || ''} ${equipoNuevo.color || ''}(${equipoDefectuoso.imei || ''})`;
+        detalles += ` | 📱❌ ${equipoDefectuoso.modelo || 'N/A'} ${equipoDefectuoso.capacidad || ''} ${equipoDefectuoso.color || ''}"${sanitizar(equipoDefectuoso.imei) || ''}" | `;
+        detalles += ` ➡️ 📱✅ ${equipoNuevo.modelo || 'N/A'} ${equipoNuevo.capacidad || ''} ${equipoNuevo.color || ''}(${sanitizar(equipoNuevo.imei) || ''})`;
         
         if (diferencia.tipo && diferencia.tipo !== 'ninguna') {
             const simbolo = diferencia.tipo === 'favor-cliente' ? '💰➡️👤' : '💰➡️🏪';
@@ -330,7 +332,7 @@ Movimiento.prototype.obtenerDetalles = function() {
         }
         
         if (equipoDefectuoso.problema) {
-            detalles += ` | ⚠️ ${equipoDefectuoso.problema}`;
+            detalles += ` | ⚠️ ${sanitizar(equipoDefectuoso.problema)}`;
         }
         
         return detalles;
@@ -338,5 +340,4 @@ Movimiento.prototype.obtenerDetalles = function() {
     
     return 'Sin detalles';
 };
-
 

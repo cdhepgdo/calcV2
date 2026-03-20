@@ -2082,7 +2082,7 @@ class App {
      * Genera formulario para accesorios con múltiples modelos
      */
     generarFormularioMultiModelo(tipo, tipoAccesorio) {
-        const maxModelos = tipoAccesorio === 'Forro' ? 5 : 10;
+        const maxModelos = tipoAccesorio === 'Forro' ? 10 : 10;
         let html = '<div class="mb-3">';
         html += '<label class="block text-sm font-medium text-gray-700 mb-1">¿Cuántos modelos diferentes?</label>';
         html += `<select id="${tipo}${tipoAccesorio.replace(/ /g, '')}CantidadModelos" class="w-full p-2 border rounded-lg">`;

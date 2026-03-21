@@ -655,7 +655,8 @@ class RegistroDiario {
     }
 
     renderizar() {
-        const periodo = parseInt(document.getElementById('filtroPeriodo').value);
+        // AHORA: lee el valor como texto primero
+        const periodoVal = document.getElementById('filtroPeriodo').value;
         const fechaFiltro = document.getElementById('filtroFecha').value;
         
         let diasFiltrados = Array.from(this.registroPorDia.values());
@@ -666,7 +667,17 @@ class RegistroDiario {
             diasFiltrados = diasFiltrados.filter(dia => dia.fecha === fechaBuscada);
         }
         // Filtrar por período
-        else if (periodo !== 'todos') {
+        else if (periodoVal !== 'todos') {
+            let dias = 0;
+            if (periodoVal === 'personalizado') {
+                // Lee el campo personalizado
+                dias = parseInt(document.getElementById('diasPersonalizado').value);
+                if (!dias || dias < 1) return; // Si está vacío o es 0, no hace nada
+            } else {
+                // Las opciones normales (7, 15, 30...) se convierten a número como antes
+                dias = parseInt(periodoVal);
+            }
+            
             const fechaLimite = new Date();
             fechaLimite.setDate(fechaLimite.getDate() - periodo);
             
@@ -960,9 +971,29 @@ class RegistroDiario {
             window.location.href = 'index.html';
         });
 
-        document.getElementById('filtroPeriodo').addEventListener('change', () => {
+        /* document.getElementById('filtroPeriodo').addEventListener('change', () => {
             document.getElementById('filtroFecha').value = '';
             this.renderizar();
+        }); */
+        // AHORA: detecta QUÉ opción elegiste
+        document.getElementById('filtroPeriodo').addEventListener('change', (e) => {
+            document.getElementById('filtroFecha').value = '';
+            const div = document.getElementById('diasPersonalizadoDiv');
+            if (e.target.value === 'personalizado') {
+                // Si eligió "Personalizado" → MUESTRA el campo y lo enfoca
+                div.style.display = 'block';
+                document.getElementById('diasPersonalizado').value = '';
+                document.getElementById('diasPersonalizado').focus();
+                // ⚠️ No llama a renderizar() aquí, espera que el usuario escriba
+            } else {
+                // Si eligió cualquier otra opción → OCULTA el campo y filtra normal
+                div.style.display = 'none';
+                this.renderizar();
+            }
+        });
+        // NUEVO: escucha mientras el usuario escribe en el campo personalizado
+        document.getElementById('diasPersonalizado').addEventListener('input', () => {
+            this.renderizar(); // filtra cada vez que escribe un dígito
         });
 
         document.getElementById('filtroFecha').addEventListener('change', () => {

@@ -994,6 +994,7 @@ class RegistroDiario {
         // NUEVO: escucha mientras el usuario escribe en el campo personalizado
         document.getElementById('diasPersonalizado').addEventListener('input', () => {
             this.renderizar(); // filtra cada vez que escribe un dígito
+            console.log("hol")
         });
 
         document.getElementById('filtroFecha').addEventListener('change', () => {

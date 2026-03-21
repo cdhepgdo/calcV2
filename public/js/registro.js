@@ -679,7 +679,7 @@ class RegistroDiario {
             }
             
             const fechaLimite = new Date();
-            fechaLimite.setDate(fechaLimite.getDate() - periodo);
+            fechaLimite.setDate(fechaLimite.getDate() - periodoVal);
             
             diasFiltrados = diasFiltrados.filter(dia => {
                 const fechaDia = this.parsearFecha(dia.fecha);

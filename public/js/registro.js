@@ -570,11 +570,23 @@ class RegistroDiario {
                 const destino = tipoLower.includes('salida')
                     ? dia.accesoriosSalidos
                     : dia.accesoriosIngresados;
-                if (!destino[tipoAcc]) destino[tipoAcc] = 0;
+                /* if (!destino[tipoAcc]) destino[tipoAcc] = 0;
                 if (datos.modelos && datos.modelos.length > 0) {
                     datos.modelos.forEach(m => { destino[tipoAcc] += parseInt(m.cantidad) || 0; });
                 } else {
                     destino[tipoAcc] += parseInt(datos.cantidad) || 1;
+                } */
+                if (!destino[tipoAcc]) destino[tipoAcc] = {};   // ← objeto anidado, no número
+                if (datos.modelos && datos.modelos.length > 0) {
+                    datos.modelos.forEach(m => {
+                        const nombreModelo = m.modelo || 'Sin especificar';
+                        if (!destino[tipoAcc][nombreModelo]) destino[tipoAcc][nombreModelo] = 0;
+                        destino[tipoAcc][nombreModelo] += parseInt(m.cantidad) || 0;
+                    });
+                } else {
+                    // Si no tiene lista de modelos, agrupa bajo "Sin especificar"
+                    if (!destino[tipoAcc]['Sin especificar']) destino[tipoAcc]['Sin especificar'] = 0;
+                    destino[tipoAcc]['Sin especificar'] += parseInt(datos.cantidad) || 1;
                 }
             }
         });
@@ -883,7 +895,7 @@ class RegistroDiario {
         html += `<h3 class="accesorios-titulo" style="color:${color};">${titulo}</h3>`;
         html += `<div class="accesorios-grid">`;
 
-        Object.entries(datos).forEach(([tipo, cantidad]) => {
+        /* Object.entries(datos).forEach(([tipo, cantidad]) => {
             html += `
                 <div class="accesorio-card">
                     <div class="accesorio-header">${tipo}</div>
@@ -895,6 +907,19 @@ class RegistroDiario {
                     </div>
                 </div>
             `;
+        }); */
+        Object.entries(datos).forEach(([tipo, modelos]) => {
+            const totalTipo = Object.values(modelos).reduce((sum, cant) => sum + cant, 0);
+            html += `<div class="accesorio-card">
+                <div class="accesorio-header">${tipo} (${totalTipo})</div>
+                <div class="accesorio-detalles">`;
+            Object.entries(modelos).forEach(([modelo, cantidad]) => {
+                html += `<div class="accesorio-item">
+                    <span class="accesorio-modelo">${modelo}</span>
+                    <span class="accesorio-cantidad">${cantidad}</span>
+                </div>`;
+            });
+            html += `</div></div>`;
         });
 
         html += `</div></div>`;

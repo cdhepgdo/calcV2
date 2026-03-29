@@ -597,6 +597,9 @@ class RegistroDiario {
                 return a.hora.localeCompare(b.hora);
             });
         });
+///////////////////////////////////////////////////////
+        console.log('📊 registroPorDia:', this.registroPorDia);
+    console.log('📋 Como array:', [...this.registroPorDia.values()]);
     }
 
     obtenerDescripcionVenta(venta) {

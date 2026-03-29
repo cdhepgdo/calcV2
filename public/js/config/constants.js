@@ -121,7 +121,8 @@ export const STORAGE_KEYS = {
     VENTAS: 'ventas_iphone',
     MOVIMIENTOS: 'movimientos_iphone',
     CAJA_INICIAL: 'caja_inicial_iphone',
-    FECHA_ACTUAL: 'fecha_actual_iphone'
+    FECHA_ACTUAL: 'fecha_actual_iphone',
+    CIERRE_CAJA: 'caja_cierre_iphone'
 };
 
 export const MENSAJES = {

@@ -64,7 +64,7 @@ class App {
         document.getElementById('cajaInicial').value = this.cajaActual.cajaInicial;
         document.getElementById('cajaInicialMostrar').textContent = this.cajaActual.cajaInicial.toFixed(2);
         document.getElementById('cajaInicialConfirmacion').classList.remove('hidden');
-    } else {
+    } /* else {
         // Es un día nuevo → buscar el cierre del día anterior
         const cierreGuardado = localStorage.getItem('caja_cierre_iphone');
         if (cierreGuardado) {
@@ -73,7 +73,15 @@ class App {
             // Borde amarillo para indicar que es un valor sugerido
             document.getElementById('cajaInicial').style.borderColor = '#f59e0b';
         }
-    }
+    } */
+        else {
+            const cierreGuardado = storageService.obtenerCierreCaja();
+            if (cierreGuardado) {
+                document.getElementById('cajaInicial').value = parseFloat(cierreGuardado.monto).toFixed(2);
+                // Borde amarillo para indicar que es un valor sugerido
+                document.getElementById('cajaInicial').style.borderColor = '#f59e0b';
+            }
+        }
 }
 
     

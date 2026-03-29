@@ -1223,10 +1223,11 @@ class App {
         this.animarNumero('cajaFinal', desgloseCaja.cajaFinal);
         
         // Guardar la caja final actual para el próximo día
-        localStorage.setItem('caja_cierre_iphone', JSON.stringify({
+        /* localStorage.setItem('caja_cierre_iphone', JSON.stringify({
             monto: desgloseCaja.cajaFinal,
             fecha: new Date().toLocaleDateString('es-ES')
-        }));
+        })); */
+        storageService.guardarCierreCaja(desgloseCaja.cajaFinal);
     }
     
     /**

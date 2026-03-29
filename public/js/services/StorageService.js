@@ -154,6 +154,37 @@ class StorageService {
             return { exito: false, error: error.message };
         }
     }
+
+    // ========== CIERRE DE CAJA ==========
+        
+    /**
+     * Guarda el cierre de caja del día
+     */
+    guardarCierreCaja(monto) {
+        try {
+            const datosCierre = {
+                monto: monto,
+                fecha: new Date().toLocaleDateString('es-ES')
+            };
+            localStorage.setItem(STORAGE_KEYS.CIERRE_CAJA, JSON.stringify(datosCierre));
+            return { exito: true };
+        } catch (error) {
+            console.error('Error al guardar cierre de caja:', error);
+            return { exito: false, error: error.message };
+        }
+    }
+    /**
+     * Obtiene el último cierre de caja
+     */
+    obtenerCierreCaja() {
+        try {
+            const data = localStorage.getItem(STORAGE_KEYS.CIERRE_CAJA);
+            return data ? JSON.parse(data) : null;
+        } catch (error) {
+            console.error('Error al obtener cierre de caja:', error);
+            return null;
+        }
+    }
     
     // ========== UTILIDADES ==========
     

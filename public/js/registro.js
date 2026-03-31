@@ -728,7 +728,8 @@ class RegistroDiario {
 
     renderizarResumenAccesorios(dias) {
         const accesoriosTotales = {};
-
+        const accesoriosIngresadosTotales = {};  // ← NUEVO: objeto para ingresados
+        
         dias.forEach(dia => {
             // Validar que dia.accesorios exista
             if (!dia.accesorios || typeof dia.accesorios !== 'object') {

@@ -498,7 +498,7 @@ class RegistroDiario {
 
             const dia = this.registroPorDia.get(fecha);
             const efectivo = venta.calcularEfectivo();
-            
+
             dia.operaciones.push({
                 tipo: 'venta',
                 hora: venta.hora,
@@ -597,9 +597,9 @@ class RegistroDiario {
                 return a.hora.localeCompare(b.hora);
             });
         });
-///////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////
         console.log('📊 registroPorDia:', this.registroPorDia);
-    console.log('📋 Como array:', [...this.registroPorDia.values()]);
+        console.log('📋 Como array:', [...this.registroPorDia.values()]);
     }
 
     obtenerDescripcionVenta(venta) {
@@ -612,44 +612,44 @@ class RegistroDiario {
 
     procesarAccesorios(venta, dia) {
         const acc = venta.accesorios;
-        
+
         // Forro
         if (acc.forro && acc.forroCantidad > 0) {
             const modelo = acc.forroModelo || 'Sin especificar';
             this.agregarAccesorio(dia, 'Forro', modelo, acc.forroCantidad);
         }
-        
+
         // Cargador
         if (acc.cargador && acc.cargadorCantidad > 0) {
             this.agregarAccesorio(dia, 'Cargador', 'Estándar', acc.cargadorCantidad);
         }
-        
+
         // Vidrio
         if (acc.vidrio && acc.vidrioCantidad > 0) {
             const modelo = acc.vidrioModelo || 'Sin especificar';
             this.agregarAccesorio(dia, 'Vidrio', modelo, acc.vidrioCantidad);
         }
-        
+
         // Protector Cámara
         if (acc.protectorCamara && acc.protectorCantidad > 0) {
             this.agregarAccesorio(dia, 'Protector Cámara', 'Estándar', acc.protectorCantidad);
         }
-        
+
         // Cubo
         if (acc.cubo && acc.cuboCantidad > 0) {
             this.agregarAccesorio(dia, 'Cubo', 'Estándar', acc.cuboCantidad);
         }
-        
+
         // Cable Lightning
         if (acc.cableLightning && acc.cableLightningCantidad > 0) {
             this.agregarAccesorio(dia, 'Cable Lightning', 'Estándar', acc.cableLightningCantidad);
         }
-        
+
         // Cable C+C
         if (acc.cableCC && acc.cableCCCantidad > 0) {
             this.agregarAccesorio(dia, 'Cable C+C', 'Estándar', acc.cableCCCantidad);
         }
-        
+
         // Caja
         if (acc.caja && acc.cajaCantidad > 0) {
             const modelo = acc.cajaModelo || 'Sin especificar';
@@ -673,7 +673,7 @@ class RegistroDiario {
         // AHORA: lee el valor como texto primero
         const periodoVal = document.getElementById('filtroPeriodo').value;
         const fechaFiltro = document.getElementById('filtroFecha').value;
-        
+
         let diasFiltrados = Array.from(this.registroPorDia.values());
 
         // Filtrar por fecha específica
@@ -692,10 +692,10 @@ class RegistroDiario {
                 // Las opciones normales (7, 15, 30...) se convierten a número como antes
                 dias = parseInt(periodoVal);
             }
-            
+
             const fechaLimite = new Date();
             fechaLimite.setDate(fechaLimite.getDate() - dias);
-            
+
             diasFiltrados = diasFiltrados.filter(dia => {
                 const fechaDia = this.parsearFecha(dia.fecha);
                 return fechaDia >= fechaLimite;
@@ -728,13 +728,13 @@ class RegistroDiario {
 
     renderizarResumenAccesorios(dias) {
         const accesoriosTotales = {};
-        
+
         dias.forEach(dia => {
             // Validar que dia.accesorios exista
             if (!dia.accesorios || typeof dia.accesorios !== 'object') {
                 return;
             }
-            
+
             Object.entries(dia.accesorios).forEach(([tipo, modelos]) => {
                 if (!accesoriosTotales[tipo]) {
                     accesoriosTotales[tipo] = {};
@@ -746,9 +746,35 @@ class RegistroDiario {
                     accesoriosTotales[tipo][modelo] += cantidad;
                 });
             });
+
+            // ── 2. NUEVO: Acumular accesorios SALIDOS por movimientos ──
+            //    Se suman al MISMO objeto accesoriosTotales
+            //    porque salida = artículo que se fue (como una venta)
+            if (dia.accesoriosSalidos && typeof dia.accesoriosSalidos === 'object') {
+                Object.entries(dia.accesoriosSalidos).forEach(([tipo, modelos]) => {
+                    if (!accesoriosTotales[tipo]) accesoriosTotales[tipo] = {};
+                    Object.entries(modelos).forEach(([modelo, cantidad]) => {
+                        if (!accesoriosTotales[tipo][modelo]) accesoriosTotales[tipo][modelo] = 0;
+                        accesoriosTotales[tipo][modelo] += cantidad;
+                    });
+                });
+            }
+            // ── 3. NUEVO: Acumular accesorios INGRESADOS por movimientos ──
+            //    Estos van en un objeto SEPARADO para mostrarlos aparte
+            if (dia.accesoriosIngresados && typeof dia.accesoriosIngresados === 'object') {
+                Object.entries(dia.accesoriosIngresados).forEach(([tipo, modelos]) => {
+                    if (!accesoriosIngresadosTotales[tipo]) accesoriosIngresadosTotales[tipo] = {};
+                    Object.entries(modelos).forEach(([modelo, cantidad]) => {
+                        if (!accesoriosIngresadosTotales[tipo][modelo]) accesoriosIngresadosTotales[tipo][modelo] = 0;
+                        accesoriosIngresadosTotales[tipo][modelo] += cantidad;
+                    });
+                });
+            }
         });
 
-        // Crear HTML para el resumen
+
+
+        /* // Crear HTML para el resumen
         const contenedor = document.getElementById('resumenAccesoriosPeriodo');
         if (!contenedor) return;
 
@@ -758,16 +784,16 @@ class RegistroDiario {
         }
 
         let html = '<div class="accesorios-grid">';
-        
+
         Object.entries(accesoriosTotales).forEach(([tipo, modelos]) => {
             const totalTipo = Object.values(modelos).reduce((sum, cant) => sum + cant, 0);
-            
+
             html += `
                 <div class="accesorio-card">
                     <div class="accesorio-header">${tipo} (${totalTipo})</div>
                     <div class="accesorio-detalles">
             `;
-            
+
             Object.entries(modelos)
                 .sort((a, b) => b[1] - a[1]) // Ordenar por cantidad descendente
                 .forEach(([modelo, cantidad]) => {
@@ -778,7 +804,7 @@ class RegistroDiario {
                         </div>
                     `;
                 });
-            
+
             html += `
                     </div>
                 </div>
@@ -786,12 +812,73 @@ class RegistroDiario {
         });
 
         html += '</div>';
+        contenedor.innerHTML = html; */
+        // ── Renderizar HTML ──
+        const contenedor = document.getElementById('resumenAccesoriosPeriodo');
+        if (!contenedor) return;
+        const sinSalidos = Object.keys(accesoriosTotales).length === 0;
+        const sinIngresados = Object.keys(accesoriosIngresadosTotales).length === 0;
+        if (sinSalidos && sinIngresados) {
+            contenedor.innerHTML = '<p class="text-gray-500 text-center">No hay accesorios en este período</p>';
+            return;
+        }
+        let html = '';
+        // ── Sección 1: Salidos (ventas + movimientos combinados) ──
+        if (!sinSalidos) {
+            html += '<h3 class="accesorios-titulo" style="color:#c53030;">📦➡️ Accesorios Salidos del Período (Ventas + Movimientos)</h3>';
+            html += '<div class="accesorios-grid">';
+            Object.entries(accesoriosTotales).forEach(([tipo, modelos]) => {
+                const totalTipo = Object.values(modelos).reduce((sum, cant) => sum + cant, 0);
+                html += `
+                    <div class="accesorio-card">
+                        <div class="accesorio-header">${tipo} (${totalTipo})</div>
+                        <div class="accesorio-detalles">
+                `;
+                Object.entries(modelos)
+                    .sort((a, b) => b[1] - a[1])
+                    .forEach(([modelo, cantidad]) => {
+                        html += `
+                            <div class="accesorio-item">
+                                <span class="accesorio-modelo">${modelo}</span>
+                                <span class="accesorio-cantidad">${cantidad}</span>
+                            </div>
+                        `;
+                    });
+                html += '</div></div>';
+            });
+            html += '</div>';
+        }
+        // ── Sección 2: Ingresados (solo movimientos) ──
+        if (!sinIngresados) {
+            html += '<h3 class="accesorios-titulo" style="color:#276749; margin-top:1rem;">📦⬅️ Accesorios Ingresados del Período</h3>';
+            html += '<div class="accesorios-grid">';
+            Object.entries(accesoriosIngresadosTotales).forEach(([tipo, modelos]) => {
+                const totalTipo = Object.values(modelos).reduce((sum, cant) => sum + cant, 0);
+                html += `
+                    <div class="accesorio-card">
+                        <div class="accesorio-header">${tipo} (${totalTipo})</div>
+                        <div class="accesorio-detalles">
+                `;
+                Object.entries(modelos)
+                    .sort((a, b) => b[1] - a[1])
+                    .forEach(([modelo, cantidad]) => {
+                        html += `
+                            <div class="accesorio-item">
+                                <span class="accesorio-modelo">${modelo}</span>
+                                <span class="accesorio-cantidad">${cantidad}</span>
+                            </div>
+                        `;
+                    });
+                html += '</div></div>';
+            });
+            html += '</div>';
+        }
         contenedor.innerHTML = html;
     }
 
     renderizarDias(dias) {
         const contenedor = document.getElementById('contenedorRegistro');
-        
+
         if (dias.length === 0) {
             contenedor.innerHTML = '<div class="sin-datos">No hay datos para mostrar en el período seleccionado</div>';
             return;
@@ -851,9 +938,9 @@ class RegistroDiario {
         if (!dia.accesorios || typeof dia.accesorios !== 'object') {
             return '';
         }
-        
+
         const tiposAccesorios = Object.keys(dia.accesorios);
-        
+
         if (tiposAccesorios.length === 0) {
             return '';
         }
@@ -865,13 +952,13 @@ class RegistroDiario {
         tiposAccesorios.forEach(tipo => {
             const modelos = dia.accesorios[tipo];
             const totalTipo = Object.values(modelos).reduce((sum, cant) => sum + cant, 0);
-            
+
             html += `
                 <div class="accesorio-card">
                     <div class="accesorio-header">${tipo} (${totalTipo})</div>
                     <div class="accesorio-detalles">
             `;
-            
+
             Object.entries(modelos).forEach(([modelo, cantidad]) => {
                 html += `
                     <div class="accesorio-item">
@@ -880,7 +967,7 @@ class RegistroDiario {
                     </div>
                 `;
             });
-            
+
             html += `
                     </div>
                 </div>
@@ -939,18 +1026,18 @@ class RegistroDiario {
             tipoTexto = '💳 Venta';
         } else {
             const desc = operacion.descripcion.toLowerCase();
-            if (desc.includes('salida') && desc.includes('efectivo'))      tipoTexto = '💸 Salida Efectivo';
+            if (desc.includes('salida') && desc.includes('efectivo')) tipoTexto = '💸 Salida Efectivo';
             else if (desc.includes('ingreso') && desc.includes('efectivo')) tipoTexto = '💵 Ingreso Efectivo';
-            else if (desc.includes('salida') && desc.includes('equipo'))    tipoTexto = '📱➡️ Salida Equipo';
-            else if (desc.includes('ingreso') && desc.includes('equipo'))   tipoTexto = '📱⬅️ Ingreso Equipo';
-            else if (desc.includes('compra'))                               tipoTexto = '📱⬅️ Compra Equipo';
+            else if (desc.includes('salida') && desc.includes('equipo')) tipoTexto = '📱➡️ Salida Equipo';
+            else if (desc.includes('ingreso') && desc.includes('equipo')) tipoTexto = '📱⬅️ Ingreso Equipo';
+            else if (desc.includes('compra')) tipoTexto = '📱⬅️ Compra Equipo';
             else if (desc.includes('salida') && desc.includes('accesorio')) tipoTexto = '🛡️➡️ Salida Acc.';
-            else if (desc.includes('ingreso') && desc.includes('accesorio'))tipoTexto = '🛡️⬅️ Ingreso Acc.';
-            else if (desc.includes('cambio'))                               tipoTexto = '🔄 Garantía';
+            else if (desc.includes('ingreso') && desc.includes('accesorio')) tipoTexto = '🛡️⬅️ Ingreso Acc.';
+            else if (desc.includes('cambio')) tipoTexto = '🔄 Garantía';
         }
 
         const montoClase = operacion.efectivo > 0 ? 'monto-positivo' :
-                           operacion.efectivo < 0 ? 'monto-negativo' : 'monto-neutral';
+            operacion.efectivo < 0 ? 'monto-negativo' : 'monto-neutral';
 
         const efectivoTexto = operacion.efectivo !== 0 ?
             `${operacion.efectivo > 0 ? '+' : ''}$${Math.abs(operacion.efectivo).toFixed(2)}` :
@@ -964,7 +1051,7 @@ class RegistroDiario {
                 if (detalles && detalles !== 'Sin detalles') {
                     detallesExtra = `<br><small style="color:#718096;font-size:0.8em;">${detalles}</small>`;
                 }
-            } catch(e) { /* ignorar */ }
+            } catch (e) { /* ignorar */ }
         }
 
         const descripcionTexto = operacion.tipo === 'venta'

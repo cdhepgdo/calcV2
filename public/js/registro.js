@@ -578,8 +578,14 @@ class RegistroDiario {
                 } */
                 if (!destino[tipoAcc]) destino[tipoAcc] = {};   // ← objeto anidado, no número
                 if (datos.modelos && datos.modelos.length > 0) {
+                    /* CÓDIGO NUEVO (Reemplaza lo anterior por esto): */
                     datos.modelos.forEach(m => {
-                        const nombreModelo = m.modelo || 'Sin especificar';
+                        // Si es una Caja y tiene color, lo juntamos igual que en las ventas
+                        let nombreModelo = m.modelo || 'Sin especificar';
+                        if (tipoAcc === 'Caja' && m.color) {
+                            nombreModelo = `${nombreModelo} ${m.color}`;
+                        }
+                        
                         if (!destino[tipoAcc][nombreModelo]) destino[tipoAcc][nombreModelo] = 0;
                         destino[tipoAcc][nombreModelo] += parseInt(m.cantidad) || 0;
                     });

@@ -571,12 +571,12 @@ class RegistroDiario {
                  // 1. ESTANDARIZAR LOS NOMBRES ANTES DE INICIALIZAR
                 if (tipoAcc === "Lightning") {
                     tipoAcc = "Cable Lightning";
-                    if (detalle === 'Sin especificar') detalle = "Estandar";
+                    if (detalle === 'Sin especificar') detalle = "Estándar";
                 } else if (tipoAcc === "USB-C a USB-C") {
                     tipoAcc = "Cable C+C";
-                    if (detalle === 'Sin especificar') detalle = "Estandar";
+                    if (detalle === 'Sin especificar') detalle = "Estándar";
                 } else if (tipoAcc === "Cargador") {
-                    if (detalle === 'Sin especificar') detalle = "Estandar";
+                    if (detalle === 'Sin especificar') detalle = "Estándar";
                 }
                 
                 const destino = tipoLower.includes('salida')

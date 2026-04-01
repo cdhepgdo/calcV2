@@ -568,6 +568,17 @@ class RegistroDiario {
                 const datos = movimiento.datos;
                 let tipoAcc = datos.tipo || 'Desconocido';
                 let detalle = datos.modelo || 'Sin especificar'; 
+                 // 1. ESTANDARIZAR LOS NOMBRES ANTES DE INICIALIZAR
+                if (tipoAcc === "Lightning") {
+                    tipoAcc = "Cable Lightning";
+                    if (detalle === 'Sin especificar') detalle = "Estandar";
+                } else if (tipoAcc === "USB-C a USB-C") {
+                    tipoAcc = "Cable C+C";
+                    if (detalle === 'Sin especificar') detalle = "Estandar";
+                } else if (tipoAcc === "Cargador") {
+                    if (detalle === 'Sin especificar') detalle = "Estandar";
+                }
+                
                 const destino = tipoLower.includes('salida')
                     ? dia.accesoriosSalidos
                     : dia.accesoriosIngresados;
@@ -592,16 +603,7 @@ class RegistroDiario {
                     });
                 } else {
                     // Si no tiene lista de modelos, agrupa bajo "Sin especificar"
-                    // aqui se puede agregar mas detalles de los accesorios
-                    if(tipoAcc === "Lightning"){
-                        tipoAcc = "Cable Lightning";
-                        detalle = "Estandar";
-                    }else if(tipoAcc === "USB-C a USB-C"){
-                        tipoAcc = "Cable C+C";
-                        detalle = "Estandar";
-                    }else if(tipoAcc === "Cargador"){
-                        detalle = "Estandar";
-                    }
+                    
                     if (!destino[tipoAcc][detalle]) destino[tipoAcc][detalle] = 0;
                     destino[tipoAcc][detalle] += parseInt(datos.cantidad) || 1;
                 }

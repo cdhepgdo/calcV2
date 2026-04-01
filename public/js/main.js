@@ -2372,7 +2372,7 @@ class App {
                 Object.assign(datosMovimiento, detalles);
                 break;
         }
-
+        console.log(datosMovimiento, tipo);
         // Retornar en el formato que espera el modelo Movimiento
         return {
             tipo: tipo,
@@ -2430,7 +2430,7 @@ class App {
                 detalles.descripcion = document.getElementById(`${prefijo}OtroDescripcion`)?.value || '';
                 break;
         }
-
+        console.log(detalles);
         return detalles;
     }
 

@@ -627,7 +627,7 @@ class RegistroDiario {
         // Vidrio
         if (acc.vidrio && acc.vidrioCantidad > 0) {
             const modelo = acc.vidrioModelo || 'Sin especificar';
-            this.agregarAccesorio(dia, 'Vidrio', modelo, acc.vidrioCantidad);
+            this.agregarAccesorio(dia, 'Vidrio Templado', modelo, acc.vidrioCantidad);
         }
 
         // Protector Cámara

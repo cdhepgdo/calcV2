@@ -566,7 +566,8 @@ class RegistroDiario {
             // Registrar accesorios movidos para el resumen visual
             if (tipoLower.includes('accesorio')) {
                 const datos = movimiento.datos;
-                const tipoAcc = datos.tipo || 'Desconocido';
+                let tipoAcc = datos.tipo || 'Desconocido';
+                let detalle = datos.modelo || 'Sin especificar'; 
                 const destino = tipoLower.includes('salida')
                     ? dia.accesoriosSalidos
                     : dia.accesoriosIngresados;
@@ -591,8 +592,18 @@ class RegistroDiario {
                     });
                 } else {
                     // Si no tiene lista de modelos, agrupa bajo "Sin especificar"
-                    if (!destino[tipoAcc]['Sin especificar']) destino[tipoAcc]['Sin especificar'] = 0;
-                    destino[tipoAcc]['Sin especificar'] += parseInt(datos.cantidad) || 1;
+                    // aqui se puede agregar mas detalles de los accesorios
+                    if(tipoAcc === "Lightning"){
+                        tipoAcc = "Cable Lightning";
+                        detalle = "Estandar";
+                    }else if(tipoAcc === "USB-C a USB-C"){
+                        tipoAcc = "Cable C+C";
+                        detalle = "Estandar";
+                    }else if(tipoAcc === "Cargador"){
+                        detalle = "Estandar";
+                    }
+                    if (!destino[tipoAcc][detalle]) destino[tipoAcc][detalle] = 0;
+                    destino[tipoAcc][detalle] += parseInt(datos.cantidad) || 1;
                 }
             }
         });

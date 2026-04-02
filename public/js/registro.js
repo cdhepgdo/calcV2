@@ -568,16 +568,25 @@ class RegistroDiario {
                 const datos = movimiento.datos;
                 let tipoAcc = datos.tipo || 'Desconocido';
                 let detalle = datos.modelo || 'Sin especificar'; 
+
+                
                  // 1. ESTANDARIZAR LOS NOMBRES ANTES DE INICIALIZAR
+                if (detalle.toLowerCase() === 'estandar' || detalle === 'Sin especificar') {
+                    detalle = 'Estándar';
+                }
+                
                 if (tipoAcc === "Lightning") {
                     tipoAcc = "Cable Lightning";
-                    if (detalle === 'Sin especificar') detalle = "Estándar";
                 } else if (tipoAcc === "USB-C a USB-C") {
                     tipoAcc = "Cable C+C";
-                    if (detalle === 'Sin especificar') detalle = "Estándar";
                 } else if (tipoAcc === "Cargador") {
                     if (detalle === 'Sin especificar') detalle = "Estándar";
                 }
+
+                // -> AQUI ESTA LA EDICIÓN PARA IDENTIFICAR MOVIMIENTOS DISTINTOS A VENTAS <-
+                // Si quisieras que el detalle diga "Estándar (Movimiento)" para diferenciarlo de "Estándar" (venta normal),
+                // solo basta con revisar si incluye "salida" y agregar el sufijo. Descomenta la siguiente línea para activarlo:
+                if (tipoLower.includes('salida')) detalle += ' (Por Movimiento)';
                 
                 const destino = tipoLower.includes('salida')
                     ? dia.accesoriosSalidos
@@ -597,13 +606,16 @@ class RegistroDiario {
                         if (tipoAcc === 'Caja' && m.color) {
                             nombreModelo = `${nombreModelo} ${m.color}`;
                         }
+
+                        // -> Lo mismo aplicaría si tienen múltiples modelos y quieres distinguirlos <-
+                        // Descomenta la siguiente línea para activarlo en multi-modelo:
+                        if (tipoLower.includes('salida')) nombreModelo += ' (Por Movimiento)';
                         
                         if (!destino[tipoAcc][nombreModelo]) destino[tipoAcc][nombreModelo] = 0;
                         destino[tipoAcc][nombreModelo] += parseInt(m.cantidad) || 0;
                     });
                 } else {
                     // Si no tiene lista de modelos, agrupa bajo "Sin especificar"
-                    
                     if (!destino[tipoAcc][detalle]) destino[tipoAcc][detalle] = 0;
                     destino[tipoAcc][detalle] += parseInt(datos.cantidad) || 1;
                 }

@@ -1167,39 +1167,39 @@ class RegistroDiario {
         URL.revokeObjectURL(url);
     }
 
-    function calcularPesoModelo(nombre) {
-    // 1. Extraemos el número principal del modelo
-    const match = nombre.match(/\d+/);
-    const numero = match ? parseInt(match[0]) : 0;
     
-    // Si no es un teléfono (ej: "Estándar", "Sin especificar") le damos peso máximo para que vaya al final
-    if (numero === 0) return { numero: 999, jerarquia: 0 }; 
-
-    // 2. Extraemos el sufijo
-    const sufijo = nombre.toLowerCase();
-    
-    // 3. Asignamos un peso de jerarquía según el estándar
-    let jerarquia = 1; // Base
-    if (sufijo.includes('pro max')) jerarquia = 4;
-    else if (sufijo.includes('pro')) jerarquia = 3;
-    else if (sufijo.includes('plus')) jerarquia = 2;
-    else if (sufijo.includes('mini')) jerarquia = 0; // Mini va antes del base
-
-    return { numero, jerarquia };
-}
-
-function ordenarModelosPro(a, b) {
-    const pesoA = calcularPesoModelo(a[0]);
-    const pesoB = calcularPesoModelo(b[0]);
-
-    if (pesoA.numero !== pesoB.numero) return pesoA.numero - pesoB.numero;
-    if (pesoA.jerarquia !== pesoB.jerarquia) return pesoA.jerarquia - pesoB.jerarquia;
-    
-    return a[0].localeCompare(b[0]);
-}
 
 }
-
+function calcularPesoModelo(nombre) {
+        // 1. Extraemos el número principal del modelo
+        const match = nombre.match(/\d+/);
+        const numero = match ? parseInt(match[0]) : 0;
+        
+        // Si no es un teléfono (ej: "Estándar", "Sin especificar") le damos peso máximo para que vaya al final
+        if (numero === 0) return { numero: 999, jerarquia: 0 }; 
+    
+        // 2. Extraemos el sufijo
+        const sufijo = nombre.toLowerCase();
+        
+        // 3. Asignamos un peso de jerarquía según el estándar
+        let jerarquia = 1; // Base
+        if (sufijo.includes('pro max')) jerarquia = 4;
+        else if (sufijo.includes('pro')) jerarquia = 3;
+        else if (sufijo.includes('plus')) jerarquia = 2;
+        else if (sufijo.includes('mini')) jerarquia = 0; // Mini va antes del base
+    
+        return { numero, jerarquia };
+    }
+    
+    function ordenarModelosPro(a, b) {
+        const pesoA = calcularPesoModelo(a[0]);
+        const pesoB = calcularPesoModelo(b[0]);
+    
+        if (pesoA.numero !== pesoB.numero) return pesoA.numero - pesoB.numero;
+        if (pesoA.jerarquia !== pesoB.jerarquia) return pesoA.jerarquia - pesoB.jerarquia;
+        
+        return a[0].localeCompare(b[0]);
+    }
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
     new RegistroDiario();

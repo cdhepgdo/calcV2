@@ -77,6 +77,10 @@
 ];*/
 const productos = [
   {
+    "nombre": "Apple Watch serie 9 41 mm sellado",
+    "usd": 319
+  },
+  {
     "nombre": "Apple Watch serie 9 41 mm open box",
     "usd": 279
   },
@@ -150,11 +154,11 @@ const productos = [
   },
   {
     "nombre": "Iphone 12 pro (128gb)",
-    "usd": 340
+    "usd": 320
   },
   {
     "nombre": "IPhone 12 pro (256gb)",
-    "usd": 380
+    "usd": 360
   },
   {
     "nombre": "IPhone 12 pro (512gb)",
@@ -162,15 +166,15 @@ const productos = [
   },
   {
     "nombre": "IPhone 12proMax128gb",
-    "usd": 399
+    "usd": 360
   },
   {
     "nombre": "IPhone 12proMax(256gb)",
-    "usd": 430
+    "usd": 380
   },
   {
     "nombre": "IPhone 12promax(512gb)",
-    "usd": 470
+    "usd": 430
   },
   {
     "nombre": "IPhone 13 ( 128gb)",
@@ -182,7 +186,7 @@ const productos = [
   },
   {
     "nombre": "IPhone 13 (256gb)",
-    "usd": 399
+    "usd": 390
   },
   {
     "nombre": "IPhone 13 (512gb)",
@@ -214,11 +218,11 @@ const productos = [
   },
   {
     "nombre": "IPhone 13 pro Max (512gb)",
-    "usd": 639
+    "usd": 625
   },
   {
     "nombre": "IPhone 13 pro Max (1TBgb)",
-    "usd": 669
+    "usd": 650
   },
   {
     "nombre": "IPhone 14 (128gb)",
@@ -242,11 +246,11 @@ const productos = [
   },
   {
     "nombre": "IPhone 14 pro(128gb)",
-    "usd": 509
+    "usd": 499
   },
   {
     "nombre": "IPhone 14 pro (256gb)",
-    "usd": 539
+    "usd": 519
   },
   {
     "nombre": "IPhone 14 pro (512gb)",
@@ -254,11 +258,11 @@ const productos = [
   },
   {
     "nombre": "IPhone 14 pro Max (128gb)",
-    "usd": 609
+    "usd": 599
   },
   {
     "nombre": "IPhone 14 pro Max (256gb)",
-    "usd": 645
+    "usd": 619
   },
   {
     "nombre": "IPhone 14 pro Max (512gb)",
@@ -266,7 +270,7 @@ const productos = [
   },
   {
     "nombre": "IPhone 15 (128gb)",
-    "usd": 499
+    "usd": 520
   },
   {
     "nombre": "IPhone 15 (256gb)",
@@ -278,7 +282,7 @@ const productos = [
   },
   {
     "nombre": "Iphone 15 plus (128gb)",
-    "usd": 590
+    "usd": 550
   },
   {
     "nombre": "Iphone 15 plus (256gb)",
@@ -286,67 +290,59 @@ const productos = [
   },
   {
     "nombre": "IPhone 15 pro (128gb)",
-    "usd": 630
+    "usd": 619
   },
   {
     "nombre": "IPhone 15 pro (256gb)",
-    "usd": 699
+    "usd": 650
   },
   {
     "nombre": "IPhone 15 pro Max (256gb)",
-    "usd": 799
+    "usd": 740
   },
   {
     "nombre": "Iphone 15 pro Max (512gb)",
-    "usd": 850
-  },
-  {
-    "nombre": "Iphone 15 pro Max (1TB)",
-    "usd": 940
-  },
-  {
-    "nombre": "IPhone 16 (128gb)",
-    "usd": 749
-  },
-  {
-    "nombre": "IPhone 16 (256gb)",
     "usd": 820
   },
   {
+    "nombre": "Iphone 15 pro Max (1TB)",
+    "usd": 850
+  },
+  {
+    "nombre": "IPhone 16 (128gb)",
+    "usd": 699
+  },
+  {
+    "nombre": "IPhone 16 (256gb)",
+    "usd": 629
+  },
+  {
     "nombre": "IPhone 16 PLUS (128gb)",
-    "usd": 750
+    "usd": 789
   },
   {
     "nombre": "IPhone 16 PLUS (256gb)",
-    "usd": 799
+    "usd": 810
   },
   {
     "nombre": "IPhone 16 pro (128gb)",
-    "usd": 869
+    "usd": 820
   },
   {
     "nombre": "IPhone 16 pro (256gb)",
-    "usd": 919
-  },
-  {
-    "nombre": "IPhone 16 pro (512)",
-    "usd": 1000
-  },
-  {
-    "nombre": "IPhone 16 pro (1TB)",
-    "usd": 1050
+    "usd": 899
   },
   {
     "nombre": "IPhone 16 pro Max (256gb)",
-    "usd": 980
+    "usd": 990
   },
   {
     "nombre": "IPhone 16 pro Max (256gb) 100%",
-    "usd": 1040
+    "usd": 1060
   },
   {
     "nombre": "IPhone 16 pro Max (512gb)",
-    "usd": 1050
+    "usd": 1030
   },
   {
     "nombre": "IPhone 16 pro Max (1TB)",
@@ -357,16 +353,36 @@ const productos = [
     "usd": 1090
   },
   {
-    "nombre": "Iphone 17 pro 256gb",
-    "usd": 1380
+    "nombre": "iphone 17 512",
+    "usd": 1340
+  },
+  {
+    "nombre": "Iphone 17 pro 256gb white",
+    "usd": 1420
+  },
+  {
+    "nombre": "Iphone 17 pro 256gb blue orange",
+    "usd": 1399
+  },
+  {
+    "nombre": "Iphone 17 pro 512gb",
+    "usd": 1640
   },
   {
     "nombre": "Iphone 17 pro Max 256gb",
+    "usd": 1540
+  },
+  {
+    "nombre": "Iphone 17 pro Max 256gb blue orange",
     "usd": 1520
   },
   {
+    "nombre": "Iphone 17 pro Max 512gb White",
+    "usd": 1790
+  },
+  {
     "nombre": "Iphone 17 pro Max 512gb",
-    "usd": 1759
+    "usd": 1750
   },
   {
     "nombre": "IPhone 17 pro Max 1TB",

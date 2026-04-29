@@ -180,15 +180,33 @@ class RegistroDiario {
 
     renderizar() {
         const periodo = parseInt(document.getElementById('filtroPeriodo').value);
-        const fechaFiltro = document.getElementById('filtroFecha').value;
+        //const fechaFiltro = document.getElementById('filtroFecha').value;
+        const fechaDesde = document.getElementById('filtroDesde').value;
+        const fechaHasta = document.getElementById('filtroHasta').value;
         
         let diasFiltrados = Array.from(this.registroPorDia.values());
 
-        // Filtrar por fecha específica
+        /* // Filtrar por fecha específica
         if (fechaFiltro) {
             const fechaBuscada = this.convertirFechaInput(fechaFiltro);
             diasFiltrados = diasFiltrados.filter(dia => dia.fecha === fechaBuscada);
+        } */
+        // Filtrar por rango de fechas
+        if (fechaDesde || fechaHasta) {
+            diasFiltrados = diasFiltrados.filter(dia => {
+                const fechaDia = this.parsearFecha(dia.fecha);
+                if (fechaDesde) {
+                    const desde = new Date(fechaDesde + 'T00:00:00');
+                    if (fechaDia < desde) return false;
+                }
+                if (fechaHasta) {
+                    const hasta = new Date(fechaHasta + 'T23:59:59');
+                    if (fechaDia > hasta) return false;
+                }
+                return true;
+            });
         }
+        
         // Filtrar por período
         else if (periodo !== 'todos') {
             const fechaLimite = new Date();
@@ -461,7 +479,13 @@ class RegistroDiario {
             this.renderizar();
         });
 
-        document.getElementById('filtroFecha').addEventListener('change', () => {
+        /* document.getElementById('filtroFecha').addEventListener('change', () => {
+            this.renderizar();
+        }); */
+        document.getElementById('filtroDesde').addEventListener('change', () => {
+            this.renderizar();
+        });
+        document.getElementById('filtroHasta').addEventListener('change', () => {
             this.renderizar();
         });
 

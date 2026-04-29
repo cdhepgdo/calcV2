@@ -54,9 +54,17 @@ class RegistroDiario {
             // Procesar accesorios de la venta
             this.procesarAccesorios(venta, dia);
 
-            dia.totalVentas += venta.montoTotal;
+            /* dia.totalVentas += venta.montoTotal;
             dia.totalIngresos += efectivo;
-            dia.cantidadVentas++;
+            dia.cantidadVentas++; */
+
+            // Solo sumar al total de ventas si NO es un abono
+            if (venta.tipoTransaccion !== 'abono') {
+                dia.totalVentas += venta.montoTotal;
+                dia.cantidadVentas++;
+            }
+            // Los abonos SÍ generan efectivo, así que esto se queda fuera del if
+            dia.totalIngresos += efectivo;
         });
 
         // Procesar movimientos
@@ -379,7 +387,7 @@ class RegistroDiario {
         return html;
     }
 
-    crearFilaOperacion(operacion) {
+    /* crearFilaOperacion(operacion) {
         const tipoBadge = operacion.tipo === 'venta' ? 'tipo-venta' : 'tipo-movimiento';
         const tipoTexto = operacion.tipo === 'venta' ? 'Venta' : 'Movimiento';
         
@@ -399,7 +407,37 @@ class RegistroDiario {
                 <td class="${montoClase}">${efectivoTexto}</td>
             </tr>
         `;
+    } */
+    crearFilaOperacion(operacion) {
+        let tipoBadge = operacion.tipo === 'venta' ? 'tipo-venta' : 'tipo-movimiento';
+        let tipoTexto = 'Movimiento';
+    
+        if (operacion.tipo === 'venta') {
+            if (operacion.detalles && operacion.detalles.tipoTransaccion === 'abono') {
+                tipoTexto = '💰 Abono';
+            } else {
+                tipoTexto = '💳 Venta';
+            }
+        }
+        
+        const montoClase = operacion.efectivo > 0 ? 'monto-positivo' : 
+                          operacion.efectivo < 0 ? 'monto-negativo' : 'monto-neutral';
+        
+        const efectivoTexto = operacion.efectivo !== 0 ? 
+            `${operacion.efectivo > 0 ? '+' : ''}$${operacion.efectivo.toFixed(2)}` : 
+            '-';
+    
+        return `
+            <tr>
+                <td>${operacion.hora}</td>
+                <td><span class="tipo-badge ${tipoBadge}">${tipoTexto}</span></td>
+                <td>${operacion.descripcion}</td>
+                <td class="monto-positivo">$${operacion.monto.toFixed(2)}</td>
+                <td class="${montoClase}">${efectivoTexto}</td>
+            </tr>
+        `;
     }
+
 
     parsearFecha(fechaStr) {
         // Convierte "DD/MM/YYYY" a objeto Date

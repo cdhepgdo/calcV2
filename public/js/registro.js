@@ -703,7 +703,9 @@ class RegistroDiario {
         }); */
         // AHORA: detecta QUÉ opción elegiste
         document.getElementById('filtroPeriodo').addEventListener('change', (e) => {
-            document.getElementById('filtroFecha').value = '';
+            //document.getElementById('filtroFecha').value = '';
+            document.getElementById('filtroDesde').value = '';
+            document.getElementById('filtroHasta').value = '';
             const div = document.getElementById('diasPersonalizadoDiv');
             if (e.target.value === 'personalizado') {
                 // Si eligió "Personalizado" → MUESTRA el campo y lo enfoca

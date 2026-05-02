@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro Diario - Sistema de Inventario</title>
     <link rel="stylesheet" href="css/registro.css">
 </head>
+
 <body>
     <!-- Menú de Navegación -->
-    <nav class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white shadow-lg">
+    <nav
+        class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white shadow-lg">
         <div class="flex gap-2" id="menuOptions">
             <a href="lista.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">LISTADO PRECIOS</a>
             <a href="intercambio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cálculo Trading</a>
@@ -17,7 +20,8 @@
             <a href="inv-precio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Inv</a>
         </div>
         <button id="menuToggle" class="hidden text-2xl focus:outline-none relative z-50">☰</button>
-        <div id="floatingMenu" class="hidden fixed bottom-20 right-6 bg-blue-700 text-white rounded-lg shadow-lg py-2 flex flex-col gap-1 z-40">
+        <div id="floatingMenu"
+            class="hidden fixed bottom-20 right-6 bg-blue-700 text-white rounded-lg shadow-lg py-2 flex flex-col gap-1 z-40">
             <a href="lista.html" class="px-4 py-2 hover:bg-blue-900 rounded">LISTADO PRECIOS</a>
             <a href="intercambio.html" class="px-4 py-2 hover:bg-blue-900 rounded">Cálculo Trading</a>
             <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Principal</a>
@@ -48,14 +52,13 @@
                     <option value="90">Últimos 90 días</option>
                     <option value="todos">Todos</option>
                     <!-- Ahora se agregó: -->
-                    <option value="personalizado">Personalizado...</option>  ← nueva opción
+                    <option value="personalizado">Personalizado...</option> ← nueva opción
                 </select>
                 </select>
 
                 <!-- Y este bloque NUEVO justo debajo del select: -->
                 <div id="diasPersonalizadoDiv" style="display:none;">
-                    <input type="number" id="diasPersonalizado" min="1" max="3650"
-                           placeholder="Cantidad de días" ...>
+                    <input type="number" id="diasPersonalizado" min="1" max="3650" placeholder="Cantidad de días" ...>
                 </div>
             </div>
             <div class="filtro-grupo">
@@ -98,5 +101,5 @@
 
     <script type="module" src="js/registro.js"></script>
 </body>
-</html>
 
+</html>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,10 +8,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-4">
-    
+
     <!-- Menú de Navegación -->
-    <nav class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white shadow-lg">
+    <nav
+        class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white shadow-lg">
         <div class="flex gap-2" id="menuOptions">
             <a href="lista.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">LISTADO PRECIOS</a>
             <a href="intercambio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cálculo Trading</a>
@@ -19,7 +22,8 @@
             <a href="inv-precio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Inv</a>
         </div>
         <button id="menuToggle" class="hidden text-2xl focus:outline-none relative z-50">☰</button>
-        <div id="floatingMenu" class="hidden fixed bottom-20 right-6 bg-blue-700 text-white rounded-lg shadow-lg py-2 flex flex-col gap-1 z-40">
+        <div id="floatingMenu"
+            class="hidden fixed bottom-20 right-6 bg-blue-700 text-white rounded-lg shadow-lg py-2 flex flex-col gap-1 z-40">
             <a href="lista.html" class="px-4 py-2 hover:bg-blue-900 rounded">LISTADO PRECIOS</a>
             <a href="intercambio.html" class="px-4 py-2 hover:bg-blue-900 rounded">Cálculo Trading</a>
             <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Principal</a>
@@ -45,9 +49,11 @@
             <div class="flex items-center gap-4">
                 <div class="flex-1">
                     <label class="block text-sm font-medium text-green-700 mb-2">Efectivo disponible ($)</label>
-                    <input type="number" id="cajaInicial" step="0.01" class="w-full p-3 border border-green-300 rounded-lg" placeholder="0.00">
+                    <input type="number" id="cajaInicial" step="0.01"
+                        class="w-full p-3 border border-green-300 rounded-lg" placeholder="0.00">
                 </div>
-                <button id="guardarCajaInicial" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition">
+                <button id="guardarCajaInicial"
+                    class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition">
                     💾 Guardar
                 </button>
             </div>
@@ -86,15 +92,18 @@
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Nombre y Apellido</label>
-                            <input type="text" id="clienteNombre" class="w-full p-3 border rounded-lg" placeholder="Nombre completo">
+                            <input type="text" id="clienteNombre" class="w-full p-3 border rounded-lg"
+                                placeholder="Nombre completo">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Cédula</label>
-                            <input type="text" id="clienteCedula" class="w-full p-3 border rounded-lg" placeholder="V-12345678">
+                            <input type="text" id="clienteCedula" class="w-full p-3 border rounded-lg"
+                                placeholder="V-12345678">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
-                            <input type="tel" id="clienteTelefono" class="w-full p-3 border rounded-lg" placeholder="0414-1234567">
+                            <input type="tel" id="clienteTelefono" class="w-full p-3 border rounded-lg"
+                                placeholder="0414-1234567">
                         </div>
                     </div>
                 </div>
@@ -118,11 +127,13 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">% Batería</label>
-                            <input type="number" id="bateria" min="1" max="100" class="w-full p-3 border rounded-lg" placeholder="85">
+                            <input type="number" id="bateria" min="1" max="100" class="w-full p-3 border rounded-lg"
+                                placeholder="85">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">IMEI</label>
-                            <input type="text" id="equipoImei" class="w-full p-3 border rounded-lg" placeholder="IMEI del equipo">
+                            <input type="text" id="equipoImei" class="w-full p-3 border rounded-lg"
+                                placeholder="IMEI del equipo">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Garantía</label>
@@ -141,9 +152,17 @@
                                 <input type="checkbox" id="forro" class="mr-3">
                                 <span class="font-medium">Forro</span>
                             </label>
-                            <div id="forroModelo" class="hidden grid grid-cols-2 gap-3">
-                                <select class="p-2 border rounded-lg accModelo"></select>
-                                <input type="number" min="1" value="1" class="p-2 border rounded-lg" placeholder="Cant.">
+                            <div id="forroContenedor" class="hidden flex-col gap-2">
+                                <div id="forroLista" class="flex flex-col gap-2">
+                                    <div
+                                        class="forro-item grid grid-cols-[repeat(auto-fill,minmax(52px,1fr))] gap-2 items-center">
+                                        <select class="p-2 border rounded-lg accModelo flex-1"></select>
+                                        <input type="number" min="1" value="1"
+                                            class="p-2 border rounded-lg w-20 forro-cant" placeholder="Cant.">
+                                        <button type="button"
+                                            class="btn-add-forro bg-green-500 text-white w-8 h-8 rounded font-bold hover:bg-green-600 transition">+</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -154,7 +173,8 @@
                                 <span class="font-medium">Cargador</span>
                             </label>
                             <div id="cargadorCantidad" class="hidden">
-                                <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg" placeholder="Cant.">
+                                <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg"
+                                    placeholder="Cant.">
                             </div>
                         </div>
 
@@ -164,9 +184,17 @@
                                 <input type="checkbox" id="vidrio" class="mr-3">
                                 <span class="font-medium">Vidrio</span>
                             </label>
-                            <div id="vidrioModelo" class="hidden grid grid-cols-2 gap-3">
-                                <select class="p-2 border rounded-lg accModelo"></select>
-                                <input type="number" min="1" value="1" class="p-2 border rounded-lg" placeholder="Cant.">
+                            <div id="vidrioContenedor" class="hidden flex-col gap-2">
+                                <div id="vidrioLista" class="flex flex-col gap-2">
+                                    <div
+                                        class="vidrio-item grid grid-cols-[repeat(auto-fill,minmax(52px,1fr))] gap-2 items-center">
+                                        <select class="p-2 border rounded-lg accModelo flex-1"></select>
+                                        <input type="number" min="1" value="1"
+                                            class="p-2 border rounded-lg w-20 vidrio-cant" placeholder="Cant.">
+                                        <button type="button"
+                                            class="btn-add-vidrio bg-green-500 text-white w-8 h-8 rounded font-bold hover:bg-green-600 transition">+</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -177,7 +205,8 @@
                                 <span class="font-medium">Protector Cámara</span>
                             </label>
                             <div id="protectorCantidad" class="hidden">
-                                <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg" placeholder="Cant.">
+                                <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg"
+                                    placeholder="Cant.">
                             </div>
                         </div>
 
@@ -188,7 +217,8 @@
                                 <span class="font-medium">Cubo</span>
                             </label>
                             <div id="cuboCantidad" class="hidden">
-                                <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg" placeholder="Cant.">
+                                <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg"
+                                    placeholder="Cant.">
                             </div>
                         </div>
 
@@ -199,7 +229,8 @@
                                 <span class="font-medium">Cable Lightning</span>
                             </label>
                             <div id="cableLightningCantidad" class="hidden">
-                                <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg" placeholder="Cant.">
+                                <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg"
+                                    placeholder="Cant.">
                             </div>
                         </div>
 
@@ -210,7 +241,8 @@
                                 <span class="font-medium">Cable C+C</span>
                             </label>
                             <div id="cableCCCantidad" class="hidden">
-                                <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg" placeholder="Cant.">
+                                <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg"
+                                    placeholder="Cant.">
                             </div>
                         </div>
 
@@ -221,9 +253,30 @@
                                 <span class="font-medium">Caja</span>
                             </label>
                             <div id="cajaModelo" class="hidden grid grid-cols-3 gap-3">
-                                <select class="p-2 border rounded-lg accModelo"></select>
-                                <select id="cajaColorSelect" class="p-2 border rounded-lg"></select>
-                                <input type="number" min="1" value="1" class="p-2 border rounded-lg" placeholder="Cant.">
+                                <select class="p-2 border rounded-lg accModelo flex-1"></select>
+                                <select id="cajaColorSelect" class="p-2 border rounded-lg flex-1"></select>
+                                <input type="number" min="1" value="1" class="p-2 border rounded-lg w-full"
+                                    placeholder="Cant.">
+                            </div>
+                        </div>
+
+                        <!-- Otro Accesorio -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <label class="flex items-center mb-3">
+                                <input type="checkbox" id="otroAccesorio" class="mr-3">
+                                <span class="font-medium">Otro Accesorio</span>
+                            </label>
+                            <div id="otroContenedor" class="hidden flex-col gap-2">
+                                <div id="otroLista" class="flex flex-col gap-2">
+                                    <div class="otro-item grid grid-cols-[1fr,auto,auto] gap-2 items-center">
+                                        <input type="text" class="p-2 border rounded-lg flex-1 otro-nombre"
+                                            placeholder="¿Qué es?">
+                                        <input type="number" min="1" value="1"
+                                            class="p-2 border rounded-lg w-20 otro-cant" placeholder="Cant.">
+                                        <button type="button"
+                                            class="btn-add-otro bg-green-500 text-white w-8 h-8 rounded font-bold hover:bg-green-600 transition">+</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -243,7 +296,8 @@
                         <h3 class="font-semibold mb-3 text-green-800">💵 Pago en Efectivo</h3>
                         <div>
                             <label class="block text-sm font-medium mb-2">Monto en Efectivo ($)</label>
-                            <input type="number" id="efectivoMonto" step="0.01" class="w-full p-3 border rounded-lg text-lg" placeholder="0.00">
+                            <input type="number" id="efectivoMonto" step="0.01"
+                                class="w-full p-3 border rounded-lg text-lg" placeholder="0.00">
                         </div>
                     </div>
 
@@ -252,7 +306,8 @@
                         <h3 class="font-semibold mb-3 text-blue-800">💰 Pago por Zelle</h3>
                         <div>
                             <label class="block text-sm font-medium mb-2">Monto en Dólares ($)</label>
-                            <input type="number" id="zelleMonto" step="0.01" class="w-full p-3 border rounded-lg text-lg" placeholder="0.00">
+                            <input type="number" id="zelleMonto" step="0.01"
+                                class="w-full p-3 border rounded-lg text-lg" placeholder="0.00">
                         </div>
                     </div>
 
@@ -261,7 +316,8 @@
                         <h3 class="font-semibold mb-3 text-yellow-800">🪙 Pago por Binance</h3>
                         <div>
                             <label class="block text-sm font-medium mb-2">Monto en Dólares ($)</label>
-                            <input type="number" id="binanceMonto" step="0.01" class="w-full p-3 border rounded-lg text-lg" placeholder="0.00">
+                            <input type="number" id="binanceMonto" step="0.01"
+                                class="w-full p-3 border rounded-lg text-lg" placeholder="0.00">
                         </div>
                     </div>
 
@@ -271,51 +327,62 @@
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm mb-1">Efectivo ($)</label>
-                                <input type="number" id="montoEfectivo" step="0.01" class="w-full p-2 border rounded-lg" placeholder="0.00">
+                                <input type="number" id="montoEfectivo" step="0.01" class="w-full p-2 border rounded-lg"
+                                    placeholder="0.00">
                             </div>
                             <div>
                                 <label class="block text-sm mb-1">Zelle ($)</label>
-                                <input type="number" id="montoZelle" step="0.01" class="w-full p-2 border rounded-lg" placeholder="0.00">
+                                <input type="number" id="montoZelle" step="0.01" class="w-full p-2 border rounded-lg"
+                                    placeholder="0.00">
                             </div>
                             <div>
                                 <label class="block text-sm mb-1">Binance ($)</label>
-                                <input type="number" id="montoBinance" step="0.01" class="w-full p-2 border rounded-lg" placeholder="0.00">
+                                <input type="number" id="montoBinance" step="0.01" class="w-full p-2 border rounded-lg"
+                                    placeholder="0.00">
                             </div>
-                            
+
                             <!-- Pago Móvil con detalles -->
                             <div class="md:col-span-2 bg-purple-50 p-3 rounded-lg">
                                 <label class="block text-sm font-medium mb-2">💳 Pago Móvil</label>
                                 <div class="grid md:grid-cols-3 gap-3">
                                     <div>
                                         <label class="block text-xs mb-1">Dólares ($)</label>
-                                        <input type="number" id="montoPagoMovilDolares" step="0.01" class="w-full p-2 border rounded-lg text-sm" placeholder="0.00">
+                                        <input type="number" id="montoPagoMovilDolares" step="0.01"
+                                            class="w-full p-2 border rounded-lg text-sm" placeholder="0.00">
                                     </div>
                                     <div>
                                         <label class="block text-xs mb-1">Tasa (Bs/$)</label>
-                                        <input type="number" id="montoPagoMovilTasa" step="0.01" class="w-full p-2 border rounded-lg text-sm" placeholder="0.00">
+                                        <input type="number" id="montoPagoMovilTasa" step="0.01"
+                                            class="w-full p-2 border rounded-lg text-sm" placeholder="0.00">
                                     </div>
                                     <div>
                                         <label class="block text-xs mb-1">Bolívares (Bs)</label>
-                                        <input type="number" id="montoPagoMovilBolivares" step="0.01" class="w-full p-2 border rounded-lg text-sm bg-gray-100" placeholder="0.00" readonly>
+                                        <input type="number" id="montoPagoMovilBolivares" step="0.01"
+                                            class="w-full p-2 border rounded-lg text-sm bg-gray-100" placeholder="0.00"
+                                            readonly>
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <!-- Transferencia con detalles -->
                             <div class="md:col-span-2 bg-indigo-50 p-3 rounded-lg">
                                 <label class="block text-sm font-medium mb-2">🏦 Transferencia</label>
                                 <div class="grid md:grid-cols-3 gap-3">
                                     <div>
                                         <label class="block text-xs mb-1">Dólares ($)</label>
-                                        <input type="number" id="montoTransferenciaDolares" step="0.01" class="w-full p-2 border rounded-lg text-sm" placeholder="0.00">
+                                        <input type="number" id="montoTransferenciaDolares" step="0.01"
+                                            class="w-full p-2 border rounded-lg text-sm" placeholder="0.00">
                                     </div>
                                     <div>
                                         <label class="block text-xs mb-1">Tasa (Bs/$)</label>
-                                        <input type="number" id="montoTransferenciaTasa" step="0.01" class="w-full p-2 border rounded-lg text-sm" placeholder="0.00">
+                                        <input type="number" id="montoTransferenciaTasa" step="0.01"
+                                            class="w-full p-2 border rounded-lg text-sm" placeholder="0.00">
                                     </div>
                                     <div>
                                         <label class="block text-xs mb-1">Bolívares (Bs)</label>
-                                        <input type="number" id="montoTransferenciaBolivares" step="0.01" class="w-full p-2 border rounded-lg text-sm bg-gray-100" placeholder="0.00" readonly>
+                                        <input type="number" id="montoTransferenciaBolivares" step="0.01"
+                                            class="w-full p-2 border rounded-lg text-sm bg-gray-100" placeholder="0.00"
+                                            readonly>
                                     </div>
                                 </div>
                             </div>
@@ -331,15 +398,18 @@
                         <div class="grid md:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-sm mb-1">Dólares ($)</label>
-                                <input type="number" id="pagomovilDolares" step="0.01" class="w-full p-2 border rounded-lg">
+                                <input type="number" id="pagomovilDolares" step="0.01"
+                                    class="w-full p-2 border rounded-lg">
                             </div>
                             <div>
                                 <label class="block text-sm mb-1">Bolívares (Bs)</label>
-                                <input type="number" id="pagomovilBolivares" step="0.01" class="w-full p-2 border rounded-lg">
+                                <input type="number" id="pagomovilBolivares" step="0.01"
+                                    class="w-full p-2 border rounded-lg">
                             </div>
                             <div>
                                 <label class="block text-sm mb-1">Tasa (Bs/$)</label>
-                                <input type="number" id="pagomovilTasa" step="0.01" class="w-full p-2 border rounded-lg">
+                                <input type="number" id="pagomovilTasa" step="0.01"
+                                    class="w-full p-2 border rounded-lg">
                             </div>
                         </div>
                     </div>
@@ -350,15 +420,18 @@
                         <div class="grid md:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-sm mb-1">Dólares ($)</label>
-                                <input type="number" id="transferenciaDolares" step="0.01" class="w-full p-2 border rounded-lg">
+                                <input type="number" id="transferenciaDolares" step="0.01"
+                                    class="w-full p-2 border rounded-lg">
                             </div>
                             <div>
                                 <label class="block text-sm mb-1">Bolívares (Bs)</label>
-                                <input type="number" id="transferenciaBolivares" step="0.01" class="w-full p-2 border rounded-lg">
+                                <input type="number" id="transferenciaBolivares" step="0.01"
+                                    class="w-full p-2 border rounded-lg">
                             </div>
                             <div>
                                 <label class="block text-sm mb-1">Tasa (Bs/$)</label>
-                                <input type="number" id="transferenciaTasa" step="0.01" class="w-full p-2 border rounded-lg">
+                                <input type="number" id="transferenciaTasa" step="0.01"
+                                    class="w-full p-2 border rounded-lg">
                             </div>
                         </div>
                     </div>
@@ -411,7 +484,8 @@
                             </div>
                             <div>
                                 <label class="block text-sm mb-2">% Batería</label>
-                                <input type="number" id="equipoBateria" min="1" max="100" class="w-full p-3 border rounded-lg">
+                                <input type="number" id="equipoBateria" min="1" max="100"
+                                    class="w-full p-3 border rounded-lg">
                             </div>
                             <div>
                                 <label class="block text-sm mb-2">IMEI</label>
@@ -423,7 +497,8 @@
                             </div>
                             <div class="md:col-span-2">
                                 <label class="block text-sm mb-2">Comentarios</label>
-                                <textarea id="equipoComentarios" rows="3" class="w-full p-3 border rounded-lg"></textarea>
+                                <textarea id="equipoComentarios" rows="3"
+                                    class="w-full p-3 border rounded-lg"></textarea>
                             </div>
                         </div>
                     </div>
@@ -432,7 +507,7 @@
                 <!-- Después de la sección de Equipo Recibido -->
                 <div id="cambioGarantiaForm" class="hidden bg-green-50 p-6 rounded-lg border-2 border-green-200">
                     <h3 class="text-xl font-bold text-gray-800 mb-4">🔄 Cambio por Garantía</h3>
-                    
+
                     <!-- Equipo Defectuoso (Recibido) -->
                     <div class="bg-red-50 p-4 rounded-lg mb-4 border border-red-200">
                         <h4 class="font-semibold text-red-800 mb-3">📱❌ Equipo Defectuoso (Recibido)</h4>
@@ -462,7 +537,8 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">% Batería</label>
-                                <input type="number" id="defectuosoBateria" min="0" max="100" class="w-full p-2 border rounded-lg">
+                                <input type="number" id="defectuosoBateria" min="0" max="100"
+                                    class="w-full p-2 border rounded-lg">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
@@ -470,12 +546,12 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Problema Reportado</label>
-                                <textarea id="defectuosoProblema" rows="2" class="w-full p-2 border rounded-lg" 
+                                <textarea id="defectuosoProblema" rows="2" class="w-full p-2 border rounded-lg"
                                     placeholder="Ej: No enciende, pantalla rota, etc."></textarea>
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Equipo Nuevo (Entregado) -->
                     <div class="bg-green-100 p-4 rounded-lg border border-green-300">
                         <h4 class="font-semibold text-green-800 mb-3">📱✅ Equipo Nuevo (Entregado)</h4>
@@ -505,7 +581,8 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">% Batería</label>
-                                <input type="number" id="nuevoBateria" min="0" max="100" class="w-full p-2 border rounded-lg">
+                                <input type="number" id="nuevoBateria" min="0" max="100"
+                                    class="w-full p-2 border rounded-lg">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
@@ -513,7 +590,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Diferencia de Dinero -->
                     <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-300 mt-4">
                         <h4 class="font-semibold text-yellow-800 mb-3">💵 Diferencia de Precio (Opcional)</h4>
@@ -528,7 +605,8 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Monto ($)</label>
-                                <input type="number" id="montoDiferencia" step="0.01" min="0" value="0" class="w-full p-2 border rounded-lg" disabled>
+                                <input type="number" id="montoDiferencia" step="0.01" min="0" value="0"
+                                    class="w-full p-2 border rounded-lg" disabled>
                             </div>
                         </div>
                         <p class="text-xs text-gray-600 mt-2">
@@ -565,7 +643,8 @@
                         </label>
                     </div>
                     <div id="abonoInfo" class="hidden mt-3 p-3 bg-orange-50 rounded-lg">
-                        <p class="text-sm text-orange-800">⚠️ <strong>Abono:</strong> No se incluirá en el total de ventas del día</p>
+                        <p class="text-sm text-orange-800">⚠️ <strong>Abono:</strong> No se incluirá en el total de
+                            ventas del día</p>
                     </div>
                     <div id="notaVentaInfo" class="hidden mt-3">
                         <label class="block text-sm mb-1">Detalles de la Nota</label>
@@ -574,9 +653,10 @@
                 </div>
 
                 <!-- Monto Total (Calculado Automáticamente) -->
-                <div id="montoTotalSection" class="bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-xl p-6 shadow-lg">
+                <div id="montoTotalSection"
+                    class="bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-xl p-6 shadow-lg">
                     <h2 class="text-2xl font-bold mb-4">💰 Monto Total de la Venta</h2>
-                    
+
                     <div class="bg-white bg-opacity-20 rounded-lg p-4 mb-3">
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-sm">Pago en efectivo/digital:</span>
@@ -587,41 +667,49 @@
                             <span class="text-xl font-bold" id="subtotalEquipo">$0.00</span>
                         </div>
                     </div>
-                    
-                    <div class="flex justify-between items-center border-t-2 border-white pt-3" id="totalCalculadoDisplay">
+
+                    <div class="flex justify-between items-center border-t-2 border-white pt-3"
+                        id="totalCalculadoDisplay">
                         <span class="text-lg font-semibold">TOTAL:</span>
                         <span class="text-3xl font-bold" id="montoTotalDisplay">$0.00</span>
                     </div>
-                    
+
                     <!-- Campo editable para WEPPA (ventas a crédito) -->
                     <div id="weppaMontoEditable" class="hidden border-t-2 border-white pt-3 mt-3">
                         <div class="bg-yellow-400 bg-opacity-30 rounded-lg p-3 mb-3">
                             <p class="text-sm">⚠️ <strong>WEPPA Activo (Venta a Crédito):</strong></p>
-                            <p class="text-xs mt-1">• <strong>Inicial:</strong> Lo que el cliente paga HOY (efectivo/digital + equipo recibido)</p>
-                            <p class="text-xs">• <strong>Total Final:</strong> El precio real del equipo (lo que debe en total)</p>
+                            <p class="text-xs mt-1">• <strong>Inicial:</strong> Lo que el cliente paga HOY
+                                (efectivo/digital + equipo recibido)</p>
+                            <p class="text-xs">• <strong>Total Final:</strong> El precio real del equipo (lo que debe en
+                                total)</p>
                         </div>
                         <div class="bg-white bg-opacity-20 rounded-lg p-3 mb-3">
                             <div class="flex justify-between items-center">
-                                <span class="text-sm font-semibold">WEPPA (Inicial $<span id="weppaInicial">0.00</span>)</span>
+                                <span class="text-sm font-semibold">WEPPA (Inicial $<span
+                                        id="weppaInicial">0.00</span>)</span>
                                 <span class="text-lg font-bold">Pago HOY</span>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
                             <label class="text-sm font-semibold">Monto Total Final:</label>
-                            <input type="number" id="montoTotalManual" step="0.01" class="flex-1 p-3 text-2xl font-bold text-gray-800 border-2 border-white rounded-lg" placeholder="0.00">
+                            <input type="number" id="montoTotalManual" step="0.01"
+                                class="flex-1 p-3 text-2xl font-bold text-gray-800 border-2 border-white rounded-lg"
+                                placeholder="0.00">
                         </div>
                     </div>
-                    
+
                     <!-- Campo oculto para enviar el total -->
                     <input type="hidden" id="montoTotal" name="montoTotal">
                 </div>
 
                 <!-- Botones -->
                 <div class="flex gap-4 pt-6">
-                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition">
+                    <button type="submit"
+                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition">
                         ✅ Registrar Venta
                     </button>
-                    <button type="button" id="limpiarForm" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition">
+                    <button type="button" id="limpiarForm"
+                        class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition">
                         🗑️ Limpiar
                     </button>
                 </div>
@@ -632,30 +720,37 @@
         <!-- Movimientos de Inventario -->
         <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">📦 Movimientos de Inventario</h2>
-            
+
             <!-- Selector de Tipo de Movimiento -->
             <div class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-3">Tipo de Movimiento</label>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <button type="button" id="btnSalidaEfectivo" class="movimiento-btn bg-red-100 hover:bg-red-200 text-red-800 p-3 rounded-lg border-2 border-transparent transition-all">
+                    <button type="button" id="btnSalidaEfectivo"
+                        class="movimiento-btn bg-red-100 hover:bg-red-200 text-red-800 p-3 rounded-lg border-2 border-transparent transition-all">
                         💸 Salida Efectivo
                     </button>
-                    <button type="button" id="btnIngresoEfectivo" class="movimiento-btn bg-green-100 hover:bg-green-200 text-green-800 p-3 rounded-lg border-2 border-transparent transition-all">
+                    <button type="button" id="btnIngresoEfectivo"
+                        class="movimiento-btn bg-green-100 hover:bg-green-200 text-green-800 p-3 rounded-lg border-2 border-transparent transition-all">
                         💵 Ingreso Efectivo
                     </button>
-                    <button type="button" id="btnSalidaEquipo" class="movimiento-btn bg-orange-100 hover:bg-orange-200 text-orange-800 p-3 rounded-lg border-2 border-transparent transition-all">
+                    <button type="button" id="btnSalidaEquipo"
+                        class="movimiento-btn bg-orange-100 hover:bg-orange-200 text-orange-800 p-3 rounded-lg border-2 border-transparent transition-all">
                         📱➡️ Salida Equipo
                     </button>
-                    <button type="button" id="btnIngresoEquipo" class="movimiento-btn bg-teal-100 hover:bg-teal-200 text-teal-800 p-3 rounded-lg border-2 border-transparent transition-all">
+                    <button type="button" id="btnIngresoEquipo"
+                        class="movimiento-btn bg-teal-100 hover:bg-teal-200 text-teal-800 p-3 rounded-lg border-2 border-transparent transition-all">
                         📱⬅️ Ingreso Equipo
                     </button>
-                    <button type="button" id="btnSalidaAccesorio" class="movimiento-btn bg-yellow-100 hover:bg-yellow-200 text-yellow-800 p-3 rounded-lg border-2 border-transparent transition-all">
+                    <button type="button" id="btnSalidaAccesorio"
+                        class="movimiento-btn bg-yellow-100 hover:bg-yellow-200 text-yellow-800 p-3 rounded-lg border-2 border-transparent transition-all">
                         🛡️➡️ Salida Accesorio
                     </button>
-                    <button type="button" id="btnIngresoAccesorio" class="movimiento-btn bg-purple-100 hover:bg-purple-200 text-purple-800 p-3 rounded-lg border-2 border-transparent transition-all">
+                    <button type="button" id="btnIngresoAccesorio"
+                        class="movimiento-btn bg-purple-100 hover:bg-purple-200 text-purple-800 p-3 rounded-lg border-2 border-transparent transition-all">
                         🛡️⬅️ Ingreso Accesorio
                     </button>
-                    <button type="button" id="btnCompraEquipo" class="movimiento-btn bg-green-100 hover:bg-green-200 text-green-800 p-3 rounded-lg border-2 border-transparent transition-all">
+                    <button type="button" id="btnCompraEquipo"
+                        class="movimiento-btn bg-green-100 hover:bg-green-200 text-green-800 p-3 rounded-lg border-2 border-transparent transition-all">
                         📱⬅️ Compra Equipo
                     </button>
                 </div>
@@ -669,15 +764,18 @@
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Monto ($)</label>
-                            <input type="number" id="salidaEfectivoMonto" step="0.01" class="w-full p-2 border rounded-lg" placeholder="0.00">
+                            <input type="number" id="salidaEfectivoMonto" step="0.01"
+                                class="w-full p-2 border rounded-lg" placeholder="0.00">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Persona que retira</label>
-                            <input type="text" id="salidaEfectivoPersona" class="w-full p-2 border rounded-lg" placeholder="Nombre completo">
+                            <input type="text" id="salidaEfectivoPersona" class="w-full p-2 border rounded-lg"
+                                placeholder="Nombre completo">
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Motivo/Nota</label>
-                            <textarea id="salidaEfectivoNota" rows="2" class="w-full p-2 border rounded-lg" placeholder="Descripción del motivo"></textarea>
+                            <textarea id="salidaEfectivoNota" rows="2" class="w-full p-2 border rounded-lg"
+                                placeholder="Descripción del motivo"></textarea>
                         </div>
                     </div>
                 </div>
@@ -688,11 +786,13 @@
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Monto ($)</label>
-                            <input type="number" id="ingresoEfectivoMonto" step="0.01" class="w-full p-2 border rounded-lg" placeholder="0.00">
+                            <input type="number" id="ingresoEfectivoMonto" step="0.01"
+                                class="w-full p-2 border rounded-lg" placeholder="0.00">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Motivo/Nota</label>
-                            <textarea id="ingresoEfectivoNota" rows="2" class="w-full p-2 border rounded-lg" placeholder="Descripción del ingreso"></textarea>
+                            <textarea id="ingresoEfectivoNota" rows="2" class="w-full p-2 border rounded-lg"
+                                placeholder="Descripción del ingreso"></textarea>
                         </div>
                     </div>
                 </div>
@@ -722,11 +822,13 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">% Batería</label>
-                            <input type="number" id="salidaEquipoBateria" min="1" max="100" class="w-full p-2 border rounded-lg" placeholder="85">
+                            <input type="number" id="salidaEquipoBateria" min="1" max="100"
+                                class="w-full p-2 border rounded-lg" placeholder="85">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
-                            <input type="text" id="salidaEquipoImei" class="w-full p-2 border rounded-lg" placeholder="Número IMEI">
+                            <input type="text" id="salidaEquipoImei" class="w-full p-2 border rounded-lg"
+                                placeholder="Número IMEI">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Destino</label>
@@ -740,15 +842,18 @@
                         </div>
                         <div id="salidaEquipoDestinoPersonalizadoDiv" class="hidden">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Destino Personalizado</label>
-                            <input type="text" id="salidaEquipoDestinoPersonalizado" class="w-full p-2 border rounded-lg" placeholder="Especificar destino">
+                            <input type="text" id="salidaEquipoDestinoPersonalizado"
+                                class="w-full p-2 border rounded-lg" placeholder="Especificar destino">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Persona que retira</label>
-                            <input type="text" id="salidaEquipoPersona" class="w-full p-2 border rounded-lg" placeholder="Nombre completo">
+                            <input type="text" id="salidaEquipoPersona" class="w-full p-2 border rounded-lg"
+                                placeholder="Nombre completo">
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Notas adicionales</label>
-                            <textarea id="salidaEquipoNota" rows="2" class="w-full p-2 border rounded-lg" placeholder="Detalles adicionales"></textarea>
+                            <textarea id="salidaEquipoNota" rows="2" class="w-full p-2 border rounded-lg"
+                                placeholder="Detalles adicionales"></textarea>
                         </div>
                     </div>
                 </div>
@@ -778,11 +883,13 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
-                            <input type="text" id="ingresoEquipoImei" class="w-full p-2 border rounded-lg" placeholder="Número IMEI">
+                            <input type="text" id="ingresoEquipoImei" class="w-full p-2 border rounded-lg"
+                                placeholder="Número IMEI">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">% Batería</label>
-                            <input type="number" id="ingresoEquipoBateria" min="1" max="100" class="w-full p-2 border rounded-lg" placeholder="85">
+                            <input type="number" id="ingresoEquipoBateria" min="1" max="100"
+                                class="w-full p-2 border rounded-lg" placeholder="85">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Origen/Procedencia</label>
@@ -798,11 +905,13 @@
                         </div>
                         <div id="ingresoEquipoOrigenPersonalizadoDiv" class="hidden">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Origen Personalizado</label>
-                            <input type="text" id="ingresoEquipoOrigenPersonalizado" class="w-full p-2 border rounded-lg" placeholder="Especificar origen">
+                            <input type="text" id="ingresoEquipoOrigenPersonalizado"
+                                class="w-full p-2 border rounded-lg" placeholder="Especificar origen">
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Notas adicionales</label>
-                            <textarea id="ingresoEquipoNota" rows="2" class="w-full p-2 border rounded-lg" placeholder="Detalles adicionales"></textarea>
+                            <textarea id="ingresoEquipoNota" rows="2" class="w-full p-2 border rounded-lg"
+                                placeholder="Detalles adicionales"></textarea>
                         </div>
                     </div>
                 </div>
@@ -832,19 +941,23 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">% Batería</label>
-                            <input type="number" id="compraEquipoBateria" min="1" max="100" class="w-full p-2 border rounded-lg" placeholder="85">
+                            <input type="number" id="compraEquipoBateria" min="1" max="100"
+                                class="w-full p-2 border rounded-lg" placeholder="85">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
-                            <input type="text" id="compraEquipoImei" class="w-full p-2 border rounded-lg" placeholder="Número IMEI">
+                            <input type="text" id="compraEquipoImei" class="w-full p-2 border rounded-lg"
+                                placeholder="Número IMEI">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Precio de Compra ($)</label>
-                            <input type="number" id="compraEquipoPrecio" step="0.01" class="w-full p-2 border rounded-lg" placeholder="0.00">
+                            <input type="number" id="compraEquipoPrecio" step="0.01"
+                                class="w-full p-2 border rounded-lg" placeholder="0.00">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor/Vendedor</label>
-                            <input type="text" id="compraEquipoProveedor" class="w-full p-2 border rounded-lg" placeholder="Nombre del vendedor">
+                            <input type="text" id="compraEquipoProveedor" class="w-full p-2 border rounded-lg"
+                                placeholder="Nombre del vendedor">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Estado del Equipo</label>
@@ -859,7 +972,8 @@
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
-                            <textarea id="compraEquipoNota" rows="2" class="w-full p-2 border rounded-lg" placeholder="Detalles del estado, accesorios incluidos, etc."></textarea>
+                            <textarea id="compraEquipoNota" rows="2" class="w-full p-2 border rounded-lg"
+                                placeholder="Detalles del estado, accesorios incluidos, etc."></textarea>
                         </div>
                     </div>
                 </div>
@@ -894,7 +1008,8 @@
                         </div>
                         <div id="salidaAccesorioDestinoPersonalizadoDiv" class="hidden md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Destino Personalizado</label>
-                            <input type="text" id="salidaAccesorioDestinoPersonalizado" class="w-full p-2 border rounded-lg" placeholder="Especificar destino">
+                            <input type="text" id="salidaAccesorioDestinoPersonalizado"
+                                class="w-full p-2 border rounded-lg" placeholder="Especificar destino">
                         </div>
                     </div>
                     <div id="salidaAccesorioDetalles" class="mt-4"></div>
@@ -920,7 +1035,8 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
-                            <input type="text" id="ingresoAccesorioProveedor" class="w-full p-2 border rounded-lg" placeholder="Nombre del proveedor">
+                            <input type="text" id="ingresoAccesorioProveedor" class="w-full p-2 border rounded-lg"
+                                placeholder="Nombre del proveedor">
                         </div>
                     </div>
                     <div id="ingresoAccesorioDetalles" class="mt-4"></div>
@@ -928,10 +1044,12 @@
 
                 <!-- Botones de Acción -->
                 <div class="flex gap-4 mt-6">
-                    <button type="button" id="guardarMovimiento" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition">
+                    <button type="button" id="guardarMovimiento"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition">
                         ✅ Registrar Movimiento
                     </button>
-                    <button type="button" id="cancelarMovimiento" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg transition">
+                    <button type="button" id="cancelarMovimiento"
+                        class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg transition">
                         ❌ Cancelar
                     </button>
                 </div>
@@ -952,11 +1070,13 @@
                     <p class="text-lg font-semibold text-blue-800">📱 Equipos: <span id="equiposVendidos">0</span></p>
                 </div>
                 <div class="p-4 bg-purple-50 rounded-lg">
-                    <p class="text-lg font-semibold text-purple-800">🏦 Caja Final: $<span id="cajaFinal">0.00</span></p>
+                    <p class="text-lg font-semibold text-purple-800">🏦 Caja Final: $<span id="cajaFinal">0.00</span>
+                    </p>
                 </div>
             </div>
             <div class="text-center">
-                <button onclick="app.imprimirResumenDia()" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-lg transition">
+                <button onclick="app.imprimirResumenDia()"
+                    class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-lg transition">
                     🖨️ Imprimir Resumen del Día
                 </button>
             </div>
@@ -974,5 +1094,5 @@
     <!-- Cargar módulos JavaScript -->
     <script type="module" src="js/main.js"></script>
 </body>
-</html>
 
+</html>

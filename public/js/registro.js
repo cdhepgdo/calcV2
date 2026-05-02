@@ -123,14 +123,14 @@ class RegistroDiario {
             if (tipoLower.includes('accesorio')) {
                 const datos = movimiento.datos;
                 let tipoAcc = datos.tipo || 'Desconocido';
-                let detalle = datos.modelo || 'Sin especificar'; 
+                let detalle = datos.modelo || 'Sin especificar';
 
-                
-                 // 1. ESTANDARIZAR LOS NOMBRES ANTES DE INICIALIZAR
+
+                // 1. ESTANDARIZAR LOS NOMBRES ANTES DE INICIALIZAR
                 if (detalle.toLowerCase() === 'estandar' || detalle === 'Sin especificar') {
                     detalle = 'Estándar';
                 }
-                
+
                 if (tipoAcc === "Lightning") {
                     tipoAcc = "Cable Lightning";
                 } else if (tipoAcc === "USB-C a USB-C") {
@@ -143,7 +143,7 @@ class RegistroDiario {
                 // Si quisieras que el detalle diga "Estándar (Movimiento)" para diferenciarlo de "Estándar" (venta normal),
                 // solo basta con revisar si incluye "salida" y agregar el sufijo. Descomenta la siguiente línea para activarlo:
                 if (tipoLower.includes('salida')) detalle += ' (Por Movimiento)';
-                
+
                 const destino = tipoLower.includes('salida')
                     ? dia.accesoriosSalidos
                     : dia.accesoriosIngresados;
@@ -166,7 +166,7 @@ class RegistroDiario {
                         // -> Lo mismo aplicaría si tienen múltiples modelos y quieres distinguirlos <-
                         // Descomenta la siguiente línea para activarlo en multi-modelo:
                         if (tipoLower.includes('salida')) nombreModelo += ' (Por Movimiento)';
-                        
+
                         if (!destino[tipoAcc][nombreModelo]) destino[tipoAcc][nombreModelo] = 0;
                         destino[tipoAcc][nombreModelo] += parseInt(m.cantidad) || 0;
                     });
@@ -201,9 +201,14 @@ class RegistroDiario {
         const acc = venta.accesorios;
 
         // Forro
-        if (acc.forro && acc.forroCantidad > 0) {
-            const modelo = acc.forroModelo || 'Sin especificar';
-            this.agregarAccesorio(dia, 'Forro', modelo, acc.forroCantidad);
+        if (acc.forro) {
+            if (acc.forros && acc.forros.length > 0) {
+                acc.forros.forEach(f => {
+                    this.agregarAccesorio(dia, 'Forro', f.modelo || 'Sin especificar', f.cantidad);
+                });
+            } else if (acc.forroCantidad > 0) {
+                this.agregarAccesorio(dia, 'Forro', acc.forroModelo || 'Sin especificar', acc.forroCantidad);
+            }
         }
 
         // Cargador
@@ -212,9 +217,21 @@ class RegistroDiario {
         }
 
         // Vidrio
-        if (acc.vidrio && acc.vidrioCantidad > 0) {
-            const modelo = acc.vidrioModelo || 'Sin especificar';
-            this.agregarAccesorio(dia, 'Vidrio Templado', modelo, acc.vidrioCantidad);
+        if (acc.vidrio) {
+            if (acc.vidrios && acc.vidrios.length > 0) {
+                acc.vidrios.forEach(v => {
+                    this.agregarAccesorio(dia, 'Vidrio Templado', v.modelo || 'Sin especificar', v.cantidad);
+                });
+            } else if (acc.vidrioCantidad > 0) {
+                this.agregarAccesorio(dia, 'Vidrio Templado', acc.vidrioModelo || 'Sin especificar', acc.vidrioCantidad);
+            }
+        }
+
+        // Otros
+        if (acc.otro && acc.otros && acc.otros.length > 0) {
+            acc.otros.forEach(o => {
+                this.agregarAccesorio(dia, 'Otro', o.nombre || 'Sin especificar', o.cantidad);
+            });
         }
 
         // Protector Cámara
@@ -285,7 +302,7 @@ class RegistroDiario {
                 return true;
             });
         }
-            
+
         // Filtrar por período
         else if (periodoVal !== 'todos') {
             let dias = 0;
@@ -334,7 +351,7 @@ class RegistroDiario {
     renderizarResumenAccesorios(dias) {
         const accesoriosTotales = {};
         const accesoriosIngresadosTotales = {};  // ← NUEVO: objeto para ingresados
-        
+
         dias.forEach(dia => {
             // Validar que dia.accesorios exista
             if (!dia.accesorios || typeof dia.accesorios !== 'object') {
@@ -752,39 +769,39 @@ class RegistroDiario {
         URL.revokeObjectURL(url);
     }
 
-    
+
 
 }
 function calcularPesoModelo(nombre) {
-        // 1. Extraemos el número principal del modelo
-        const match = nombre.match(/\d+/);
-        const numero = match ? parseInt(match[0]) : 0;
-        
-        // Si no es un teléfono (ej: "Estándar", "Sin especificar") le damos peso máximo para que vaya al final
-        if (numero === 0) return { numero: 999, jerarquia: 0 }; 
-    
-        // 2. Extraemos el sufijo
-        const sufijo = nombre.toLowerCase();
-        
-        // 3. Asignamos un peso de jerarquía según el estándar
-        let jerarquia = 1; // Base
-        if (sufijo.includes('pro max')) jerarquia = 4;
-        else if (sufijo.includes('pro')) jerarquia = 3;
-        else if (sufijo.includes('plus')) jerarquia = 2;
-        else if (sufijo.includes('mini')) jerarquia = 0; // Mini va antes del base
-    
-        return { numero, jerarquia };
-    }
-    
-    function ordenarModelosPro(a, b) {
-        const pesoA = calcularPesoModelo(a[0]);
-        const pesoB = calcularPesoModelo(b[0]);
-    
-        if (pesoA.numero !== pesoB.numero) return pesoA.numero - pesoB.numero;
-        if (pesoA.jerarquia !== pesoB.jerarquia) return pesoA.jerarquia - pesoB.jerarquia;
-        
-        return a[0].localeCompare(b[0]);
-    }
+    // 1. Extraemos el número principal del modelo
+    const match = nombre.match(/\d+/);
+    const numero = match ? parseInt(match[0]) : 0;
+
+    // Si no es un teléfono (ej: "Estándar", "Sin especificar") le damos peso máximo para que vaya al final
+    if (numero === 0) return { numero: 999, jerarquia: 0 };
+
+    // 2. Extraemos el sufijo
+    const sufijo = nombre.toLowerCase();
+
+    // 3. Asignamos un peso de jerarquía según el estándar
+    let jerarquia = 1; // Base
+    if (sufijo.includes('pro max')) jerarquia = 4;
+    else if (sufijo.includes('pro')) jerarquia = 3;
+    else if (sufijo.includes('plus')) jerarquia = 2;
+    else if (sufijo.includes('mini')) jerarquia = 0; // Mini va antes del base
+
+    return { numero, jerarquia };
+}
+
+function ordenarModelosPro(a, b) {
+    const pesoA = calcularPesoModelo(a[0]);
+    const pesoB = calcularPesoModelo(b[0]);
+
+    if (pesoA.numero !== pesoB.numero) return pesoA.numero - pesoB.numero;
+    if (pesoA.jerarquia !== pesoB.jerarquia) return pesoA.jerarquia - pesoB.jerarquia;
+
+    return a[0].localeCompare(b[0]);
+}
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
     new RegistroDiario();

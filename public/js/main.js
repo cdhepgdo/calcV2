@@ -1,7 +1,7 @@
-﻿/**
- * Archivo principal de la aplicación
- * Orquesta la inicialización y coordinación de todos los módulos
- */
+/**
+* Archivo principal de la aplicación
+* Orquesta la inicialización y coordinación de todos los módulos
+*/
 import { CambioGarantia } from './models/CambioGarantia.js';
 import { Movimiento } from './models/Movimiento.js';
 import { ventaService } from './services/VentaService.js';
@@ -9,12 +9,12 @@ import { movimientoService } from './services/MovimientoService.js';
 import { storageService } from './services/StorageService.js';
 import { printService } from './services/PrintService.js';
 import { Caja } from './models/Caja.js';
-import { 
-    MODELOS_IPHONE, 
-    COLORES_IPHONE, 
-    CAPACIDADES_IPHONE, 
+import {
+    MODELOS_IPHONE,
+    COLORES_IPHONE,
+    CAPACIDADES_IPHONE,
     GARANTIAS,
-    FORMAS_PAGO 
+    FORMAS_PAGO
 } from './config/constants.js';
 import { llenarSelect, mostrarAlerta, confirmar } from './utils/domHelpers.js';
 import { formatearMoneda, formatearFecha, sanitizar } from './utils/formatters.js';
@@ -25,24 +25,24 @@ class App {
         this.ventaEnEdicion = null;
         this.init();
     }
-    
+
     /**
      * Inicializa la aplicación
      */
     init() {
         console.log('🚀 Iniciando aplicación...');
-        
+
         // Cargar datos iniciales
         this.cargarDatosIniciales();
-        
+
         // Inicializar componentes
         this.inicializarSelectores();
         this.inicializarEventos();
         this.actualizarUI();
-        
+
         console.log('✅ Aplicación iniciada correctamente');
     }
-    
+
     /**
      * Carga los datos iniciales desde el storage
      */
@@ -57,14 +57,14 @@ class App {
         }
     } */
     cargarDatosIniciales() {
-    this.cajaActual = storageService.obtenerCajaInicial();
-    const hoy = new Date().toLocaleDateString('es-ES');
-    if (this.cajaActual.cajaInicial > 0 && this.cajaActual.fecha === hoy) {
-        // Ya se guardó la caja HOY → mostrar normalmente
-        document.getElementById('cajaInicial').value = this.cajaActual.cajaInicial;
-        document.getElementById('cajaInicialMostrar').textContent = this.cajaActual.cajaInicial.toFixed(2);
-        document.getElementById('cajaInicialConfirmacion').classList.remove('hidden');
-    } /* else {
+        this.cajaActual = storageService.obtenerCajaInicial();
+        const hoy = new Date().toLocaleDateString('es-ES');
+        if (this.cajaActual.cajaInicial > 0 && this.cajaActual.fecha === hoy) {
+            // Ya se guardó la caja HOY → mostrar normalmente
+            document.getElementById('cajaInicial').value = this.cajaActual.cajaInicial;
+            document.getElementById('cajaInicialMostrar').textContent = this.cajaActual.cajaInicial.toFixed(2);
+            document.getElementById('cajaInicialConfirmacion').classList.remove('hidden');
+        } /* else {
         // Es un día nuevo → buscar el cierre del día anterior
         const cierreGuardado = localStorage.getItem('caja_cierre_iphone');
         if (cierreGuardado) {
@@ -82,9 +82,9 @@ class App {
                 document.getElementById('cajaInicial').style.borderColor = '#f59e0b';
             }
         }
-}
+    }
 
-    
+
     /**
      * Inicializa todos los selectores con sus opciones
      */
@@ -94,34 +94,34 @@ class App {
         llenarSelect(document.getElementById('color'), COLORES_IPHONE, 'Seleccionar color');
         llenarSelect(document.getElementById('almacenamiento'), CAPACIDADES_IPHONE, 'Seleccionar capacidad');
         llenarSelect(document.getElementById('equipoGarantia'), GARANTIAS, 'Seleccionar garantía');
-        
+
         // Selectores de equipo recibido
         llenarSelect(document.getElementById('equipoModelo'), MODELOS_IPHONE, 'Seleccionar modelo');
         llenarSelect(document.getElementById('equipoColor'), COLORES_IPHONE, 'Seleccionar color');
-        
+
         // Selectores de accesorios
         document.querySelectorAll('.accModelo').forEach(select => {
             llenarSelect(select, MODELOS_IPHONE, 'Seleccionar modelo');
         });
-        
+
         llenarSelect(document.getElementById('cajaColorSelect'), COLORES_IPHONE, 'Seleccionar color');
-        
+
         // Selectores de movimientos de inventario
         // Salida de equipo
         llenarSelect(document.getElementById('salidaEquipoModelo'), MODELOS_IPHONE, 'Seleccionar modelo');
         llenarSelect(document.getElementById('salidaEquipoColor'), COLORES_IPHONE, 'Seleccionar color');
         llenarSelect(document.getElementById('salidaEquipoCapacidad'), CAPACIDADES_IPHONE, 'Seleccionar capacidad');
-        
+
         // Ingreso de equipo
         llenarSelect(document.getElementById('ingresoEquipoModelo'), MODELOS_IPHONE, 'Seleccionar modelo');
         llenarSelect(document.getElementById('ingresoEquipoColor'), COLORES_IPHONE, 'Seleccionar color');
         llenarSelect(document.getElementById('ingresoEquipoCapacidad'), CAPACIDADES_IPHONE, 'Seleccionar capacidad');
-        
+
         // Compra de equipo
         llenarSelect(document.getElementById('compraEquipoModelo'), MODELOS_IPHONE, 'Seleccionar modelo');
         llenarSelect(document.getElementById('compraEquipoColor'), COLORES_IPHONE, 'Seleccionar color');
         llenarSelect(document.getElementById('compraEquipoCapacidad'), CAPACIDADES_IPHONE, 'Seleccionar capacidad');
-    
+
         // Selectores de cambio por garantía
         llenarSelect(document.getElementById('defectuosoModelo'), MODELOS_IPHONE, 'Seleccionar modelo');
         llenarSelect(document.getElementById('defectuosoColor'), COLORES_IPHONE, 'Seleccionar color');
@@ -137,39 +137,39 @@ class App {
                 </label>
             `).join('');
         }
-    
+
     }
-    
+
     /**
      * Inicializa todos los event listeners
      */
     inicializarEventos() {
         // Fecha actual
         this.actualizarFecha();
-        
+
         // Caja inicial
         document.getElementById('guardarCajaInicial').addEventListener('click', () => this.guardarCajaInicial());
-        
+
         // Formulario de venta
         document.getElementById('ventaForm').addEventListener('submit', (e) => this.manejarSubmitVenta(e));
         document.getElementById('limpiarForm').addEventListener('click', () => this.limpiarFormularioVenta());
-        
+
         // Tipo de venta
         document.querySelectorAll('input[name="tipoVenta"]').forEach(radio => {
             radio.addEventListener('change', () => {
                 this.manejarCambioTipoVenta()
-                
+
             });
         });
-        
+
         // Accesorios
         this.inicializarEventosAccesorios();
-        
+
         // Forma de pago
         document.querySelectorAll('input[name="formaPago"]').forEach(radio => {
             radio.addEventListener('change', () => {
                 this.manejarCambioFormaPago()
-                let methods = ['efectivo','zelle', 'binance', 'pagomovil', 'transferencia']
+                let methods = ['efectivo', 'zelle', 'binance', 'pagomovil', 'transferencia']
                 let formaPago = methods.some(p => document.querySelector('input[name="formaPago"]:checked')?.value.includes(p))
                 //const checkbox = document.getElementById('weppa');
                 const montoTotalField = document.getElementById('montoTotal');
@@ -178,7 +178,7 @@ class App {
                     montoTotalField.classList.remove('bg-gray-100');
                     montoTotalField.classList.add('bg-white');
                     console.log('i')
-                } else{
+                } else {
                     montoTotalField.setAttribute('readonly', true);
                     montoTotalField.classList.add('bg-gray-100');
                     montoTotalField.classList.remove('bg-white');
@@ -188,7 +188,7 @@ class App {
                 }
             });
         });
-        
+
         // Pago mixto
         ['montoEfectivo', 'montoZelle', 'montoBinance', 'montoPagoMovilDolares', 'montoTransferenciaDolares'].forEach(id => {
             document.getElementById(id).addEventListener('input', () => {
@@ -196,12 +196,12 @@ class App {
                 this.calcularYMostrarTotal();
             });
         });
-        
+
         // Event listeners para formularios individuales de pago
         document.getElementById('efectivoMonto')?.addEventListener('input', () => this.calcularYMostrarTotal());
         document.getElementById('zelleMonto')?.addEventListener('input', () => this.calcularYMostrarTotal());
         document.getElementById('binanceMonto')?.addEventListener('input', () => this.calcularYMostrarTotal());
-        
+
         // Cálculo automático de bolívares en Pago Móvil (formulario principal)
         document.getElementById('pagomovilDolares').addEventListener('input', () => {
             this.calcularBolivaresPagoMovil();
@@ -231,21 +231,21 @@ class App {
         });
 
         document.getElementById('paypalMonto').addEventListener('input', () => this.calcularYMostrarTotal());
-        
+
         // Cálculo automático de bolívares en Pago Móvil DENTRO de Pago Mixto
         document.getElementById('montoPagoMovilDolares').addEventListener('input', () => this.calcularBolivaresPagoMovilMixto());
         document.getElementById('montoPagoMovilTasa').addEventListener('input', () => this.calcularBolivaresPagoMovilMixto());
-        
+
         // Cálculo automático de bolívares en Transferencia DENTRO de Pago Mixto
         document.getElementById('montoTransferenciaDolares').addEventListener('input', () => this.calcularBolivaresTransferenciaMixto());
         document.getElementById('montoTransferenciaTasa').addEventListener('input', () => this.calcularBolivaresTransferenciaMixto());
-        
+
         // Equipo recibido
         document.getElementById('recibirEquipo').addEventListener('change', (e) => {
             document.getElementById('equipoRecibidoDetalles').classList.toggle('hidden', !e.target.checked);
             this.calcularYMostrarTotal();
         });
-        
+
         // Diferencia de precio en cambio por garantía
         document.getElementById('tipoDiferencia').addEventListener('change', (e) => {
             const montoInput = document.getElementById('montoDiferencia');
@@ -256,23 +256,23 @@ class App {
                 montoInput.disabled = false;
             }
         });
-        
+
         // Actualizar total cuando cambia el valor del equipo recibido
         document.getElementById('equipoValor').addEventListener('input', () => this.calcularYMostrarTotal());
-        
+
         // Tipo de transacción
         document.querySelectorAll('input[name="tipoTransaccion"]').forEach(radio => {
             radio.addEventListener('change', () => this.manejarCambioTipoTransaccion());
         });
-        
+
         // Nota de venta
         document.getElementById('notaVenta').addEventListener('change', (e) => {
             document.getElementById('notaVentaInfo').classList.toggle('hidden', !e.target.checked);
         });
-        
+
         // Menú
         this.inicializarMenu();
-        
+
         // Movimientos de Inventario
         this.inicializarEventosMovimientos();
 
@@ -280,7 +280,7 @@ class App {
         document.getElementById('weppa').addEventListener('change', (e) => {
             const weppaActivo = e.target.checked;
             const campoEditable = document.getElementById('weppaMontoEditable');
-            
+
             if (weppaActivo) {
                 // Mostrar campo editable
                 campoEditable.classList.remove('hidden');
@@ -296,7 +296,7 @@ class App {
                 this.calcularYMostrarTotal();
             }
         });
-        
+
         // Event listener para el campo manual de WEPPA
         document.getElementById('montoTotalManual')?.addEventListener('input', (e) => {
             const montoManual = parseFloat(e.target.value) || 0;
@@ -306,21 +306,28 @@ class App {
             document.getElementById('montoTotalDisplay').textContent = `$${montoManual.toFixed(2)}`;
         });
     }
-    
+
     /**
      * Inicializa eventos de accesorios
      */
     inicializarEventosAccesorios() {
-        const accesorios = ['forro', 'cargador', 'vidrio', 'protectorCamara', 'cubo', 'cableLightning', 'cableCC', 'caja'];
-        
+        const accesorios = ['forro', 'cargador', 'vidrio', 'protectorCamara', 'cubo', 'cableLightning', 'cableCC', 'caja', 'otroAccesorio'];
+
         accesorios.forEach(accesorio => {
             const checkbox = document.getElementById(accesorio);
             if (checkbox) {
                 checkbox.addEventListener('change', (e) => {
-                    const contenedor = document.getElementById(`${accesorio}${accesorio === 'vidrio' ? 'Modelo' : accesorio === 'forro' ? 'Modelo' : accesorio === 'caja' ? 'Modelo' : 'Cantidad'}`);
+                    let suffix = 'Cantidad';
+                    if (['forro', 'vidrio'].includes(accesorio)) suffix = 'Contenedor';
+                    else if (accesorio === 'caja') suffix = 'Modelo';
+                    else if (accesorio === 'otroAccesorio') suffix = 'Contenedor';
+                    
+                    const contenedorId = accesorio === 'otroAccesorio' ? 'otroContenedor' : `${accesorio}${suffix}`;
+                    const contenedor = document.getElementById(contenedorId);
+                    
                     if (contenedor) {
                         contenedor.classList.toggle('hidden', !e.target.checked);
-                        
+
                         // Auto-seleccionar modelo si es forro, vidrio o caja
                         if (e.target.checked && (accesorio === 'forro' || accesorio === 'vidrio' || accesorio === 'caja')) {
                             this.autoSeleccionarModeloAccesorio(accesorio);
@@ -329,7 +336,12 @@ class App {
                 });
             }
         });
-        
+
+        // Habilitar + / - para dinámicos
+        this.manejarFilasDinamicas('.btn-add-forro', 'forroLista', '.forro-item');
+        this.manejarFilasDinamicas('.btn-add-vidrio', 'vidrioLista', '.vidrio-item');
+        this.manejarFilasDinamicas('.btn-add-otro', 'otroLista', '.otro-item');
+
         // Evento para auto-seleccionar cuando cambia el modelo del iPhone
         const modeloSelect = document.getElementById('modelo');
         if (modeloSelect) {
@@ -347,31 +359,66 @@ class App {
             });
         }
     }
-    
+
+    /**
+     * Maneja dinámicamente agregar/quitar filas
+     */
+    manejarFilasDinamicas(selectorBtnAdd, contenedorPadreId, selectorItem) {
+        document.addEventListener('click', e => {
+            if (e.target.closest(selectorBtnAdd)) {
+                const btn = e.target.closest(selectorBtnAdd);
+                const itemOriginal = btn.closest(selectorItem);
+                const contenedor = document.getElementById(contenedorPadreId);
+                
+                if (!contenedor) return;
+
+                const nuevoItem = itemOriginal.cloneNode(true);
+                
+                // Cambiar el botón "+" por uno de "-" (eliminar fila)
+                const nuevoBtn = nuevoItem.querySelector(selectorBtnAdd);
+                nuevoBtn.className = 'btn-remove-fila bg-red-500 text-white w-8 h-8 rounded font-bold hover:bg-red-600 transition';
+                nuevoBtn.textContent = '-';
+                nuevoBtn.onclick = () => nuevoItem.remove();
+
+                // Limpiar valores del clon
+                const selects = nuevoItem.querySelectorAll('select');
+                selects.forEach(s => s.value = '');
+                
+                const inputsText = nuevoItem.querySelectorAll('input[type="text"]');
+                inputsText.forEach(i => i.value = '');
+
+                const inputsNumber = nuevoItem.querySelectorAll('input[type="number"]');
+                inputsNumber.forEach(i => i.value = 1);
+
+                contenedor.appendChild(nuevoItem);
+            }
+        });
+    }
+
     /**
      * Auto-selecciona el modelo del accesorio basándose en el iPhone seleccionado
      */
     autoSeleccionarModeloAccesorio(tipoAccesorio) {
         const modeloIphone = document.getElementById('modelo').value;
-        
+
         if (!modeloIphone) return; // Si no hay modelo seleccionado, no hacer nada
-        
+
         let selectAccesorio;
-        
+
         // Obtener el select correcto según el tipo de accesorio
         if (tipoAccesorio === 'forro') {
-            selectAccesorio = document.querySelector('#forroModelo select');
+            selectAccesorio = document.querySelector('.forro-item:last-child select');
         } else if (tipoAccesorio === 'vidrio') {
-            selectAccesorio = document.querySelector('#vidrioModelo select');
+            selectAccesorio = document.querySelector('.vidrio-item:last-child select');
         } else if (tipoAccesorio === 'caja') {
             selectAccesorio = document.querySelector('#cajaModelo select:first-child');
         }
-        
+
         if (selectAccesorio) {
             // Buscar si existe una opción que coincida exactamente con el modelo del iPhone
             const opciones = Array.from(selectAccesorio.options);
             const opcionCoincidente = opciones.find(option => option.value === modeloIphone);
-            
+
             if (opcionCoincidente) {
                 selectAccesorio.value = modeloIphone;
                 console.log(`✅ Auto-seleccionado ${tipoAccesorio}: ${modeloIphone}`);
@@ -380,21 +427,21 @@ class App {
             }
         }
     }
-    
+
     /**
      * Inicializa el menú de navegación
      */
     inicializarMenu() {
         const menuToggle = document.getElementById('menuToggle');
         const floatingMenu = document.getElementById('floatingMenu');
-        
+
         if (menuToggle && floatingMenu) {
             menuToggle.addEventListener('click', () => {
                 floatingMenu.classList.toggle('hidden');
             });
         }
     }
-    
+
     /**
      * Actualiza la fecha actual
      */
@@ -404,23 +451,23 @@ class App {
             fechaElement.textContent = formatearFecha(new Date());
         }
     }
-    
+
     /**
      * Guarda la caja inicial
      */
     guardarCajaInicial() {
         const valor = parseFloat(document.getElementById('cajaInicial').value) || 0;
         this.cajaActual = new Caja(valor);
-        
+
         storageService.guardarCajaInicial(this.cajaActual);
-        
+
         document.getElementById('cajaInicialConfirmacion').classList.remove('hidden');
         document.getElementById('cajaInicialMostrar').textContent = valor.toFixed(2);
-        
+
         mostrarAlerta('✅ Caja inicial guardada correctamente', 'success');
         this.actualizarResumenVentas();
     }
-    
+
     /**
      * Maneja el cambio de tipo de venta
      */
@@ -428,7 +475,7 @@ class App {
         const tipoVenta = document.querySelector('input[name="tipoVenta"]:checked').value;
         const infoIphone = document.getElementById('infoIphone');
         const datosCliente = document.getElementById('datosClienteSection');
-        
+
         if (tipoVenta === 'accesorios') {
             infoIphone.style.display = 'none';
             datosCliente.style.display = 'none';
@@ -437,13 +484,13 @@ class App {
             datosCliente.style.display = 'block';
         }
     }
-    
+
     /**
      * Maneja el cambio de forma de pago
      */
     manejarCambioFormaPago() {
         const formaPago = document.querySelector('input[name="formaPago"]:checked')?.value;
-        
+
         // Ocultar todos los formularios primero
         document.getElementById('efectivo-form')?.classList.add('hidden');
         document.getElementById('zelle-form')?.classList.add('hidden');
@@ -453,7 +500,7 @@ class App {
         document.getElementById('pagoMixto')?.classList.add('hidden');
         // Agregar esta línea al bloque de "ocultar todos"
         document.getElementById('paypal-form')?.classList.add('hidden');
-        
+
         // Mostrar el formulario correspondiente
         if (formaPago === 'efectivo') {
             document.getElementById('efectivo-form')?.classList.remove('hidden');
@@ -472,11 +519,11 @@ class App {
         else if (formaPago === 'paypal') {
             document.getElementById('paypal-form')?.classList.remove('hidden');
         }
-        
+
         // Recalcular total
         this.calcularYMostrarTotal();
     }
-    
+
     /**
      * Maneja el cambio de tipo de transacción
      */
@@ -485,14 +532,14 @@ class App {
         document.getElementById('abonoInfo').classList.toggle('hidden', tipoTransaccion !== 'abono'); */
 
         const tipoTransaccion = document.querySelector('input[name="tipoTransaccion"]:checked').value;
-    
+
         // Mostrar/ocultar sección de abono
         document.getElementById('abonoInfo').classList.toggle('hidden', tipoTransaccion !== 'abono');
-        
+
         // Mostrar/ocultar sección de cambio por garantía
         const esCambioGarantia = tipoTransaccion === 'cambio-garantia';
         document.getElementById('cambioGarantiaForm').classList.toggle('hidden', !esCambioGarantia);
-        
+
         // Si es cambio por garantía, ocultar secciones innecesarias
         if (esCambioGarantia) {
             document.getElementById('accesoriosSection').style.display = 'none';
@@ -510,7 +557,7 @@ class App {
             document.getElementById('montoTotalSection').classList.remove('hidden');
         }
     }
-    
+
     /**
      * Calcula el total del pago mixto
      */
@@ -554,14 +601,14 @@ class App {
 
         const montoTotalVenta = document.getElementById('montoTotal');
         const montoTotalMixto = document.getElementById('totalMixto');
-        
+
         const total = efectivo + zelle + binance + pagoMovil + transferencia;
-        
+
         // El monto total es solo el pago en efectivo/digital, NO incluye equipo recibido
         montoTotalMixto.textContent = total.toFixed(2);
         montoTotalVenta.value = total.toFixed(2);  // ✅ CORRECTO
     }
-    
+
     /**
      * Calcula y muestra el total de la venta
      * Incluye el pago en efectivo/digital + equipo recibido
@@ -569,7 +616,7 @@ class App {
     calcularYMostrarTotal() {
         const formaPago = document.querySelector('input[name="formaPago"]:checked')?.value;
         let subtotalPago = 0;
-        
+
         // Calcular subtotal según forma de pago
         if (formaPago === 'efectivo') {
             subtotalPago = parseFloat(document.getElementById('efectivoMonto')?.value) || 0;
@@ -591,23 +638,23 @@ class App {
         } else if (formaPago === 'paypal') {
             subtotalPago = parseFloat(document.getElementById('paypalMonto')?.value) || 0;
         }
-        
+
         // Agregar equipo recibido si existe
         let subtotalEquipo = 0;
         if (document.getElementById('recibirEquipo')?.checked) {
             subtotalEquipo = parseFloat(document.getElementById('equipoValor')?.value) || 0;
         }
-        
+
         // Calcular total (Pago + Equipo = Inicial)
         const totalInicial = subtotalPago + subtotalEquipo;
-        
+
         // Verificar si WEPPA está activo
         const weppaActivo = document.getElementById('weppa')?.checked;
-        
+
         // Mostrar en la interfaz
         document.getElementById('subtotalPago').textContent = `$${subtotalPago.toFixed(2)}`;
         document.getElementById('subtotalEquipo').textContent = `$${subtotalEquipo.toFixed(2)}`;
-        
+
         if (weppaActivo) {
             // Si WEPPA está activo, mostrar el inicial y mantener el total manual
             document.getElementById('weppaInicial').textContent = totalInicial.toFixed(2);
@@ -617,7 +664,7 @@ class App {
             document.getElementById('montoTotalDisplay').textContent = `$${totalInicial.toFixed(2)}`;
             document.getElementById('montoTotal').value = totalInicial.toFixed(2);
         }
-        
+
         // Mostrar/ocultar línea de equipo recibido
         const equipoLinea = document.getElementById('equipoRecibidoLinea');
         if (subtotalEquipo > 0) {
@@ -626,61 +673,61 @@ class App {
             equipoLinea.style.display = 'none';
         }
     }
-    
+
     /**
      * Calcula bolívares desde dólares en Pago Móvil
      */
     calcularBolivaresPagoMovil() {
         const dolares = parseFloat(document.getElementById('pagomovilDolares').value) || 0;
         const tasa = parseFloat(document.getElementById('pagomovilTasa').value) || 0;
-        
+
         if (dolares > 0 && tasa > 0) {
             const bolivares = dolares * tasa;
             document.getElementById('pagomovilBolivares').value = bolivares.toFixed(2);
         }
     }
-    
+
     /**
      * Calcula dólares desde bolívares en Pago Móvil
      */
     calcularDolaresPagoMovil() {
         const bolivares = parseFloat(document.getElementById('pagomovilBolivares').value) || 0;
         const tasa = parseFloat(document.getElementById('pagomovilTasa').value) || 0;
-        
+
         if (bolivares > 0 && tasa > 0) {
             const dolares = bolivares / tasa;
             document.getElementById('pagomovilDolares').value = dolares.toFixed(2);
             document.getElementById('montoTotal').value = dolares.toFixed(2);
         }
     }
-    
+
     /**
      * Calcula bolívares desde dólares en Transferencia
      */
     calcularBolivaresTransferencia() {
         const dolares = parseFloat(document.getElementById('transferenciaDolares').value) || 0;
         const tasa = parseFloat(document.getElementById('transferenciaTasa').value) || 0;
-        
+
         if (dolares > 0 && tasa > 0) {
             const bolivares = dolares * tasa;
             document.getElementById('transferenciaBolivares').value = bolivares.toFixed(2);
         }
     }
-    
+
     /**
      * Calcula dólares desde bolívares en Transferencia
      */
     calcularDolaresTransferencia() {
         const bolivares = parseFloat(document.getElementById('transferenciaBolivares').value) || 0;
         const tasa = parseFloat(document.getElementById('transferenciaTasa').value) || 0;
-        
+
         if (bolivares > 0 && tasa > 0) {
             const dolares = bolivares / tasa;
             document.getElementById('transferenciaDolares').value = dolares.toFixed(2);
             document.getElementById('montoTotal').value = dolares.toFixed(2);
         }
     }
-    
+
     /**
      * Calcula el total incluyendo el equipo recibido
      * NOTA: Esta función ahora solo llama a calcularYMostrarTotal()
@@ -689,39 +736,39 @@ class App {
         // Redirigir a la nueva función centralizada
         this.calcularYMostrarTotal();
     }
-    
+
     /**
      * Calcula bolívares desde dólares en Pago Móvil DENTRO de Pago Mixto
      */
     calcularBolivaresPagoMovilMixto() {
         const dolares = parseFloat(document.getElementById('montoPagoMovilDolares').value) || 0;
         const tasa = parseFloat(document.getElementById('montoPagoMovilTasa').value) || 0;
-        
+
         if (dolares > 0 && tasa > 0) {
             const bolivares = dolares * tasa;
             document.getElementById('montoPagoMovilBolivares').value = bolivares.toFixed(2);
         } else {
             document.getElementById('montoPagoMovilBolivares').value = '';
         }
-        
+
         // Recalcular el total mixto
         this.calcularTotalMixto();
     }
-    
+
     /**
      * Calcula bolívares desde dólares en Transferencia DENTRO de Pago Mixto
      */
     calcularBolivaresTransferenciaMixto() {
         const dolares = parseFloat(document.getElementById('montoTransferenciaDolares').value) || 0;
         const tasa = parseFloat(document.getElementById('montoTransferenciaTasa').value) || 0;
-        
+
         if (dolares > 0 && tasa > 0) {
             const bolivares = dolares * tasa;
             document.getElementById('montoTransferenciaBolivares').value = bolivares.toFixed(2);
         } else {
             document.getElementById('montoTransferenciaBolivares').value = '';
         }
-        
+
         // Recalcular el total mixto
         this.calcularTotalMixto();
     }
@@ -732,16 +779,16 @@ class App {
     calcularMontoTotal() {
         const formaPago = document.querySelector('input[name="formaPago"]:checked');
         if (!formaPago) return 0;
-        
+
         let total = 0;
-        
+
         if (formaPago.value === 'mixto') {
             const efectivo = parseFloat(document.getElementById('montoEfectivo').value) || 0;
             const zelle = parseFloat(document.getElementById('montoZelle').value) || 0;
             const binance = parseFloat(document.getElementById('montoBinance').value) || 0;
             const pagoMovil = parseFloat(document.getElementById('montoPagoMovilDolares').value) || 0;
             const transferencia = parseFloat(document.getElementById('montoTransferenciaDolares').value) || 0;
-            
+
             total = efectivo + zelle + binance + pagoMovil + transferencia;
         } else if (formaPago.value === 'pagomovil') {
             total = parseFloat(document.getElementById('pagomovilDolares').value) || 0;
@@ -749,17 +796,17 @@ class App {
             total = parseFloat(document.getElementById('transferenciaDolares').value) || 0;
         } else {
             // Para efectivo, zelle, binance
-            const campoId = formaPago.value === 'efectivo' ? 'montoEfectivo' : 
-                        formaPago.value === 'zelle' ? 'montoZelle' : 'montoBinance';
+            const campoId = formaPago.value === 'efectivo' ? 'montoEfectivo' :
+                formaPago.value === 'zelle' ? 'montoZelle' : 'montoBinance';
             total = parseFloat(document.getElementById(campoId).value) || 0;
         }
-        
+
         // Agregar equipo recibido si existe
         if (document.getElementById('recibirEquipo').checked) {
             const valorEquipo = parseFloat(document.getElementById('equipoValor').value) || 0;
             total += valorEquipo;
         }
-        
+
         return total;
     }
 
@@ -770,7 +817,7 @@ class App {
     recopilarDatosCambioGarantia() {
         const tipoDiferencia = document.getElementById('tipoDiferencia').value;
         const montoDiferencia = parseFloat(document.getElementById('montoDiferencia').value) || 0;
-        
+
         return {
             cliente: {
                 nombre: document.getElementById('clienteNombre').value,
@@ -805,14 +852,14 @@ class App {
     manejarSubmitCambioGarantia() {
         const datos = this.recopilarDatosCambioGarantia();
         const cambio = new CambioGarantia(datos);
-        
+
         const resultado = movimientoService.registrarCambioGarantia(cambio);
-        
+
         if (resultado.exito) {
             mostrarAlerta(resultado.mensaje, 'success');
             this.limpiarFormularioVenta();
             this.actualizarUI();
-            
+
             // Preguntar si desea imprimir la garantía
             if (confirm('¿Desea imprimir la garantía del cambio?')) {
                 this.imprimirGarantiaCambio(cambio);
@@ -821,30 +868,30 @@ class App {
             mostrarAlerta(resultado.errores.join('<br>'), 'error');
         }
     }
-    
+
     /**
      * Maneja el submit del formulario de venta
      */
     manejarSubmitVenta(e) {
         e.preventDefault();
-    
+
         const tipoTransaccion = document.querySelector('input[name="tipoTransaccion"]:checked').value;
-        
+
         // Si es cambio por garantía, usar flujo diferente
         if (tipoTransaccion === 'cambio-garantia') {
             this.manejarSubmitCambioGarantia();
             return;
         }
-        
+
         const datosVenta = this.recopilarDatosVenta();
         console.log(datosVenta.formaPago)
-        
+
         let resultado;
         if (this.ventaEnEdicion) {
             datosVenta.id = this.ventaEnEdicion;
             resultado = ventaService.actualizarVenta(datosVenta);
-            
-            
+
+
         } else {
             /* const montoCalculado = this.calcularMontoTotal();
             const montoIngresado = parseFloat(document.getElementById('montoTotal').value);
@@ -863,7 +910,7 @@ class App {
             } */
             resultado = ventaService.crearVenta(datosVenta);
         }
-        
+
         if (resultado.exito) {
 
             // Restaurar botón y limpiar estado de edición
@@ -871,13 +918,13 @@ class App {
             submitBtn.innerHTML = '✅ Registrar Venta';
             submitBtn.classList.remove('bg-orange-600', 'hover:bg-orange-700');
             submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-            
+
             // Eliminar botón de cancelar
             const cancelBtn = document.getElementById('cancelarEdicion');
             if (cancelBtn) {
                 cancelBtn.remove();
             }
-            
+
             this.ventaEnEdicion = null;
 
             mostrarAlerta(resultado.mensaje, 'success');
@@ -887,7 +934,7 @@ class App {
             mostrarAlerta(resultado.errores.join('<br>'), 'error');
         }
     }
-    
+
     /**
      * Recopila los datos del formulario de venta
      */
@@ -895,17 +942,17 @@ class App {
         const tipoVenta = document.querySelector('input[name="tipoVenta"]:checked').value;
         const tipoTransaccion = document.querySelector('input[name="tipoTransaccion"]:checked').value;
         const formaPago = document.querySelector('input[name="formaPago"]:checked')?.value;
-        
+
         const datos = {
             tipoVenta,
             tipoTransaccion,
             formaPago,
             montoTotal: parseFloat(document.getElementById('montoTotal').value) || 0,
             weppa: document.getElementById('weppa').checked,
-            notaVentaDetalles: document.getElementById('notaVenta').checked ? 
+            notaVentaDetalles: document.getElementById('notaVenta').checked ?
                 document.getElementById('notaVentaDetalles').value : null
         };
-        
+
         // Cliente y equipo (solo si es venta completa)
         if (tipoVenta === 'completa') {
             datos.cliente = {
@@ -913,7 +960,7 @@ class App {
                 cedula: document.getElementById('clienteCedula').value,
                 telefono: document.getElementById('clienteTelefono').value
             };
-            
+
             datos.equipo = {
                 modelo: document.getElementById('modelo').value,
                 color: document.getElementById('color').value,
@@ -923,10 +970,10 @@ class App {
                 garantia: document.getElementById('equipoGarantia').value
             };
         }
-        
+
         // Accesorios
         datos.accesorios = this.recopilarAccesorios();
-        
+
         if (formaPago === 'mixto') {
             // PAGO MIXTO
             datos.pagoMixto = {
@@ -936,7 +983,7 @@ class App {
                 pagoMovil: parseFloat(document.getElementById('montoPagoMovilDolares').value) || 0,
                 transferencia: parseFloat(document.getElementById('montoTransferenciaDolares').value) || 0
             };
-            
+
             // Guardar detalles de Pago Móvil si tiene tasa y bolívares
             const pagoMovilTasaMixto = parseFloat(document.getElementById('montoPagoMovilTasa').value) || 0;
             const pagoMovilBolivaresMixto = parseFloat(document.getElementById('montoPagoMovilBolivares').value) || 0;
@@ -947,7 +994,7 @@ class App {
                     tasa: pagoMovilTasaMixto
                 };
             }
-            
+
             // Guardar detalles de Transferencia si tiene tasa y bolívares
             const transferenciaTasaMixto = parseFloat(document.getElementById('montoTransferenciaTasa').value) || 0;
             const transferenciaBolivaresMixto = parseFloat(document.getElementById('montoTransferenciaBolivares').value) || 0;
@@ -958,13 +1005,13 @@ class App {
                     tasa: transferenciaTasaMixto
                 };
             }
-            
+
         } else if (formaPago === 'pagomovil') {
             // PAGO MÓVIL SIMPLE
             const dolares = parseFloat(document.getElementById('pagomovilDolares').value) || 0;
             const bolivares = parseFloat(document.getElementById('pagomovilBolivares').value) || 0;
             const tasa = parseFloat(document.getElementById('pagomovilTasa').value) || 0;
-            
+
             if (dolares > 0 && bolivares > 0 && tasa > 0) {
                 datos.pagoMovilDetalles = {
                     dolares: dolares,
@@ -972,13 +1019,13 @@ class App {
                     tasa: tasa
                 };
             }
-            
+
         } else if (formaPago === 'transferencia') {
             // TRANSFERENCIA SIMPLE
             const dolares = parseFloat(document.getElementById('transferenciaDolares').value) || 0;
             const bolivares = parseFloat(document.getElementById('transferenciaBolivares').value) || 0;
             const tasa = parseFloat(document.getElementById('transferenciaTasa').value) || 0;
-            
+
             if (dolares > 0 && bolivares > 0 && tasa > 0) {
                 datos.transferenciaDetalles = {
                     dolares: dolares,
@@ -1002,14 +1049,14 @@ class App {
             // Capturar el monto
             const montoPago = parseFloat(document.getElementById('paypalMonto').value) || 0;
             datos.montoPago = montoPago;
-            
+
             // Capturar datos adicionales específicos de PayPal
             datos.paypalDetalles = {
                 email: document.getElementById('paypalEmail').value,
                 monto: montoPago
             };
         }
-        
+
         // Equipo recibido (si aplica)
         if (document.getElementById('recibirEquipo').checked) {
             datos.equipoRecibido = {
@@ -1022,66 +1069,133 @@ class App {
                 comentarios: document.getElementById('equipoComentarios').value
             };
         }
-        
+
         return datos;
     }
-    
+
     /**
      * Recopila los datos de accesorios
      */
     recopilarAccesorios() {
+        // Analizar y recolectar las filas de forro
+        const forrosData = [];
+        if (document.getElementById('forro').checked) {
+            document.querySelectorAll('#forroLista .forro-item').forEach(item => {
+                const mod = item.querySelector('.accModelo').value;
+                const cant = parseInt(item.querySelector('.forro-cant').value) || 0;
+                if (mod && cant > 0) forrosData.push({ modelo: mod, cantidad: cant });
+            });
+        }
+        
+        // Analizar y recolectar las filas de vidrio
+        const vidriosData = [];
+        if (document.getElementById('vidrio').checked) {
+            document.querySelectorAll('#vidrioLista .vidrio-item').forEach(item => {
+                const mod = item.querySelector('.accModelo').value;
+                const cant = parseInt(item.querySelector('.vidrio-cant').value) || 0;
+                if (mod && cant > 0) vidriosData.push({ modelo: mod, cantidad: cant });
+            });
+        }
+
+        // Analizar y recolectar las filas de otroAccesorio
+        const otrosData = [];
+        const otroCheckbox = document.getElementById('otroAccesorio');
+        if (otroCheckbox && otroCheckbox.checked) {
+            document.querySelectorAll('#otroLista .otro-item').forEach(item => {
+                const nom = item.querySelector('.otro-nombre').value;
+                const cant = parseInt(item.querySelector('.otro-cant').value) || 0;
+                if (nom && cant > 0) otrosData.push({ nombre: nom, cantidad: cant });
+            });
+        }
+
         return {
             forro: document.getElementById('forro').checked,
-            forroModelo: document.getElementById('forro').checked ? 
-                document.querySelector('#forroModelo select')?.value : null,
-            forroCantidad: document.getElementById('forro').checked ? 
-                parseInt(document.querySelector('#forroModelo input')?.value) || 0 : 0,
-            
+            forros: forrosData,
+
             cargador: document.getElementById('cargador').checked,
-            cargadorCantidad: document.getElementById('cargador').checked ? 
+            cargadorCantidad: document.getElementById('cargador').checked ?
                 parseInt(document.querySelector('#cargadorCantidad input')?.value) || 0 : 0,
-            
+
             vidrio: document.getElementById('vidrio').checked,
-            vidrioModelo: document.getElementById('vidrio').checked ? 
-                document.querySelector('#vidrioModelo select')?.value : null,
-            vidrioCantidad: document.getElementById('vidrio').checked ? 
-                parseInt(document.querySelector('#vidrioModelo input')?.value) || 0 : 0,
+            vidrios: vidriosData,
             
+            otro: !!(otroCheckbox && otroCheckbox.checked),
+            otros: otrosData,
+
             protectorCamara: document.getElementById('protectorCamara').checked,
-            protectorCantidad: document.getElementById('protectorCamara').checked ? 
+            protectorCantidad: document.getElementById('protectorCamara').checked ?
                 parseInt(document.querySelector('#protectorCantidad input')?.value) || 0 : 0,
-            
+
             cubo: document.getElementById('cubo').checked,
-            cuboCantidad: document.getElementById('cubo').checked ? 
+            cuboCantidad: document.getElementById('cubo').checked ?
                 parseInt(document.querySelector('#cuboCantidad input')?.value) || 0 : 0,
-            
+
             cableLightning: document.getElementById('cableLightning').checked,
-            cableLightningCantidad: document.getElementById('cableLightning').checked ? 
+            cableLightningCantidad: document.getElementById('cableLightning').checked ?
                 parseInt(document.querySelector('#cableLightningCantidad input')?.value) || 0 : 0,
-            
+
             cableCC: document.getElementById('cableCC').checked,
-            cableCCCantidad: document.getElementById('cableCC').checked ? 
+            cableCCCantidad: document.getElementById('cableCC').checked ?
                 parseInt(document.querySelector('#cableCCCantidad input')?.value) || 0 : 0,
-            
+
             caja: document.getElementById('caja').checked,
-            cajaModelo: document.getElementById('caja').checked ? 
+            cajaModelo: document.getElementById('caja').checked ?
                 document.querySelector('#cajaModelo select:first-child')?.value : null,
-            cajaColor: document.getElementById('caja').checked ? 
+            cajaColor: document.getElementById('caja').checked ?
                 document.getElementById('cajaColorSelect')?.value : null,
-            cajaCantidad: document.getElementById('caja').checked ? 
+            cajaCantidad: document.getElementById('caja').checked ?
                 parseInt(document.querySelector('#cajaModelo input')?.value) || 0 : 0
         };
     }
-    
+
     /**
      * Limpia el formulario de venta
      */
     limpiarFormularioVenta() {
         document.getElementById('ventaForm').reset();
-        
+
         // Ocultar campos condicionales
-        document.getElementById('forroModelo').classList.add('hidden');
-        document.getElementById('vidrioModelo').classList.add('hidden');
+        document.getElementById('forroContenedor')?.classList.add('hidden');
+        document.getElementById('vidrioContenedor')?.classList.add('hidden');
+        document.getElementById('otroContenedor')?.classList.add('hidden');
+        
+        // Limpiar dinámicos devolviéndolos a una sola fila en blanco
+        const listContainerForro = document.getElementById('forroLista');
+        if (listContainerForro) {
+            const items = listContainerForro.querySelectorAll('.forro-item');
+            items.forEach((item, index) => { if (index > 0) item.remove(); });
+            if (items[0]) {
+                const s = items[0].querySelector('select');
+                if (s) s.value = '';
+                const i = items[0].querySelector('input.forro-cant');
+                if (i) i.value = 1;
+            }
+        }
+        
+        const listContainerVidrio = document.getElementById('vidrioLista');
+        if (listContainerVidrio) {
+            const items = listContainerVidrio.querySelectorAll('.vidrio-item');
+            items.forEach((item, index) => { if (index > 0) item.remove(); });
+            if (items[0]) {
+                const s = items[0].querySelector('select');
+                if (s) s.value = '';
+                const i = items[0].querySelector('input.vidrio-cant');
+                if (i) i.value = 1;
+            }
+        }
+        
+        const listContainerOtro = document.getElementById('otroLista');
+        if (listContainerOtro) {
+            const items = listContainerOtro.querySelectorAll('.otro-item');
+            items.forEach((item, index) => { if (index > 0) item.remove(); });
+            if (items[0]) {
+                const s = items[0].querySelector('input.otro-nombre');
+                if (s) s.value = '';
+                const i = items[0].querySelector('input.otro-cant');
+                if (i) i.value = 1;
+            }
+        }
+
         document.getElementById('cargadorCantidad').classList.add('hidden');
         document.getElementById('protectorCantidad').classList.add('hidden');
         document.getElementById('cuboCantidad').classList.add('hidden');
@@ -1095,21 +1209,21 @@ class App {
         document.getElementById('abonoInfo').classList.add('hidden');
         document.getElementById('notaVentaInfo').classList.add('hidden');
         document.getElementById('paypal-form')?.classList.add('hidden');
-        
+
         // Ocultar formularios de pago individuales
         document.getElementById('efectivo-form')?.classList.add('hidden');
         document.getElementById('zelle-form')?.classList.add('hidden');
         document.getElementById('binance-form')?.classList.add('hidden');
-        
+
         // Ocultar formulario de cambio por garantía
         document.getElementById('cambioGarantiaForm').classList.add('hidden');
-        
+
         // Mostrar secciones por defecto (que se ocultan en cambio garantía)
         document.getElementById('infoIphone').style.display = 'block';
         document.getElementById('datosClienteSection').style.display = 'block';
         document.getElementById('accesoriosSection').style.display = 'block';
         document.getElementById('formaPagoSection').style.display = 'block';
-        
+
         // Resetear displays de totales
         document.getElementById('subtotalPago').textContent = '$0.00';
         document.getElementById('subtotalEquipo').textContent = '$0.00';
@@ -1117,18 +1231,18 @@ class App {
         document.getElementById('montoTotal').value = '';
         document.getElementById('totalMixto').textContent = '0.00';
         document.getElementById('equipoRecibidoLinea').style.display = 'none';
-        
+
         // Resetear WEPPA
         document.getElementById('weppa').checked = false;
         document.getElementById('weppaMontoEditable')?.classList.add('hidden');
         document.getElementById('montoTotalManual').value = '';
         document.getElementById('weppaInicial').textContent = '0.00';
-        
+
         // Resetear tipo de transacción a "venta"
         document.querySelector('input[name="tipoTransaccion"][value="venta"]').checked = true;
         this.manejarCambioTipoTransaccion();
     }
-    
+
     /**
      * Actualiza toda la UI
      */
@@ -1136,18 +1250,18 @@ class App {
         this.actualizarResumenVentas();
         this.actualizarResumenMovimientos();
     }
-    
+
     /**
      * Actualiza el resumen de ventas
      */
     actualizarResumenVentas() {
         const fechaHoy = new Date().toLocaleDateString('es-ES'); // 1. Obtenemos la fecha
-        
+
         // 2. Filtramos al instante por la fecha de hoy
         const ventas = ventaService.obtenerVentas().filter(v => v.fecha === fechaHoy);
         const movimientos = movimientoService.obtenerMovimientos().filter(m => m.fecha === fechaHoy);
         const resumenElement = document.getElementById('resumenVentas');
-        
+
         if (ventas.length === 0) {
             resumenElement.innerHTML = `
                 <div class="text-center py-8">
@@ -1161,9 +1275,9 @@ class App {
             const ventasCompletas = ventas.filter(v => v.tipoVenta === 'completa' && v.tipoTransaccion !== 'abono');
             const abonos = ventas.filter(v => v.tipoTransaccion === 'abono');
             const soloAccesorios = ventas.filter(v => v.tipoVenta === 'accesorios');
-            
+
             let html = '';
-            
+
             if (ventasCompletas.length > 0) {
                 html += `
                     <div class="mb-4">
@@ -1177,7 +1291,7 @@ class App {
                     </div>
                 `;
             }
-            
+
             if (soloAccesorios.length > 0) {
                 html += `
                     <div class="mb-4">
@@ -1191,7 +1305,7 @@ class App {
                     </div>
                 `;
             }
-            
+
             if (abonos.length > 0) {
                 html += `
                     <div class="mb-4">
@@ -1207,21 +1321,21 @@ class App {
             }
 
 
-            
+
             resumenElement.innerHTML = html;
         }
-        
+
         // Actualizar totales con animación
         const totalDia = ventaService.calcularTotalDia();
         const equiposVendidos = ventaService.contarEquiposVendidos();
         const desgloseCaja = this.cajaActual.obtenerDesglose(ventas, movimientos);
         console.log(ventas)
         console.log(movimientos)
-        
+
         this.animarNumero('totalDia', totalDia);
         this.animarNumero('equiposVendidos', equiposVendidos, false);
         this.animarNumero('cajaFinal', desgloseCaja.cajaFinal);
-        
+
         // Guardar la caja final actual para el próximo día
         /* localStorage.setItem('caja_cierre_iphone', JSON.stringify({
             monto: desgloseCaja.cajaFinal,
@@ -1229,25 +1343,25 @@ class App {
         })); */
         storageService.guardarCierreCaja(desgloseCaja.cajaFinal);
     }
-    
+
     /**
      * Anima un número al cambiar
      */
     animarNumero(elementId, valorFinal, esMoneda = true) {
         const element = document.getElementById(elementId);
         const valorActual = parseFloat(element.textContent) || 0;
-        
+
         if (valorActual === valorFinal) return;
-        
+
         const duracion = 500; // ms
         const pasos = 20;
         const incremento = (valorFinal - valorActual) / pasos;
         let paso = 0;
-        
+
         const intervalo = setInterval(() => {
             paso++;
             const nuevoValor = valorActual + (incremento * paso);
-            
+
             if (paso >= pasos) {
                 element.textContent = esMoneda ? valorFinal.toFixed(2) : Math.round(valorFinal);
                 clearInterval(intervalo);
@@ -1256,14 +1370,14 @@ class App {
             }
         }, duracion / pasos);
     }
-    
+
     /**
      * Calcula el total inicial de una venta WEPPA (lo que pagó HOY)
      * Inicial = Pago en efectivo/digital + Equipo recibido
      */
     calcularTotalInicial(venta) {
         let totalPago = 0;
-        
+
         // Calcular el pago según la forma de pago
         if (venta.formaPago === 'mixto' && venta.pagoMixto) {
             // Sumar todos los métodos de pago del mixto
@@ -1290,33 +1404,33 @@ class App {
                 totalPago = venta.montoTotal;
             }
         }
-        
+
         // Agregar equipo recibido al pago para obtener el inicial
         const equipoRecibido = venta.equipoRecibido ? venta.equipoRecibido.valor : 0;
         const totalInicial = totalPago + equipoRecibido;
-        
+
         return totalInicial;
     }
-    
+
     /**
      * Renderiza una venta en HTML con diseño mejorado tipo tarjeta
      */
     renderizarVenta(venta, index) {
         const accesorios = venta.obtenerResumenAccesorios();
-        
+
         // Calcular HTML del WEPPA con inicial si aplica
         let weppaHtml = '';
         if (venta.weppa) {
             const totalInicial = this.calcularTotalInicial(venta);
             weppaHtml = `<span class="bg-yellow-200 px-2 py-1 rounded text-xs font-bold ml-2">WEPPA (Inicial $${totalInicial.toFixed(2)})</span>`;
         }
-        
+
         // Construir secciones solo si hay datos
         let seccionEquipo = '';
         let seccionAccesorios = '';
         let seccionEquipoRecibido = '';
         let seccionPago = '';
-        
+
         // Sección Equipo (solo si es venta completa)
         if (venta.tipoVenta === 'completa') {
             seccionEquipo = `
@@ -1334,7 +1448,7 @@ class App {
                 </div>
             `;
         }
-        
+
         // Sección Accesorios (solo si hay accesorios)
         if (accesorios.length > 0) {
             seccionAccesorios = `
@@ -1348,7 +1462,7 @@ class App {
                 </div>
             `;
         }
-        
+
         // Sección Equipo Recibido (solo si existe)
         if (venta.equipoRecibido) {
             seccionEquipoRecibido = `
@@ -1367,10 +1481,10 @@ class App {
                 </div>
             `;
         }
-        
+
         // Sección Pago (siempre presente)
         let detallesPago = [];
-        
+
         if (venta.formaPago === 'mixto' && venta.pagoMixto) {
             if (venta.pagoMixto.efectivo > 0) {
                 detallesPago.push(`<p class="bg-green-100 px-2 py-1 rounded">Efectivo: ${formatearMoneda(venta.pagoMixto.efectivo)}</p>`);
@@ -1402,11 +1516,11 @@ class App {
         } else {
             detallesPago.push(`<p class="bg-blue-100 px-2 py-1 rounded">${venta.formaPago.toUpperCase()}: ${formatearMoneda(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0))}</p>`);
         }
-        
+
         if (venta.equipoRecibido) {
             detallesPago.push(`<p class="bg-orange-100 px-2 py-1 rounded">Equipo recibido: ${venta.equipoRecibido.modelo} (${formatearMoneda(venta.equipoRecibido.valor)})</p>`);
         }
-        
+
         seccionPago = `
             <div class="bg-purple-50 p-3 rounded-lg">
                 <h5 class="font-semibold text-purple-800 text-xs mb-2 flex items-center">
@@ -1418,7 +1532,7 @@ class App {
                 </div>
             </div>
         `;
-        
+
         return `
             <div class="border-2 ${venta.tipoTransaccion === 'abono' ? 'border-orange-300 bg-orange-50' : 'border-gray-200 bg-white'} rounded-xl p-4 shadow-md mb-4 fade-in hover-lift">
                 <!-- Header -->
@@ -1464,7 +1578,7 @@ class App {
             </div>
         `;
     }
-    
+
     /**
      * Actualiza el resumen de movimientos
      */
@@ -1474,13 +1588,13 @@ class App {
             console.warn('Elemento resumenMovimientos no encontrado');
             return;
         }
-        
+
         const fechaHoy = new Date().toLocaleDateString('es-ES'); // 1. Obtenemos la fecha
-        
+
         // 2. Filtramos los movimientos al instante
         const movimientos = movimientoService.obtenerMovimientos().filter(m => m.fecha === fechaHoy);
         console.log('📦 Movimientos obtenidos:', movimientos.length, movimientos);
-        
+
         if (movimientos.length === 0) {
             resumenElement.innerHTML = `
                 <div class="text-center py-8">
@@ -1491,21 +1605,21 @@ class App {
             `;
         } else {
             // Agrupar movimientos por tipo (case insensitive)
-            const ingresos = movimientos.filter(m => 
-                m.tipo.toLowerCase().includes('ingreso') || 
+            const ingresos = movimientos.filter(m =>
+                m.tipo.toLowerCase().includes('ingreso') ||
                 m.tipo.toLowerCase().includes('compra')
             );
-            const salidas = movimientos.filter(m => 
+            const salidas = movimientos.filter(m =>
                 m.tipo.toLowerCase().includes('salida')
             );
-            
+
             // Línea 1291 (después de definir salidas)
-            const cambiosGarantia = movimientos.filter(m => 
-                m.tipo.toLowerCase().includes('cambio') && 
+            const cambiosGarantia = movimientos.filter(m =>
+                m.tipo.toLowerCase().includes('cambio') &&
                 m.tipo.toLowerCase().includes('garantía')
             );
             let html = '';
-            
+
             if (ingresos.length > 0) {
                 html += `
                     <div class="mb-4">
@@ -1519,7 +1633,7 @@ class App {
                     </div>
                 `;
             }
-            
+
             if (salidas.length > 0) {
                 html += `
                     <div class="mb-4">
@@ -1546,24 +1660,24 @@ class App {
                     </div>
                 `;
             }
-            
+
             resumenElement.innerHTML = html;
         }
     }
-    
+
     /**
      * Renderiza un movimiento en HTML
      */
     renderizarMovimiento(movimientoData) {
         // Asegurar que sea una instancia de Movimiento
-        const movimiento = movimientoData instanceof Movimiento 
-            ? movimientoData 
+        const movimiento = movimientoData instanceof Movimiento
+            ? movimientoData
             : Movimiento.fromJSON(movimientoData);
-        
+
         // Determinar color según tipo
         let colorClass = 'bg-white border-gray-200';
         const tipoLower = movimiento.tipo.toLowerCase();
-        
+
         if (tipoLower.includes('cambio') && tipoLower.includes('garantía')) {
             colorClass = 'bg-blue-50 border-blue-300';
         } else if (tipoLower.includes('ingreso') || tipoLower.includes('compra')) {
@@ -1571,11 +1685,11 @@ class App {
         } else if (tipoLower.includes('salida')) {
             colorClass = 'bg-red-50 border-red-200';
         }
-        
+
         // Obtener título y detalles (ahora sí funcionan los métodos)
         let titulo = movimiento.tipo;
         let detalles = '';
-        
+
         try {
             titulo = movimiento.obtenerTitulo();
             detalles = movimiento.obtenerDetalles();
@@ -1583,7 +1697,7 @@ class App {
             console.error('Error al renderizar movimiento:', error, movimiento);
             detalles = 'Error al cargar detalles';
         }
-        
+
         return `
             <div class="border rounded-lg p-3 ${colorClass} shadow-sm fade-in">
                 <div class="flex justify-between items-start">
@@ -1596,30 +1710,30 @@ class App {
             </div>
         `;
     }
-    
+
     /**
      * Edita una venta
      */
     editarVenta(ventaId) {
         const venta = ventaService.obtenerVentaPorId(ventaId);
-        
+
         if (!venta) {
             mostrarAlerta('Venta no encontrada', 'error');
             return;
         }
-        
+
         // Marcar que estamos editando
         this.ventaEnEdicion = ventaId;
-        
+
         // Llenar el formulario con los datos de la venta
         this.llenarFormularioConVenta(venta);
-        
+
         // Cambiar el botón de submit
         const submitBtn = document.querySelector('button[type="submit"]');
         submitBtn.innerHTML = '✏️ Actualizar Venta';
         submitBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
         submitBtn.classList.add('bg-orange-600', 'hover:bg-orange-700');
-        
+
         // Agregar botón de cancelar si no existe
         let cancelBtn = document.getElementById('cancelarEdicion');
         if (!cancelBtn) {
@@ -1629,41 +1743,41 @@ class App {
             cancelBtn.className = 'bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition';
             cancelBtn.innerHTML = '❌ Cancelar Edición';
             cancelBtn.onclick = () => this.cancelarEdicion();
-            
+
             // Insertar después del botón de submit
             submitBtn.parentNode.insertBefore(cancelBtn, submitBtn.nextSibling);
         }
-        
+
         // Scroll al formulario
         document.getElementById('ventaForm').scrollIntoView({ behavior: 'smooth' });
-        
+
         mostrarAlerta('Editando venta. Modifica los campos y guarda los cambios.', 'info');
     }
-    
+
     /**
      * Cancela la edición y restaura el formulario
      */
     cancelarEdicion() {
         this.ventaEnEdicion = null;
-        
+
         // Restaurar botón de submit
         const submitBtn = document.querySelector('button[type="submit"]');
         submitBtn.innerHTML = '✅ Registrar Venta';
         submitBtn.classList.remove('bg-orange-600', 'hover:bg-orange-700');
         submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-        
+
         // Eliminar botón de cancelar
         const cancelBtn = document.getElementById('cancelarEdicion');
         if (cancelBtn) {
             cancelBtn.remove();
         }
-        
+
         // Limpiar formulario
         this.limpiarFormularioVenta();
-        
+
         mostrarAlerta('Edición cancelada', 'info');
     }
-    
+
     /**
      * Llena el formulario con los datos de una venta
      */
@@ -1671,13 +1785,13 @@ class App {
         // Tipo de venta
         document.querySelector(`input[name="tipoVenta"][value="${venta.tipoVenta}"]`).checked = true;
         this.manejarCambioTipoVenta();
-        
+
         // Cliente y Equipo (si es venta completa)
         if (venta.tipoVenta === 'completa') {
             document.getElementById('clienteNombre').value = venta.cliente.nombre || '';
             document.getElementById('clienteCedula').value = venta.cliente.cedula || '';
             document.getElementById('clienteTelefono').value = venta.cliente.telefono || '';
-            
+
             document.getElementById('modelo').value = venta.equipo.modelo || '';
             document.getElementById('color').value = venta.equipo.color || '';
             document.getElementById('almacenamiento').value = venta.equipo.almacenamiento || '';
@@ -1685,44 +1799,76 @@ class App {
             document.getElementById('equipoImei').value = venta.equipo.imei || '';
             document.getElementById('equipoGarantia').value = venta.equipo.garantia || '';
         }
-        
+
         // Accesorios - Usar setTimeout para asegurar que los elementos estén visibles
         setTimeout(() => {
-            // Forro
-            if (venta.accesorios.forro) {
-                document.getElementById('forro').checked = true;
-                document.getElementById('forro').dispatchEvent(new Event('change'));
-                setTimeout(() => {
-                    const forroSelect = document.querySelector('#forroModelo select');
-                    const forroCantidad = document.querySelector('#forroModelo input');
-                    if (forroSelect) forroSelect.value = venta.accesorios.forroModelo || '';
-                    if (forroCantidad) forroCantidad.value = venta.accesorios.forroCantidad || 1;
-                }, 50);
+            // Helper para recalcular selectores al inyectar HTML de forma síncrona
+            const renderizarListaDinamica = (arr, contenedorPadreId, tipo, checkId) => {
+                if (arr && arr.length > 0) {
+                    document.getElementById(checkId).checked = true;
+                    document.getElementById(checkId).dispatchEvent(new Event('change'));
+                    
+                    const listaContenedor = document.getElementById(contenedorPadreId);
+                    if (!listaContenedor) return;
+                    listaContenedor.innerHTML = ''; // limpiar default
+
+                    arr.forEach((item, idx) => {
+                        const isFirst = idx === 0;
+                        const btnClass = isFirst ? `btn-add-${tipo} bg-green-500` : 'btn-remove-fila bg-red-500';
+                        const btnText = isFirst ? '+' : '-';
+                        const btnAction = isFirst ? '' : 'onclick="this.parentElement.remove()"';
+                        
+                        let htmlFila = '';
+                        if (tipo === 'otro') {
+                            htmlFila = `
+                            <div class="otro-item grid grid-cols-[1fr,auto,auto] gap-2 items-center">
+                                <input type="text" value="${item.nombre || ''}" class="p-2 border rounded-lg flex-1 otro-nombre" placeholder="¿Qué es?">
+                                <input type="number" min="1" value="${item.cantidad}" class="p-2 border rounded-lg w-20 otro-cant" placeholder="Cant.">
+                                <button type="button" class="${btnClass} text-white w-8 h-8 rounded font-bold" ${btnAction}>${btnText}</button>
+                            </div>`;
+                        } else {
+                            htmlFila = `
+                            <div class="${tipo}-item grid grid-cols-[1fr,auto,auto] gap-2 items-center">
+                                <select class="p-2 border rounded-lg accModelo flex-1"></select>
+                                <input type="number" min="1" value="${item.cantidad}" class="p-2 border rounded-lg w-20 ${tipo}-cant" placeholder="Cant.">
+                                <button type="button" class="${btnClass} text-white w-8 h-8 rounded font-bold" ${btnAction}>${btnText}</button>
+                            </div>`;
+                        }
+                        listaContenedor.insertAdjacentHTML('beforeend', htmlFila);
+                    });
+
+                    // Poblar options en los select (si the type is forro/vidrio)
+                    if (tipo !== 'otro') {
+                        const selects = listaContenedor.querySelectorAll('.accModelo');
+                        selects.forEach((select, i) => {
+                            // Helper importado `llenarSelect` ya no está expuesto aquí fácilmente, 
+                            // copiamos de Constants usando window o global? Wait, en class App podemos leer MODELOS_IPHONE.
+                            // Mejor clonamos las options del select original que existe en #salidaEquipoModelo etc., 
+                            // o llamamos this.inicializarSelectores() si no rellenamos options? No, hay que rellenar options.
+                            const optionsCloneRef = document.getElementById('modelo');
+                            if(optionsCloneRef) {
+                                select.innerHTML = optionsCloneRef.innerHTML; // easy clone
+                                select.options[0].textContent = 'Seleccionar modelo';
+                            }
+                            select.value = arr[i].modelo || '';
+                        });
+                    }
+                }
+            };
+
+            renderizarListaDinamica(venta.accesorios.forros, 'forroLista', 'forro', 'forro');
+            renderizarListaDinamica(venta.accesorios.vidrios, 'vidrioLista', 'vidrio', 'vidrio');
+            renderizarListaDinamica(venta.accesorios.otros, 'otroLista', 'otro', 'otroAccesorio');
+
+            // Migración compatibilidad hacia atrás: si `forroModelo` está definido y no hay `forros` array
+            if (venta.accesorios.forro && (!venta.accesorios.forros || !venta.accesorios.forros.length)) {
+                 renderizarListaDinamica([{modelo: venta.accesorios.forroModelo, cantidad: venta.accesorios.forroCantidad || 1}], 'forroLista', 'forro', 'forro');
             }
-            
+            if (venta.accesorios.vidrio && (!venta.accesorios.vidrios || !venta.accesorios.vidrios.length)) {
+                 renderizarListaDinamica([{modelo: venta.accesorios.vidrioModelo, cantidad: venta.accesorios.vidrioCantidad || 1}], 'vidrioLista', 'vidrio', 'vidrio');
+            }
+
             // Cargador
-            if (venta.accesorios.cargador) {
-                document.getElementById('cargador').checked = true;
-                document.getElementById('cargador').dispatchEvent(new Event('change'));
-                setTimeout(() => {
-                    const cargadorCantidad = document.querySelector('#cargadorCantidad input');
-                    if (cargadorCantidad) cargadorCantidad.value = venta.accesorios.cargadorCantidad || 1;
-                }, 50);
-            }
-            
-            // Vidrio
-            if (venta.accesorios.vidrio) {
-                document.getElementById('vidrio').checked = true;
-                document.getElementById('vidrio').dispatchEvent(new Event('change'));
-                setTimeout(() => {
-                    const vidrioSelect = document.querySelector('#vidrioModelo select');
-                    const vidrioCantidad = document.querySelector('#vidrioModelo input');
-                    if (vidrioSelect) vidrioSelect.value = venta.accesorios.vidrioModelo || '';
-                    if (vidrioCantidad) vidrioCantidad.value = venta.accesorios.vidrioCantidad || 1;
-                }, 50);
-            }
-            
-            // Protector de cámara
             if (venta.accesorios.protectorCamara) {
                 document.getElementById('protectorCamara').checked = true;
                 document.getElementById('protectorCamara').dispatchEvent(new Event('change'));
@@ -1731,7 +1877,7 @@ class App {
                     if (protectorCantidad) protectorCantidad.value = venta.accesorios.protectorCantidad || 1;
                 }, 50);
             }
-            
+
             // Cubo
             if (venta.accesorios.cubo) {
                 document.getElementById('cubo').checked = true;
@@ -1741,7 +1887,7 @@ class App {
                     if (cuboCantidad) cuboCantidad.value = venta.accesorios.cuboCantidad || 1;
                 }, 50);
             }
-            
+
             // Cable Lightning
             if (venta.accesorios.cableLightning) {
                 document.getElementById('cableLightning').checked = true;
@@ -1751,7 +1897,7 @@ class App {
                     if (cableLightningCantidad) cableLightningCantidad.value = venta.accesorios.cableLightningCantidad || 1;
                 }, 50);
             }
-            
+
             // Cable C+C
             if (venta.accesorios.cableCC) {
                 document.getElementById('cableCC').checked = true;
@@ -1761,7 +1907,7 @@ class App {
                     if (cableCCCantidad) cableCCCantidad.value = venta.accesorios.cableCCCantidad || 1;
                 }, 50);
             }
-            
+
             // Caja
             if (venta.accesorios.caja) {
                 document.getElementById('caja').checked = true;
@@ -1776,11 +1922,11 @@ class App {
                 }, 50);
             }
         }, 100);
-        
+
         // Forma de pago
         document.querySelector(`input[name="formaPago"][value="${venta.formaPago}"]`).checked = true;
         this.manejarCambioFormaPago();
-        
+
         // Detalles de pago según tipo
         setTimeout(() => {
             if (venta.formaPago === 'efectivo') {
@@ -1806,7 +1952,7 @@ class App {
                 document.getElementById('transferenciaTasa').value = venta.transferenciaDetalles.tasa || 0;
             }
         }, 150);
-        
+
         // Equipo recibido
         if (venta.equipoRecibido) {
             document.getElementById('recibirEquipo').checked = true;
@@ -1821,14 +1967,14 @@ class App {
                 document.getElementById('equipoComentarios').value = venta.equipoRecibido.comentarios || '';
             }, 150);
         }
-        
+
         // Monto total
         document.getElementById('montoTotal').value = venta.montoTotal;
-        
+
         // Tipo de transacción
         document.querySelector(`input[name="tipoTransaccion"][value="${venta.tipoTransaccion}"]`).checked = true;
         this.manejarCambioTipoTransaccion();
-        
+
         // WEPPA
         document.getElementById('weppa').checked = venta.weppa || false;
         if (venta.weppa) {
@@ -1837,7 +1983,7 @@ class App {
                 document.getElementById('montoTotalManual').value = venta.montoTotal;
             }, 200);
         }
-        
+
         // Nota de venta
         if (venta.notaVentaDetalles) {
             document.getElementById('notaVenta').checked = true;
@@ -1846,59 +1992,59 @@ class App {
                 document.getElementById('notaVentaDetalles').value = venta.notaVentaDetalles;
             }, 100);
         }
-        
+
         // Recalcular y mostrar totales después de cargar todo
         setTimeout(() => {
             this.calcularYMostrarTotal();
         }, 250);
     }
-    
+
     /**
      * Imprime la garantía de una venta
      */
     imprimirGarantia(ventaId) {
         const venta = ventaService.obtenerVentaPorId(ventaId);
-        
+
         if (!venta) {
             mostrarAlerta('Venta no encontrada', 'error');
             return;
         }
-        
+
         if (venta.tipoVenta !== 'completa') {
             mostrarAlerta('Solo se pueden imprimir garantías de ventas completas', 'warning');
             return;
         }
-        
+
         printService.imprimirGarantia(venta);
     }
-    
+
     /**
      * Imprime la garantía de un cambio por garantía
      */
     imprimirGarantiaCambio(cambio) {
         printService.imprimirGarantiaCambio(cambio);
     }
-    
+
     /**
      * Imprime el resumen del día
      */
     imprimirResumenDia() {
         const fechaHoy = new Date().toLocaleDateString('es-ES'); // 1. Obtenemos la fecha
-        
+
         // 2. Filtramos al instante por la fecha de hoy
         const ventas = ventaService.obtenerVentas().filter(v => v.fecha === fechaHoy);
         const movimientos = movimientoService.obtenerMovimientos().filter(m => m.fecha === fechaHoy);
-        
+
         printService.imprimirResumenDia(ventas, movimientos, this.cajaActual);
     }
-    
+
     /**
      * Elimina una venta
      */
     eliminarVenta(ventaId) {
         if (confirmar('¿Estás seguro de que quieres eliminar esta venta?')) {
             const resultado = ventaService.eliminarVenta(ventaId);
-            
+
             if (resultado.exito) {
                 mostrarAlerta(resultado.mensaje, 'success');
                 this.actualizarUI();
@@ -1943,7 +2089,7 @@ class App {
 
         // Eventos para destinos/orígenes personalizados
         this.inicializarDestinosPersonalizados();
-        
+
         // Eventos para tipos de accesorios
         this.inicializarTiposAccesorios();
     }
@@ -2185,12 +2331,12 @@ class App {
     inicializarCantidadModelos(tipo, tipoAccesorio) {
         const selectId = `${tipo}${tipoAccesorio.replace(/ /g, '')}CantidadModelos`;
         const select = document.getElementById(selectId);
-        
+
         if (select) {
             select.addEventListener('change', (e) => {
                 this.generarCamposModelos(tipo, tipoAccesorio, parseInt(e.target.value));
             });
-            
+
             // Generar campos iniciales
             this.generarCamposModelos(tipo, tipoAccesorio, 1);
         }
@@ -2202,7 +2348,7 @@ class App {
     generarCamposModelos(tipo, tipoAccesorio, cantidad) {
         const contenedorId = `${tipo}${tipoAccesorio.replace(/ /g, '')}Modelos`;
         const contenedor = document.getElementById(contenedorId);
-        
+
         if (!contenedor) return;
 
         let html = '';
@@ -2210,7 +2356,7 @@ class App {
             html += '<div class="bg-gray-50 p-3 rounded-lg mb-3">';
             html += `<p class="text-sm font-medium text-gray-700 mb-2">Modelo ${i}</p>`;
             html += '<div class="grid md:grid-cols-2 gap-3">';
-            
+
             // Modelo de iPhone
             html += '<div>';
             html += '<label class="block text-xs text-gray-600 mb-1">Modelo iPhone</label>';
@@ -2220,13 +2366,13 @@ class App {
                 html += `<option value="${modelo.valor}">${modelo.etiqueta}</option>`;
             });
             html += '</select></div>';
-            
+
             // Cantidad
             html += '<div>';
             html += '<label class="block text-xs text-gray-600 mb-1">Cantidad</label>';
             html += `<input type="number" min="1" value="1" class="w-full p-2 border rounded-lg text-sm" data-cantidad="${i}">`;
             html += '</div>';
-            
+
             // Si es Caja, agregar color
             if (tipoAccesorio === 'Caja') {
                 html += '<div class="md:col-span-2">';
@@ -2238,10 +2384,10 @@ class App {
                 });
                 html += '</select></div>';
             }
-            
+
             html += '</div></div>';
         }
-        
+
         contenedor.innerHTML = html;
     }
 
@@ -2252,7 +2398,7 @@ class App {
         try {
             const datos = this.recopilarDatosMovimiento();
             console.log('📝 Datos recopilados:', datos);
-            
+
             if (!datos) {
                 alert('Por favor complete todos los campos requeridos');
                 return;
@@ -2262,11 +2408,11 @@ class App {
             // Guardar usando el servicio
             const resultado = movimientoService.crearMovimiento(datos);
             console.log('💾 Resultado del guardado:', resultado);
-            
+
             if (resultado.exito) {
                 alert('✅ Movimiento registrado correctamente');
                 this.cancelarMovimiento();
-                
+
                 // Actualizar resumen con manejo de errores separado
                 try {
                     this.actualizarResumenMovimientos();
@@ -2357,7 +2503,7 @@ class App {
                 console.log(this.tipoMovimientoActual)
                 tipo = esSalida ? 'Salida Accesorio' : 'Ingreso Accesorio';
                 datosMovimiento.tipo = document.getElementById(`${prefijo}AccesorioTipo`)?.value || '';
-                
+
                 if (esSalida) {
                     datosMovimiento.destino = document.getElementById('salidaAccesorioDestino')?.value || '';
                     if (datosMovimiento.destino === 'Otro') {
@@ -2366,7 +2512,7 @@ class App {
                 } else {
                     datosMovimiento.proveedor = document.getElementById('ingresoAccesorioProveedor')?.value || '';
                 }
-                
+
                 // Recopilar detalles específicos del accesorio
                 const detalles = this.recopilarDetallesAccesorio(prefijo, datosMovimiento.tipo);
                 Object.assign(datosMovimiento, detalles);
@@ -2394,15 +2540,15 @@ class App {
             case 'Protector de Cámara':
                 const cantidadModelos = document.getElementById(`${prefijo}${tipoSinEspacios}CantidadModelos`)?.value || 1;
                 detalles.modelos = [];
-                
+
                 const contenedor = document.getElementById(`${prefijo}${tipoSinEspacios}Modelos`);
                 if (contenedor) {
                     for (let i = 1; i <= cantidadModelos; i++) {
                         const modelo = contenedor.querySelector(`[data-modelo="${i}"]`)?.value || '';
                         const cantidad = contenedor.querySelector(`[data-cantidad="${i}"]`)?.value || 1;
-                        const color = tipoAccesorio === 'Caja' ? 
+                        const color = tipoAccesorio === 'Caja' ?
                             (contenedor.querySelector(`[data-color="${i}"]`)?.value || '') : '';
-                        
+
                         if (modelo) {
                             detalles.modelos.push({ modelo, cantidad: parseInt(cantidad), color });
                         }
@@ -2472,6 +2618,5 @@ class App {
 document.addEventListener('DOMContentLoaded', () => {
     window.app = new App();
 });
-
 
 

@@ -189,6 +189,24 @@ class App {
             });
         });
 
+        /* === NUEVO === */
+        // Manejo del checkbox de "Abonos Previos"
+        const checkboxAbonos = document.getElementById('tieneAbonosPrevios');
+        if (checkboxAbonos) {
+            checkboxAbonos.addEventListener('change', (e) => {
+                document.getElementById('abonosPreviosDetalles').classList.toggle('hidden', !e.target.checked);
+                this.calcularYMostrarTotal();
+            });
+        }
+        // Botones para agregar más abonos
+        this.manejarFilasDinamicas('.btn-add-abono-previo', 'listaAbonosPrevios', '.abono-previo-item');
+        // Escuchar cambios de importe en los abonos previos
+        document.getElementById('listaAbonosPrevios')?.addEventListener('input', (e) => {
+            if (e.target.classList.contains('abono-monto')) {
+                this.calcularYMostrarTotal();
+            }
+        });
+        /* =========== */
         // Pago mixto
         ['montoEfectivo', 'montoZelle', 'montoBinance', 'montoPagoMovilDolares', 'montoTransferenciaDolares'].forEach(id => {
             document.getElementById(id).addEventListener('input', () => {
@@ -321,10 +339,10 @@ class App {
                     if (['forro', 'vidrio'].includes(accesorio)) suffix = 'Contenedor';
                     else if (accesorio === 'caja') suffix = 'Modelo';
                     else if (accesorio === 'otroAccesorio') suffix = 'Contenedor';
-                    
+
                     const contenedorId = accesorio === 'otroAccesorio' ? 'otroContenedor' : `${accesorio}${suffix}`;
                     const contenedor = document.getElementById(contenedorId);
-                    
+
                     if (contenedor) {
                         contenedor.classList.toggle('hidden', !e.target.checked);
 
@@ -369,11 +387,11 @@ class App {
                 const btn = e.target.closest(selectorBtnAdd);
                 const itemOriginal = btn.closest(selectorItem);
                 const contenedor = document.getElementById(contenedorPadreId);
-                
+
                 if (!contenedor) return;
 
                 const nuevoItem = itemOriginal.cloneNode(true);
-                
+
                 // Cambiar el botón "+" por uno de "-" (eliminar fila)
                 const nuevoBtn = nuevoItem.querySelector(selectorBtnAdd);
                 nuevoBtn.className = 'btn-remove-fila bg-red-500 text-white w-8 h-8 rounded font-bold hover:bg-red-600 transition';
@@ -383,7 +401,7 @@ class App {
                 // Limpiar valores del clon
                 const selects = nuevoItem.querySelectorAll('select');
                 selects.forEach(s => s.value = '');
-                
+
                 const inputsText = nuevoItem.querySelectorAll('input[type="text"]');
                 inputsText.forEach(i => i.value = '');
 
@@ -533,6 +551,8 @@ class App {
 
         const tipoTransaccion = document.querySelector('input[name="tipoTransaccion"]:checked').value;
 
+        document.getElementById('abonosPreviosForm').style.display = (tipoTransaccion === 'venta') ? 'block' : 'none';
+
         // Mostrar/ocultar sección de abono
         document.getElementById('abonoInfo').classList.toggle('hidden', tipoTransaccion !== 'abono');
 
@@ -556,6 +576,7 @@ class App {
             document.getElementById('infoIphone').style.display = 'block';
             document.getElementById('montoTotalSection').classList.remove('hidden');
         }
+
     }
 
     /**
@@ -645,8 +666,25 @@ class App {
             subtotalEquipo = parseFloat(document.getElementById('equipoValor')?.value) || 0;
         }
 
-        // Calcular total (Pago + Equipo = Inicial)
-        const totalInicial = subtotalPago + subtotalEquipo;
+        let subtotalAbonos = 0;
+        if (document.getElementById('tieneAbonosPrevios')?.checked) {
+            const montos = document.querySelectorAll('.abono-monto');
+            montos.forEach(input => {
+                subtotalAbonos += parseFloat(input.value) || 0;
+            });
+            document.getElementById('totalAbonosPreviosDisplay').textContent = subtotalAbonos.toFixed(2);
+        }
+
+        // Calcular total (Pago + Equipo + Abonos = Inicial)
+        const totalInicial = subtotalPago + subtotalEquipo + subtotalAbonos;
+
+        const abonosLinea = document.getElementById('abonosPreviosLinea');
+        if (abonosLinea) {
+            document.getElementById('subtotalAbonosPrevios').textContent = `$${subtotalAbonos.toFixed(2)}`;
+            abonosLinea.style.display = (subtotalAbonos > 0) ? 'flex' : 'none';
+        }
+
+        //const totalInicial = subtotalPago + subtotalEquipo;
 
         // Verificar si WEPPA está activo
         const weppaActivo = document.getElementById('weppa')?.checked;
@@ -943,6 +981,20 @@ class App {
         const tipoTransaccion = document.querySelector('input[name="tipoTransaccion"]:checked').value;
         const formaPago = document.querySelector('input[name="formaPago"]:checked')?.value;
 
+        let abonosRegistrados = [];
+        let totalAbonosP = 0;
+        if (document.getElementById('tieneAbonosPrevios')?.checked) {
+            const items = document.querySelectorAll('.abono-previo-item');
+            items.forEach(item => {
+                const fecha = item.querySelector('.abono-fecha').value;
+                const monto = parseFloat(item.querySelector('.abono-monto').value) || 0;
+                if (monto > 0) {
+                    abonosRegistrados.push({ fecha, monto });
+                    totalAbonosP += monto;
+                }
+            });
+        }
+
         const datos = {
             tipoVenta,
             tipoTransaccion,
@@ -950,7 +1002,9 @@ class App {
             montoTotal: parseFloat(document.getElementById('montoTotal').value) || 0,
             weppa: document.getElementById('weppa').checked,
             notaVentaDetalles: document.getElementById('notaVenta').checked ?
-                document.getElementById('notaVentaDetalles').value : null
+                document.getElementById('notaVentaDetalles').value : null,
+            abonosPrevios: abonosRegistrados,
+            totalAbonosPrevios: totalAbonosP
         };
 
         // Cliente y equipo (solo si es venta completa)
@@ -1086,7 +1140,7 @@ class App {
                 if (mod && cant > 0) forrosData.push({ modelo: mod, cantidad: cant });
             });
         }
-        
+
         // Analizar y recolectar las filas de vidrio
         const vidriosData = [];
         if (document.getElementById('vidrio').checked) {
@@ -1118,7 +1172,7 @@ class App {
 
             vidrio: document.getElementById('vidrio').checked,
             vidrios: vidriosData,
-            
+
             otro: !!(otroCheckbox && otroCheckbox.checked),
             otros: otrosData,
 
@@ -1158,7 +1212,7 @@ class App {
         document.getElementById('forroContenedor')?.classList.add('hidden');
         document.getElementById('vidrioContenedor')?.classList.add('hidden');
         document.getElementById('otroContenedor')?.classList.add('hidden');
-        
+
         // Limpiar dinámicos devolviéndolos a una sola fila en blanco
         const listContainerForro = document.getElementById('forroLista');
         if (listContainerForro) {
@@ -1171,7 +1225,7 @@ class App {
                 if (i) i.value = 1;
             }
         }
-        
+
         const listContainerVidrio = document.getElementById('vidrioLista');
         if (listContainerVidrio) {
             const items = listContainerVidrio.querySelectorAll('.vidrio-item');
@@ -1183,7 +1237,7 @@ class App {
                 if (i) i.value = 1;
             }
         }
-        
+
         const listContainerOtro = document.getElementById('otroLista');
         if (listContainerOtro) {
             const items = listContainerOtro.querySelectorAll('.otro-item');
@@ -1195,6 +1249,19 @@ class App {
                 if (i) i.value = 1;
             }
         }
+        // Limpiar abonos previos
+        document.getElementById('tieneAbonosPrevios').checked = false;
+        document.getElementById('abonosPreviosDetalles').classList.add('hidden');
+        const listaAbonosP = document.getElementById('listaAbonosPrevios');
+        if (listaAbonosP) {
+            const items = listaAbonosP.querySelectorAll('.abono-previo-item');
+            items.forEach((item, index) => { if (index > 0) item.remove(); });
+            if (items[0]) {
+                items[0].querySelector('.abono-fecha').value = '';
+                items[0].querySelector('.abono-monto').value = '';
+            }
+        }
+        document.getElementById('totalAbonosPreviosDisplay').textContent = '0.00';
 
         document.getElementById('cargadorCantidad').classList.add('hidden');
         document.getElementById('protectorCantidad').classList.add('hidden');
@@ -1514,11 +1581,18 @@ class App {
         } else if (venta.formaPago === 'transferencia' && venta.transferenciaDetalles) {
             detallesPago.push(`<p class="bg-indigo-100 px-2 py-1 rounded">Transferencia: ${formatearMoneda(venta.transferenciaDetalles.dolares)} = ${venta.transferenciaDetalles.bolivares}Bs (${venta.transferenciaDetalles.tasa})</p>`);
         } else {
-            detallesPago.push(`<p class="bg-blue-100 px-2 py-1 rounded">${venta.formaPago.toUpperCase()}: ${formatearMoneda(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0))}</p>`);
+            detallesPago.push(`<p class="bg-blue-100 px-2 py-1 rounded">${venta.formaPago.toUpperCase()}: ${formatearMoneda(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0) - (venta.totalAbonosPrevios || 0))}</p>`);
         }
 
         if (venta.equipoRecibido) {
             detallesPago.push(`<p class="bg-orange-100 px-2 py-1 rounded">Equipo recibido: ${venta.equipoRecibido.modelo} (${formatearMoneda(venta.equipoRecibido.valor)})</p>`);
+        }
+
+        if (venta.abonosPrevios && venta.abonosPrevios.length > 0) {
+            venta.abonosPrevios.forEach(ab => {
+                const fechaText = ab.fecha ? ` (${ab.fecha})` : '';
+                detallesPago.push(`<p class="bg-green-100 px-2 py-1 rounded">Abono Precargado${fechaText}: ${formatearMoneda(ab.monto)}</p>`);
+            });
         }
 
         seccionPago = `
@@ -1807,7 +1881,7 @@ class App {
                 if (arr && arr.length > 0) {
                     document.getElementById(checkId).checked = true;
                     document.getElementById(checkId).dispatchEvent(new Event('change'));
-                    
+
                     const listaContenedor = document.getElementById(contenedorPadreId);
                     if (!listaContenedor) return;
                     listaContenedor.innerHTML = ''; // limpiar default
@@ -1817,7 +1891,7 @@ class App {
                         const btnClass = isFirst ? `btn-add-${tipo} bg-green-500` : 'btn-remove-fila bg-red-500';
                         const btnText = isFirst ? '+' : '-';
                         const btnAction = isFirst ? '' : 'onclick="this.parentElement.remove()"';
-                        
+
                         let htmlFila = '';
                         if (tipo === 'otro') {
                             htmlFila = `
@@ -1846,7 +1920,7 @@ class App {
                             // Mejor clonamos las options del select original que existe en #salidaEquipoModelo etc., 
                             // o llamamos this.inicializarSelectores() si no rellenamos options? No, hay que rellenar options.
                             const optionsCloneRef = document.getElementById('modelo');
-                            if(optionsCloneRef) {
+                            if (optionsCloneRef) {
                                 select.innerHTML = optionsCloneRef.innerHTML; // easy clone
                                 select.options[0].textContent = 'Seleccionar modelo';
                             }
@@ -1862,10 +1936,10 @@ class App {
 
             // Migración compatibilidad hacia atrás: si `forroModelo` está definido y no hay `forros` array
             if (venta.accesorios.forro && (!venta.accesorios.forros || !venta.accesorios.forros.length)) {
-                 renderizarListaDinamica([{modelo: venta.accesorios.forroModelo, cantidad: venta.accesorios.forroCantidad || 1}], 'forroLista', 'forro', 'forro');
+                renderizarListaDinamica([{ modelo: venta.accesorios.forroModelo, cantidad: venta.accesorios.forroCantidad || 1 }], 'forroLista', 'forro', 'forro');
             }
             if (venta.accesorios.vidrio && (!venta.accesorios.vidrios || !venta.accesorios.vidrios.length)) {
-                 renderizarListaDinamica([{modelo: venta.accesorios.vidrioModelo, cantidad: venta.accesorios.vidrioCantidad || 1}], 'vidrioLista', 'vidrio', 'vidrio');
+                renderizarListaDinamica([{ modelo: venta.accesorios.vidrioModelo, cantidad: venta.accesorios.vidrioCantidad || 1 }], 'vidrioLista', 'vidrio', 'vidrio');
             }
 
             // Cargador
@@ -1930,11 +2004,11 @@ class App {
         // Detalles de pago según tipo
         setTimeout(() => {
             if (venta.formaPago === 'efectivo') {
-                document.getElementById('efectivoMonto').value = venta.montoTotal || 0;
+                document.getElementById('efectivoMonto').value = venta.montoPago || 0;
             } else if (venta.formaPago === 'zelle') {
-                document.getElementById('zelleMonto').value = venta.montoTotal || 0;
+                document.getElementById('zelleMonto').value = venta.montoPago || 0;
             } else if (venta.formaPago === 'binance') {
-                document.getElementById('binanceMonto').value = venta.montoTotal || 0;
+                document.getElementById('binanceMonto').value = venta.montoPago || 0;
             } else if (venta.formaPago === 'mixto' && venta.pagoMixto) {
                 document.getElementById('montoEfectivo').value = venta.pagoMixto.efectivo || 0;
                 document.getElementById('montoZelle').value = venta.pagoMixto.zelle || 0;
@@ -1974,6 +2048,34 @@ class App {
         // Tipo de transacción
         document.querySelector(`input[name="tipoTransaccion"][value="${venta.tipoTransaccion}"]`).checked = true;
         this.manejarCambioTipoTransaccion();
+
+        // Abonos previos
+        if (venta.abonosPrevios && venta.abonosPrevios.length > 0) {
+            document.getElementById('tieneAbonosPrevios').checked = true;
+            document.getElementById('tieneAbonosPrevios').dispatchEvent(new Event('change'));
+
+            setTimeout(() => {
+                const listaAbonosP = document.getElementById('listaAbonosPrevios');
+                if (listaAbonosP) {
+                    listaAbonosP.innerHTML = '';
+                    venta.abonosPrevios.forEach((abono, idx) => {
+                        const isFirst = idx === 0;
+                        const btnClass = isFirst ? 'btn-add-abono-previo bg-green-500 hover:bg-green-600' : 'btn-remove-fila bg-red-500 hover:bg-red-600';
+                        const btnText = isFirst ? '+' : '-';
+                        const btnAction = isFirst ? '' : 'onclick="this.parentElement.remove()"';
+
+                        const htmlFila = `
+                            <div class="abono-previo-item grid grid-cols-[1fr,1fr,auto] gap-2 items-center">
+                                <input type="date" value="${abono.fecha || ''}" class="p-2 border rounded-lg abono-fecha" title="Fecha del Abono">
+                                <input type="number" min="0" step="0.01" value="${abono.monto || 0}" class="p-2 border rounded-lg abono-monto" placeholder="Monto ($)">
+                                <button type="button" class="${btnClass} text-white w-8 h-8 rounded font-bold transition" ${btnAction}>${btnText}</button>
+                            </div>
+                        `;
+                        listaAbonosP.insertAdjacentHTML('beforeend', htmlFila);
+                    });
+                }
+            }, 50);
+        }
 
         // WEPPA
         document.getElementById('weppa').checked = venta.weppa || false;

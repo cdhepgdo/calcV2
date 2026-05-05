@@ -65,6 +65,10 @@ export class Venta {
         // Equipo recibido
         this.equipoRecibido = data.equipoRecibido || null;
 
+        // Abonos previos (para cierres)
+        this.abonosPrevios = data.abonosPrevios || []; // Array de {fecha, monto}
+        this.totalAbonosPrevios = data.totalAbonosPrevios || 0;
+
         // Extras
         this.weppa = data.weppa || false;
         this.notaVentaDetalles = data.notaVentaDetalles || null;
@@ -124,7 +128,7 @@ export class Venta {
 
             // Agregar equipo recibido al cálculo
             const equipoRecibidoValor = this.equipoRecibido ? this.equipoRecibido.valor : 0;
-            const totalEsperado = totalPagoMixto + equipoRecibidoValor;
+            const totalEsperado = totalPagoMixto + equipoRecibidoValor + (this.totalAbonosPrevios || 0);
             const diferencia = Math.abs(totalEsperado - this.montoTotal);
 
             if (diferencia > 0.01 && !this.weppa) {
@@ -137,7 +141,7 @@ export class Venta {
             } else {
                 // VALIDACIÓN PAGO MÓVIL
                 const equipoRecibidoValor = this.equipoRecibido ? this.equipoRecibido.valor : 0;
-                const totalEsperado = this.pagoMovilDetalles.dolares + equipoRecibidoValor;
+                const totalEsperado = this.pagoMovilDetalles.dolares + equipoRecibidoValor + (this.totalAbonosPrevios || 0);
                 const diferencia = this.montoTotal - totalEsperado;
                 console.log('pagomovilio', diferencia)
                 if (diferencia > 0.01 && !this.weppa) {
@@ -153,7 +157,7 @@ export class Venta {
             } else {
                 // VALIDACIÓN TRANSFERENCIA
                 const equipoRecibidoValor = this.equipoRecibido ? this.equipoRecibido.valor : 0;
-                const totalEsperado = this.transferenciaDetalles.dolares + equipoRecibidoValor;
+                const totalEsperado = this.transferenciaDetalles.dolares + equipoRecibidoValor + (this.totalAbonosPrevios || 0);
                 const diferencia = this.montoTotal - totalEsperado;
 
                 if (diferencia > 0.01 && !this.weppa) {
@@ -197,7 +201,7 @@ export class Venta {
         let efectivo = 0;
 
         if (this.formaPago === 'efectivo') {
-            efectivo = this.montoTotal - (this.equipoRecibido ? this.equipoRecibido.valor : 0);
+            efectivo = this.montoTotal - (this.equipoRecibido ? this.equipoRecibido.valor : 0) - (this.totalAbonosPrevios || 0);
         } else if (this.formaPago === 'mixto' && this.pagoMixto) {
             efectivo = this.pagoMixto.efectivo || 0;
         }
@@ -268,6 +272,8 @@ export class Venta {
             pagoMovilDetalles: this.pagoMovilDetalles,
             transferenciaDetalles: this.transferenciaDetalles,
             equipoRecibido: this.equipoRecibido,
+            abonosPrevios: this.abonosPrevios,
+            totalAbonosPrevios: this.totalAbonosPrevios,
             weppa: this.weppa,
             notaVentaDetalles: this.notaVentaDetalles
         };

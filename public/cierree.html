@@ -1,1098 +1,288 @@
-<!DOCTYPE html>
-<html lang="es">
+/**
+ * Modelo de Venta
+ * Representa una venta de iPhone y/o accesorios
+ */
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Ventas iPhone - Refactorizado</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/styles.css">
-</head>
+export class Venta {
+    constructor(data = {}) {
+        this.id = data.id || this.generarId();
+        this.fecha = data.fecha || new Date().toLocaleDateString('es-ES');
+        this.hora = data.hora || new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-4">
+        // Tipo de venta
+        this.tipoVenta = data.tipoVenta || 'completa'; // 'completa' o 'accesorios'
+        this.tipoTransaccion = data.tipoTransaccion || 'venta'; // 'venta' o 'abono'
 
-    <!-- Menú de Navegación -->
-    <nav
-        class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white shadow-lg">
-        <div class="flex gap-2" id="menuOptions">
-            <a href="lista.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">LISTADO PRECIOS</a>
-            <a href="intercambio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cálculo Trading</a>
-            <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Principal</a>
-            <a href="registro.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">📊 Registro</a>
-            <a href="inv-precio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Inv</a>
-        </div>
-        <button id="menuToggle" class="hidden text-2xl focus:outline-none relative z-50">☰</button>
-        <div id="floatingMenu"
-            class="hidden fixed bottom-20 right-6 bg-blue-700 text-white rounded-lg shadow-lg py-2 flex flex-col gap-1 z-40">
-            <a href="lista.html" class="px-4 py-2 hover:bg-blue-900 rounded">LISTADO PRECIOS</a>
-            <a href="intercambio.html" class="px-4 py-2 hover:bg-blue-900 rounded">Cálculo Trading</a>
-            <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Principal</a>
-            <a href="registro.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">📊 Registro</a>
-            <a href="inv-precio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Inv</a>
-        </div>
-    </nav>
+        // Cliente
+        this.cliente = data.cliente || {
+            nombre: '',
+            cedula: '',
+            telefono: ''
+        };
 
-    <!-- Espaciador -->
-    <div class="h-14"></div>
+        // Equipo (si es venta completa)
+        this.equipo = data.equipo || {
+            modelo: '',
+            color: '',
+            almacenamiento: '',
+            bateria: '',
+            imei: '',
+            garantia: ''
+        };
 
-    <div class="max-w-6xl mx-auto">
-        <!-- Header -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <h1 class="text-3xl font-bold text-gray-800 text-center mb-2">📱 Sistema de Ventas iPhone</h1>
-            <p class="text-gray-600 text-center">Versión Refactorizada - <span id="fecha-actual"></span></p>
-            <p class="text-sm text-center text-blue-600 mt-2">✨ Arquitectura modular con ES6 Modules</p>
-        </div>
+        // Accesorios
+        this.accesorios = data.accesorios || {
+            forro: false,
+            forros: [], // Array de {modelo, cantidad}
+            cargador: false,
+            cargadorCantidad: 0,
+            vidrio: false,
+            vidrios: [], // Array de {modelo, cantidad}
+            otro: false,
+            otros: [], // Array de {nombre, cantidad}
+            protectorCamara: false,
+            protectorCantidad: 0,
+            cubo: false,
+            cuboCantidad: 0,
+            cableLightning: false,
+            cableLightningCantidad: 0,
+            cableCC: false,
+            cableCCCantidad: 0,
+            caja: false,
+            cajaModelo: null,
+            cajaColor: null,
+            cajaCantidad: 0
+        };
 
-        <!-- Caja Inicial -->
-        <div class="bg-green-50 border-2 border-green-200 rounded-xl shadow-lg p-6 mb-6">
-            <h2 class="text-xl font-semibold text-green-800 mb-4">💰 Caja Inicial del Día</h2>
-            <div class="flex items-center gap-4">
-                <div class="flex-1">
-                    <label class="block text-sm font-medium text-green-700 mb-2">Efectivo disponible ($)</label>
-                    <input type="number" id="cajaInicial" step="0.01"
-                        class="w-full p-3 border border-green-300 rounded-lg" placeholder="0.00">
-                </div>
-                <button id="guardarCajaInicial"
-                    class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition">
-                    💾 Guardar
-                </button>
-            </div>
-            <div id="cajaInicialConfirmacion" class="hidden mt-3 p-3 bg-green-100 rounded-lg">
-                <p class="text-green-800 font-medium">✅ Caja inicial: $<span id="cajaInicialMostrar">0.00</span></p>
-            </div>
-        </div>
+        // Pago
+        this.formaPago = data.formaPago || '';
+        this.montoTotal = data.montoTotal || 0;
+        this.montoPago = data.montoPago || null; // Monto del pago (para WEPPA con efectivo/zelle/binance)
+        this.pagoMixto = data.pagoMixto || null;
+        this.pagoMovilDetalles = data.pagoMovilDetalles || null;
+        this.transferenciaDetalles = data.transferenciaDetalles || null;
 
+        // Equipo recibido
+        this.equipoRecibido = data.equipoRecibido || null;
 
-        <!-- Formulario de Venta -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <form id="ventaForm" class="space-y-6">
-                <!-- Tipo de Venta -->
-                <div class="border-b pb-6">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4">🛒 Tipo de Venta</h2>
-                    <div class="flex items-center space-x-6">
-                        <label class="flex items-center">
-                            <input type="radio" name="tipoVenta" value="completa" checked class="mr-2">
-                            <span>iPhone + Accesorios</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="radio" name="tipoVenta" value="accesorios" class="mr-2">
-                            <span>Solo Accesorios</span>
-                        </label>
-                        <!-- AGREGAR ESTA NUEVA OPCIÓN AQUÍ -->
-                        <!-- <label class="flex items-center">
-                            <input type="radio" name="tipoTransaccion" value="cambio-garantia" class="mr-2">
-                            🔄 Cambio por Garantía
-                        </label> -->
-                    </div>
-                </div>
+        // Abonos previos (para cierres)
+        this.abonosPrevios = data.abonosPrevios || []; // Array de {fecha, monto}
+        this.totalAbonosPrevios = data.totalAbonosPrevios || 0;
 
-                <!-- Datos del Cliente -->
-                <div id="datosClienteSection" class="border-b pb-6">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4">👤 Datos del Cliente</h2>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Nombre y Apellido</label>
-                            <input type="text" id="clienteNombre" class="w-full p-3 border rounded-lg"
-                                placeholder="Nombre completo">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Cédula</label>
-                            <input type="text" id="clienteCedula" class="w-full p-3 border rounded-lg"
-                                placeholder="V-12345678">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
-                            <input type="tel" id="clienteTelefono" class="w-full p-3 border rounded-lg"
-                                placeholder="0414-1234567">
-                        </div>
-                    </div>
-                </div>
+        // Extras
+        this.weppa = data.weppa || false;
+        this.notaVentaDetalles = data.notaVentaDetalles || null;
+    }
 
+    generarId() {
+        return `venta_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    }
 
-                <!-- Información del iPhone -->
-                <div id="infoIphone" class="border-b pb-6 bg-blue-50 rounded-xl p-6">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4">📱 Información del iPhone</h2>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Modelo</label>
-                            <select id="modelo" class="w-full p-3 border rounded-lg"></select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
-                            <select id="color" class="w-full p-3 border rounded-lg"></select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Almacenamiento</label>
-                            <select id="almacenamiento" class="w-full p-3 border rounded-lg"></select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">% Batería</label>
-                            <input type="number" id="bateria" min="1" max="100" class="w-full p-3 border rounded-lg"
-                                placeholder="85">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">IMEI</label>
-                            <input type="text" id="equipoImei" class="w-full p-3 border rounded-lg"
-                                placeholder="IMEI del equipo">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Garantía</label>
-                            <select id="equipoGarantia" class="w-full p-3 border rounded-lg"></select>
-                        </div>
-                    </div>
-                </div>
+    /**
+     * Valida que la venta tenga todos los datos requeridos
+     */
+    validar() {
+        const errores = [];
 
-                <!-- Accesorios -->
-                <div class="border-b pb-6 bg-blue-50 rounded-xl p-6" id="accesoriosSection">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4">🛡️ Accesorios</h2>
-                    <div class="grid md:grid-cols-4 gap-2">
-                        <!-- Forro -->
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <label class="flex items-center mb-3">
-                                <input type="checkbox" id="forro" class="mr-3">
-                                <span class="font-medium">Forro</span>
-                            </label>
-                            <div id="forroContenedor" class="hidden flex-col gap-2">
-                                <div id="forroLista" class="flex flex-col gap-2">
-                                    <div
-                                        class="forro-item grid grid-cols-[repeat(auto-fill,minmax(52px,1fr))] gap-2 items-center">
-                                        <select class="p-2 border rounded-lg accModelo flex-1"></select>
-                                        <input type="number" min="1" value="1"
-                                            class="p-2 border rounded-lg w-20 forro-cant" placeholder="Cant.">
-                                        <button type="button"
-                                            class="btn-add-forro bg-green-500 text-white w-8 h-8 rounded font-bold hover:bg-green-600 transition">+</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+        // Validar forma de pago
+        if (!this.formaPago) {
+            errores.push('Debe seleccionar una forma de pago');
+        }
 
-                        <!-- Cargador -->
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <label class="flex items-center mb-3">
-                                <input type="checkbox" id="cargador" class="mr-3">
-                                <span class="font-medium">Cargador</span>
-                            </label>
-                            <div id="cargadorCantidad" class="hidden">
-                                <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg"
-                                    placeholder="Cant.">
-                            </div>
-                        </div>
+        // Validar monto
+        if (!this.montoTotal || this.montoTotal <= 0) {
+            errores.push('El monto total debe ser mayor a $0.00');
+        }
 
-                        <!-- Vidrio -->
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <label class="flex items-center mb-3">
-                                <input type="checkbox" id="vidrio" class="mr-3">
-                                <span class="font-medium">Vidrio</span>
-                            </label>
-                            <div id="vidrioContenedor" class="hidden flex-col gap-2">
-                                <div id="vidrioLista" class="flex flex-col gap-2">
-                                    <div
-                                        class="vidrio-item grid grid-cols-[repeat(auto-fill,minmax(52px,1fr))] gap-2 items-center">
-                                        <select class="p-2 border rounded-lg accModelo flex-1"></select>
-                                        <input type="number" min="1" value="1"
-                                            class="p-2 border rounded-lg w-20 vidrio-cant" placeholder="Cant.">
-                                        <button type="button"
-                                            class="btn-add-vidrio bg-green-500 text-white w-8 h-8 rounded font-bold hover:bg-green-600 transition">+</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+        // Validar datos del equipo si es venta completa
+        if (this.tipoVenta === 'completa') {
+            if (!this.equipo.modelo) errores.push('Debe seleccionar un modelo de iPhone');
+            if (!this.equipo.color) errores.push('Debe seleccionar un color');
+            if (!this.equipo.almacenamiento) errores.push('Debe seleccionar capacidad de almacenamiento');
+            if (!this.equipo.bateria) errores.push('Debe ingresar el porcentaje de batería');
+            if (!this.equipo.garantia) errores.push('Debe seleccionar el tipo de garantía');
 
-                        <!-- Protector Cámara -->
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <label class="flex items-center mb-3">
-                                <input type="checkbox" id="protectorCamara" class="mr-3">
-                                <span class="font-medium">Protector Cámara</span>
-                            </label>
-                            <div id="protectorCantidad" class="hidden">
-                                <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg"
-                                    placeholder="Cant.">
-                            </div>
-                        </div>
+            // Validar datos del cliente
+            if (!this.cliente.nombre) errores.push('Debe ingresar el nombre del cliente');
+            if (!this.cliente.cedula) errores.push('Debe ingresar la cédula del cliente');
+            if (!this.cliente.telefono) errores.push('Debe ingresar el teléfono del cliente');
+        }
+        if (this.equipoRecibido) {
+            if (!this.equipoRecibido.modelo) errores.push('Debe seleccionar un modelo de iPhone recibido');
+            if (!this.equipoRecibido.color) errores.push('Debe seleccionar un color del equipo recibido');
+            if (!this.equipoRecibido.capacidad) errores.push('Debe seleccionar capacidad de almacenamiento del equipo recibido');
+            if (!this.equipoRecibido.bateria) errores.push('Debe ingresar el porcentaje de batería del equipo recibido');
+            if (!this.equipoRecibido.imei) errores.push('Debe ingresar el imei del equipo recibido');
+            if (!this.equipoRecibido.valor) errores.push('Debe ingresar el valor del equipo recibido');
 
-                        <!-- Cubo -->
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <label class="flex items-center mb-3">
-                                <input type="checkbox" id="cubo" class="mr-3">
-                                <span class="font-medium">Cubo</span>
-                            </label>
-                            <div id="cuboCantidad" class="hidden">
-                                <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg"
-                                    placeholder="Cant.">
-                            </div>
-                        </div>
+        }
 
-                        <!-- Cable Lightning -->
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <label class="flex items-center mb-3">
-                                <input type="checkbox" id="cableLightning" class="mr-3">
-                                <span class="font-medium">Cable Lightning</span>
-                            </label>
-                            <div id="cableLightningCantidad" class="hidden">
-                                <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg"
-                                    placeholder="Cant.">
-                            </div>
-                        </div>
+        // Validar montos según forma de pago
+        if (this.formaPago === 'mixto' && this.pagoMixto) {
+            // VALIDACIÓN PAGO MIXTO
+            const totalPagoMixto = (this.pagoMixto.efectivo || 0) +
+                (this.pagoMixto.zelle || 0) +
+                (this.pagoMixto.binance || 0) +
+                (this.pagoMixto.pagoMovil || 0) +
+                (this.pagoMixto.transferencia || 0);
 
-                        <!-- Cable C+C -->
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <label class="flex items-center mb-3">
-                                <input type="checkbox" id="cableCC" class="mr-3">
-                                <span class="font-medium">Cable C+C</span>
-                            </label>
-                            <div id="cableCCCantidad" class="hidden">
-                                <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg"
-                                    placeholder="Cant.">
-                            </div>
-                        </div>
+            // Agregar equipo recibido al cálculo
+            const equipoRecibidoValor = this.equipoRecibido ? this.equipoRecibido.valor : 0;
+            const totalEsperado = totalPagoMixto + equipoRecibidoValor + (this.totalAbonosPrevios || 0);
+            const diferencia = Math.abs(totalEsperado - this.montoTotal);
 
-                        <!-- Caja -->
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <label class="flex items-center mb-3">
-                                <input type="checkbox" id="caja" class="mr-3">
-                                <span class="font-medium">Caja</span>
-                            </label>
-                            <div id="cajaModelo" class="hidden grid grid-cols-3 gap-3">
-                                <select class="p-2 border rounded-lg accModelo flex-1"></select>
-                                <select id="cajaColorSelect" class="p-2 border rounded-lg flex-1"></select>
-                                <input type="number" min="1" value="1" class="p-2 border rounded-lg w-full"
-                                    placeholder="Cant.">
-                            </div>
-                        </div>
+            if (diferencia > 0.01 && !this.weppa) {
+                errores.push(`El total del pago mixto ($${totalPagoMixto.toFixed(2)}) + equipo recibido ($${equipoRecibidoValor.toFixed(2)}) no coincide con el monto total ($${this.montoTotal.toFixed(2)}). Active WEPPA si es intencional.`);
+            }
 
-                        <!-- Otro Accesorio -->
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <label class="flex items-center mb-3">
-                                <input type="checkbox" id="otroAccesorio" class="mr-3">
-                                <span class="font-medium">Otro Accesorio</span>
-                            </label>
-                            <div id="otroContenedor" class="hidden flex-col gap-2">
-                                <div id="otroLista" class="flex flex-col gap-2">
-                                    <div class="otro-item grid grid-cols-[1fr,auto,auto] gap-2 items-center">
-                                        <input type="text" class="p-2 border rounded-lg flex-1 otro-nombre"
-                                            placeholder="¿Qué es?">
-                                        <input type="number" min="1" value="1"
-                                            class="p-2 border rounded-lg w-20 otro-cant" placeholder="Cant.">
-                                        <button type="button"
-                                            class="btn-add-otro bg-green-500 text-white w-8 h-8 rounded font-bold hover:bg-green-600 transition">+</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        } else if (this.formaPago === 'pagomovil') {
+            if (!this.pagoMovilDetalles) {
+                errores.push(`Coloca la tasa`)
+            } else {
+                // VALIDACIÓN PAGO MÓVIL
+                const equipoRecibidoValor = this.equipoRecibido ? this.equipoRecibido.valor : 0;
+                const totalEsperado = this.pagoMovilDetalles.dolares + equipoRecibidoValor + (this.totalAbonosPrevios || 0);
+                const diferencia = this.montoTotal - totalEsperado;
+                console.log('pagomovilio', diferencia)
+                if (diferencia > 0.01 && !this.weppa) {
+                    errores.push(`El monto total ($${this.montoTotal.toFixed(2)}) no puede ser mayor al pago móvil ($${this.pagoMovilDetalles.dolares.toFixed(2)}) + equipo recibido ($${equipoRecibidoValor.toFixed(2)}). Active WEPPA si es intencional.`);
+                } else if (diferencia < 0 && !this.weppa) {
+                    errores.push(`El monto total ($${this.montoTotal.toFixed(2)}) no puede ser menor al pago móvil ($${this.pagoMovilDetalles.dolares.toFixed(2)}) + equipo recibido ($${equipoRecibidoValor.toFixed(2)}). Active WEPPA si es intencional.`);
+                }
+            }
 
+        } else if (this.formaPago === 'transferencia') {
+            if (!this.transferenciaDetalles) {
+                errores.push(`Coloca la Tasa`)
+            } else {
+                // VALIDACIÓN TRANSFERENCIA
+                const equipoRecibidoValor = this.equipoRecibido ? this.equipoRecibido.valor : 0;
+                const totalEsperado = this.transferenciaDetalles.dolares + equipoRecibidoValor + (this.totalAbonosPrevios || 0);
+                const diferencia = this.montoTotal - totalEsperado;
 
-                <!-- Forma de Pago -->
-                <div class="border-b pb-6 bg-blue-50 rounded-xl p-6" id="formaPagoSection">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4">💳 Forma de Pago</h2>
-                    <!-- ESTO PONES: -->
-                    <div id="formaPagoRadios" class="grid md:grid-cols-3 gap-3">
-                        <!-- Los radios se generan automáticamente desde FORMAS_PAGO en constants.js -->
-                    </div>
+                if (diferencia > 0.01 && !this.weppa) {
+                    errores.push(`El monto total ($${this.montoTotal.toFixed(2)}) no puede ser mayor a la transferencia ($${this.transferenciaDetalles.dolares.toFixed(2)}) + equipo recibido ($${equipoRecibidoValor.toFixed(2)}). Active WEPPA si es intencional.`);
+                } else if (diferencia < 0 && !this.weppa) {
+                    errores.push(`El monto total ($${this.montoTotal.toFixed(2)}) no puede ser menor a la transferencia ($${this.transferenciaDetalles.dolares.toFixed(2)}) + equipo recibido ($${equipoRecibidoValor.toFixed(2)}). Active WEPPA si es intencional.`);
+                }
+            }
 
-                    <!-- Formulario EFECTIVO -->
-                    <div id="efectivo-form" class="hidden mt-4 p-4 bg-green-50 rounded-lg border-2 border-green-200">
-                        <h3 class="font-semibold mb-3 text-green-800">💵 Pago en Efectivo</h3>
-                        <div>
-                            <label class="block text-sm font-medium mb-2">Monto en Efectivo ($)</label>
-                            <input type="number" id="efectivoMonto" step="0.01"
-                                class="w-full p-3 border rounded-lg text-lg" placeholder="0.00">
-                        </div>
-                    </div>
+        } else if (['efectivo', 'zelle', 'binance'].includes(this.formaPago)) {
+            // VALIDACIÓN PAGOS SIMPLES (efectivo, zelle, binance)
+            // Para estos métodos, el montoTotal debe ser igual o menor al ingresado
+            // La validación principal ya se hace en el submit con calcularMontoTotal()
+            // Aquí solo validamos que sea positivo
+            if (this.montoTotal <= 0) {
+                errores.push('El monto total debe ser mayor a cero.');
+            }
+        }
 
-                    <!-- Formulario ZELLE -->
-                    <div id="zelle-form" class="hidden mt-4 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
-                        <h3 class="font-semibold mb-3 text-blue-800">💰 Pago por Zelle</h3>
-                        <div>
-                            <label class="block text-sm font-medium mb-2">Monto en Dólares ($)</label>
-                            <input type="number" id="zelleMonto" step="0.01"
-                                class="w-full p-3 border rounded-lg text-lg" placeholder="0.00">
-                        </div>
-                    </div>
+        // validar accesorios
+        if (this.accesorios.forro) {
+            if (!this.accesorios.forros || this.accesorios.forros.length === 0) errores.push('Debe seleccionar al menos un modelo de Forro');
+        }
+        if (this.accesorios.vidrio) {
+            if (!this.accesorios.vidrios || this.accesorios.vidrios.length === 0) errores.push('Debe seleccionar al menos un modelo de Vidrio');
+        }
+        if (this.accesorios.otro) {
+            if (!this.accesorios.otros || this.accesorios.otros.length === 0) errores.push('Debe especificar al menos un accesorio en la opción Otro');
+        }
 
-                    <!-- Formulario BINANCE -->
-                    <div id="binance-form" class="hidden mt-4 p-4 bg-yellow-50 rounded-lg border-2 border-yellow-200">
-                        <h3 class="font-semibold mb-3 text-yellow-800">🪙 Pago por Binance</h3>
-                        <div>
-                            <label class="block text-sm font-medium mb-2">Monto en Dólares ($)</label>
-                            <input type="number" id="binanceMonto" step="0.01"
-                                class="w-full p-3 border rounded-lg text-lg" placeholder="0.00">
-                        </div>
-                    </div>
+        return {
+            valido: errores.length === 0,
+            errores
+        };
+    }
 
-                    <!-- Pago Mixto -->
-                    <div id="pagoMixto" class="hidden mt-4 bg-blue-100 p-4 rounded-lg">
-                        <h3 class="font-medium mb-3">Detalles del Pago Mixto</h3>
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm mb-1">Efectivo ($)</label>
-                                <input type="number" id="montoEfectivo" step="0.01" class="w-full p-2 border rounded-lg"
-                                    placeholder="0.00">
-                            </div>
-                            <div>
-                                <label class="block text-sm mb-1">Zelle ($)</label>
-                                <input type="number" id="montoZelle" step="0.01" class="w-full p-2 border rounded-lg"
-                                    placeholder="0.00">
-                            </div>
-                            <div>
-                                <label class="block text-sm mb-1">Binance ($)</label>
-                                <input type="number" id="montoBinance" step="0.01" class="w-full p-2 border rounded-lg"
-                                    placeholder="0.00">
-                            </div>
+    /**
+     * Calcula el efectivo involucrado en esta venta
+     */
+    calcularEfectivo() {
+        let efectivo = 0;
 
-                            <!-- Pago Móvil con detalles -->
-                            <div class="md:col-span-2 bg-purple-50 p-3 rounded-lg">
-                                <label class="block text-sm font-medium mb-2">💳 Pago Móvil</label>
-                                <div class="grid md:grid-cols-3 gap-3">
-                                    <div>
-                                        <label class="block text-xs mb-1">Dólares ($)</label>
-                                        <input type="number" id="montoPagoMovilDolares" step="0.01"
-                                            class="w-full p-2 border rounded-lg text-sm" placeholder="0.00">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs mb-1">Tasa (Bs/$)</label>
-                                        <input type="number" id="montoPagoMovilTasa" step="0.01"
-                                            class="w-full p-2 border rounded-lg text-sm" placeholder="0.00">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs mb-1">Bolívares (Bs)</label>
-                                        <input type="number" id="montoPagoMovilBolivares" step="0.01"
-                                            class="w-full p-2 border rounded-lg text-sm bg-gray-100" placeholder="0.00"
-                                            readonly>
-                                    </div>
-                                </div>
-                            </div>
+        if (this.formaPago === 'efectivo') {
+            efectivo = this.montoTotal - (this.equipoRecibido ? this.equipoRecibido.valor : 0) - (this.totalAbonosPrevios || 0);
+        } else if (this.formaPago === 'mixto' && this.pagoMixto) {
+            efectivo = this.pagoMixto.efectivo || 0;
+        }
 
-                            <!-- Transferencia con detalles -->
-                            <div class="md:col-span-2 bg-indigo-50 p-3 rounded-lg">
-                                <label class="block text-sm font-medium mb-2">🏦 Transferencia</label>
-                                <div class="grid md:grid-cols-3 gap-3">
-                                    <div>
-                                        <label class="block text-xs mb-1">Dólares ($)</label>
-                                        <input type="number" id="montoTransferenciaDolares" step="0.01"
-                                            class="w-full p-2 border rounded-lg text-sm" placeholder="0.00">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs mb-1">Tasa (Bs/$)</label>
-                                        <input type="number" id="montoTransferenciaTasa" step="0.01"
-                                            class="w-full p-2 border rounded-lg text-sm" placeholder="0.00">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs mb-1">Bolívares (Bs)</label>
-                                        <input type="number" id="montoTransferenciaBolivares" step="0.01"
-                                            class="w-full p-2 border rounded-lg text-sm bg-gray-100" placeholder="0.00"
-                                            readonly>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mt-3 p-3 bg-white rounded border">
-                            <p class="text-sm font-medium">Total: $<span id="totalMixto">0.00</span></p>
-                        </div>
-                    </div>
+        return efectivo;
+    }
 
-                    <!-- Pago Móvil Detalles -->
-                    <div id="pagomovil-detalles" class="hidden mt-4 bg-green-50 p-4 rounded-lg">
-                        <h3 class="font-medium mb-3">Detalles Pago Móvil</h3>
-                        <div class="grid md:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-sm mb-1">Dólares ($)</label>
-                                <input type="number" id="pagomovilDolares" step="0.01"
-                                    class="w-full p-2 border rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-sm mb-1">Bolívares (Bs)</label>
-                                <input type="number" id="pagomovilBolivares" step="0.01"
-                                    class="w-full p-2 border rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-sm mb-1">Tasa (Bs/$)</label>
-                                <input type="number" id="pagomovilTasa" step="0.01"
-                                    class="w-full p-2 border rounded-lg">
-                            </div>
-                        </div>
-                    </div>
+    /**
+     * Obtiene un resumen legible de los accesorios
+     */
+    obtenerResumenAccesorios() {
+        const accesorios = [];
 
-                    <!-- Transferencia Detalles -->
-                    <div id="transferencia-detalles" class="hidden mt-4 bg-purple-50 p-4 rounded-lg">
-                        <h3 class="font-medium mb-3">Detalles Transferencia</h3>
-                        <div class="grid md:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-sm mb-1">Dólares ($)</label>
-                                <input type="number" id="transferenciaDolares" step="0.01"
-                                    class="w-full p-2 border rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-sm mb-1">Bolívares (Bs)</label>
-                                <input type="number" id="transferenciaBolivares" step="0.01"
-                                    class="w-full p-2 border rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-sm mb-1">Tasa (Bs/$)</label>
-                                <input type="number" id="transferenciaTasa" step="0.01"
-                                    class="w-full p-2 border rounded-lg">
-                            </div>
-                        </div>
-                    </div>
+        if (this.accesorios.forro && this.accesorios.forros) {
+            this.accesorios.forros.forEach(f => {
+                accesorios.push(`Forro ${f.modelo || 'N/A'} (${f.cantidad})`);
+            });
+        }
+        if (this.accesorios.cargador) {
+            accesorios.push(`Cargador (${this.accesorios.cargadorCantidad})`);
+        }
+        if (this.accesorios.vidrio && this.accesorios.vidrios) {
+            this.accesorios.vidrios.forEach(v => {
+                accesorios.push(`Vidrio ${v.modelo || 'N/A'} (${v.cantidad})`);
+            });
+        }
+        if (this.accesorios.otro && this.accesorios.otros) {
+            this.accesorios.otros.forEach(o => {
+                accesorios.push(`${o.nombre || 'Otro'} (${o.cantidad})`);
+            });
+        }
+        if (this.accesorios.protectorCamara) {
+            accesorios.push(`Protector Cámara (${this.accesorios.protectorCantidad})`);
+        }
+        if (this.accesorios.cubo) {
+            accesorios.push(`Cubo (${this.accesorios.cuboCantidad})`);
+        }
+        if (this.accesorios.cableLightning) {
+            accesorios.push(`Cable Lightning (${this.accesorios.cableLightningCantidad})`);
+        }
+        if (this.accesorios.cableCC) {
+            accesorios.push(`Cable C+C (${this.accesorios.cableCCCantidad})`);
+        }
+        if (this.accesorios.caja) {
+            accesorios.push(`Caja ${this.accesorios.cajaModelo || 'N/A'} ${this.accesorios.cajaColor || 'N/A'} (${this.accesorios.cajaCantidad})`);
+        }
 
-                    <!-- Formulario PAYPAL -->
-                    <div id="paypal-form" class="hidden mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <h3 class="font-semibold mb-3 text-blue-800">🅿️ Pago por PayPal</h3>
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Monto en Dólares ($)</label>
-                                <input type="number" id="paypalMonto" step="0.01"
-                                    class="w-full p-3 border rounded-lg text-lg" placeholder="0.00">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Email PayPal del cliente</label>
-                                <input type="email" id="paypalEmail" class="w-full p-3 border rounded-lg"
-                                    placeholder="cliente@email.com">
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        return accesorios;
+    }
 
+    /**
+     * Convierte la venta a un objeto plano para almacenamiento
+     */
+    toJSON() {
+        return {
+            id: this.id,
+            fecha: this.fecha,
+            hora: this.hora,
+            tipoVenta: this.tipoVenta,
+            tipoTransaccion: this.tipoTransaccion,
+            cliente: this.cliente,
+            equipo: this.equipo,
+            accesorios: this.accesorios,
+            formaPago: this.formaPago,
+            montoTotal: this.montoTotal,
+            montoPago: this.montoPago,
+            pagoMixto: this.pagoMixto,
+            pagoMovilDetalles: this.pagoMovilDetalles,
+            transferenciaDetalles: this.transferenciaDetalles,
+            equipoRecibido: this.equipoRecibido,
+            abonosPrevios: this.abonosPrevios,
+            totalAbonosPrevios: this.totalAbonosPrevios,
+            weppa: this.weppa,
+            notaVentaDetalles: this.notaVentaDetalles
+        };
+    }
 
-                <!-- Equipo Recibido -->
-                <div class="border-b pb-6 bg-orange-50 rounded-xl p-6" id="equipoRecibidoForm">
-                    <label class="flex items-center mb-4">
-                        <input type="checkbox" id="recibirEquipo" class="mr-3">
-                        <span class="text-xl font-semibold">📱➡️ Recibir Equipo como Parte de Pago</span>
-                    </label>
-                    <div id="equipoRecibidoDetalles" class="hidden bg-white p-4 rounded-lg">
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm mb-2">Modelo</label>
-                                <select id="equipoModelo" class="w-full p-3 border rounded-lg"></select>
-                            </div>
-                            <div>
-                                <label class="block text-sm mb-2">Capacidad</label>
-                                <select id="equipoCapacidad" class="w-full p-3 border rounded-lg">
-                                    <option value="">Seleccionar</option>
-                                    <option value="64GB">64GB</option>
-                                    <option value="128GB">128GB</option>
-                                    <option value="256GB">256GB</option>
-                                    <option value="512GB">512GB</option>
-                                    <option value="1TB">1TB</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm mb-2">Color</label>
-                                <select id="equipoColor" class="w-full p-3 border rounded-lg"></select>
-                            </div>
-                            <div>
-                                <label class="block text-sm mb-2">% Batería</label>
-                                <input type="number" id="equipoBateria" min="1" max="100"
-                                    class="w-full p-3 border rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-sm mb-2">IMEI</label>
-                                <input type="text" id="equipoImeiR" class="w-full p-3 border rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-sm mb-2">Valor ($)</label>
-                                <input type="number" id="equipoValor" step="0.01" class="w-full p-3 border rounded-lg">
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-sm mb-2">Comentarios</label>
-                                <textarea id="equipoComentarios" rows="3"
-                                    class="w-full p-3 border rounded-lg"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Después de la sección de Equipo Recibido -->
-                <div id="cambioGarantiaForm" class="hidden bg-green-50 p-6 rounded-lg border-2 border-green-200">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">🔄 Cambio por Garantía</h3>
-
-                    <!-- Equipo Defectuoso (Recibido) -->
-                    <div class="bg-red-50 p-4 rounded-lg mb-4 border border-red-200">
-                        <h4 class="font-semibold text-red-800 mb-3">📱❌ Equipo Defectuoso (Recibido)</h4>
-                        <div class="grid md:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
-                                <select id="defectuosoModelo" class="w-full p-2 border rounded-lg">
-                                    <option value="">Seleccionar</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Capacidad</label>
-                                <select id="defectuosoCapacidad" class="w-full p-2 border rounded-lg">
-                                    <option value="">Seleccionar</option>
-                                    <option value="64GB">64GB</option>
-                                    <option value="128GB">128GB</option>
-                                    <option value="256GB">256GB</option>
-                                    <option value="512GB">512GB</option>
-                                    <option value="1TB">1TB</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
-                                <select id="defectuosoColor" class="w-full p-2 border rounded-lg">
-                                    <option value="">Seleccionar</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">% Batería</label>
-                                <input type="number" id="defectuosoBateria" min="0" max="100"
-                                    class="w-full p-2 border rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
-                                <input type="text" id="defectuosoImei" class="w-full p-2 border rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Problema Reportado</label>
-                                <textarea id="defectuosoProblema" rows="2" class="w-full p-2 border rounded-lg"
-                                    placeholder="Ej: No enciende, pantalla rota, etc."></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Equipo Nuevo (Entregado) -->
-                    <div class="bg-green-100 p-4 rounded-lg border border-green-300">
-                        <h4 class="font-semibold text-green-800 mb-3">📱✅ Equipo Nuevo (Entregado)</h4>
-                        <div class="grid md:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
-                                <select id="nuevoModelo" class="w-full p-2 border rounded-lg">
-                                    <option value="">Seleccionar</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Capacidad</label>
-                                <select id="nuevoCapacidad" class="w-full p-2 border rounded-lg">
-                                    <option value="">Seleccionar</option>
-                                    <option value="64GB">64GB</option>
-                                    <option value="128GB">128GB</option>
-                                    <option value="256GB">256GB</option>
-                                    <option value="512GB">512GB</option>
-                                    <option value="1TB">1TB</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
-                                <select id="nuevoColor" class="w-full p-2 border rounded-lg">
-                                    <option value="">Seleccionar</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">% Batería</label>
-                                <input type="number" id="nuevoBateria" min="0" max="100"
-                                    class="w-full p-2 border rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
-                                <input type="text" id="nuevoImei" class="w-full p-2 border rounded-lg">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Diferencia de Dinero -->
-                    <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-300 mt-4">
-                        <h4 class="font-semibold text-yellow-800 mb-3">💵 Diferencia de Precio (Opcional)</h4>
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Diferencia</label>
-                                <select id="tipoDiferencia" class="w-full p-2 border rounded-lg">
-                                    <option value="ninguna">Sin diferencia</option>
-                                    <option value="favor-cliente">A favor del cliente (devolver dinero)</option>
-                                    <option value="favor-tienda">A favor de la tienda (cobrar dinero)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Monto ($)</label>
-                                <input type="number" id="montoDiferencia" step="0.01" min="0" value="0"
-                                    class="w-full p-2 border rounded-lg" disabled>
-                            </div>
-                        </div>
-                        <p class="text-xs text-gray-600 mt-2">
-                            <strong>A favor del cliente:</strong> Se resta de la caja (equipo nuevo es más barato)<br>
-                            <strong>A favor de la tienda:</strong> Se suma a la caja (equipo nuevo es más caro)
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Tipo de Transacción -->
-                <div class="border-b pb-6 bg-blue-50 rounded-xl p-6">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4">📋 Tipo de Transacción</h2>
-                    <div class="flex items-center space-x-6">
-                        <label class="flex items-center">
-                            <input type="radio" name="tipoTransaccion" value="venta" checked class="mr-2">
-                            <span>Venta Completa</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="radio" name="tipoTransaccion" value="abono" class="mr-2">
-                            <span>Abono</span>
-                        </label>
-                        <!-- NUEVO: Cambio por Garantía -->
-                        <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-green-50">
-                            <input type="radio" name="tipoTransaccion" value="cambio-garantia" class="mr-3">
-                            <span class="font-medium">🔄 Cambio Garantía</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" id="weppa" class="mr-2">
-                            <span>WEPPA</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" id="notaVenta" class="mr-2">
-                            <span>Nota de Venta</span>
-                        </label>
-                    </div>
-                    <div id="abonoInfo" class="hidden mt-3 p-3 bg-orange-50 rounded-lg">
-                        <p class="text-sm text-orange-800">⚠️ <strong>Abono:</strong> No se incluirá en el total de
-                            ventas del día</p>
-                    </div>
-                    <div id="notaVentaInfo" class="hidden mt-3">
-                        <label class="block text-sm mb-1">Detalles de la Nota</label>
-                        <input type="text" id="notaVentaDetalles" class="w-full p-2 border rounded-lg">
-                    </div>
-                </div>
-
-                <!-- Monto Total (Calculado Automáticamente) -->
-                <div id="montoTotalSection"
-                    class="bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-xl p-6 shadow-lg">
-                    <h2 class="text-2xl font-bold mb-4">💰 Monto Total de la Venta</h2>
-
-                    <div class="bg-white bg-opacity-20 rounded-lg p-4 mb-3">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-sm">Pago en efectivo/digital:</span>
-                            <span class="text-xl font-bold" id="subtotalPago">$0.00</span>
-                        </div>
-                        <div class="flex justify-between items-center" id="equipoRecibidoLinea" style="display: none;">
-                            <span class="text-sm">+ Equipo recibido:</span>
-                            <span class="text-xl font-bold" id="subtotalEquipo">$0.00</span>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-between items-center border-t-2 border-white pt-3"
-                        id="totalCalculadoDisplay">
-                        <span class="text-lg font-semibold">TOTAL:</span>
-                        <span class="text-3xl font-bold" id="montoTotalDisplay">$0.00</span>
-                    </div>
-
-                    <!-- Campo editable para WEPPA (ventas a crédito) -->
-                    <div id="weppaMontoEditable" class="hidden border-t-2 border-white pt-3 mt-3">
-                        <div class="bg-yellow-400 bg-opacity-30 rounded-lg p-3 mb-3">
-                            <p class="text-sm">⚠️ <strong>WEPPA Activo (Venta a Crédito):</strong></p>
-                            <p class="text-xs mt-1">• <strong>Inicial:</strong> Lo que el cliente paga HOY
-                                (efectivo/digital + equipo recibido)</p>
-                            <p class="text-xs">• <strong>Total Final:</strong> El precio real del equipo (lo que debe en
-                                total)</p>
-                        </div>
-                        <div class="bg-white bg-opacity-20 rounded-lg p-3 mb-3">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-semibold">WEPPA (Inicial $<span
-                                        id="weppaInicial">0.00</span>)</span>
-                                <span class="text-lg font-bold">Pago HOY</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <label class="text-sm font-semibold">Monto Total Final:</label>
-                            <input type="number" id="montoTotalManual" step="0.01"
-                                class="flex-1 p-3 text-2xl font-bold text-gray-800 border-2 border-white rounded-lg"
-                                placeholder="0.00">
-                        </div>
-                    </div>
-
-                    <!-- Campo oculto para enviar el total -->
-                    <input type="hidden" id="montoTotal" name="montoTotal">
-                </div>
-
-                <!-- Botones -->
-                <div class="flex gap-4 pt-6">
-                    <button type="submit"
-                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition">
-                        ✅ Registrar Venta
-                    </button>
-                    <button type="button" id="limpiarForm"
-                        class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition">
-                        🗑️ Limpiar
-                    </button>
-                </div>
-            </form>
-        </div>
-
-
-        <!-- Movimientos de Inventario -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">📦 Movimientos de Inventario</h2>
-
-            <!-- Selector de Tipo de Movimiento -->
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-3">Tipo de Movimiento</label>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <button type="button" id="btnSalidaEfectivo"
-                        class="movimiento-btn bg-red-100 hover:bg-red-200 text-red-800 p-3 rounded-lg border-2 border-transparent transition-all">
-                        💸 Salida Efectivo
-                    </button>
-                    <button type="button" id="btnIngresoEfectivo"
-                        class="movimiento-btn bg-green-100 hover:bg-green-200 text-green-800 p-3 rounded-lg border-2 border-transparent transition-all">
-                        💵 Ingreso Efectivo
-                    </button>
-                    <button type="button" id="btnSalidaEquipo"
-                        class="movimiento-btn bg-orange-100 hover:bg-orange-200 text-orange-800 p-3 rounded-lg border-2 border-transparent transition-all">
-                        📱➡️ Salida Equipo
-                    </button>
-                    <button type="button" id="btnIngresoEquipo"
-                        class="movimiento-btn bg-teal-100 hover:bg-teal-200 text-teal-800 p-3 rounded-lg border-2 border-transparent transition-all">
-                        📱⬅️ Ingreso Equipo
-                    </button>
-                    <button type="button" id="btnSalidaAccesorio"
-                        class="movimiento-btn bg-yellow-100 hover:bg-yellow-200 text-yellow-800 p-3 rounded-lg border-2 border-transparent transition-all">
-                        🛡️➡️ Salida Accesorio
-                    </button>
-                    <button type="button" id="btnIngresoAccesorio"
-                        class="movimiento-btn bg-purple-100 hover:bg-purple-200 text-purple-800 p-3 rounded-lg border-2 border-transparent transition-all">
-                        🛡️⬅️ Ingreso Accesorio
-                    </button>
-                    <button type="button" id="btnCompraEquipo"
-                        class="movimiento-btn bg-green-100 hover:bg-green-200 text-green-800 p-3 rounded-lg border-2 border-transparent transition-all">
-                        📱⬅️ Compra Equipo
-                    </button>
-                </div>
-            </div>
-
-            <!-- Formularios de Movimientos -->
-            <div id="movimientoForms" class="hidden">
-                <!-- Salida de Efectivo -->
-                <div id="formSalidaEfectivo" class="movimiento-form hidden bg-red-50 p-4 rounded-lg">
-                    <h3 class="font-semibold text-red-800 mb-3">💸 Salida de Efectivo</h3>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Monto ($)</label>
-                            <input type="number" id="salidaEfectivoMonto" step="0.01"
-                                class="w-full p-2 border rounded-lg" placeholder="0.00">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Persona que retira</label>
-                            <input type="text" id="salidaEfectivoPersona" class="w-full p-2 border rounded-lg"
-                                placeholder="Nombre completo">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Motivo/Nota</label>
-                            <textarea id="salidaEfectivoNota" rows="2" class="w-full p-2 border rounded-lg"
-                                placeholder="Descripción del motivo"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Ingreso de Efectivo -->
-                <div id="formIngresoEfectivo" class="movimiento-form hidden bg-green-50 p-4 rounded-lg">
-                    <h3 class="font-semibold text-green-800 mb-3">💵 Ingreso de Efectivo</h3>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Monto ($)</label>
-                            <input type="number" id="ingresoEfectivoMonto" step="0.01"
-                                class="w-full p-2 border rounded-lg" placeholder="0.00">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Motivo/Nota</label>
-                            <textarea id="ingresoEfectivoNota" rows="2" class="w-full p-2 border rounded-lg"
-                                placeholder="Descripción del ingreso"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Salida de Equipo -->
-                <div id="formSalidaEquipo" class="movimiento-form hidden bg-orange-50 p-4 rounded-lg">
-                    <h3 class="font-semibold text-orange-800 mb-3">📱➡️ Salida de Equipo</h3>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
-                            <select id="salidaEquipoModelo" class="w-full p-2 border rounded-lg"></select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Capacidad</label>
-                            <select id="salidaEquipoCapacidad" class="w-full p-2 border rounded-lg">
-                                <option value="">Seleccionar</option>
-                                <option value="64GB">64GB</option>
-                                <option value="128GB">128GB</option>
-                                <option value="256GB">256GB</option>
-                                <option value="512GB">512GB</option>
-                                <option value="1TB">1TB</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
-                            <select id="salidaEquipoColor" class="w-full p-2 border rounded-lg"></select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">% Batería</label>
-                            <input type="number" id="salidaEquipoBateria" min="1" max="100"
-                                class="w-full p-2 border rounded-lg" placeholder="85">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
-                            <input type="text" id="salidaEquipoImei" class="w-full p-2 border rounded-lg"
-                                placeholder="Número IMEI">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Destino</label>
-                            <select id="salidaEquipoDestino" class="w-full p-2 border rounded-lg">
-                                <option value="">Seleccionar</option>
-                                <option value="Aviadores">Aviadores</option>
-                                <option value="Estación Central">Estación Central</option>
-                                <option value="Principal de Valencia">Principal de Valencia</option>
-                                <option value="Otro">Otro</option>
-                            </select>
-                        </div>
-                        <div id="salidaEquipoDestinoPersonalizadoDiv" class="hidden">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Destino Personalizado</label>
-                            <input type="text" id="salidaEquipoDestinoPersonalizado"
-                                class="w-full p-2 border rounded-lg" placeholder="Especificar destino">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Persona que retira</label>
-                            <input type="text" id="salidaEquipoPersona" class="w-full p-2 border rounded-lg"
-                                placeholder="Nombre completo">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Notas adicionales</label>
-                            <textarea id="salidaEquipoNota" rows="2" class="w-full p-2 border rounded-lg"
-                                placeholder="Detalles adicionales"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Ingreso de Equipo -->
-                <div id="formIngresoEquipo" class="movimiento-form hidden bg-teal-50 p-4 rounded-lg">
-                    <h3 class="font-semibold text-teal-800 mb-3">📱⬅️ Ingreso de Equipo</h3>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
-                            <select id="ingresoEquipoModelo" class="w-full p-2 border rounded-lg"></select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Capacidad</label>
-                            <select id="ingresoEquipoCapacidad" class="w-full p-2 border rounded-lg">
-                                <option value="">Seleccionar</option>
-                                <option value="64GB">64GB</option>
-                                <option value="128GB">128GB</option>
-                                <option value="256GB">256GB</option>
-                                <option value="512GB">512GB</option>
-                                <option value="1TB">1TB</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
-                            <select id="ingresoEquipoColor" class="w-full p-2 border rounded-lg"></select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
-                            <input type="text" id="ingresoEquipoImei" class="w-full p-2 border rounded-lg"
-                                placeholder="Número IMEI">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">% Batería</label>
-                            <input type="number" id="ingresoEquipoBateria" min="1" max="100"
-                                class="w-full p-2 border rounded-lg" placeholder="85">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Origen/Procedencia</label>
-                            <select id="ingresoEquipoOrigen" class="w-full p-2 border rounded-lg">
-                                <option value="">Seleccionar</option>
-                                <option value="Aviadores">Aviadores</option>
-                                <option value="Estación Central">Estación Central</option>
-                                <option value="Principal de Valencia">Principal de Valencia</option>
-                                <option value="Proveedor Externo">Proveedor Externo</option>
-                                <option value="Cliente">Cliente</option>
-                                <option value="Otro">Otro</option>
-                            </select>
-                        </div>
-                        <div id="ingresoEquipoOrigenPersonalizadoDiv" class="hidden">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Origen Personalizado</label>
-                            <input type="text" id="ingresoEquipoOrigenPersonalizado"
-                                class="w-full p-2 border rounded-lg" placeholder="Especificar origen">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Notas adicionales</label>
-                            <textarea id="ingresoEquipoNota" rows="2" class="w-full p-2 border rounded-lg"
-                                placeholder="Detalles adicionales"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Compra de Equipo -->
-                <div id="formCompraEquipo" class="movimiento-form hidden bg-green-50 p-4 rounded-lg">
-                    <h3 class="font-semibold text-green-800 mb-3">📱⬅️ Compra de Equipo</h3>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
-                            <select id="compraEquipoModelo" class="w-full p-2 border rounded-lg"></select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Capacidad</label>
-                            <select id="compraEquipoCapacidad" class="w-full p-2 border rounded-lg">
-                                <option value="">Seleccionar</option>
-                                <option value="64GB">64GB</option>
-                                <option value="128GB">128GB</option>
-                                <option value="256GB">256GB</option>
-                                <option value="512GB">512GB</option>
-                                <option value="1TB">1TB</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
-                            <select id="compraEquipoColor" class="w-full p-2 border rounded-lg"></select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">% Batería</label>
-                            <input type="number" id="compraEquipoBateria" min="1" max="100"
-                                class="w-full p-2 border rounded-lg" placeholder="85">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
-                            <input type="text" id="compraEquipoImei" class="w-full p-2 border rounded-lg"
-                                placeholder="Número IMEI">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Precio de Compra ($)</label>
-                            <input type="number" id="compraEquipoPrecio" step="0.01"
-                                class="w-full p-2 border rounded-lg" placeholder="0.00">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor/Vendedor</label>
-                            <input type="text" id="compraEquipoProveedor" class="w-full p-2 border rounded-lg"
-                                placeholder="Nombre del vendedor">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Estado del Equipo</label>
-                            <select id="compraEquipoEstado" class="w-full p-2 border rounded-lg">
-                                <option value="">Seleccionar</option>
-                                <option value="Nuevo">Nuevo</option>
-                                <option value="Usado - Excelente">Usado - Excelente</option>
-                                <option value="Usado - Bueno">Usado - Bueno</option>
-                                <option value="Usado - Regular">Usado - Regular</option>
-                                <option value="Para Reparar">Para Reparar</option>
-                            </select>
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
-                            <textarea id="compraEquipoNota" rows="2" class="w-full p-2 border rounded-lg"
-                                placeholder="Detalles del estado, accesorios incluidos, etc."></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Salida de Accesorio -->
-                <div id="formSalidaAccesorio" class="movimiento-form hidden bg-yellow-50 p-4 rounded-lg">
-                    <h3 class="font-semibold text-yellow-800 mb-3">🛡️➡️ Salida de Accesorio</h3>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Accesorio</label>
-                            <select id="salidaAccesorioTipo" class="w-full p-2 border rounded-lg">
-                                <option value="">Seleccionar</option>
-                                <option value="Forro">Forro</option>
-                                <option value="Vidrio Templado">Vidrio Templado</option>
-                                <option value="Cargador">Cargador</option>
-                                <option value="Cable">Cable</option>
-                                <option value="Cubo">Cubo</option>
-                                <option value="Caja">Caja</option>
-                                <option value="Protector de Cámara">Protector de Cámara</option>
-                                <option value="Otro">Otro</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Destino</label>
-                            <select id="salidaAccesorioDestino" class="w-full p-2 border rounded-lg">
-                                <option value="">Seleccionar</option>
-                                <option value="Aviadores">Aviadores</option>
-                                <option value="Estación Central">Estación Central</option>
-                                <option value="Principal de Valencia">Principal de Valencia</option>
-                                <option value="Otro">Otro</option>
-                            </select>
-                        </div>
-                        <div id="salidaAccesorioDestinoPersonalizadoDiv" class="hidden md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Destino Personalizado</label>
-                            <input type="text" id="salidaAccesorioDestinoPersonalizado"
-                                class="w-full p-2 border rounded-lg" placeholder="Especificar destino">
-                        </div>
-                    </div>
-                    <div id="salidaAccesorioDetalles" class="mt-4"></div>
-                </div>
-
-                <!-- Ingreso de Accesorio -->
-                <div id="formIngresoAccesorio" class="movimiento-form hidden bg-purple-50 p-4 rounded-lg">
-                    <h3 class="font-semibold text-purple-800 mb-3">🛡️⬅️ Ingreso de Accesorio</h3>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Accesorio</label>
-                            <select id="ingresoAccesorioTipo" class="w-full p-2 border rounded-lg">
-                                <option value="">Seleccionar</option>
-                                <option value="Forro">Forro</option>
-                                <option value="Vidrio Templado">Vidrio Templado</option>
-                                <option value="Cargador">Cargador</option>
-                                <option value="Cable">Cable</option>
-                                <option value="Cubo">Cubo</option>
-                                <option value="Caja">Caja</option>
-                                <option value="Protector de Cámara">Protector de Cámara</option>
-                                <option value="Otro">Otro</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
-                            <input type="text" id="ingresoAccesorioProveedor" class="w-full p-2 border rounded-lg"
-                                placeholder="Nombre del proveedor">
-                        </div>
-                    </div>
-                    <div id="ingresoAccesorioDetalles" class="mt-4"></div>
-                </div>
-
-                <!-- Botones de Acción -->
-                <div class="flex gap-4 mt-6">
-                    <button type="button" id="guardarMovimiento"
-                        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition">
-                        ✅ Registrar Movimiento
-                    </button>
-                    <button type="button" id="cancelarMovimiento"
-                        class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg transition">
-                        ❌ Cancelar
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Resumen de Ventas -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">📊 Resumen del Día</h2>
-            <div id="resumenVentas" class="space-y-3 mb-4">
-                <p class="text-gray-600">No hay ventas registradas hoy.</p>
-            </div>
-            <div class="grid md:grid-cols-3 gap-4 mb-4">
-                <div class="p-4 bg-green-50 rounded-lg">
-                    <p class="text-lg font-semibold text-green-800">💰 Total: $<span id="totalDia">0.00</span></p>
-                </div>
-                <div class="p-4 bg-blue-50 rounded-lg">
-                    <p class="text-lg font-semibold text-blue-800">📱 Equipos: <span id="equiposVendidos">0</span></p>
-                </div>
-                <div class="p-4 bg-purple-50 rounded-lg">
-                    <p class="text-lg font-semibold text-purple-800">🏦 Caja Final: $<span id="cajaFinal">0.00</span>
-                    </p>
-                </div>
-            </div>
-            <div class="text-center">
-                <button onclick="app.imprimirResumenDia()"
-                    class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-lg transition">
-                    🖨️ Imprimir Resumen del Día
-                </button>
-            </div>
-        </div>
-
-        <!-- Resumen de Movimientos -->
-        <div class="bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">📦 Movimientos del Día</h2>
-            <div id="resumenMovimientos" class="space-y-3">
-                <p class="text-gray-600">No hay movimientos registrados hoy.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Cargar módulos JavaScript -->
-    <script type="module" src="js/main.js"></script>
-</body>
-
-</html>
+    /**
+     * Crea una instancia de Venta desde un objeto plano
+     */
+    static fromJSON(json) {
+        return new Venta(json);
+    }
+}

@@ -1895,14 +1895,14 @@ class App {
                         let htmlFila = '';
                         if (tipo === 'otro') {
                             htmlFila = `
-                            <div class="otro-item grid grid-cols-[1fr,auto,auto] gap-2 items-center">
+                            <div class="otro-item grid grid-cols-[40%,35%,25%] gap-2 items-center">
                                 <input type="text" value="${item.nombre || ''}" class="p-2 border rounded-lg flex-1 otro-nombre" placeholder="¿Qué es?">
                                 <input type="number" min="1" value="${item.cantidad}" class="p-2 border rounded-lg w-20 otro-cant" placeholder="Cant.">
                                 <button type="button" class="${btnClass} text-white w-8 h-8 rounded font-bold" ${btnAction}>${btnText}</button>
                             </div>`;
                         } else {
                             htmlFila = `
-                            <div class="${tipo}-item grid grid-cols-[1fr,auto,auto] gap-2 items-center">
+                            <div class="${tipo}-item grid grid-cols-[40%,35%,25%] gap-2 items-center">
                                 <select class="p-2 border rounded-lg accModelo flex-1"></select>
                                 <input type="number" min="1" value="${item.cantidad}" class="p-2 border rounded-lg w-20 ${tipo}-cant" placeholder="Cant.">
                                 <button type="button" class="${btnClass} text-white w-8 h-8 rounded font-bold" ${btnAction}>${btnText}</button>

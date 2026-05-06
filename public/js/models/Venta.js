@@ -201,7 +201,11 @@ export class Venta {
         let efectivo = 0;
 
         if (this.formaPago === 'efectivo') {
-            efectivo = this.montoTotal - (this.equipoRecibido ? this.equipoRecibido.valor : 0) - (this.totalAbonosPrevios || 0);
+            if (this.montoPago !== null && this.montoPago !== undefined) {
+                efectivo = this.montoPago;
+            } else {
+                efectivo = this.montoTotal - (this.equipoRecibido ? this.equipoRecibido.valor : 0) - (this.totalAbonosPrevios || 0);
+            }
         } else if (this.formaPago === 'mixto' && this.pagoMixto) {
             efectivo = this.pagoMixto.efectivo || 0;
         }

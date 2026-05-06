@@ -1581,7 +1581,10 @@ class App {
         } else if (venta.formaPago === 'transferencia' && venta.transferenciaDetalles) {
             detallesPago.push(`<p class="bg-indigo-100 px-2 py-1 rounded">Transferencia: ${formatearMoneda(venta.transferenciaDetalles.dolares)} = ${venta.transferenciaDetalles.bolivares}Bs (${venta.transferenciaDetalles.tasa})</p>`);
         } else {
-            detallesPago.push(`<p class="bg-blue-100 px-2 py-1 rounded">${venta.formaPago.toUpperCase()}: ${formatearMoneda(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0) - (venta.totalAbonosPrevios || 0))}</p>`);
+            const pagoReal = (venta.montoPago !== null && venta.montoPago !== undefined)
+                ? venta.montoPago
+                : (venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0) - (venta.totalAbonosPrevios || 0));
+            detallesPago.push(`<p class="bg-blue-100 px-2 py-1 rounded">${venta.formaPago.toUpperCase()}: ${formatearMoneda(pagoReal)}</p>`);
         }
 
         if (venta.equipoRecibido) {

@@ -22,7 +22,11 @@ export class Caja {
         // Sumar efectivo de ventas
         ventas.forEach(venta => {
             if (venta.formaPago === 'efectivo') {
-                efectivoVentas += venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0) - (venta.totalAbonosPrevios || 0);
+                if (venta.montoPago !== null && venta.montoPago !== undefined) {
+                    efectivoVentas += venta.montoPago;
+                } else {
+                    efectivoVentas += venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0) - (venta.totalAbonosPrevios || 0);
+                }
             } else if (venta.formaPago === 'mixto' && venta.pagoMixto) {
                 efectivoVentas += venta.pagoMixto.efectivo || 0;
             }
@@ -64,7 +68,11 @@ export class Caja {
 
         ventas.forEach(venta => {
             if (venta.formaPago === 'efectivo') {
-                efectivoVentas += venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0) - (venta.totalAbonosPrevios || 0);
+                if (venta.montoPago !== null && venta.montoPago !== undefined) {
+                    efectivoVentas += venta.montoPago;
+                } else {
+                    efectivoVentas += venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0) - (venta.totalAbonosPrevios || 0);
+                }
             } else if (venta.formaPago === 'mixto' && venta.pagoMixto) {
                 efectivoVentas += venta.pagoMixto.efectivo || 0;
             }

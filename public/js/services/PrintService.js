@@ -10,32 +10,38 @@ class PrintService {
      * Calcula el total inicial de una venta (sin equipo recibido)
      */
     calcularTotalInicialVenta(venta) {
-        let totalInicial = 0;
+        let totalPago = 0;
 
+        // Calcular el pago según la forma de pago
         if (venta.formaPago === 'mixto' && venta.pagoMixto) {
             // Sumar todos los métodos de pago del mixto
-            totalInicial += venta.pagoMixto.efectivo || 0;
-            totalInicial += venta.pagoMixto.zelle || 0;
-            totalInicial += venta.pagoMixto.binance || 0;
-
-            // Para pago móvil y transferencia, usar los dólares
-            if (venta.pagoMixto.pagoMovilDetalles) {
-                totalInicial += venta.pagoMixto.pagoMovilDetalles.dolares || 0;
-            } else {
-                totalInicial += venta.pagoMixto.pagoMovil || 0;
-            }
-
-            if (venta.pagoMixto.transferenciaDetalles) {
-                totalInicial += venta.pagoMixto.transferenciaDetalles.dolares || 0;
-            } else {
-                totalInicial += venta.pagoMixto.transferencia || 0;
-            }
+            totalPago += venta.pagoMixto.efectivo || 0;
+            totalPago += venta.pagoMixto.zelle || 0;
+            totalPago += venta.pagoMixto.binance || 0;
+            totalPago += venta.pagoMixto.pagoMovil || 0;
+            totalPago += venta.pagoMixto.transferencia || 0;
+        } else if (venta.formaPago === 'pagomovil' && venta.pagoMovilDetalles) {
+            // Para pago móvil, usar los dólares
+            totalPago = venta.pagoMovilDetalles.dolares || 0;
+        } else if (venta.formaPago === 'transferencia' && venta.transferenciaDetalles) {
+            // Para transferencia, usar los dólares
+            totalPago = venta.transferenciaDetalles.dolares || 0;
+        } else if (venta.montoPago !== undefined && venta.montoPago !== null) {
+            // Si tiene montoPago guardado (efectivo/zelle/binance con WEPPA)
+            totalPago = venta.montoPago;
         } else {
-            // Para pagos simples, el total menos el equipo recibido
-            totalInicial = venta.montoTotal;
+            // Fallback: Si no hay WEPPA, el monto total es el pago
+            // Si hay WEPPA pero no tiene montoPago, calcular: Total - Equipo
+            if (venta.weppa && venta.equipoRecibido) {
+                totalPago = venta.montoTotal - venta.equipoRecibido.valor;
+            } else {
+                totalPago = venta.montoTotal;
+            }
         }
 
-        return totalInicial + (venta.equipoRecibido ? venta.equipoRecibido.valor : 0);
+        // Agregar equipo recibido al pago para obtener el inicial
+        const equipoRecibido = venta.equipoRecibido ? venta.equipoRecibido.valor : 0;
+        return totalPago + equipoRecibido;
     }
 
     /**
@@ -748,11 +754,11 @@ class PrintService {
      */
     generarItemVenta(venta, numero) {
         const accesorios = venta.obtenerResumenAccesorios();
-        
+
         const formatearBs = (monto) => {
             const numeroStr = typeof monto === 'string' ? parseFloat(monto) : monto;
             if (isNaN(numeroStr)) return monto + ' Bs';
-            return numeroStr.toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' Bs';
+            return numeroStr.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' Bs';
         };
 
         // Calcular HTML del WEPPA
@@ -837,13 +843,23 @@ class PrintService {
         } else if (venta.formaPago === 'transferencia' && venta.transferenciaDetalles) {
             detallesPago.push(`<span class="pago-tag">Transf: ${formatearMoneda(venta.transferenciaDetalles.dolares)} = ${formatearBs(venta.transferenciaDetalles.bolivares)} (${venta.transferenciaDetalles.tasa})</span>`);
         } else {
-            detallesPago.push(`<span class="pago-tag">${venta.formaPago.toUpperCase()}: ${formatearMoneda(venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0))}</span>`);
+            const pagoReal = (venta.montoPago !== null && venta.montoPago !== undefined) 
+                ? venta.montoPago 
+                : (venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0) - (venta.totalAbonosPrevios || 0));
+            detallesPago.push(`<span class="pago-tag">${venta.formaPago.toUpperCase()}: ${formatearMoneda(pagoReal)}</span>`);
         }
-        
+
         if (venta.equipoRecibido) {
             detallesPago.push(`<span class="pago-tag">Eq. rev: ${venta.equipoRecibido.modelo} (${formatearMoneda(venta.equipoRecibido.valor)})</span>`);
         }
-        
+
+        if (venta.abonosPrevios && venta.abonosPrevios.length > 0) {
+            venta.abonosPrevios.forEach(ab => {
+                const fechaText = ab.fecha ? ` (${ab.fecha})` : '';
+                detallesPago.push(`<span class="pago-tag" style="background:#dcfce7;color:#166534">Abono Precargado${fechaText}: ${formatearMoneda(ab.monto)}</span>`);
+            });
+        }
+
         seccionPago = `
             <div class="venta-box box-purple">
                 <h5>💳 Pago</h5>
@@ -853,7 +869,7 @@ class PrintService {
         `;
 
         const esAbono = venta.tipoTransaccion === 'abono';
-        
+
         return `
             <div class="venta-item ${esAbono ? 'abono' : ''}">
                 <div class="venta-header">
@@ -1073,5 +1089,4 @@ class PrintService {
 
 // Exportar una instancia única (Singleton)
 export const printService = new PrintService();
-
 

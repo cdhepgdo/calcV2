@@ -667,10 +667,10 @@ async function fetchExchangeRate() {
   try {
     const res = await fetch('https://open.er-api.com/v6/latest/USD');
     const data = await res.json();
-    if (data.result === 'success' && data.rates.VES) {
+    if (data.result === 'success' && typeof data.rates.VES === 'number' && data.rates.VES > 0) {
       return parseFloat(data.rates.VES);
     } else {
-      console.error('Error al obtener tasa:', data);
+      console.warn('La API (open.er-api.com) no retornó una tasa válida para VES. Valor retornado:', data.rates?.VES);
       return null;
     }
   } catch (err) {
@@ -685,10 +685,15 @@ async function fetchExchangeRate() {
 async function updateApiValue() {
   const rate = await fetchExchangeRate();
   const binanceRate = await fetchBinanceP2PAverage();
+  
   if (rate !== null) {
     apiValueInput.value = rate.toFixed(2);
-    transferRate.value = binanceRate.toFixed(2) | 0;
-    calculateRealTime(); // recalcula con el nuevo valor
+  }
+  
+  // Binance ya actualiza su input internamente, pero aquí podemos asegurar que
+  // se recalcula la UI si alguna de las dos tasas llegó correctamente.
+  if (rate !== null || binanceRate !== null) {
+    calculateRealTime();
   }
 }
 updateApiValue();                      // al cargar
@@ -976,35 +981,3 @@ function updatePrice() {
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -665,11 +665,11 @@ function onMethodChange() {
 // 🌐 Obtener tasa USD → VES real desde open.er-api.com
 async function fetchExchangeRate() {
   try {
-    const res = await fetch('https://open.er-api.com/v6/latest/USD');
+    const res = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json');
     const data = await res.json();
-    if (data.result === 'success'/*  && typeof data.rates.VES === 'number' && data.rates.VES > 0 */) {
+    if (data.usd.ves /*=== 'success'  && typeof data.rates.VES === 'number' && data.rates.VES > 0 */) {
       console.log(data, 'hola')
-      return parseFloat(data.rates.VES);
+      return parseFloat(data.usd.ves);
     } else {
       console.warn('La API (open.er-api.com) no retornó una tasa válida para VES. Valor retornado:', data.rates?.VES);
       return null;

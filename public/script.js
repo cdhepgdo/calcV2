@@ -667,7 +667,8 @@ async function fetchExchangeRate() {
   try {
     const res = await fetch('https://open.er-api.com/v6/latest/USD');
     const data = await res.json();
-    if (data.result === 'success' && typeof data.rates.VES === 'number' && data.rates.VES > 0) {
+    if (data.result === 'success'/*  && typeof data.rates.VES === 'number' && data.rates.VES > 0 */) {
+      console.log(data, 'hola')
       return parseFloat(data.rates.VES);
     } else {
       console.warn('La API (open.er-api.com) no retornó una tasa válida para VES. Valor retornado:', data.rates?.VES);

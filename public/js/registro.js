@@ -14,15 +14,22 @@ class RegistroDiario {
     }
 
     async init() {
-        await this.cargarDatos();
+        storageService.inicializar();
+        storageService.onCambio(() => {
+            this.cargarDatos();
+            this.procesarDatos();
+            this.renderizar();
+        });
+
+        this.cargarDatos();
         this.procesarDatos();
         this.renderizar();
         this.configurarEventos();
     }
 
-    async cargarDatos() {
-        this.ventas = await storageService.obtenerVentas();
-        this.movimientos = await storageService.obtenerMovimientos();
+    cargarDatos() {
+        this.ventas = storageService.obtenerVentas();
+        this.movimientos = storageService.obtenerMovimientos();
     }
 
     procesarDatos() {

@@ -1,4 +1,4 @@
-﻿/**
+/**
 * Archivo principal de la aplicación
 * Orquesta la inicialización y coordinación de todos los módulos
 */
@@ -1338,6 +1338,7 @@ class App {
      * Actualiza toda la UI
      */
     async actualizarUI() {
+        if (!this.cajaActual) return;
         await this.actualizarResumenVentas();
         await this.actualizarResumenMovimientos();
     }

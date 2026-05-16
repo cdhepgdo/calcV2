@@ -56,6 +56,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
         // ===== CONFIGURACIÓN FIREBASE (misma que firebase-config.js) =====
         const firebaseConfig = {
@@ -68,6 +69,7 @@
         };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
         // ===== LEER LOCALSTORAGE =====
         const KEYS = {
@@ -97,14 +99,6 @@
         const btn = document.getElementById('btnMigrar');
         const logEl = document.getElementById('logContainer');
 
-        if (ventas.length === 0 && movimientos.length === 0 && !cajaInicial) {
-            btn.textContent = '❌ No hay datos para migrar';
-            btn.disabled = true;
-        } else {
-            btn.textContent = `🚀 Migrar ${ventas.length} ventas y ${movimientos.length} movimientos`;
-            btn.disabled = false;
-        }
-
         function log(msg, tipo = '') {
             logEl.style.display = 'block';
             const span = document.createElement('div');
@@ -113,6 +107,22 @@
             logEl.appendChild(span);
             logEl.scrollTop = logEl.scrollHeight;
         }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                if (ventas.length === 0 && movimientos.length === 0 && !cajaInicial) {
+                    btn.textContent = '❌ No hay datos para migrar';
+                    btn.disabled = true;
+                } else {
+                    btn.textContent = `🚀 Migrar ${ventas.length} ventas y ${movimientos.length} movimientos`;
+                    btn.disabled = false;
+                }
+            } else {
+                btn.textContent = '🔒 Debes iniciar sesión primero';
+                btn.disabled = true;
+                log('❌ Error: No hay un usuario autenticado. Por favor, abre la app principal, inicia sesión y vuelve a recargar esta página.', 'error');
+            }
+        });
 
         btn.addEventListener('click', async () => {
             btn.disabled = true;

@@ -90,13 +90,13 @@ export function validarEmail(email) {
  */
 export function validarCampos(validaciones) {
     const errores = [];
-    
+
     validaciones.forEach(validacion => {
         if (!validacion.valido) {
             errores.push(validacion.error);
         }
     });
-    
+
     return {
         valido: errores.length === 0,
         errores

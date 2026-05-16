@@ -20,6 +20,7 @@
             <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Principal</a>
             <a href="registro.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">📊 Registro</a>
             <a href="inv-precio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Inv</a>
+            <button id="btnLogout" class="px-3 py-2 rounded bg-red-600 hover:bg-red-700 font-bold transition ml-2">Cerrar Sesión</button>
         </div>
         <button id="menuToggle" class="hidden text-2xl focus:outline-none relative z-50">☰</button>
         <div id="floatingMenu"
@@ -29,6 +30,7 @@
             <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Principal</a>
             <a href="registro.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">📊 Registro</a>
             <a href="inv-precio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Inv</a>
+            <button id="btnLogoutMobile" class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white font-bold transition rounded mt-2">Cerrar Sesión</button>
         </div>
     </nav>
 
@@ -155,7 +157,7 @@
                             <div id="forroContenedor" class="hidden flex-col gap-2">
                                 <div id="forroLista" class="flex flex-col gap-2">
                                     <div
-                                        class="forro-item grid grid-cols-[40%,35%,25%] gap-2 items-center">
+                                        class="forro-item grid grid-cols-[repeat(auto-fill,minmax(52px,1fr))] gap-2 items-center">
                                         <select class="p-2 border rounded-lg accModelo flex-1"></select>
                                         <input type="number" min="1" value="1"
                                             class="p-2 border rounded-lg w-20 forro-cant" placeholder="Cant.">
@@ -187,7 +189,7 @@
                             <div id="vidrioContenedor" class="hidden flex-col gap-2">
                                 <div id="vidrioLista" class="flex flex-col gap-2">
                                     <div
-                                        class="vidrio-item grid grid-cols-[40%,35%,25%] gap-2 items-center">
+                                        class="vidrio-item grid grid-cols-[repeat(auto-fill,minmax(52px,1fr))] gap-2 items-center">
                                         <select class="p-2 border rounded-lg accModelo flex-1"></select>
                                         <input type="number" min="1" value="1"
                                             class="p-2 border rounded-lg w-20 vidrio-cant" placeholder="Cant.">
@@ -268,7 +270,7 @@
                             </label>
                             <div id="otroContenedor" class="hidden flex-col gap-2">
                                 <div id="otroLista" class="flex flex-col gap-2">
-                                    <div class="otro-item grid grid-cols-[40%,35%,25%] gap-2 items-center">
+                                    <div class="otro-item grid grid-cols-[1fr,auto,auto] gap-2 items-center">
                                         <input type="text" class="p-2 border rounded-lg flex-1 otro-nombre"
                                             placeholder="¿Qué es?">
                                         <input type="number" min="1" value="1"

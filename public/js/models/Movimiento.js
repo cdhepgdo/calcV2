@@ -15,24 +15,24 @@ export class Movimiento {
         this.hora = data.hora || new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
         this.datos = data.datos || {};
     }
-    
+
     generarId() {
         return `mov_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     }
-    
+
     /**
      * Valida que el movimiento tenga todos los datos requeridos
      */
     validar() {
         const errores = [];
-        
+
         if (!this.tipo) {
             errores.push('Debe especificar el tipo de movimiento');
             return { valido: false, errores };
         }
-        
+
         const tipoLower = this.tipo.toLowerCase();
-        
+
         // SALIDA DE EFECTIVO
         if (tipoLower.includes('salida') && tipoLower.includes('efectivo')) {
             if (!this.datos.monto || isNaN(this.datos.monto) || this.datos.monto <= 0) {
@@ -45,7 +45,7 @@ export class Movimiento {
                 errores.push('Debe especificar el motivo del retiro');
             }
         }
-        
+
         // INGRESO DE EFECTIVO
         else if (tipoLower.includes('ingreso') && tipoLower.includes('efectivo')) {
             if (!this.datos.monto || isNaN(this.datos.monto) || this.datos.monto <= 0) {
@@ -55,7 +55,7 @@ export class Movimiento {
                 errores.push('Debe especificar el motivo del ingreso');
             }
         }
-        
+
         // SALIDA DE EQUIPO
         else if (tipoLower.includes('salida') && tipoLower.includes('equipo')) {
             if (!this.datos.modelo || this.datos.modelo.trim() === '') {
@@ -74,7 +74,7 @@ export class Movimiento {
                 errores.push('Debe especificar quién retira el equipo');
             }
         }
-        
+
         // INGRESO DE EQUIPO
         else if (tipoLower.includes('ingreso') && tipoLower.includes('equipo')) {
             if (!this.datos.modelo || this.datos.modelo.trim() === '') {
@@ -90,7 +90,7 @@ export class Movimiento {
                 errores.push('Debe especificar el origen');
             }
         }
-        
+
         // COMPRA DE EQUIPO
         else if (tipoLower.includes('compra')) {
             if (!this.datos.modelo || this.datos.modelo.trim() === '') {
@@ -109,7 +109,7 @@ export class Movimiento {
                 errores.push('Debe especificar el proveedor');
             }
         }
-        
+
         // SALIDA DE ACCESORIO
         else if (tipoLower.includes('salida') && tipoLower.includes('accesorio')) {
             if (!this.datos.tipo || this.datos.tipo.trim() === '') {
@@ -119,7 +119,7 @@ export class Movimiento {
                 errores.push('Debe especificar el destino');
             }
         }
-        
+
         // INGRESO DE ACCESORIO
         else if (tipoLower.includes('ingreso') && tipoLower.includes('accesorio')) {
             if (!this.datos.tipo || this.datos.tipo.trim() === '') {
@@ -129,7 +129,7 @@ export class Movimiento {
                 errores.push('Debe especificar el proveedor');
             }
         }
-        
+
         // CAMBIO POR GARANTÍA
         else if (tipoLower.includes('cambio') && tipoLower.includes('garantía')) {
             // Ya se valida en CambioGarantia.validar()
@@ -144,13 +144,13 @@ export class Movimiento {
                 errores.push('Debe especificar el equipo nuevo');
             }
         }
-        
+
         return {
             valido: errores.length === 0,
             errores
         };
     }
-    
+
     /**
      * Calcula el impacto en efectivo de este movimiento
      */
@@ -166,7 +166,7 @@ export class Movimiento {
                 return 0;
         }
     }
-    
+
     /**
      * Obtiene un título descriptivo del movimiento
      */
@@ -180,16 +180,16 @@ export class Movimiento {
             [TIPOS_MOVIMIENTO.INGRESO_ACCESORIO]: '🛡️⬅️',
             [TIPOS_MOVIMIENTO.COMPRA_EQUIPO]: '📱⬅️'
         };
-        
+
         const icono = iconos[this.tipo] || '📦';
-        
+
         // Manejar Cambio Garantía antes del switch
         const tipoLower = this.tipo.toLowerCase();
         if (tipoLower.includes('cambio') && tipoLower.includes('garantía')) {
             const cliente = this.datos.cliente || {};
             return `🔄 Cambio por Garantía - ${cliente.nombre || 'Cliente'}`;
         }
-        
+
         switch (this.tipo) {
             case TIPOS_MOVIMIENTO.SALIDA_EFECTIVO:
                 return `${icono} Salida de Efectivo - $${this.datos.monto}`;
@@ -209,7 +209,7 @@ export class Movimiento {
                 return `${icono} Movimiento`;
         }
     }
-    
+
     /**
      * Obtiene detalles legibles del movimiento
      */
@@ -217,19 +217,19 @@ export class Movimiento {
         switch (this.tipo) {
             case TIPOS_MOVIMIENTO.SALIDA_EFECTIVO:
                 return `Retirado por: ${this.datos.persona} | Motivo: ${this.datos.nota}`;
-                
+
             case TIPOS_MOVIMIENTO.INGRESO_EFECTIVO:
                 return `Motivo: ${this.datos.nota}`;
-                
+
             case TIPOS_MOVIMIENTO.SALIDA_EQUIPO:
                 return `${this.datos.modelo} ${this.datos.capacidad} ${this.datos.color} | Destino: ${this.datos.destino} | Retirado por: ${this.datos.persona}`;
-                
+
             case TIPOS_MOVIMIENTO.INGRESO_EQUIPO:
                 return `${this.datos.modelo} ${this.datos.capacidad} ${this.datos.color} | Origen: ${this.datos.origen}`;
-                
+
             case TIPOS_MOVIMIENTO.COMPRA_EQUIPO:
                 return `${this.datos.modelo} ${this.datos.capacidad} ${this.datos.color} | Precio: $${this.datos.precio} | Proveedor: ${this.datos.proveedor}`;
-                
+
             case TIPOS_MOVIMIENTO.SALIDA_ACCESORIO:
             case TIPOS_MOVIMIENTO.INGRESO_ACCESORIO:
                 let detalles = `Tipo: ${this.datos.tipo}`;
@@ -237,18 +237,18 @@ export class Movimiento {
                     detalles += ` | Cantidad: ${this.datos.cantidad}`;
                 }
                 if (this.datos.modelos && this.datos.modelos.length > 0) {
-                    const modelosTexto = this.datos.modelos.map(m => 
+                    const modelosTexto = this.datos.modelos.map(m =>
                         m.color ? `${m.modelo} ${m.color} (${m.cantidad})` : `${m.modelo} (${m.cantidad})`
                     ).join(', ');
                     detalles += ` | Modelos: ${modelosTexto}`;
                 }
                 return detalles;
-                
+
             default:
                 return 'Sin detalles';
         }
     }
-    
+
     /**
      * Convierte el movimiento a un objeto plano para almacenamiento
      */
@@ -261,7 +261,7 @@ export class Movimiento {
             datos: this.datos
         };
     }
-    
+
     /**
      * Crea una instancia de Movimiento desde un objeto plano
      */
@@ -271,37 +271,37 @@ export class Movimiento {
 }
 
 // Sobrescribir el método obtenerDetalles para soportar tipos con espacios
-Movimiento.prototype.obtenerDetalles = function() {
+Movimiento.prototype.obtenerDetalles = function () {
     const tipoLower = this.tipo.toLowerCase();
-    
+
     if (tipoLower.includes('salida') && tipoLower.includes('efectivo')) {
         console.log(this.datos)
         return `💵-${this.datos.monto}$ | Retirado por: ${sanitizar(this.datos.persona) || 'N/A'} | 📝Motivo: ${sanitizar(this.datos.nota) || 'N/A'}`;
     }
-    
+
     if (tipoLower.includes('ingreso') && tipoLower.includes('efectivo')) {
         return `💵+${this.datos.monto}$ | 📝Motivo: ${sanitizar(this.datos.nota) || 'N/A'}`;
     }
-    
+
     if (tipoLower.includes('salida') && tipoLower.includes('equipo')) {
         return `${this.datos.modelo || ''} ${this.datos.capacidad || ''} ${this.datos.color || ''} | Destino: ${this.datos.destino || 'N/A'} | Retirado por: ${sanitizar(this.datos.persona) || 'N/A'}`;
     }
-    
+
     if (tipoLower.includes('ingreso') && tipoLower.includes('equipo')) {
         return `${this.datos.modelo || ''} ${this.datos.capacidad || ''} ${this.datos.color || ''} | Origen: ${this.datos.origen || 'N/A'}`;
     }
-    
+
     if (tipoLower.includes('compra')) {
         return `${this.datos.modelo || ''} ${this.datos.capacidad || ''} ${this.datos.color || ''} | Precio: $${this.datos.precio || 0} | Proveedor: ${sanitizar(this.datos.proveedor) || 'N/A'}`;
     }
-    
+
     if (tipoLower.includes('accesorio')) {
         let detalles = `Tipo: ${this.datos.tipo || 'N/A'}`;
         if (this.datos.cantidad) {
             detalles += ` | Cantidad: ${this.datos.cantidad}`;
         }
         if (this.datos.modelos && this.datos.modelos.length > 0) {
-            const modelosTexto = this.datos.modelos.map(m => 
+            const modelosTexto = this.datos.modelos.map(m =>
                 m.color ? `${m.modelo} ${m.color} (${m.cantidad})` : `${m.modelo} (${m.cantidad})`
             ).join(', ');
             detalles += ` | Modelos: ${modelosTexto}`;
@@ -314,30 +314,29 @@ Movimiento.prototype.obtenerDetalles = function() {
         }
         return detalles;
     }
-    
+
     // CASO PARA CAMBIO POR GARANTÍA
     if (tipoLower.includes('cambio') && tipoLower.includes('garantía')) {
         const cliente = this.datos.cliente || {};
         const equipoDefectuoso = this.datos.equipoDefectuoso || {};
         const equipoNuevo = this.datos.equipoNuevo || {};
         const diferencia = this.datos.diferencia || {};
-        
+
         let detalles = `👤 ${cliente.nombre || 'N/A'} (${cliente.cedula || 'N/A'})`;
         detalles += ` | 📱❌ ${equipoDefectuoso.modelo || 'N/A'} ${equipoDefectuoso.capacidad || ''} ${equipoDefectuoso.color || ''}"${sanitizar(equipoDefectuoso.imei) || ''}" | `;
         detalles += ` ➡️ 📱✅ ${equipoNuevo.modelo || 'N/A'} ${equipoNuevo.capacidad || ''} ${equipoNuevo.color || ''}(${sanitizar(equipoNuevo.imei) || ''})`;
-        
+
         if (diferencia.tipo && diferencia.tipo !== 'ninguna') {
             const simbolo = diferencia.tipo === 'favor-cliente' ? '💰➡️👤' : '💰➡️🏪';
             detalles += ` | ${simbolo} $${diferencia.monto || 0}`;
         }
-        
+
         if (equipoDefectuoso.problema) {
             detalles += ` | ⚠️ ${sanitizar(equipoDefectuoso.problema)}`;
         }
-        
+
         return detalles;
     }
-    
+
     return 'Sin detalles';
 };
-

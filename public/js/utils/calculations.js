@@ -7,10 +7,10 @@
  */
 export function calcularTotalPagoMixto(pagoMixto) {
     return (pagoMixto.efectivo || 0) +
-           (pagoMixto.zelle || 0) +
-           (pagoMixto.binance || 0) +
-           (pagoMixto.pagoMovil || 0) +
-           (pagoMixto.transferencia || 0);
+        (pagoMixto.zelle || 0) +
+        (pagoMixto.binance || 0) +
+        (pagoMixto.pagoMovil || 0) +
+        (pagoMixto.transferencia || 0);
 }
 
 /**

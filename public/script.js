@@ -77,10 +77,6 @@
 ];*/
 const productos = [
   {
-    "nombre": "Apple Watch serie 9 41 mm sellado",
-    "usd": 319
-  },
-  {
     "nombre": "Apple Watch serie 9 41 mm open box",
     "usd": 279
   },
@@ -154,11 +150,11 @@ const productos = [
   },
   {
     "nombre": "Iphone 12 pro (128gb)",
-    "usd": 320
+    "usd": 340
   },
   {
     "nombre": "IPhone 12 pro (256gb)",
-    "usd": 360
+    "usd": 380
   },
   {
     "nombre": "IPhone 12 pro (512gb)",
@@ -166,15 +162,15 @@ const productos = [
   },
   {
     "nombre": "IPhone 12proMax128gb",
-    "usd": 360
+    "usd": 399
   },
   {
     "nombre": "IPhone 12proMax(256gb)",
-    "usd": 380
+    "usd": 430
   },
   {
     "nombre": "IPhone 12promax(512gb)",
-    "usd": 430
+    "usd": 470
   },
   {
     "nombre": "IPhone 13 ( 128gb)",
@@ -186,7 +182,7 @@ const productos = [
   },
   {
     "nombre": "IPhone 13 (256gb)",
-    "usd": 390
+    "usd": 399
   },
   {
     "nombre": "IPhone 13 (512gb)",
@@ -218,11 +214,11 @@ const productos = [
   },
   {
     "nombre": "IPhone 13 pro Max (512gb)",
-    "usd": 625
+    "usd": 639
   },
   {
     "nombre": "IPhone 13 pro Max (1TBgb)",
-    "usd": 650
+    "usd": 669
   },
   {
     "nombre": "IPhone 14 (128gb)",
@@ -246,11 +242,11 @@ const productos = [
   },
   {
     "nombre": "IPhone 14 pro(128gb)",
-    "usd": 499
+    "usd": 509
   },
   {
     "nombre": "IPhone 14 pro (256gb)",
-    "usd": 519
+    "usd": 539
   },
   {
     "nombre": "IPhone 14 pro (512gb)",
@@ -258,11 +254,11 @@ const productos = [
   },
   {
     "nombre": "IPhone 14 pro Max (128gb)",
-    "usd": 599
+    "usd": 609
   },
   {
     "nombre": "IPhone 14 pro Max (256gb)",
-    "usd": 619
+    "usd": 645
   },
   {
     "nombre": "IPhone 14 pro Max (512gb)",
@@ -270,7 +266,7 @@ const productos = [
   },
   {
     "nombre": "IPhone 15 (128gb)",
-    "usd": 520
+    "usd": 499
   },
   {
     "nombre": "IPhone 15 (256gb)",
@@ -282,7 +278,7 @@ const productos = [
   },
   {
     "nombre": "Iphone 15 plus (128gb)",
-    "usd": 550
+    "usd": 590
   },
   {
     "nombre": "Iphone 15 plus (256gb)",
@@ -290,59 +286,67 @@ const productos = [
   },
   {
     "nombre": "IPhone 15 pro (128gb)",
-    "usd": 619
+    "usd": 630
   },
   {
     "nombre": "IPhone 15 pro (256gb)",
-    "usd": 650
-  },
-  {
-    "nombre": "IPhone 15 pro Max (256gb)",
-    "usd": 740
-  },
-  {
-    "nombre": "Iphone 15 pro Max (512gb)",
-    "usd": 820
-  },
-  {
-    "nombre": "Iphone 15 pro Max (1TB)",
-    "usd": 850
-  },
-  {
-    "nombre": "IPhone 16 (128gb)",
     "usd": 699
   },
   {
+    "nombre": "IPhone 15 pro Max (256gb)",
+    "usd": 799
+  },
+  {
+    "nombre": "Iphone 15 pro Max (512gb)",
+    "usd": 850
+  },
+  {
+    "nombre": "Iphone 15 pro Max (1TB)",
+    "usd": 940
+  },
+  {
+    "nombre": "IPhone 16 (128gb)",
+    "usd": 749
+  },
+  {
     "nombre": "IPhone 16 (256gb)",
-    "usd": 629
-  },
-  {
-    "nombre": "IPhone 16 PLUS (128gb)",
-    "usd": 789
-  },
-  {
-    "nombre": "IPhone 16 PLUS (256gb)",
-    "usd": 810
-  },
-  {
-    "nombre": "IPhone 16 pro (128gb)",
     "usd": 820
   },
   {
+    "nombre": "IPhone 16 PLUS (128gb)",
+    "usd": 750
+  },
+  {
+    "nombre": "IPhone 16 PLUS (256gb)",
+    "usd": 799
+  },
+  {
+    "nombre": "IPhone 16 pro (128gb)",
+    "usd": 869
+  },
+  {
     "nombre": "IPhone 16 pro (256gb)",
-    "usd": 899
+    "usd": 919
+  },
+  {
+    "nombre": "IPhone 16 pro (512)",
+    "usd": 1000
+  },
+  {
+    "nombre": "IPhone 16 pro (1TB)",
+    "usd": 1050
   },
   {
     "nombre": "IPhone 16 pro Max (256gb)",
-    "usd": 990
+    "usd": 980
   },
   {
     "nombre": "IPhone 16 pro Max (256gb) 100%",
-    "usd": 1060
+    "usd": 1040
   },
   {
     "nombre": "IPhone 16 pro Max (512gb)",
-    "usd": 1030
+    "usd": 1050
   },
   {
     "nombre": "IPhone 16 pro Max (1TB)",
@@ -353,36 +357,16 @@ const productos = [
     "usd": 1090
   },
   {
-    "nombre": "iphone 17 512",
-    "usd": 1340
-  },
-  {
-    "nombre": "Iphone 17 pro 256gb white",
-    "usd": 1420
-  },
-  {
-    "nombre": "Iphone 17 pro 256gb blue orange",
-    "usd": 1399
-  },
-  {
-    "nombre": "Iphone 17 pro 512gb",
-    "usd": 1640
+    "nombre": "Iphone 17 pro 256gb",
+    "usd": 1380
   },
   {
     "nombre": "Iphone 17 pro Max 256gb",
-    "usd": 1540
-  },
-  {
-    "nombre": "Iphone 17 pro Max 256gb blue orange",
     "usd": 1520
   },
   {
-    "nombre": "Iphone 17 pro Max 512gb White",
-    "usd": 1790
-  },
-  {
     "nombre": "Iphone 17 pro Max 512gb",
-    "usd": 1750
+    "usd": 1759
   },
   {
     "nombre": "IPhone 17 pro Max 1TB",
@@ -665,13 +649,12 @@ function onMethodChange() {
 // 🌐 Obtener tasa USD → VES real desde open.er-api.com
 async function fetchExchangeRate() {
   try {
-    const res = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json');
+    const res = await fetch('https://open.er-api.com/v6/latest/USD');
     const data = await res.json();
-    if (data.usd.ves /*=== 'success'  && typeof data.rates.VES === 'number' && data.rates.VES > 0 */) {
-      console.log(data, 'hola')
-      return parseFloat(data.usd.ves);
+    if (data.result === 'success' && data.rates.VES) {
+      return parseFloat(data.rates.VES);
     } else {
-      console.warn('La API (open.er-api.com) no retornó una tasa válida para VES. Valor retornado:', data.rates?.VES);
+      console.error('Error al obtener tasa:', data);
       return null;
     }
   } catch (err) {
@@ -686,15 +669,10 @@ async function fetchExchangeRate() {
 async function updateApiValue() {
   const rate = await fetchExchangeRate();
   const binanceRate = await fetchBinanceP2PAverage();
-  
   if (rate !== null) {
     apiValueInput.value = rate.toFixed(2);
-  }
-  
-  // Binance ya actualiza su input internamente, pero aquí podemos asegurar que
-  // se recalcula la UI si alguna de las dos tasas llegó correctamente.
-  if (rate !== null || binanceRate !== null) {
-    calculateRealTime();
+    transferRate.value = binanceRate.toFixed(2) | 0;
+    calculateRealTime(); // recalcula con el nuevo valor
   }
 }
 updateApiValue();                      // al cargar
@@ -982,3 +960,35 @@ function updatePrice() {
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

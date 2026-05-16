@@ -52,12 +52,12 @@ export function formatearHora(fecha) {
 export function formatearTelefono(telefono) {
     // Eliminar caracteres no numéricos
     const numeros = telefono.replace(/\D/g, '');
-    
+
     // Formatear como 0414-1234567
     if (numeros.length === 11) {
         return `${numeros.slice(0, 4)}-${numeros.slice(4)}`;
     }
-    
+
     return telefono;
 }
 
@@ -69,13 +69,13 @@ export function formatearCedula(cedula) {
     if (cedula.includes('-')) {
         return cedula.toUpperCase();
     }
-    
+
     // Intentar formatear
     const match = cedula.match(/^([VEJPvejp])(\d+)$/);
     if (match) {
         return `${match[1].toUpperCase()}-${match[2]}`;
     }
-    
+
     return cedula.toUpperCase();
 }
 

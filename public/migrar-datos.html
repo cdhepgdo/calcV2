@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migración de Datos a Firebase</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #e0e0e0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .container { background: #16213e; padding: 2rem; border-radius: 12px; max-width: 600px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        h1 { text-align: center; margin-bottom: 1rem; color: #00b4d8; font-size: 1.5rem; }
+        .info { background: #0f3460; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; line-height: 1.6; }
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+        .stat { background: #0f3460; padding: 1rem; border-radius: 8px; text-align: center; }
+        .stat .num { font-size: 2rem; font-weight: bold; color: #00b4d8; }
+        .stat .label { font-size: 0.8rem; color: #aaa; margin-top: 0.3rem; }
+        button { width: 100%; padding: 1rem; border: none; border-radius: 8px; font-size: 1.1rem; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+        .btn-primary { background: #00b4d8; color: #fff; }
+        .btn-primary:hover { background: #0077b6; }
+        .btn-primary:disabled { background: #555; cursor: not-allowed; }
+        .btn-secondary { background: #e63946; color: #fff; margin-top: 0.5rem; }
+        .log { background: #0a0a1a; padding: 1rem; border-radius: 8px; margin-top: 1rem; max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; white-space: pre-wrap; }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+        .warning { color: #fbbf24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Migración de Datos a Firebase</h1>
+
+        <div class="info">
+            <strong>¿Qué hace esto?</strong><br>
+            Lee todas las ventas, movimientos y caja inicial guardados en el
+            <strong>localStorage</strong> de ESTE navegador y los sube a Firebase Firestore.
+            <br><br>
+            ⚠️ <strong>Ábrelo en la PC donde están los datos.</strong>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="num" id="numVentas">-</div>
+                <div class="label">Ventas encontradas</div>
+            </div>
+            <div class="stat">
+                <div class="num" id="numMovimientos">-</div>
+                <div class="label">Movimientos encontrados</div>
+            </div>
+        </div>
+
+        <button id="btnMigrar" class="btn-primary" disabled>⏳ Cargando datos...</button>
+
+        <div id="logContainer" class="log" style="display:none;"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+        // ===== CONFIGURACIÓN FIREBASE (misma que firebase-config.js) =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyDPdvDTvMIv-dgoLuiKRDb4_0jx1dtKL14",
+            authDomain: "usaimport1.firebaseapp.com",
+            projectId: "usaimport1",
+            storageBucket: "usaimport1.firebasestorage.app",
+            messagingSenderId: "1052948620010",
+            appId: "1:1052948620010:web:93d4b17a5a94ada239ed93"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // ===== LEER LOCALSTORAGE =====
+        const KEYS = {
+            VENTAS: 'ventas_iphone',
+            MOVIMIENTOS: 'movimientos_iphone',
+            CAJA_INICIAL: 'caja_inicial_iphone',
+            CIERRE_CAJA: 'caja_cierre_iphone'
+        };
+
+        let ventas = [];
+        let movimientos = [];
+        let cajaInicial = null;
+        let cierreCaja = null;
+
+        try {
+            ventas = JSON.parse(localStorage.getItem(KEYS.VENTAS) || '[]');
+            movimientos = JSON.parse(localStorage.getItem(KEYS.MOVIMIENTOS) || '[]');
+            cajaInicial = JSON.parse(localStorage.getItem(KEYS.CAJA_INICIAL));
+            cierreCaja = JSON.parse(localStorage.getItem(KEYS.CIERRE_CAJA));
+        } catch (e) {
+            console.error('Error leyendo localStorage:', e);
+        }
+
+        document.getElementById('numVentas').textContent = ventas.length;
+        document.getElementById('numMovimientos').textContent = movimientos.length;
+
+        const btn = document.getElementById('btnMigrar');
+        const logEl = document.getElementById('logContainer');
+
+        if (ventas.length === 0 && movimientos.length === 0 && !cajaInicial) {
+            btn.textContent = '❌ No hay datos para migrar';
+            btn.disabled = true;
+        } else {
+            btn.textContent = `🚀 Migrar ${ventas.length} ventas y ${movimientos.length} movimientos`;
+            btn.disabled = false;
+        }
+
+        function log(msg, tipo = '') {
+            logEl.style.display = 'block';
+            const span = document.createElement('div');
+            span.className = tipo;
+            span.textContent = msg;
+            logEl.appendChild(span);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        btn.addEventListener('click', async () => {
+            btn.disabled = true;
+            btn.textContent = '⏳ Migrando...';
+            let errores = 0;
+
+            // Migrar ventas
+            for (let i = 0; i < ventas.length; i++) {
+                const v = ventas[i];
+                try {
+                    await setDoc(doc(db, "ventas", v.id), v);
+                    log(`✅ Venta ${i + 1}/${ventas.length}: ${v.id}`, 'success');
+                } catch (e) {
+                    log(`❌ Error venta ${v.id}: ${e.message}`, 'error');
+                    errores++;
+                }
+            }
+
+            // Migrar movimientos
+            for (let i = 0; i < movimientos.length; i++) {
+                const m = movimientos[i];
+                try {
+                    await setDoc(doc(db, "movimientos", m.id), m);
+                    log(`✅ Movimiento ${i + 1}/${movimientos.length}: ${m.id}`, 'success');
+                } catch (e) {
+                    log(`❌ Error movimiento ${m.id}: ${e.message}`, 'error');
+                    errores++;
+                }
+            }
+
+            // Migrar caja inicial
+            if (cajaInicial) {
+                try {
+                    await setDoc(doc(db, "config", "cajaInicial"), cajaInicial);
+                    log('✅ Caja inicial migrada', 'success');
+                } catch (e) {
+                    log(`❌ Error caja inicial: ${e.message}`, 'error');
+                    errores++;
+                }
+            }
+
+            // Migrar cierre caja
+            if (cierreCaja) {
+                try {
+                    await setDoc(doc(db, "config", "cierreCaja"), cierreCaja);
+                    log('✅ Cierre de caja migrado', 'success');
+                } catch (e) {
+                    log(`❌ Error cierre caja: ${e.message}`, 'error');
+                    errores++;
+                }
+            }
+
+            // Resumen
+            if (errores === 0) {
+                log('\n🎉 ¡Migración completada exitosamente! Todos los datos están ahora en Firebase.', 'success');
+                btn.textContent = '✅ ¡Migración completada!';
+            } else {
+                log(`\n⚠️ Migración completada con ${errores} errores.`, 'warning');
+                btn.textContent = '⚠️ Completado con errores';
+            }
+        });
+    </script>
+</body>
+</html>

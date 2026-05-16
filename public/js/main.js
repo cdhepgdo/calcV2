@@ -1,7 +1,8 @@
-/**
+﻿/**
 * Archivo principal de la aplicación
 * Orquesta la inicialización y coordinación de todos los módulos
 */
+import { authService } from './services/AuthService.js';
 import { CambioGarantia } from './models/CambioGarantia.js';
 import { Movimiento } from './models/Movimiento.js';
 import { ventaService } from './services/VentaService.js';
@@ -29,16 +30,27 @@ class App {
     /**
      * Inicializa la aplicación
      */
-    init() {
+    async init() {
         console.log('🚀 Iniciando aplicación...');
 
-        // Cargar datos iniciales
-        this.cargarDatosIniciales();
+        // ── LÍNEAS NUEVAS ──────────────────────────────
+        // Arranca el caché con onSnapshot
+        storageService.inicializar();
 
-        // Inicializar componentes
+        // Cada vez que Firebase actualiza el caché,
+        // la UI se re-renderiza automáticamente
+        storageService.onCambio(() => this.actualizarUI());
+        // ───────────────────────────────────────────────
+
+        // Inicializar componentes (no dependen de datos)
         this.inicializarSelectores();
         this.inicializarEventos();
-        this.actualizarUI();
+
+        // Cargar datos iniciales desde Firebase
+        await this.cargarDatosIniciales();
+
+        // Actualizar UI con los datos cargados
+        await this.actualizarUI();
 
         console.log('✅ Aplicación iniciada correctamente');
     }
@@ -56,26 +68,16 @@ class App {
             document.getElementById('cajaInicialConfirmacion').classList.remove('hidden');
         }
     } */
-    cargarDatosIniciales() {
-        this.cajaActual = storageService.obtenerCajaInicial();
+    async cargarDatosIniciales() {
+        this.cajaActual = await storageService.obtenerCajaInicial();
         const hoy = new Date().toLocaleDateString('es-ES');
         if (this.cajaActual.cajaInicial > 0 && this.cajaActual.fecha === hoy) {
             // Ya se guardó la caja HOY → mostrar normalmente
             document.getElementById('cajaInicial').value = this.cajaActual.cajaInicial;
             document.getElementById('cajaInicialMostrar').textContent = this.cajaActual.cajaInicial.toFixed(2);
             document.getElementById('cajaInicialConfirmacion').classList.remove('hidden');
-        } /* else {
-        // Es un día nuevo → buscar el cierre del día anterior
-        const cierreGuardado = localStorage.getItem('caja_cierre_iphone');
-        if (cierreGuardado) {
-            const datos = JSON.parse(cierreGuardado);
-            document.getElementById('cajaInicial').value = parseFloat(datos.monto).toFixed(2);
-            // Borde amarillo para indicar que es un valor sugerido
-            document.getElementById('cajaInicial').style.borderColor = '#f59e0b';
-        }
-    } */
-        else {
-            const cierreGuardado = storageService.obtenerCierreCaja();
+        } else {
+            const cierreGuardado = await storageService.obtenerCierreCaja();
             if (cierreGuardado) {
                 document.getElementById('cajaInicial').value = parseFloat(cierreGuardado.monto).toFixed(2);
                 // Borde amarillo para indicar que es un valor sugerido
@@ -473,17 +475,17 @@ class App {
     /**
      * Guarda la caja inicial
      */
-    guardarCajaInicial() {
+    async guardarCajaInicial() {
         const valor = parseFloat(document.getElementById('cajaInicial').value) || 0;
         this.cajaActual = new Caja(valor);
 
-        storageService.guardarCajaInicial(this.cajaActual);
+        await storageService.guardarCajaInicial(this.cajaActual);
 
         document.getElementById('cajaInicialConfirmacion').classList.remove('hidden');
         document.getElementById('cajaInicialMostrar').textContent = valor.toFixed(2);
 
         mostrarAlerta('✅ Caja inicial guardada correctamente', 'success');
-        this.actualizarResumenVentas();
+        await this.actualizarResumenVentas();
     }
 
     /**
@@ -887,16 +889,19 @@ class App {
     /**
      * Maneja el submit del formulario de cambio por garantía
      */
-    manejarSubmitCambioGarantia() {
+    async manejarSubmitCambioGarantia() {
         const datos = this.recopilarDatosCambioGarantia();
         const cambio = new CambioGarantia(datos);
 
-        const resultado = movimientoService.registrarCambioGarantia(cambio);
+        const resultado = await movimientoService.registrarCambioGarantia(cambio);
 
         if (resultado.exito) {
             mostrarAlerta(resultado.mensaje, 'success');
             this.limpiarFormularioVenta();
-            this.actualizarUI();
+            // Actualizar UI en background (fire-and-forget)
+            this.actualizarUI().catch(err =>
+                console.warn('⚠️ Error actualizando UI después de cambio garantía:', err)
+            );
 
             // Preguntar si desea imprimir la garantía
             if (confirm('¿Desea imprimir la garantía del cambio?')) {
@@ -908,69 +913,88 @@ class App {
     }
 
     /**
-     * Maneja el submit del formulario de venta
+     * Maneja el submit del formulario de venta.
+     * 
+     * DISEÑO CLAVE: El botón se rehabilita INMEDIATAMENTE después de que Firebase
+     * confirma la escritura (instantáneo offline gracias a IndexedDB).
+     * La actualización visual de la lista (actualizarUI) se ejecuta en background
+     * sin bloquear, para que el usuario pueda registrar otra venta de inmediato.
      */
-    manejarSubmitVenta(e) {
+    async manejarSubmitVenta(e) {
         e.preventDefault();
 
         const tipoTransaccion = document.querySelector('input[name="tipoTransaccion"]:checked').value;
 
         // Si es cambio por garantía, usar flujo diferente
         if (tipoTransaccion === 'cambio-garantia') {
-            this.manejarSubmitCambioGarantia();
+            await this.manejarSubmitCambioGarantia();
             return;
         }
 
-        const datosVenta = this.recopilarDatosVenta();
-        console.log(datosVenta.formaPago)
+        // Bloquear botón para evitar doble envío (idempotencia UI)
+        const submitBtn = document.querySelector('button[type="submit"]');
+        const textoOriginal = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '⏳ Guardando...';
 
-        let resultado;
-        if (this.ventaEnEdicion) {
-            datosVenta.id = this.ventaEnEdicion;
-            resultado = ventaService.actualizarVenta(datosVenta);
+        try {
+            const datosVenta = this.recopilarDatosVenta();
 
-
-        } else {
-            /* const montoCalculado = this.calcularMontoTotal();
-            const montoIngresado = parseFloat(document.getElementById('montoTotal').value);
-
-            // Solo permitir monto mayor si WEPPA está marcado
-            const weppaChecked = document.getElementById('weppa').checked;
-
-            if (!weppaChecked && Math.abs(montoCalculado - montoIngresado) > 0.01) {
-                alert('❌ El monto total no puede ser modificado manualmente a menos que WEPPA esté marcado');
-                return;
+            let resultado;
+            if (this.ventaEnEdicion) {
+                datosVenta.id = this.ventaEnEdicion;
+                resultado = await ventaService.actualizarVenta(datosVenta);
+            } else {
+                resultado = await ventaService.crearVenta(datosVenta);
             }
 
-            if (weppaChecked && montoIngresado < montoCalculado) {
-                alert('❌ Con WEPPA marcado, el monto total no puede ser menor al calculado automáticamente');
-                return;
-            } */
-            resultado = ventaService.crearVenta(datosVenta);
-        }
+            // ✅ PRIMERO: Rehabilitar botón y limpiar formulario ANTES de actualizar UI.
+            // Razón: guardarVenta/actualizarVenta ya terminó (Firebase lo escribió en
+            // IndexedDB local de forma instantánea). El usuario ya puede registrar otra.
+            submitBtn.disabled = false;
 
-        if (resultado.exito) {
+            if (resultado.exito) {
+                // Restaurar botón y limpiar estado de edición
+                submitBtn.innerHTML = '✅ Registrar Venta';
+                submitBtn.classList.remove('bg-orange-600', 'hover:bg-orange-700');
+                submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
 
-            // Restaurar botón y limpiar estado de edición
-            const submitBtn = document.querySelector('button[type="submit"]');
-            submitBtn.innerHTML = '✅ Registrar Venta';
-            submitBtn.classList.remove('bg-orange-600', 'hover:bg-orange-700');
-            submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                // Eliminar botón de cancelar edición si existía
+                const cancelBtn = document.getElementById('cancelarEdicion');
+                if (cancelBtn) {
+                    cancelBtn.remove();
+                }
 
-            // Eliminar botón de cancelar
-            const cancelBtn = document.getElementById('cancelarEdicion');
-            if (cancelBtn) {
-                cancelBtn.remove();
+                this.ventaEnEdicion = null;
+
+                mostrarAlerta(resultado.mensaje, 'success');
+                this.limpiarFormularioVenta();
+
+                // ✅ DESPUÉS: Actualizar la lista de ventas en BACKGROUND (fire-and-forget).
+                // No usamos await para no bloquear la interfaz.
+                // Si falla (por estar offline), no es grave: la lista se actualizará
+                // cuando el usuario recargue o vuelva la conexión.
+                this.actualizarUI().catch(err =>
+                    console.warn('⚠️ Error actualizando UI después de guardar (no bloqueante):', err)
+                );
+            } else {
+                // Hubo errores de validación — mostrarlos
+                submitBtn.innerHTML = textoOriginal;
+                mostrarAlerta(resultado.errores.join('<br>'), 'error');
             }
-
-            this.ventaEnEdicion = null;
-
-            mostrarAlerta(resultado.mensaje, 'success');
-            this.limpiarFormularioVenta();
-            this.actualizarUI();
-        } else {
-            mostrarAlerta(resultado.errores.join('<br>'), 'error');
+        } catch (error) {
+            // Error inesperado (ej: error de red, permisos, etc.)
+            console.error('Error al guardar venta:', error);
+            mostrarAlerta('❌ Error al guardar la venta. Intente de nuevo.', 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = textoOriginal;
         }
+        // ✅ ELIMINAMOS el bloque finally problemático.
+        // Razón: el finally tenía una condición (innerHTML === '⏳ Guardando...')
+        // que fallaba cuando el bloque de éxito ya había cambiado el texto,
+        // causando que el botón quedara deshabilitado en ciertos casos.
+        // Ahora cada rama (éxito, error de validación, excepción) maneja
+        // la rehabilitación del botón explícitamente.
     }
 
     /**
@@ -1313,20 +1337,20 @@ class App {
     /**
      * Actualiza toda la UI
      */
-    actualizarUI() {
-        this.actualizarResumenVentas();
-        this.actualizarResumenMovimientos();
+    async actualizarUI() {
+        await this.actualizarResumenVentas();
+        await this.actualizarResumenMovimientos();
     }
 
     /**
      * Actualiza el resumen de ventas
      */
-    actualizarResumenVentas() {
+    async actualizarResumenVentas() {
         const fechaHoy = new Date().toLocaleDateString('es-ES'); // 1. Obtenemos la fecha
 
         // 2. Filtramos al instante por la fecha de hoy
-        const ventas = ventaService.obtenerVentas().filter(v => v.fecha === fechaHoy);
-        const movimientos = movimientoService.obtenerMovimientos().filter(m => m.fecha === fechaHoy);
+        const ventas = (await ventaService.obtenerVentas()).filter(v => v.fecha === fechaHoy);
+        const movimientos = (await movimientoService.obtenerMovimientos()).filter(m => m.fecha === fechaHoy);
         const resumenElement = document.getElementById('resumenVentas');
 
         if (ventas.length === 0) {
@@ -1393,8 +1417,8 @@ class App {
         }
 
         // Actualizar totales con animación
-        const totalDia = ventaService.calcularTotalDia();
-        const equiposVendidos = ventaService.contarEquiposVendidos();
+        const totalDia = await ventaService.calcularTotalDia();
+        const equiposVendidos = await ventaService.contarEquiposVendidos();
         const desgloseCaja = this.cajaActual.obtenerDesglose(ventas, movimientos);
         console.log(ventas)
         console.log(movimientos)
@@ -1408,7 +1432,7 @@ class App {
             monto: desgloseCaja.cajaFinal,
             fecha: new Date().toLocaleDateString('es-ES')
         })); */
-        storageService.guardarCierreCaja(desgloseCaja.cajaFinal);
+        await storageService.guardarCierreCaja(desgloseCaja.cajaFinal);
     }
 
     /**
@@ -1659,7 +1683,7 @@ class App {
     /**
      * Actualiza el resumen de movimientos
      */
-    actualizarResumenMovimientos() {
+    async actualizarResumenMovimientos() {
         const resumenElement = document.getElementById('resumenMovimientos');
         if (!resumenElement) {
             console.warn('Elemento resumenMovimientos no encontrado');
@@ -1669,7 +1693,7 @@ class App {
         const fechaHoy = new Date().toLocaleDateString('es-ES'); // 1. Obtenemos la fecha
 
         // 2. Filtramos los movimientos al instante
-        const movimientos = movimientoService.obtenerMovimientos().filter(m => m.fecha === fechaHoy);
+        const movimientos = (await movimientoService.obtenerMovimientos()).filter(m => m.fecha === fechaHoy);
         console.log('📦 Movimientos obtenidos:', movimientos.length, movimientos);
 
         if (movimientos.length === 0) {
@@ -1789,46 +1813,58 @@ class App {
     }
 
     /**
-     * Edita una venta
+     * Edita una venta.
+     * 
+     * Envuelto en try-catch para que si la lectura de Firebase se cuelga
+     * o falla offline, el usuario reciba un mensaje de error en vez de
+     * quedarse viendo una pantalla congelada indefinidamente.
      */
-    editarVenta(ventaId) {
-        const venta = ventaService.obtenerVentaPorId(ventaId);
+    async editarVenta(ventaId) {
+        try {
+            const venta = await ventaService.obtenerVentaPorId(ventaId);
 
-        if (!venta) {
-            mostrarAlerta('Venta no encontrada', 'error');
-            return;
+            if (!venta) {
+                mostrarAlerta('Venta no encontrada', 'error');
+                return;
+            }
+
+            // Marcar que estamos editando
+            this.ventaEnEdicion = ventaId;
+
+            // Llenar el formulario con los datos de la venta
+            this.llenarFormularioConVenta(venta);
+
+            // Cambiar el botón de submit
+            const submitBtn = document.querySelector('button[type="submit"]');
+            // Asegurar que el botón esté habilitado (podría haber quedado
+            // deshabilitado de una operación previa)
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '✏️ Actualizar Venta';
+            submitBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            submitBtn.classList.add('bg-orange-600', 'hover:bg-orange-700');
+
+            // Agregar botón de cancelar si no existe
+            let cancelBtn = document.getElementById('cancelarEdicion');
+            if (!cancelBtn) {
+                cancelBtn = document.createElement('button');
+                cancelBtn.type = 'button';
+                cancelBtn.id = 'cancelarEdicion';
+                cancelBtn.className = 'bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition';
+                cancelBtn.innerHTML = '❌ Cancelar Edición';
+                cancelBtn.onclick = () => this.cancelarEdicion();
+
+                // Insertar después del botón de submit
+                submitBtn.parentNode.insertBefore(cancelBtn, submitBtn.nextSibling);
+            }
+
+            // Scroll al formulario
+            document.getElementById('ventaForm').scrollIntoView({ behavior: 'smooth' });
+
+            mostrarAlerta('Editando venta. Modifica los campos y guarda los cambios.', 'info');
+        } catch (error) {
+            console.error('Error al cargar venta para edición:', error);
+            mostrarAlerta('❌ No se pudo cargar la venta para editar. Intente de nuevo.', 'error');
         }
-
-        // Marcar que estamos editando
-        this.ventaEnEdicion = ventaId;
-
-        // Llenar el formulario con los datos de la venta
-        this.llenarFormularioConVenta(venta);
-
-        // Cambiar el botón de submit
-        const submitBtn = document.querySelector('button[type="submit"]');
-        submitBtn.innerHTML = '✏️ Actualizar Venta';
-        submitBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-        submitBtn.classList.add('bg-orange-600', 'hover:bg-orange-700');
-
-        // Agregar botón de cancelar si no existe
-        let cancelBtn = document.getElementById('cancelarEdicion');
-        if (!cancelBtn) {
-            cancelBtn = document.createElement('button');
-            cancelBtn.type = 'button';
-            cancelBtn.id = 'cancelarEdicion';
-            cancelBtn.className = 'bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition';
-            cancelBtn.innerHTML = '❌ Cancelar Edición';
-            cancelBtn.onclick = () => this.cancelarEdicion();
-
-            // Insertar después del botón de submit
-            submitBtn.parentNode.insertBefore(cancelBtn, submitBtn.nextSibling);
-        }
-
-        // Scroll al formulario
-        document.getElementById('ventaForm').scrollIntoView({ behavior: 'smooth' });
-
-        mostrarAlerta('Editando venta. Modifica los campos y guarda los cambios.', 'info');
     }
 
     /**
@@ -1839,6 +1875,7 @@ class App {
 
         // Restaurar botón de submit
         const submitBtn = document.querySelector('button[type="submit"]');
+        submitBtn.disabled = false; // Asegurar que esté habilitado
         submitBtn.innerHTML = '✅ Registrar Venta';
         submitBtn.classList.remove('bg-orange-600', 'hover:bg-orange-700');
         submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
@@ -1898,14 +1935,14 @@ class App {
                         let htmlFila = '';
                         if (tipo === 'otro') {
                             htmlFila = `
-                            <div class="otro-item grid grid-cols-[40%,35%,25%] gap-2 items-center">
+                            <div class="otro-item grid grid-cols-[52px,auto,auto] gap-2 items-center">
                                 <input type="text" value="${item.nombre || ''}" class="p-2 border rounded-lg flex-1 otro-nombre" placeholder="¿Qué es?">
                                 <input type="number" min="1" value="${item.cantidad}" class="p-2 border rounded-lg w-20 otro-cant" placeholder="Cant.">
                                 <button type="button" class="${btnClass} text-white w-8 h-8 rounded font-bold" ${btnAction}>${btnText}</button>
                             </div>`;
                         } else {
                             htmlFila = `
-                            <div class="${tipo}-item grid grid-cols-[40%,35%,25%] gap-2 items-center">
+                            <div class="${tipo}-item grid grid-cols-[52px,auto,auto] gap-2 items-center">
                                 <select class="p-2 border rounded-lg accModelo flex-1"></select>
                                 <input type="number" min="1" value="${item.cantidad}" class="p-2 border rounded-lg w-20 ${tipo}-cant" placeholder="Cant.">
                                 <button type="button" class="${btnClass} text-white w-8 h-8 rounded font-bold" ${btnAction}>${btnText}</button>
@@ -2107,8 +2144,8 @@ class App {
     /**
      * Imprime la garantía de una venta
      */
-    imprimirGarantia(ventaId) {
-        const venta = ventaService.obtenerVentaPorId(ventaId);
+    async imprimirGarantia(ventaId) {
+        const venta = await ventaService.obtenerVentaPorId(ventaId);
 
         if (!venta) {
             mostrarAlerta('Venta no encontrada', 'error');
@@ -2133,26 +2170,33 @@ class App {
     /**
      * Imprime el resumen del día
      */
-    imprimirResumenDia() {
+    async imprimirResumenDia() {
         const fechaHoy = new Date().toLocaleDateString('es-ES'); // 1. Obtenemos la fecha
 
         // 2. Filtramos al instante por la fecha de hoy
-        const ventas = ventaService.obtenerVentas().filter(v => v.fecha === fechaHoy);
-        const movimientos = movimientoService.obtenerMovimientos().filter(m => m.fecha === fechaHoy);
+        const ventas = (await ventaService.obtenerVentas()).filter(v => v.fecha === fechaHoy);
+        const movimientos = (await movimientoService.obtenerMovimientos()).filter(m => m.fecha === fechaHoy);
 
         printService.imprimirResumenDia(ventas, movimientos, this.cajaActual);
     }
 
     /**
-     * Elimina una venta
+     * Elimina una venta.
+     * 
+     * La eliminación offline es manejada por StorageService._deletedVentaIds:
+     * el documento eliminado se filtra de las lecturas aunque Firebase aún
+     * lo tenga en su caché IndexedDB. La UI se actualiza en background.
      */
-    eliminarVenta(ventaId) {
+    async eliminarVenta(ventaId) {
         if (confirmar('¿Estás seguro de que quieres eliminar esta venta?')) {
-            const resultado = ventaService.eliminarVenta(ventaId);
+            const resultado = await ventaService.eliminarVenta(ventaId);
 
             if (resultado.exito) {
                 mostrarAlerta(resultado.mensaje, 'success');
-                this.actualizarUI();
+                // Actualizar UI en background (fire-and-forget) para no bloquear
+                this.actualizarUI().catch(err =>
+                    console.warn('⚠️ Error actualizando UI después de eliminar:', err)
+                );
             } else {
                 mostrarAlerta(resultado.errores.join('<br>'), 'error');
             }
@@ -2499,7 +2543,7 @@ class App {
     /**
      * Guarda el movimiento de inventario
      */
-    guardarMovimiento() {
+    async guardarMovimiento() {
         try {
             const datos = this.recopilarDatosMovimiento();
             console.log('📝 Datos recopilados:', datos);
@@ -2511,7 +2555,7 @@ class App {
 
 
             // Guardar usando el servicio
-            const resultado = movimientoService.crearMovimiento(datos);
+            const resultado = await movimientoService.crearMovimiento(datos);
             console.log('💾 Resultado del guardado:', resultado);
 
             if (resultado.exito) {
@@ -2520,8 +2564,8 @@ class App {
 
                 // Actualizar resumen con manejo de errores separado
                 try {
-                    this.actualizarResumenMovimientos();
-                    this.actualizarResumenVentas();  // ⭐ AGREGAR ESTA LÍNEA
+                    await this.actualizarResumenMovimientos();
+                    await this.actualizarResumenVentas();
                 } catch (errorResumen) {
                     console.error('Error al actualizar resumen:', errorResumen);
                     // No mostrar alert aquí, el movimiento ya se guardó correctamente
@@ -2721,7 +2765,19 @@ class App {
 
 // Inicializar la aplicación cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
-    window.app = new App();
+    authService.onAuthChange((user) => {
+        if (!user) {
+            window.location.replace('login.html');
+        } else {
+            if (!window.app) {
+                window.app = new App();
+                const btnLogout = document.getElementById('btnLogout');
+                if (btnLogout) btnLogout.addEventListener('click', () => authService.logout());
+                const btnLogoutMobile = document.getElementById('btnLogoutMobile');
+                if (btnLogoutMobile) btnLogoutMobile.addEventListener('click', () => authService.logout());
+            }
+        }
+    });
 });
 
 

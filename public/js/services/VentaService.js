@@ -11,9 +11,9 @@ class VentaService {
     /**
      * Crea y guarda una nueva venta
      */
-    crearVenta(datosVenta) {
+    async crearVenta(datosVenta) {
         const venta = new Venta(datosVenta);
-        
+
         // Validar
         const validacion = venta.validar();
         if (!validacion.valido) {
@@ -22,10 +22,10 @@ class VentaService {
                 errores: validacion.errores
             };
         }
-        
+
         // Guardar
-        const resultado = storageService.guardarVenta(venta);
-        
+        const resultado = await storageService.guardarVenta(venta);
+
         if (resultado.exito) {
             return {
                 exito: true,
@@ -39,13 +39,13 @@ class VentaService {
             };
         }
     }
-    
+
     /**
      * Actualiza una venta existente
      */
-    actualizarVenta(datosVenta) {
+    async actualizarVenta(datosVenta) {
         const venta = new Venta(datosVenta);
-        
+
         // Validar
         const validacion = venta.validar();
         if (!validacion.valido) {
@@ -54,10 +54,10 @@ class VentaService {
                 errores: validacion.errores
             };
         }
-        
+
         // Actualizar
-        const resultado = storageService.actualizarVenta(venta);
-        
+        const resultado = await storageService.actualizarVenta(venta);
+
         if (resultado.exito) {
             return {
                 exito: true,
@@ -71,13 +71,13 @@ class VentaService {
             };
         }
     }
-    
+
     /**
      * Elimina una venta
      */
-    eliminarVenta(ventaId) {
-        const resultado = storageService.eliminarVenta(ventaId);
-        
+    async eliminarVenta(ventaId) {
+        const resultado = await storageService.eliminarVenta(ventaId);
+
         if (resultado.exito) {
             return {
                 exito: true,
@@ -90,114 +90,98 @@ class VentaService {
             };
         }
     }
-    
+
     /**
      * Obtiene todas las ventas
      */
-    obtenerVentas() {
-        return storageService.obtenerVentas();
+    async obtenerVentas() {
+        return await storageService.obtenerVentas();
     }
-    
+
     /**
      * Obtiene una venta por ID
      */
-    obtenerVentaPorId(ventaId) {
-        const ventas = this.obtenerVentas();
+    async obtenerVentaPorId(ventaId) {
+        const ventas = await this.obtenerVentas();
         return ventas.find(v => v.id === ventaId);
     }
-    
-    /**
-     * Calcula el total de ventas del día (excluyendo abonos)
-     */
-    /* calcularTotalDia() {
-        const ventas = this.obtenerVentas();
-        return ventas
-            .filter(v => v.tipoTransaccion !== 'abono')
-            .reduce((total, venta) => total + venta.montoTotal, 0);
-    } */
+
     /**
      * Calcula el total de ventas del día de HOY (excluyendo abonos)
      */
-    calcularTotalDia() {
-        const ventas = this.obtenerVentas();
-        const fechaHoy = new Date().toLocaleDateString('es-ES'); // 1. Obtenemos la fecha de hoy
-        
+    async calcularTotalDia() {
+        const ventas = await this.obtenerVentas();
+        const fechaHoy = new Date().toLocaleDateString('es-ES');
+
         return ventas
-            // 2. FILTRO NUEVO: Solo dejamos pasar las ventas cuya fecha coincida con hoy
-            .filter(v => v.fecha === fechaHoy) 
+            .filter(v => v.fecha === fechaHoy)
             .filter(v => v.tipoTransaccion !== 'abono')
             .reduce((total, venta) => total + venta.montoTotal, 0);
     }
-    
+
     /**
      * Cuenta los equipos vendidos (excluyendo abonos y ventas solo de accesorios)
      */
-    /* contarEquiposVendidos() {
-        const ventas = this.obtenerVentas();
-        return ventas.filter(v => 
-            v.tipoVenta === 'completa' && v.tipoTransaccion !== 'abono'
-        ).length;
-    } */
-    contarEquiposVendidos() {
-        const ventas = this.obtenerVentas();
+    async contarEquiposVendidos() {
+        const ventas = await this.obtenerVentas();
         const fechaHoy = new Date().toLocaleDateString('es-ES');
-        
-        return ventas.filter(v => 
-            v.fecha === fechaHoy && // <- El nuevo filtro mágico
-            v.tipoVenta === 'completa' && 
+
+        return ventas.filter(v =>
+            v.fecha === fechaHoy &&
+            v.tipoVenta === 'completa' &&
             v.tipoTransaccion !== 'abono'
         ).length;
     }
-    
+
     /**
      * Calcula el efectivo total del día
      */
-    calcularEfectivoDelDia() {
-        const ventas = this.obtenerVentas();
+    async calcularEfectivoDelDia() {
+        const ventas = await this.obtenerVentas();
         return ventas.reduce((total, venta) => total + venta.calcularEfectivo(), 0);
     }
-    
+
     /**
      * Obtiene ventas filtradas por criterios
      */
-    filtrarVentas(criterios = {}) {
-        let ventas = this.obtenerVentas();
-        
+    async filtrarVentas(criterios = {}) {
+        let ventas = await this.obtenerVentas();
+
         if (criterios.fecha) {
             ventas = ventas.filter(v => v.fecha === criterios.fecha);
         }
-        
+
         if (criterios.formaPago) {
             ventas = ventas.filter(v => v.formaPago === criterios.formaPago);
         }
-        
+
         if (criterios.tipoVenta) {
             ventas = ventas.filter(v => v.tipoVenta === criterios.tipoVenta);
         }
-        
+
         if (criterios.tipoTransaccion) {
             ventas = ventas.filter(v => v.tipoTransaccion === criterios.tipoTransaccion);
         }
-        
+
         if (criterios.busqueda) {
             const busqueda = criterios.busqueda.toLowerCase();
-            ventas = ventas.filter(v => 
+            ventas = ventas.filter(v =>
                 v.cliente.nombre.toLowerCase().includes(busqueda) ||
                 v.cliente.cedula.toLowerCase().includes(busqueda) ||
                 v.equipo.modelo.toLowerCase().includes(busqueda)
             );
         }
-        
+
         return ventas;
     }
-    
+
     /**
      * Obtiene estadísticas de ventas
      */
-    obtenerEstadisticas() {
-        const ventas = this.obtenerVentas();
+    async obtenerEstadisticas() {
+        const ventas = await this.obtenerVentas();
         const ventasCompletas = ventas.filter(v => v.tipoTransaccion !== 'abono');
-        
+
         // Ventas por forma de pago
         const ventasPorFormaPago = {};
         ventasCompletas.forEach(v => {
@@ -207,7 +191,7 @@ class VentaService {
             ventasPorFormaPago[v.formaPago].cantidad++;
             ventasPorFormaPago[v.formaPago].monto += v.montoTotal;
         });
-        
+
         // Modelos más vendidos
         const modelosVendidos = {};
         ventasCompletas
@@ -216,11 +200,11 @@ class VentaService {
                 const modelo = v.equipo.modelo;
                 modelosVendidos[modelo] = (modelosVendidos[modelo] || 0) + 1;
             });
-        
+
         return {
             totalVentas: ventasCompletas.length,
-            montoTotal: this.calcularTotalDia(),
-            equiposVendidos: this.contarEquiposVendidos(),
+            montoTotal: await this.calcularTotalDia(),
+            equiposVendidos: await this.contarEquiposVendidos(),
             ventasPorFormaPago,
             modelosVendidos
         };
@@ -229,4 +213,3 @@ class VentaService {
 
 // Exportar una instancia única (Singleton)
 export const ventaService = new VentaService();
-

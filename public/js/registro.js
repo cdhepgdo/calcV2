@@ -2,6 +2,7 @@
 
 
 
+import { authService } from './services/AuthService.js';
 import { storageService } from './services/StorageService.js';
 
 class RegistroDiario {
@@ -12,16 +13,16 @@ class RegistroDiario {
         this.init();
     }
 
-    init() {
-        this.cargarDatos();
+    async init() {
+        await this.cargarDatos();
         this.procesarDatos();
         this.renderizar();
         this.configurarEventos();
     }
 
-    cargarDatos() {
-        this.ventas = storageService.obtenerVentas();
-        this.movimientos = storageService.obtenerMovimientos();
+    async cargarDatos() {
+        this.ventas = await storageService.obtenerVentas();
+        this.movimientos = await storageService.obtenerMovimientos();
     }
 
     procesarDatos() {
@@ -804,5 +805,17 @@ function ordenarModelosPro(a, b) {
 }
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
-    new RegistroDiario();
+    authService.onAuthChange((user) => {
+        if (!user) {
+            window.location.replace('login.html');
+        } else {
+            if (!window.registroApp) {
+                window.registroApp = new RegistroDiario();
+                const btnLogout = document.getElementById('btnLogout');
+                if (btnLogout) btnLogout.addEventListener('click', () => authService.logout());
+                const btnLogoutMobile = document.getElementById('btnLogoutMobile');
+                if (btnLogoutMobile) btnLogoutMobile.addEventListener('click', () => authService.logout());
+            }
+        }
+    });
 });

@@ -7,7 +7,7 @@
  */
 export function createElement(tag, attributes = {}, content = '') {
     const element = document.createElement(tag);
-    
+
     Object.entries(attributes).forEach(([key, value]) => {
         if (key === 'className') {
             element.className = value;
@@ -19,7 +19,7 @@ export function createElement(tag, attributes = {}, content = '') {
             element.setAttribute(key, value);
         }
     });
-    
+
     if (content) {
         if (typeof content === 'string') {
             element.innerHTML = content;
@@ -27,7 +27,7 @@ export function createElement(tag, attributes = {}, content = '') {
             element.appendChild(content);
         }
     }
-    
+
     return element;
 }
 
@@ -36,7 +36,7 @@ export function createElement(tag, attributes = {}, content = '') {
  */
 export function llenarSelect(selectElement, opciones, placeholder = 'Seleccionar') {
     selectElement.innerHTML = `<option value="">${placeholder}</option>`;
-    
+
     opciones.forEach(opcion => {
         const option = document.createElement('option');
         option.value = opcion.valor;
@@ -61,7 +61,7 @@ export function toggleElement(element, mostrar) {
  */
 export function limpiarFormulario(formElement) {
     formElement.reset();
-    
+
     // Ocultar campos condicionales
     formElement.querySelectorAll('.conditional').forEach(el => {
         el.classList.add('hidden');
@@ -74,11 +74,11 @@ export function limpiarFormulario(formElement) {
 export function obtenerValoresFormulario(formElement) {
     const formData = new FormData(formElement);
     const valores = {};
-    
+
     for (let [key, value] of formData.entries()) {
         valores[key] = value;
     }
-    
+
     return valores;
 }
 
@@ -94,7 +94,7 @@ export function mostrarAlerta(mensaje, tipo = 'info') {
     };
 
     const alerta = document.createElement('div');
-    
+
     // EXPLICACIÓN DE CLASES NUEVAS:
     // fixed: la saca del flujo y la deja quieta en pantalla.
     // top-5 left-1/2 -translate-x-1/2: la centra arriba.
@@ -132,7 +132,7 @@ export function mostrarLoader(contenedor) {
     const loader = createElement('div', {
         className: 'flex justify-center items-center p-8'
     }, '<div class="loader"></div>');
-    
+
     contenedor.innerHTML = '';
     contenedor.appendChild(loader);
 }
@@ -156,7 +156,7 @@ export function scrollTo(element) {
  */
 export function agregarEvento(element, evento, handler) {
     element.addEventListener(evento, handler);
-    
+
     // Retornar función de limpieza
     return () => element.removeEventListener(evento, handler);
 }

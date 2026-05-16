@@ -48,6 +48,14 @@
             </div>
         </div>
 
+        <div id="loginFormContainer" style="display:none; background: #0f3460; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+            <h3 style="margin-bottom: 1rem; color: #00b4d8; text-align: center;">🔒 Iniciar Sesión para Migrar</h3>
+            <input type="email" id="migrarEmail" placeholder="Correo electrónico" style="width: 100%; padding: 0.8rem; margin-bottom: 0.5rem; border-radius: 4px; border: none; background: #1a1a2e; color: white;">
+            <input type="password" id="migrarPassword" placeholder="Contraseña" style="width: 100%; padding: 0.8rem; margin-bottom: 1rem; border-radius: 4px; border: none; background: #1a1a2e; color: white;">
+            <button id="btnLogin" class="btn-primary" style="background: #e63946;">Entrar</button>
+            <div id="loginError" style="color: #f87171; margin-top: 0.5rem; font-size: 0.8rem; text-align: center; display: none;"></div>
+        </div>
+
         <button id="btnMigrar" class="btn-primary" disabled>⏳ Cargando datos...</button>
 
         <div id="logContainer" class="log" style="display:none;"></div>
@@ -56,7 +64,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
         // ===== CONFIGURACIÓN FIREBASE (misma que firebase-config.js) =====
         const firebaseConfig = {
@@ -98,6 +106,9 @@
 
         const btn = document.getElementById('btnMigrar');
         const logEl = document.getElementById('logContainer');
+        const loginForm = document.getElementById('loginFormContainer');
+        const btnLogin = document.getElementById('btnLogin');
+        const loginError = document.getElementById('loginError');
 
         function log(msg, tipo = '') {
             logEl.style.display = 'block';
@@ -110,6 +121,8 @@
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
+                loginForm.style.display = 'none';
+                logEl.style.display = 'none';
                 if (ventas.length === 0 && movimientos.length === 0 && !cajaInicial) {
                     btn.textContent = '❌ No hay datos para migrar';
                     btn.disabled = true;
@@ -118,9 +131,30 @@
                     btn.disabled = false;
                 }
             } else {
-                btn.textContent = '🔒 Debes iniciar sesión primero';
+                loginForm.style.display = 'block';
+                btn.textContent = '🔒 Inicia sesión arriba para continuar';
                 btn.disabled = true;
-                log('❌ Error: No hay un usuario autenticado. Por favor, abre la app principal, inicia sesión y vuelve a recargar esta página.', 'error');
+            }
+        });
+
+        btnLogin.addEventListener('click', async () => {
+            const email = document.getElementById('migrarEmail').value;
+            const password = document.getElementById('migrarPassword').value;
+            if (!email || !password) {
+                loginError.textContent = 'Ingresa correo y contraseña';
+                loginError.style.display = 'block';
+                return;
+            }
+            btnLogin.disabled = true;
+            btnLogin.textContent = 'Iniciando...';
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                loginError.style.display = 'none';
+            } catch (err) {
+                loginError.textContent = 'Error: Credenciales inválidas';
+                loginError.style.display = 'block';
+                btnLogin.disabled = false;
+                btnLogin.textContent = 'Entrar';
             }
         });
 

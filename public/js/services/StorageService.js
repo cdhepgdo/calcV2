@@ -66,6 +66,15 @@ class StorageService {
     // ═══════════════════════════════════════════════════════════════════
 
     /**
+     * Obtiene el path base para la sede actual basado en la sesión.
+     * Si no hay sesión (o es la primera vez), usa "sede_1" por defecto para no romper.
+     */
+    _getBasePath() {
+        const sedeId = localStorage.getItem('usuario_sede_id') || 'sede_1';
+        return `sedes/${sedeId}`;
+    }
+
+    /**
      * Arranca los listeners de onSnapshot.
      * ¡IMPORTANTE! Llamar esto UNA SOLA VEZ al iniciar la app.
      *
@@ -93,7 +102,7 @@ class StorageService {
     _escucharVentas() {
         // onSnapshot devuelve una función para cancelar el listener
         this._unsubscribeVentas = onSnapshot(
-            collection(db, "ventas"),
+            collection(db, `${this._getBasePath()}/ventas`),
 
             // ── Callback de ÉXITO ─────────────────────────────────────
             // Firebase llama esto automáticamente cuando:
@@ -128,7 +137,7 @@ class StorageService {
      */
     _escucharMovimientos() {
         this._unsubscribeMovimientos = onSnapshot(
-            collection(db, "movimientos"),
+            collection(db, `${this._getBasePath()}/movimientos`),
             (snapshot) => {
                 this._cacheMovimientos = snapshot.docs
                     .map(docSnap => Movimiento.fromJSON(docSnap.data()));
@@ -216,7 +225,7 @@ class StorageService {
             // Disparar escritura sin esperar (fire-and-forget)
             // Firebase guarda en IndexedDB local inmediatamente
             // y sincroniza con el servidor cuando pueda
-            setDoc(doc(db, "ventas", venta.id), data)
+            setDoc(doc(db, `${this._getBasePath()}/ventas`, venta.id), data)
                 .then(() => console.log('✅ Venta sincronizada con servidor'))
                 .catch(err => console.warn('⚠️ Venta en cola offline, se sincronizará:', err.message));
 
@@ -235,7 +244,7 @@ class StorageService {
         try {
             const data = this._sanitize(ventaActualizada.toJSON());
 
-            setDoc(doc(db, "ventas", ventaActualizada.id), data)
+            setDoc(doc(db, `${this._getBasePath()}/ventas`, ventaActualizada.id), data)
                 .then(() => console.log('✅ Venta actualizada en servidor'))
                 .catch(err => console.warn('⚠️ Actualización en cola offline:', err.message));
 
@@ -265,7 +274,7 @@ class StorageService {
             this._notificarCambio();
 
             // 3. Disparar eliminación en Firebase sin esperar (fire-and-forget)
-            deleteDoc(doc(db, "ventas", ventaId))
+            deleteDoc(doc(db, `${this._getBasePath()}/ventas`, ventaId))
                 .then(() => {
                     console.log('✅ Venta eliminada del servidor');
                     // Limpiar del Set local cuando el servidor confirma
@@ -300,7 +309,7 @@ class StorageService {
         try {
             const data = this._sanitize(movimiento.toJSON());
 
-            setDoc(doc(db, "movimientos", movimiento.id), data)
+            setDoc(doc(db, `${this._getBasePath()}/movimientos`, movimiento.id), data)
                 .then(() => console.log('✅ Movimiento sincronizado'))
                 .catch(err => console.warn('⚠️ Movimiento en cola offline:', err.message));
 
@@ -324,7 +333,7 @@ class StorageService {
      */
     async obtenerCajaInicial() {
         try {
-            const docSnap = await getDoc(doc(db, "config", "cajaInicial"));
+            const docSnap = await getDoc(doc(db, `${this._getBasePath()}/config`, "cajaInicial"));
             if (docSnap.exists()) {
                 return Caja.fromJSON(docSnap.data());
             }
@@ -342,7 +351,7 @@ class StorageService {
     async guardarCajaInicial(caja) {
         try {
             const data = this._sanitize(caja.toJSON());
-            setDoc(doc(db, "config", "cajaInicial"), data)
+            setDoc(doc(db, `${this._getBasePath()}/config`, "cajaInicial"), data)
                 .catch(err => console.warn('⚠️ Caja inicial en cola offline:', err.message));
             return { exito: true };
         } catch (error) {
@@ -365,7 +374,7 @@ class StorageService {
                 monto: monto,
                 fecha: new Date().toLocaleDateString('es-ES')
             };
-            setDoc(doc(db, "config", "cierreCaja"), datosCierre)
+            setDoc(doc(db, `${this._getBasePath()}/config`, "cierreCaja"), datosCierre)
                 .catch(err => console.warn('⚠️ Cierre de caja en cola offline:', err.message));
             return { exito: true };
         } catch (error) {
@@ -380,7 +389,7 @@ class StorageService {
      */
     async obtenerCierreCaja() {
         try {
-            const docSnap = await getDoc(doc(db, "config", "cierreCaja"));
+            const docSnap = await getDoc(doc(db, `${this._getBasePath()}/config`, "cierreCaja"));
             if (docSnap.exists()) {
                 return docSnap.data();
             }
@@ -403,13 +412,13 @@ class StorageService {
     async limpiarTodo() {
         try {
             for (const venta of this._cacheVentas) {
-                await deleteDoc(doc(db, "ventas", venta.id));
+                await deleteDoc(doc(db, `${this._getBasePath()}/ventas`, venta.id));
             }
             for (const mov of this._cacheMovimientos) {
-                await deleteDoc(doc(db, "movimientos", mov.id));
+                await deleteDoc(doc(db, `${this._getBasePath()}/movimientos`, mov.id));
             }
-            await deleteDoc(doc(db, "config", "cajaInicial"));
-            await deleteDoc(doc(db, "config", "cierreCaja"));
+            await deleteDoc(doc(db, `${this._getBasePath()}/config`, "cajaInicial"));
+            await deleteDoc(doc(db, `${this._getBasePath()}/config`, "cierreCaja"));
             return { exito: true };
         } catch (error) {
             console.error('❌ Error al limpiar storage:', error);
@@ -439,17 +448,17 @@ class StorageService {
             if (datos.ventas) {
                 for (const ventaJSON of datos.ventas) {
                     const venta = Venta.fromJSON(ventaJSON);
-                    await setDoc(doc(db, "ventas", venta.id), venta.toJSON());
+                    await setDoc(doc(db, `${this._getBasePath()}/ventas`, venta.id), venta.toJSON());
                 }
             }
             if (datos.movimientos) {
                 for (const movJSON of datos.movimientos) {
                     const mov = Movimiento.fromJSON(movJSON);
-                    await setDoc(doc(db, "movimientos", mov.id), mov.toJSON());
+                    await setDoc(doc(db, `${this._getBasePath()}/movimientos`, mov.id), mov.toJSON());
                 }
             }
             if (datos.cajaInicial) {
-                await setDoc(doc(db, "config", "cajaInicial"), datos.cajaInicial);
+                await setDoc(doc(db, `${this._getBasePath()}/config`, "cajaInicial"), datos.cajaInicial);
             }
             return { exito: true };
         } catch (error) {

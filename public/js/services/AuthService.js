@@ -1,11 +1,15 @@
-import { auth } from '../config/firebase-config.js';
-import { 
-    signInWithEmailAndPassword, 
-    signOut, 
+import { auth, db } from '../config/firebase-config.js';
+import {
+    signInWithEmailAndPassword,
+    signOut,
     onAuthStateChanged,
     setPersistence,
     browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+import {
+    doc,
+    getDoc
+} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 class AuthService {
     constructor() {
@@ -26,9 +30,35 @@ class AuthService {
      * Escucha los cambios de sesión (login/logout/refresh)
      */
     onAuthChange(callback) {
-        return onAuthStateChanged(auth, (user) => {
+        return onAuthStateChanged(auth, async (user) => {
             this.user = user;
             this.isInitialized = true;
+            
+            if (user) {
+                try {
+                    // Obtener el perfil del usuario desde Firestore
+                    const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+                    if (userDoc.exists()) {
+                        const data = userDoc.data();
+                        localStorage.setItem('usuario_sede_id', data.sedeId || 'sede_1');
+                        localStorage.setItem('usuario_rol', data.rol || 'empleado');
+                        console.log(`✅ Sesión iniciada: Sede [${data.sedeId}] - Rol [${data.rol}]`);
+                    } else {
+                        console.warn(`⚠️ Usuario ${user.uid} no tiene perfil en /usuarios. Usando sede_1 por defecto.`);
+                        localStorage.setItem('usuario_sede_id', 'sede_1');
+                        localStorage.setItem('usuario_rol', 'empleado');
+                    }
+                } catch (err) {
+                    console.error("❌ Error obteniendo perfil de usuario:", err);
+                    // Fallback de seguridad
+                    localStorage.setItem('usuario_sede_id', 'sede_1');
+                }
+            } else {
+                // Si no hay usuario, limpiar localStorage
+                localStorage.removeItem('usuario_sede_id');
+                localStorage.removeItem('usuario_rol');
+            }
+            
             callback(user);
         });
     }
@@ -67,6 +97,8 @@ class AuthService {
     async logout() {
         try {
             await signOut(auth);
+            localStorage.removeItem('usuario_sede_id');
+            localStorage.removeItem('usuario_rol');
             return { exito: true };
         } catch (error) {
             console.error("Error al cerrar sesión:", error);

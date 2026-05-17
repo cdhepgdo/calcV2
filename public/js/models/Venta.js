@@ -178,6 +178,16 @@ export class Venta {
         }
 
         // validar accesorios
+         // validar accesorios
+        if (this.tipoVenta === 'accesorios') {
+            const acc = this.accesorios;
+            const tieneAccesorios = acc.forro || acc.cargador || acc.vidrio || 
+                                  acc.otro || acc.protectorCamara || acc.cubo || 
+                                  acc.cableLightning || acc.cableCC || acc.caja;
+            if (!tieneAccesorios) {
+                errores.push('Debe seleccionar al menos un accesorio para la venta.');
+            }
+        }
         if (this.accesorios.forro) {
             if (!this.accesorios.forros || this.accesorios.forros.length === 0) errores.push('Debe seleccionar al menos un modelo de Forro');
         }

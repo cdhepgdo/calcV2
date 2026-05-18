@@ -1983,13 +1983,23 @@ class App {
                 renderizarListaDinamica([{ modelo: venta.accesorios.vidrioModelo, cantidad: venta.accesorios.vidrioCantidad || 1 }], 'vidrioLista', 'vidrio', 'vidrio');
             }
 
-            // Cargador
+            // protector camara
             if (venta.accesorios.protectorCamara) {
                 document.getElementById('protectorCamara').checked = true;
                 document.getElementById('protectorCamara').dispatchEvent(new Event('change'));
                 setTimeout(() => {
                     const protectorCantidad = document.querySelector('#protectorCantidad input');
                     if (protectorCantidad) protectorCantidad.value = venta.accesorios.protectorCantidad || 1;
+                }, 50);
+            }
+
+            // Cargador
+            if (venta.accesorios.cargador) {
+                document.getElementById('cargador').checked = true;
+                document.getElementById('cargador').dispatchEvent(new Event('change'));
+                setTimeout(() => {
+                    const cargadorCantidad = document.querySelector('#cargadorCantidad input');
+                    if (cargadorCantidad) cargadorCantidad.value = venta.accesorios.cargadorCantidad || 1;
                 }, 50);
             }
 

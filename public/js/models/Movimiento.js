@@ -275,7 +275,7 @@ Movimiento.prototype.obtenerDetalles = function () {
     const tipoLower = this.tipo.toLowerCase();
 
     if (tipoLower.includes('salida') && tipoLower.includes('efectivo')) {
-        console.log(this.datos)
+        //console.log(this.datos)
         return `💵-${this.datos.monto}$ | Retirado por: ${sanitizar(this.datos.persona) || 'N/A'} | 📝Motivo: ${sanitizar(this.datos.nota) || 'N/A'}`;
     }
 

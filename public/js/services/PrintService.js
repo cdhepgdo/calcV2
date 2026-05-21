@@ -749,7 +749,7 @@ class PrintService {
         `;
     }
 
-    /**
+        /**
      * Genera el HTML de un item de venta
      */
     generarItemVenta(venta, numero) {
@@ -816,7 +816,7 @@ class PrintService {
         let detallesPago = [];
         if (venta.formaPago === 'mixto' && venta.pagoMixto) {
             if (venta.pagoMixto.efectivo > 0) {
-                detallesPago.push(`<span class="pago-tag">Efc: ${formatearMoneda(venta.pagoMixto.efectivo)}</span>`);
+                detallesPago.push(`<span class="pago-tag">Efectivo: ${formatearMoneda(venta.pagoMixto.efectivo)}</span>`);
             }
             if (venta.pagoMixto.zelle > 0) {
                 detallesPago.push(`<span class="pago-tag">Zelle: ${formatearMoneda(venta.pagoMixto.zelle)}</span>`);
@@ -826,22 +826,22 @@ class PrintService {
             }
             if (venta.pagoMixto.pagoMovil > 0) {
                 if (venta.pagoMixto.pagoMovilDetalles) {
-                    detallesPago.push(`<span class="pago-tag">PagM: ${formatearMoneda(venta.pagoMixto.pagoMovilDetalles.dolares)} = ${formatearBs(venta.pagoMixto.pagoMovilDetalles.bolivares)} (${venta.pagoMixto.pagoMovilDetalles.tasa})</span>`);
+                    detallesPago.push(`<span class="pago-tag">Pago Movil: ${formatearMoneda(venta.pagoMixto.pagoMovilDetalles.dolares)} = ${formatearBs(venta.pagoMixto.pagoMovilDetalles.bolivares)} (${venta.pagoMixto.pagoMovilDetalles.tasa})</span>`);
                 } else {
-                    detallesPago.push(`<span class="pago-tag">PagM: ${formatearMoneda(venta.pagoMixto.pagoMovil)}</span>`);
+                    detallesPago.push(`<span class="pago-tag">Pago Movil: ${formatearMoneda(venta.pagoMixto.pagoMovil)}</span>`);
                 }
             }
             if (venta.pagoMixto.transferencia > 0) {
                 if (venta.pagoMixto.transferenciaDetalles) {
-                    detallesPago.push(`<span class="pago-tag">Transf: ${formatearMoneda(venta.pagoMixto.transferenciaDetalles.dolares)} = ${formatearBs(venta.pagoMixto.transferenciaDetalles.bolivares)} (${venta.pagoMixto.transferenciaDetalles.tasa})</span>`);
+                    detallesPago.push(`<span class="pago-tag">Transferencia: ${formatearMoneda(venta.pagoMixto.transferenciaDetalles.dolares)} = ${formatearBs(venta.pagoMixto.transferenciaDetalles.bolivares)} (${venta.pagoMixto.transferenciaDetalles.tasa})</span>`);
                 } else {
-                    detallesPago.push(`<span class="pago-tag">Transf: ${formatearMoneda(venta.pagoMixto.transferencia)}</span>`);
+                    detallesPago.push(`<span class="pago-tag">Transferencia: ${formatearMoneda(venta.pagoMixto.transferencia)}</span>`);
                 }
             }
         } else if (venta.formaPago === 'pagomovil' && venta.pagoMovilDetalles) {
-            detallesPago.push(`<span class="pago-tag">PagM: ${formatearMoneda(venta.pagoMovilDetalles.dolares)} = ${formatearBs(venta.pagoMovilDetalles.bolivares)} (${venta.pagoMovilDetalles.tasa})</span>`);
+            detallesPago.push(`<span class="pago-tag">Pago Movil: ${formatearMoneda(venta.pagoMovilDetalles.dolares)} = ${formatearBs(venta.pagoMovilDetalles.bolivares)} (${venta.pagoMovilDetalles.tasa})</span>`);
         } else if (venta.formaPago === 'transferencia' && venta.transferenciaDetalles) {
-            detallesPago.push(`<span class="pago-tag">Transf: ${formatearMoneda(venta.transferenciaDetalles.dolares)} = ${formatearBs(venta.transferenciaDetalles.bolivares)} (${venta.transferenciaDetalles.tasa})</span>`);
+            detallesPago.push(`<span class="pago-tag">Transferencia: ${formatearMoneda(venta.transferenciaDetalles.dolares)} = ${formatearBs(venta.transferenciaDetalles.bolivares)} (${venta.transferenciaDetalles.tasa})</span>`);
         } else {
             const pagoReal = (venta.montoPago !== null && venta.montoPago !== undefined) 
                 ? venta.montoPago 
@@ -850,7 +850,7 @@ class PrintService {
         }
 
         if (venta.equipoRecibido) {
-            detallesPago.push(`<span class="pago-tag">Eq. rev: ${venta.equipoRecibido.modelo} (${formatearMoneda(venta.equipoRecibido.valor)})</span>`);
+            detallesPago.push(`<span class="pago-tag">Equipo Recibido: ${venta.equipoRecibido.modelo} (${formatearMoneda(venta.equipoRecibido.valor)})</span>`);
         }
 
         if (venta.abonosPrevios && venta.abonosPrevios.length > 0) {
@@ -898,7 +898,6 @@ class PrintService {
             </div>
         `;
     }
-
     /**
      * Genera el HTML de un item de movimiento
      */

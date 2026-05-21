@@ -606,8 +606,8 @@ class AdminDashboard {
             'Binance': 0,
             'Pago Móvil': 0,
             'Transferencia': 0,
-            'Paypal': 0,
-            'Mixto': 0
+            'Paypal': 0//,
+            //'Mixto': 0 
         };
 
         dias.forEach(d => {
@@ -623,7 +623,15 @@ class AdminDashboard {
                     else if (fp === 'pagomovil') metodosPago['Pago Móvil'] += op.monto;
                     else if (fp === 'transferencia') metodosPago['Transferencia'] += op.monto;
                     else if (fp === 'paypal') metodosPago['Paypal'] += op.monto;
-                    else if (fp === 'mixto') metodosPago['Mixto'] += op.monto;
+                    else if (fp === 'mixto' && op.detalles.pagoMixto) {
+                        const pm = op.detalles.pagoMixto;
+                        // Desglosa cada componente del pago mixto en su categoría real
+                        if (pm.efectivo > 0) metodosPago['Efectivo'] += pm.efectivo;
+                        if (pm.zelle > 0) metodosPago['Zelle'] += pm.zelle;
+                        if (pm.binance > 0) metodosPago['Binance'] += pm.binance;
+                        if (pm.pagoMovil > 0) metodosPago['Pago Móvil'] += pm.pagoMovil;
+                        if (pm.transferencia > 0) metodosPago['Transferencia'] += pm.transferencia;
+                    }
                 }
             });
         });

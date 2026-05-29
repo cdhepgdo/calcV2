@@ -77,7 +77,7 @@
 ];*/
 
 /* import { PRECIOS_VENTA } from './config/precios.js'; */
-import PRECIOS_VENTA from './js/config/precios.js';
+import {PRECIOS_VENTA} from './js/config/precios.js';
 
 /* const productos = [
   {

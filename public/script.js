@@ -75,7 +75,10 @@
   { nombre: "iPhone 17 Pro Max (1TB)", usd: 2199 },
   { nombre: "iPhone 17 Pro Max (2TB)", usd: 2699 }
 ];*/
-const productos = [
+
+import { PRECIOS_VENTA } from './config/precios.js';
+
+/* const productos = [
   {
     "nombre": "Apple Watch serie 9 41 mm open box",
     "usd": 279
@@ -388,7 +391,9 @@ const productos = [
     "nombre": "IPhone 17 pro Max 2TB",
     "usd": 2599
   }
-];
+]; */
+
+const productos = PRECIOS_VENTA;
 // Generar HTML <option> dinámicamente
 const optionsHTML = productos.map(p => {
   const value = p.nombre
@@ -423,18 +428,18 @@ function formatNumber(number) {
 }
 
 // Elementos del DOM
-const productSelect    = document.getElementById('productSelect');
-const customPriceDiv   = document.getElementById('customPriceDiv');
-const customPrice      = document.getElementById('customPrice');
-const customCurrency   = document.getElementById('customCurrency');
-const transferRate     = document.getElementById('transferRate');
-const apiValueInput    = document.getElementById('apiValue');
-const paymentMethod    = document.getElementById('paymentMethod');
-const transferAmount   = document.getElementById('transferAmount');
-const resultsDiv       = document.getElementById('results');
-const comparisonDiv    = document.getElementById('comparison');
-const comparisonContent= document.getElementById('comparisonContent');
-const lastUpdateSpan   = document.getElementById('lastUpdate');
+const productSelect = document.getElementById('productSelect');
+const customPriceDiv = document.getElementById('customPriceDiv');
+const customPrice = document.getElementById('customPrice');
+const customCurrency = document.getElementById('customCurrency');
+const transferRate = document.getElementById('transferRate');
+const apiValueInput = document.getElementById('apiValue');
+const paymentMethod = document.getElementById('paymentMethod');
+const transferAmount = document.getElementById('transferAmount');
+const resultsDiv = document.getElementById('results');
+const comparisonDiv = document.getElementById('comparison');
+const comparisonContent = document.getElementById('comparisonContent');
+const lastUpdateSpan = document.getElementById('lastUpdate');
 
 const batteryFullCheckbox = document.getElementById('batteryFullCheckbox');
 
@@ -504,7 +509,7 @@ const configSection = document.querySelector('.card-shadow');
 console.log(configSection)
 
 window.addEventListener('scroll', () => {
-//console.log(configSection)
+  //console.log(configSection)
   const configTop = configSection.getBoundingClientRect().top + window.scrollY;
   if (window.scrollY >= configTop - nav.offsetHeight) {
     nav.classList.remove('top-0');
@@ -705,9 +710,9 @@ function clearResults() {
 
 // Reset visual
 function resetVisualEffects() {
-  resultsDiv.style.opacity   = '1';
+  resultsDiv.style.opacity = '1';
   resultsDiv.style.transform = 'scale(1)';
-  resultsDiv.style.transition= 'all 0.3s ease';
+  resultsDiv.style.transition = 'all 0.3s ease';
 }
 
 // Cálculo en tiempo real con animación
@@ -717,15 +722,15 @@ function calculateRealTime() {
     return;
   }
 
-  resultsDiv.style.opacity   = '0.7';
+  resultsDiv.style.opacity = '0.7';
   resultsDiv.style.transform = 'scale(0.98)';
 
   setTimeout(() => {
-    const rate      = parseFloat(transferRate.value) || 0;
-    const apiValue  = parseFloat(apiValueInput.value) || 1;
-    const method    = paymentMethod.value;
-    const tAmount   = parseFloat(transferAmount.value) || 0;
-    let results     = {};
+    const rate = parseFloat(transferRate.value) || 0;
+    const apiValue = parseFloat(apiValueInput.value) || 1;
+    const method = paymentMethod.value;
+    const tAmount = parseFloat(transferAmount.value) || 0;
+    let results = {};
 
     switch (method) {
       case 'cash':
@@ -758,11 +763,11 @@ function calculateDirectPayment() {
 }
 
 function calculateTransferPayment(rate, api) {
-  const totalWithRate    = currentPrice * rate;
-  const convertedAmount  = totalWithRate / api;
+  const totalWithRate = currentPrice * rate;
+  const convertedAmount = totalWithRate / api;
   return {
     originalPrice: currentPrice,
-    finalPrice:    totalWithRate,
+    finalPrice: totalWithRate,
     convertedAmount,
     rate,
     apiValue: api
@@ -770,16 +775,16 @@ function calculateTransferPayment(rate, api) {
 }
 
 function calculateMixedPayment(tAmount, rate, api) {
-  const cashPart         = currentPrice - tAmount;
+  const cashPart = currentPrice - tAmount;
   const transferWithRate = tAmount * rate;
-  const convertedTransf  = transferWithRate / api;
+  const convertedTransf = transferWithRate / api;
   return {
-    originalPrice:   currentPrice,
-    cashAmount:      cashPart,
-    transferAmount:  tAmount,
+    originalPrice: currentPrice,
+    cashAmount: cashPart,
+    transferAmount: tAmount,
     transferWithRate,
     convertedTransfer: convertedTransf,
-    totalConverted:  cashPart + convertedTransf,
+    totalConverted: cashPart + convertedTransf,
     rate,
     apiValue: api
   };
@@ -791,7 +796,7 @@ function displayResults(res, method) {
   let html = ''
 
   //––– Directo: sin recargos
-  if (['cash','zelle','binance'].includes(method)) {
+  if (['cash', 'zelle', 'binance'].includes(method)) {
     html = `
       <div class="bg-green-50 border border-green-200 rounded-lg p-4">
         <h3 class="font-semibold text-green-800 mb-2">✅ Pago Directo</h3>
@@ -899,19 +904,18 @@ function showComparison(rate, api) {
   const sym = currentCurrency === 'EUR' ? '€' : '$';
   const methods = [
     { name: 'Efectivo/Divisas', price: currentPrice, icon: '💵' },
-    { name: 'Zelle',           price: currentPrice, icon: '💳' },
-    { name: 'Binance',         price: currentPrice, icon: '₿' },
-    { name: 'Transferencia',   price: (currentPrice * rate) / api, icon: '🏦' }
+    { name: 'Zelle', price: currentPrice, icon: '💳' },
+    { name: 'Binance', price: currentPrice, icon: '₿' },
+    { name: 'Transferencia', price: (currentPrice * rate) / api, icon: '🏦' }
   ];
 
   methods.sort((a, b) => a.price - b.price);
 
   comparisonContent.innerHTML = methods.map((m, i) => {
-    const diff    = m.price - currentPrice;
-    const isBest  = i === 0;
+    const diff = m.price - currentPrice;
+    const isBest = i === 0;
     return `
-      <div class="flex justify-between items-center p-3 rounded-lg ${
-        isBest ? 'bg-green-50 border border-green-200' : 'bg-gray-50'
+      <div class="flex justify-between items-center p-3 rounded-lg ${isBest ? 'bg-green-50 border border-green-200' : 'bg-gray-50'
       }">
         <div class="flex items-center gap-2">
           <span>${m.icon}</span>
@@ -919,9 +923,8 @@ function showComparison(rate, api) {
           ${isBest ? '<span class="text-xs bg-green-500 text-white px-2 py-1 rounded-full ml-2">MEJOR</span>' : ''}
         </div>
         <div class="text-right">
-          <div class="font-bold ${
-            isBest ? 'text-green-600' : 'text-gray-700'
-          }">${sym}${m.price.toFixed(2)} ${currentCurrency}</div>
+          <div class="font-bold ${isBest ? 'text-green-600' : 'text-gray-700'
+      }">${sym}${m.price.toFixed(2)} ${currentCurrency}</div>
           ${diff > 0 ? `<div class="text-xs text-red-500">+${sym}${diff.toFixed(2)}</div>` : ''}
         </div>
       </div>`;
@@ -933,11 +936,11 @@ function showComparison(rate, api) {
 // Nombre legible de cada método
 function getMethodName(key) {
   const map = {
-    cash:     'Efectivo/Divisas',
-    zelle:    'Zelle',
-    binance:  'Binance',
+    cash: 'Efectivo/Divisas',
+    zelle: 'Zelle',
+    binance: 'Binance',
     transfer: 'Transferencia',
-    mixed:    'Pago Mixto'
+    mixed: 'Pago Mixto'
   };
   return map[key] || key;
 }
@@ -972,35 +975,3 @@ function updatePrice() {
 updateApiValue();
 lastUpdateSpan.textContent = new Date().toLocaleTimeString('es-ES');
 calculateRealTime();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

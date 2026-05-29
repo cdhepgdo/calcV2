@@ -76,7 +76,8 @@
   { nombre: "iPhone 17 Pro Max (2TB)", usd: 2699 }
 ];*/
 
-import { PRECIOS_VENTA } from './config/precios.js';
+/* import { PRECIOS_VENTA } from './config/precios.js'; */
+import PRECIOS_VENTA from './js/config/precios.js';
 
 /* const productos = [
   {

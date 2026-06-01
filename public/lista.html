@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Precios en Bs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* 🎯 Estilos solo para impresión */
+    @media print {
+      body::before {
+        /* content: "Lista de Precios en Bolívares - Actualizado"; */
+        display: block;
+        text-align: center;
+        font-weight: bold;
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+
+      /* Ocultar tasa, botones y cualquier otro elemento que no quieras imprimir */
+      #tasa,
+      #btnImprimir,
+      #btnDescargar,
+      button,
+      a,
+      h1,
+      .acciones,
+      header,
+      nav,
+      div,
+      footer {
+        display: none !important;
+      }
+
+      /* Ajustar la tabla para ocupar todo el ancho al imprimir */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0 auto;
+      }
+
+      th,
+      td {
+        border: 1px solid #000;
+        padding: 6px;
+      }
+
+      body {
+        background: white;
+        /* Fondo limpio */
+        color: black;
+        /* Texto negro */
+      }
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0 auto;
+    }
+
+    th,
+    td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background: #333;
+      color: #fff;
+    }
+
+    tr:nth-child(even) {
+      background: #fafafa;
+    }
+
+    .bs {
+      font-weight: bold;
+      color: green;
+    }
+  </style>
+</head>
+
+<body>
+  <main class=" card-shadow">
+    <!-- Añade un contenedor para el menú flotante debajo del botón toggle -->
+    <nav id="globalMenu"
+      class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white transition-all duration-300 shadow-lg">
+      <!-- <div class="font-bold text-lg">Menú</div> -->
+      <div class="flex gap-2" id="menuOptions">
+        <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Principal</a>
+        <a href="intercambio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cálculo Trading</a>
+        <a href="cierree.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cierre</a>
+        <a href="registro.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">📊 Registro</a>
+        <a href="inv-precio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Inv</a>
+      </div>
+      <button id="menuToggle" class="hidden text-2xl focus:outline-none relative z-50" aria-label="Abrir menú">
+        ☰
+      </button>
+
+      <!-- Contenedor menú desplegable para botón flotante -->
+      <div id="floatingMenu"
+        class="hidden fixed bottom-20 right-6 bg-blue-700 text-white rounded-lg shadow-lg py-2 flex flex-col gap-1 z-40">
+        <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Principal</a>
+        <a href="intercambio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cálculo Trading</a>
+        <a href="cierree.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cierre</a>
+        <a href="registro.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">📊 Registro</a>
+        <a href="inv-precio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Inv</a>
+      </div>
+    </nav>
+    <!-- Espaciador para que el contenido no se oculte tras el menú fijo -->
+    <div class="h-14"></div>
+    <h1>💱 Lista de Precios en Bs </h1>
+    <p id="tasa">Cargando tasa...</p>
+
+    <div style="margin-top: 20px;">
+      <button id="btnImprimir">🖨 Imprimir lista</button>
+      <button id="btnDescargar">💾 Descargar CSV</button>
+      <button class="py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+        <a href="/">💱 Volver a Calculadora...</a>
+      </button>
+    </div>
+
+    <div class="mt-3 flex items-center">
+      <input type="checkbox" id="batteryFullCheckbox" class="mr-2">
+      <label for="batteryFullCheckbox" class="select-none cursor-pointer">
+        Equipo del 95% al 100% de batería (+$20 USD)
+      </label>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Precio Bs</th>
+          <th>Estimado € BCV</th>
+          <th>Oferta Divisas</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-productos"></tbody>
+    </table>
+  </main>
+
+  <script type="module">
+    const nav = document.getElementById('globalMenu');
+    const menuOptions = document.getElementById('menuOptions');
+    const menuToggle = document.getElementById('menuToggle');
+    const floatingMenu = document.getElementById('floatingMenu');
+    const configSection = document.querySelector('.card-shadow');
+    import { PRECIOS_VENTA } from './config/precios.js';
+
+    // Variables globales
+    let promedioActual = 0;
+    let tasaBCVActual = 0;
+    const batteryFullCheckbox = document.getElementById('batteryFullCheckbox');
+
+    window.addEventListener('scroll', () => {
+      //const configTop = configSection.getBoundingClientRect().top + window.scrollY;
+      if (window.scrollY >/* = configTop - nav.offsetHeight */ 100) {
+        nav.classList.remove('top-0');
+        nav.classList.add('bottom-6', 'right-6', 'left-auto', 'rounded-full', 'p-0', 'w-14', 'h-14', 'justify-center', 'items-center');
+        menuOptions.classList.add('hidden');
+        menuToggle.classList.remove('hidden');
+        floatingMenu.classList.add('hidden'); // Esconder menú flotante inicialmente
+      } else {
+        nav.classList.add('top-0');
+        nav.classList.remove('bottom-6', 'right-6', 'left-auto', 'rounded-full', 'p-0', 'w-14', 'h-14', 'justify-center', 'items-center');
+        menuOptions.classList.remove('hidden');
+        menuToggle.classList.add('hidden');
+        floatingMenu.classList.add('hidden'); // Asegurar que el menú flotante esté oculto
+      }
+    });
+
+    menuToggle.addEventListener('click', () => {
+      floatingMenu.classList.toggle('hidden');
+    });
+
+
+
+
+    async function fetchTasaBCV() {
+      try {
+        const res = await fetch("https://open.er-api.com/v6/latest/EUR");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        // El valor viene como string, lo convertimos a número
+        return parseFloat(data.rates.VES);
+      } catch (err) {
+        console.error("Error obteniendo tasa BCV:", err);
+        return null;
+      }
+    }
+
+
+    /* const productos = [
+      { nombre: "iPhone 11 (64gb)", usd: 259 },
+      { nombre: "iPhone 11 (128gb)", usd: 279 },
+      { nombre: "iPhone 11 (256gb)", usd: 299 },
+      { nombre: "iPhone 11 Pro (64gb)", usd: 290 },
+      { nombre: "iPhone 11 Pro (256gb)", usd: 349 },
+      { nombre: "iPhone 11 Pro Max (64gb)", usd: 340 },
+      { nombre: "iPhone 11 Pro Max (256gb)", usd: 350 },
+      { nombre: "iPhone 12 (64gb)", usd: 290 },
+      { nombre: "iPhone 12 (128gb)", usd: 339 },
+      { nombre: "iPhone 12 (256gb)", usd: 365 },
+      { nombre: "iPhone 12 Pro (128gb)", usd: 380 },
+      { nombre: "iPhone 12 Pro (256gb)", usd: 410 },
+      { nombre: "iPhone 12 Pro (512gb)", usd: 445 },
+      { nombre: "iPhone 12 Pro Max (128gb)", usd: 449 },
+      { nombre: "iPhone 12 Pro Max (256gb)", usd: 479 },
+      { nombre: "iPhone 12 Pro Max (512gb)", usd: 520 },
+      { nombre: "iPhone 13 (128gb)", usd: 390 },
+      { nombre: "iPhone 13 (256gb)", usd: 420 },
+      { nombre: "iPhone 13 (512gb)", usd: 440 },
+      { nombre: "iPhone 13 Pro (128gb)", usd: 509 },
+      { nombre: "iPhone 13 Pro (256gb)", usd: 539 },
+      { nombre: "iPhone 13 Pro (512gb)", usd: 559 },
+      { nombre: "iPhone 13 Pro (1TB)", usd: 580 },
+      { nombre: "iPhone 13 Pro Max (128gb)", usd: 589 },
+      { nombre: "iPhone 13 Pro Max (256gb)", usd: 639 },
+      { nombre: "iPhone 13 Pro Max (512gb)", usd: 659 },
+      { nombre: "iPhone 13 Pro Max (1TB)", usd: 669 },
+      { nombre: "iPhone 14 (128gb)", usd: 439 },
+      { nombre: "iPhone 14 (256gb)", usd: 469 },
+      { nombre: "iPhone 14 (512gb)", usd: 489 },
+      { nombre: "iPhone 14 Plus (128gb)", usd: 499 },
+      { nombre: "iPhone 14 Plus (256gb)", usd: 519 },
+      { nombre: "iPhone 14 Pro (128gb)", usd: 609 },
+      { nombre: "iPhone 14 Pro (256gb)", usd: 629 },
+      { nombre: "iPhone 14 Pro (512gb)", usd: 649 },
+      { nombre: "iPhone 14 Pro Max (128gb)", usd: 699 },
+      { nombre: "iPhone 14 Pro Max (256gb)", usd: 739 },
+      { nombre: "iPhone 14 Pro Max (512gb)", usd: 779 },
+      { nombre: "iPhone 15 (128gb)", usd: 639 },
+      { nombre: "iPhone 15 (256gb)", usd: 679 },
+      { nombre: "iPhone 15 (512gb)", usd: 689 },
+      { nombre: "iPhone 15 Plus (128gb)", usd: 690 },
+      { nombre: "iPhone 15 Plus (256gb)", usd: 720 },
+      { nombre: "iPhone 15 Pro (128gb)", usd: 780 },
+      { nombre: "iPhone 15 Pro (256gb)", usd: 820 },
+      { nombre: "iPhone 15 Pro Max (256gb)", usd: 890 },
+      { nombre: "iPhone 15 Pro Max (512gb)", usd: 979 },
+      { nombre: "iPhone 15 Pro Max (1TB)", usd: 970 },
+      { nombre: "iPhone 16 (128gb)", usd: 819 },
+      { nombre: "iPhone 16 (256gb)", usd: 849 },
+      { nombre: "iPhone 16 Plus (128gb)", usd: 869 },
+      { nombre: "iPhone 16 Plus (256gb)", usd: 919 },
+      { nombre: "iPhone 16 Pro (128gb)", usd: 1050 },
+      { nombre: "iPhone 16 Pro (512gb)", usd: 1120 },
+      { nombre: "iPhone 16 Pro (1TB)", usd: 1160 },
+      { nombre: "iPhone 16 Pro Max (256gb)", usd: 1159 },
+      { nombre: "iPhone 16 Pro Max (512gb)", usd: 1230 },
+      { nombre: "iPhone 16 Pro Max (1TB)", usd: 1350 }
+    ]; */
+    /* const productos = [
+  { nombre: "Apple Watch Serie 8 45mm", usd: 280 },
+  { nombre: "Apple Watch Serie 9 45mm", usd: 299 },
+  { nombre: "Apple Watch Serie X 42mm", usd: 440 },
+  { nombre: "Apple Watch Serie X 46mm", usd: 480 },
+  { nombre: "Apple Watch Ultra 3", usd: 1040 },
+  { nombre: "AirPods 4", usd: 250 },
+  { nombre: "AirPods Pro 3", usd: 420 },
+  { nombre: "Apple Watch Series 11", usd: 590 },
+  { nombre: "iPhone 11 (64gb)", usd: 249 },
+  { nombre: "iPhone 11 (128gb)", usd: 279 },
+  { nombre: "iPhone 11 (256gb)", usd: 299 },
+  { nombre: "iPhone 11 Pro (64gb)", usd: 290 },
+  { nombre: "iPhone 11 Pro (256gb)", usd: 349 },
+  { nombre: "iPhone 11 Pro Max (64gb)", usd: 340 },
+  { nombre: "iPhone 11 Pro Max (256gb)", usd: 350 },
+  { nombre: "iPhone 12 (64gb)", usd: 285 },
+  { nombre: "iPhone 12 (128gb)", usd: 310 },
+  { nombre: "iPhone 12 (256gb)", usd: 340 },
+  { nombre: "iPhone 12 Pro (128gb)", usd: 359 },
+  { nombre: "iPhone 12 Pro (256gb)", usd: 390 },
+  { nombre: "iPhone 12 Pro (512gb)", usd: 410 },
+  { nombre: "iPhone 12 Pro Max (128gb)", usd: 439 },
+  { nombre: "iPhone 12 Pro Max (256gb)", usd: 470 },
+  { nombre: "iPhone 12 Pro Max (512gb)", usd: 520 },
+  { nombre: "iPhone 13 (128gb)", usd: 390 }, // clase A
+  { nombre: "iPhone 13 (256gb)", usd: 419 },
+  { nombre: "iPhone 13 (512gb)", usd: 429 },
+  { nombre: "iPhone 13 Pro (128gb)", usd: 489 },
+  { nombre: "iPhone 13 Pro (256gb)", usd: 529 },
+  { nombre: "iPhone 13 Pro (512gb)", usd: 559 },
+  { nombre: "iPhone 13 Pro (1TB)", usd: 580 },
+  { nombre: "iPhone 13 Pro Max (128gb)", usd: 560 },
+  { nombre: "iPhone 13 Pro Max (256gb)", usd: 590 },
+  { nombre: "iPhone 13 Pro Max (512gb)", usd: 649 },
+  { nombre: "iPhone 13 Pro Max (1TB)", usd: 669 },
+  { nombre: "iPhone 14 (128gb)", usd: 429 },
+  { nombre: "iPhone 14 (256gb)", usd: 459 },
+  { nombre: "iPhone 14 (512gb)", usd: 489 },
+  { nombre: "iPhone 14 Plus (128gb)", usd: 439 },
+  { nombre: "iPhone 14 Plus (256gb)", usd: 479 },
+  { nombre: "iPhone 14 Pro (128gb)", usd: 599 },
+  { nombre: "iPhone 14 Pro (256gb)", usd: 629 },
+  { nombre: "iPhone 14 Pro (512gb)", usd: 649 },
+  { nombre: "iPhone 14 Pro Max (128gb)", usd: 699 },
+  { nombre: "iPhone 14 Pro Max (256gb)", usd: 729 },
+  { nombre: "iPhone 14 Pro Max (512gb)", usd: 779 },
+  { nombre: "iPhone 15 (128gb)", usd: 610 },
+  { nombre: "iPhone 15 (256gb)", usd: 650 },
+  { nombre: "iPhone 15 (512gb)", usd: 689 },
+  { nombre: "iPhone 15 Plus (128gb)", usd: 670 },
+  { nombre: "iPhone 15 Plus (256gb)", usd: 699 },
+  { nombre: "iPhone 15 Pro (128gb)", usd: 760 },
+  { nombre: "iPhone 15 Pro (256gb)", usd: 799 },
+  { nombre: "iPhone 15 Pro Max (256gb)", usd: 850 },
+  { nombre: "iPhone 15 Pro Max (512gb)", usd: 920 },
+  { nombre: "iPhone 15 Pro Max (1TB)", usd: 940 },
+  { nombre: "iPhone 16 (128gb)", usd: 799 },
+  { nombre: "iPhone 16 (256gb)", usd: 820 },
+  { nombre: "iPhone 16 Plus (128gb)", usd: 840 },
+  { nombre: "iPhone 16 Plus (256gb)", usd: 900 },
+  { nombre: "iPhone 16 Pro (128gb)", usd: 970 },
+  { nombre: "iPhone 16 Pro (512gb)", usd: 1120 },
+  { nombre: "iPhone 16 Pro (1TB)", usd: 1160 },
+  { nombre: "iPhone 16 Pro Max (256gb) 100%", usd: 1240 },
+  { nombre: "iPhone 16 Pro Max (512gb) NO 100%", usd: 1240 },
+  { nombre: "iPhone 16 Pro Max (1TB)", usd: 1350 },
+  { nombre: "iPhone 17 (256gb)", usd: 1180 },
+  { nombre: "iPhone 17 (512gb)", usd: 1330 },
+  { nombre: "iPhone 17 Air", usd: 1330 },
+  { nombre: "iPhone 17 Pro (1TB)", usd: 1890 },
+  { nombre: "iPhone 17 Pro (256gb)", usd: 1560 },
+  { nombre: "iPhone 17 Pro Max (256gb)", usd: 1690 },
+  { nombre: "iPhone 17 Pro Max (512gb)", usd: 1980 },
+  { nombre: "iPhone 17 Pro Max (1TB)", usd: 2199 },
+  { nombre: "iPhone 17 Pro Max (2TB)", usd: 2699 }
+];
+ */
+
+    const productos = PRECIOS_VENTA;
+
+
+    /* const productos = [
+      {
+        "nombre": "Apple Watch serie 9 41 mm open box",
+        "usd": 279
+      },
+      {
+        "nombre": "Apple Watch serie X 42mm",
+        "usd": 400
+      },
+      {
+        "nombre": "Apple Watch serie X 46mm",
+        "usd": 450
+      },
+      {
+        "nombre": "Apple Watch Ultra 2",
+        "usd": 550
+      },
+      {
+        "nombre": "Apple Watch Ultra 3",
+        "usd": 999
+      },
+      {
+        "nombre": "AirPods 4",
+        "usd": 250
+      },
+      {
+        "nombre": "AirPods Pro 3",
+        "usd": 399
+      },
+      {
+        "nombre": "Apple Watch series 11",
+        "usd": 590
+      },
+      {
+        "nombre": "iPhone 11 (64)gb",
+        "usd": 190
+      },
+      {
+        "nombre": "IPhone 11(128)gb",
+        "usd": 220
+      },
+      {
+        "nombre": "IPhone 11(256)gb",
+        "usd": 250
+      },
+      {
+        "nombre": "IPhone 11 Pro (64gb)",
+        "usd": 240
+      },
+      {
+        "nombre": "IPhone 11 pro (256gb)",
+        "usd": 270
+      },
+      {
+        "nombre": "IPhone 11 Pro Max(64gb)",
+        "usd": 270
+      },
+      {
+        "nombre": "IPhone 11ProMax(256gb)",
+        "usd": 300
+      },
+      {
+        "nombre": "IPhone 12 (64gb)",
+        "usd": 240
+      },
+      {
+        "nombre": "IPhone 12 (128gb)",
+        "usd": 289
+      },
+      {
+        "nombre": "IPhone 12 (256gb)",
+        "usd": 310
+      },
+      {
+        "nombre": "Iphone 12 pro (128gb)",
+        "usd": 320
+      },
+      {
+        "nombre": "IPhone 12 pro (256gb)",
+        "usd": 360
+      },
+      {
+        "nombre": "IPhone 12 pro (512gb)",
+        "usd": 410
+      },
+      {
+        "nombre": "IPhone 12proMax128gb",
+        "usd": 360
+      },
+      {
+        "nombre": "IPhone 12proMax(256gb)",
+        "usd": 380
+      },
+      {
+        "nombre": "IPhone 12promax(512gb)",
+        "usd": 430
+      },
+      {
+        "nombre": "IPhone 13 ( 128gb)",
+        "usd": 349
+      },
+      {
+        "nombre": "IPhone 13 (128gb) 100%",
+        "usd": 370
+      },
+      {
+        "nombre": "IPhone 13 (256gb)",
+        "usd": 390
+      },
+      {
+        "nombre": "IPhone 13 (512gb)",
+        "usd": 410
+      },
+      {
+        "nombre": "IPhone 13 pro (128)gb",
+        "usd": 449
+      },
+      {
+        "nombre": "IPhone 13 pro (256)gb",
+        "usd": 489
+      },
+      {
+        "nombre": "IPhone 13 pro (512)gb",
+        "usd": 520
+      },
+      {
+        "nombre": "IPhone 13 pro (1TB)gb",
+        "usd": 550
+      },
+      {
+        "nombre": "IPhone 13 pro Max (128gb)",
+        "usd": 499
+      },
+      {
+        "nombre": "IPhone 13 pro Max (256gb)",
+        "usd": 569
+      },
+      {
+        "nombre": "IPhone 13 pro Max (512gb)",
+        "usd": 625
+      },
+      {
+        "nombre": "IPhone 13 pro Max (1TBgb)",
+        "usd": 650
+      },
+      {
+        "nombre": "IPhone 14 (128gb)",
+        "usd": 389
+      },
+      {
+        "nombre": "IPhone 14 (256gb)",
+        "usd": 449
+      },
+      {
+        "nombre": "IPhone 14 (512gb)",
+        "usd": 479
+      },
+      {
+        "nombre": "IPhone 14 plus(128gb)",
+        "usd": 450
+      },
+      {
+        "nombre": "IPhone 14 plus(256gb)",
+        "usd": 489
+      },
+      {
+        "nombre": "IPhone 14 pro(128gb)",
+        "usd": 499
+      },
+      {
+        "nombre": "IPhone 14 pro (256gb)",
+        "usd": 519
+      },
+      {
+        "nombre": "IPhone 14 pro (512gb)",
+        "usd": 559
+      },
+      {
+        "nombre": "IPhone 14 pro Max (128gb)",
+        "usd": 599
+      },
+      {
+        "nombre": "IPhone 14 pro Max (256gb)",
+        "usd": 619
+      },
+      {
+        "nombre": "IPhone 14 pro Max (512gb)",
+        "usd": 670
+      },
+      {
+        "nombre": "IPhone 15 (128gb)",
+        "usd": 520
+      },
+      {
+        "nombre": "IPhone 15 (256gb)",
+        "usd": 559
+      },
+      {
+        "nombre": "IPhone 15 (512gb)",
+        "usd": 689
+      },
+      {
+        "nombre": "Iphone 15 plus (128gb)",
+        "usd": 550
+      },
+      {
+        "nombre": "Iphone 15 plus (256gb)",
+        "usd": 620
+      },
+      {
+        "nombre": "IPhone 15 pro (128gb)",
+        "usd": 619
+      },
+      {
+        "nombre": "IPhone 15 pro (256gb)",
+        "usd": 650
+      },
+      {
+        "nombre": "IPhone 15 pro Max (256gb)",
+        "usd": 740
+      },
+      {
+        "nombre": "Iphone 15 pro Max (512gb)",
+        "usd": 820
+      },
+      {
+        "nombre": "Iphone 15 pro Max (1TB)",
+        "usd": 850
+      },
+      {
+        "nombre": "IPhone 16 (128gb)",
+        "usd": 699
+      },
+      {
+        "nombre": "IPhone 16 (256gb)",
+        "usd": 629
+      },
+      {
+        "nombre": "IPhone 16 PLUS (128gb)",
+        "usd": 789
+      },
+      {
+        "nombre": "IPhone 16 PLUS (256gb)",
+        "usd": 810
+      },
+      {
+        "nombre": "IPhone 16 pro (128gb)",
+        "usd": 820
+      },
+      {
+        "nombre": "IPhone 16 pro (256gb)",
+        "usd": 899
+      },
+      {
+        "nombre": "IPhone 16 pro Max (256gb)",
+        "usd": 990
+      },
+      {
+        "nombre": "IPhone 16 pro Max (256gb) 100%",
+        "usd": 1060
+      },
+      {
+        "nombre": "IPhone 16 pro Max (512gb)",
+        "usd": 1030
+      },
+      {
+        "nombre": "IPhone 16 pro Max (1TB)",
+        "usd": 1080
+      },
+      {
+        "nombre": "iphone 17 256",
+        "usd": 1090
+      },
+      {
+        "nombre": "iphone 17 512",
+        "usd": 1340
+      },
+      {
+        "nombre": "Iphone 17 pro 256gb white",
+        "usd": 1420
+      },
+      {
+        "nombre": "Iphone 17 pro 256gb blue/orange",
+        "usd": 1399
+      },
+      {
+        "nombre": "Iphone 17 pro 512gb",
+        "usd": 1640
+      },
+      {
+        "nombre": "Iphone 17 pro Max 256gb white",
+        "usd": 1540
+      },
+      {
+        "nombre": "Iphone 17 pro Max 256gb blue orange",
+        "usd": 1520
+      },
+      {
+        "nombre": "Iphone 17 pro Max 512gb Silver",
+        "usd": 1790
+      },
+      {
+        "nombre": "Iphone 17 pro Max 512gb Orange/Blue",
+        "usd": 1750
+      },
+      {
+        "nombre": "IPhone 17 pro Max 1TB",
+        "usd": 2050
+      },
+      {
+        "nombre": "IPhone 17 pro Max 2TB",
+        "usd": 2599
+      }
+    ]; */
+    function getPrecioAjustado(precioBase) {
+      let precioFinal = precioBase;
+
+      if (batteryFullCheckbox && batteryFullCheckbox.checked) {
+        precioFinal += 20;
+      }
+
+      return precioFinal;
+    }
+
+    function renderTable(promedioActual, bcv) {
+      const tbody = document.getElementById('tabla-productos');
+      tbody.innerHTML = '';
+
+      productos.forEach(p => {
+        //const precioBs = p.usd * promedio;
+        /* const precioBs = p.usd * promedio;
+        const precioFormateado = Math.round(precioBs).toLocaleString("es-VE"); */
+
+        const precioFinalUSD = getPrecioAjustado(p.usd);
+        const precioBs = precioFinalUSD * promedioActual;
+        const precioFormateado = Math.round(precioBs).toLocaleString("es-VE");
+        const estimadoBCV = precioBs / bcv; // Bs → USD usando BCV
+        const ofertaDivisas = precioFinalUSD; // USD base
+
+        const fila = `<tr>
+                <td>${p.nombre}</td>
+                <td class="bs">Bs ${/* precioBs.toFixed(2) */precioFormateado} --></td>
+                <td>€${estimadoBCV.toFixed(2)}(BCV)</td>
+                <td>*$${ofertaDivisas.toFixed(2)}(Divisas/Zelle/Binance)*</td>
+              </tr>`;
+        tbody.innerHTML += fila;
+
+
+      })
+    }
+
+
+    async function fetchTasaYCalcular() {
+      try {
+        const res = await fetch('/.netlify/functions/binance-p2p-average?asset=USDT&fiat=VES&tradeType=SELL&rows=20&trim=0.1');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.message || 'Respuesta no válida');
+
+        console.log('Binance P2P data:', data);
+
+        // Tomamos los valores
+        const promedioo = /* data.stats.trimmedAverage ||  */data.stats.average;
+        const maximo = data.stats.max;
+
+        // Calculamos la diferencia
+        const diferencia = Math.abs(maximo - promedioo);
+
+        // Si la diferencia es menor a 1.8 usamos el promedio, si no, el máximo
+        let promedio = /* diferencia < 1.8 ? promedioo : maximo */maximo;
+        promedioActual = promedio;
+
+        //let promedio = /* data.stats.trimmedAverage || */ data.stats.average;
+        console.log(promedio.toFixed(2));
+        promedio = parseFloat(promedio.toFixed(2));
+        console.log(promedio.toFixed(2));
+
+        // 2️⃣ Obtener tasa BCV en vivo
+        const tasaBCV = await fetchTasaBCV();
+        if (!tasaBCV) throw new Error("No se pudo obtener la tasa BCV");
+        tasaBCVActual = tasaBCV;
+
+        document.getElementById('tasa').textContent = ` BNC: ${parseInt(promedio.toFixed(2))}`;
+
+        renderTable(promedioActual, tasaBCVActual)
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById('tasa').textContent = 'Error al obtener tasa';
+      }
+    }
+
+    // Botón para imprimir
+    document.getElementById('btnImprimir').addEventListener('click', () => {
+      window.print();
+    });
+
+    // Botón para descargar CSV
+    document.getElementById('btnDescargar').addEventListener('click', () => {
+      const filas = document.querySelectorAll('#tabla-productos tr');
+      let csv = "Producto,Precio Bs\n";
+      filas.forEach(fila => {
+        const cols = fila.querySelectorAll('td');
+        const producto = cols[0].innerText;
+        const precio = cols[1].innerText.replace("Bs", "").trim();
+        csv += `"${producto}",${precio}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+
+      const enlace = document.createElement('a');
+      enlace.href = url;
+      enlace.download = 'lista_precios.csv';
+      enlace.click();
+
+      URL.revokeObjectURL(url);
+    });
+
+    fetchTasaYCalcular();
+    batteryFullCheckbox.addEventListener('change', () => {
+      renderTable(promedioActual, tasaBCVActual);
+    });
+  </script>
+</body>
+
+</html>

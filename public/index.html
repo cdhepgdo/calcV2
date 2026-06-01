@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calculadora Inteligente</title>
+
+  <!-- TailwindCSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Estilos personalizados -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="gradient-bg min-h-screen py-8">
+
+  <!-- Barra de menú fija -->
+  <!-- <nav id="globalMenu" class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white transition-all duration-300 shadow-lg">
+  <div class="font-bold text-lg">Menú</div>
+  <div class="flex gap-2" id="menuOptions">
+    <a href="lista.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">LISTADO PRECIOS</a>
+    <a href="intercambio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cálculo Trading</a>
+  </div>
+  <button id="menuToggle" class="hidden text-2xl focus:outline-none" aria-label="Abrir menú">
+    ☰
+  </button>
+</nav> -->
+
+  <!-- Añade un contenedor para el menú flotante debajo del botón toggle -->
+  <nav id="globalMenu"
+    class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white transition-all duration-300 shadow-lg">
+    <!-- <div class="font-bold text-lg">Menú</div> -->
+    <div class="flex gap-2" id="menuOptions">
+      <a href="lista.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">LISTADO PRECIOS</a>
+      <a href="intercambio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cálculo Trading</a>
+      <a href="cierree.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cierre</a>
+      <a href="inv-precio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Inv</a>
+      <a href="admin.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Admin</a>
+    </div>
+    <button id="menuToggle" class="hidden text-2xl focus:outline-none relative z-50" aria-label="Abrir menú">
+      ☰
+    </button>
+
+    <!-- Contenedor menú desplegable para botón flotante -->
+    <div id="floatingMenu"
+      class="hidden fixed bottom-20 right-6 bg-blue-700 text-white rounded-lg shadow-lg py-2 flex flex-col gap-1 z-40">
+      <a href="lista.html" class="px-4 py-2 hover:bg-blue-900 rounded">LISTADO PRECIOS</a>
+      <a href="intercambio.html" class="px-4 py-2 hover:bg-blue-900 rounded">Cálculo Trading</a>
+      <a href="cierree.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cierre</a>
+      <a href="inv-precio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Inv</a>
+      <a href="admin.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Admin</a>
+    </div>
+  </nav>
+
+
+  <!-- Espaciador para que el contenido no se oculte tras el menú fijo -->
+  <div class="h-14"></div>
+
+
+  <!-- <div class="container mx-auto px-4 max-w-6xl">
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-white mb-2">💰 Calculadora Inteligente</h1>
+      <p class="text-white/80 text-lg">Gestiona precios y métodos de pago con precisión</p>
+    </div>
+
+    <div class="btn">
+      <button class="py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600" >
+        <a href="lista.html">LISTADO PRECIOS</a>
+      </button>
+    </div>
+    <div class="btn">
+      <button class="py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600" >
+        <a href="intercambio.html">Calculo Trading</a>
+      </button>
+    </div> -->
+
+  <div class="grid lg:grid-cols-2 gap-8">
+    <!-- Panel de Configuración -->
+    <div class="bg-white rounded-2xl p-6 card-shadow">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
+        ⚙️ Configuración
+      </h2>
+
+      <!-- Selección de Producto -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Producto (Base de Datos)
+        </label>
+        <!-- <select id="productSelect"
+        class="w-full p-3 border border-gray-300 rounded-lg input-focus transition-all">
+            <option value="">Seleccionar producto...</option>
+            
+            <option value="applewatch_s8_45" data-price="280" data-currency="USD">
+              ⌚ Apple Watch serie 8 45 mm - $280 USD
+            </option>
+            <option value="applewatch_s9_45" data-price="319" data-currency="USD">
+              ⌚ Apple Watch serie 9 45 mm - $319 USD
+            </option>
+            <option value="applewatch_sx_42" data-price="469" data-currency="USD">
+              ⌚ Apple Watch serie X 42 mm - $469 USD
+            </option>
+            <option value="applewatch_sx_46" data-price="499" data-currency="USD">
+              ⌚ Apple Watch serie X 46 mm - $499 USD
+            </option>
+            
+            <option value="iphone11_64" data-price="259" data-currency="USD">
+              📱 iPhone 11 (64gb) - $259 USD
+            </option>
+            <option value="iphone11_128" data-price="279" data-currency="USD">
+              📱 iPhone 11 (128gb) - $279 USD
+            </option>
+            <option value="iphone11_256" data-price="299" data-currency="USD">
+              📱 iPhone 11 (256gb) - $299 USD
+            </option>
+            <option value="iphone11pro_64" data-price="290" data-currency="USD">
+              📱 iPhone 11 Pro (64gb) - $290 USD
+            </option>
+            <option value="iphone11pro_256" data-price="349" data-currency="USD">
+              📱 iPhone 11 Pro (256gb) - $349 USD
+            </option>
+            <option value="iphone11promax_64" data-price="340" data-currency="USD">
+              📱 iPhone 11 Pro Max (64gb) - $340 USD
+            </option>
+            <option value="iphone11promax_256" data-price="350" data-currency="USD">
+              📱 iPhone 11 Pro Max (256gb) - $350 USD
+            </option>
+            
+            <option value="iphone12_64" data-price="290" data-currency="USD">
+              📱 iPhone 12 (64gb) - $290 USD
+            </option>
+            <option value="iphone12_128" data-price="339" data-currency="USD">
+              📱 iPhone 12 (128gb) - $339 USD
+            </option>
+            <option value="iphone12_256" data-price="365" data-currency="USD">
+              📱 iPhone 12 (256gb) - $365 USD
+            </option>
+            <option value="iphone12pro_128" data-price="370" data-currency="USD">
+              📱 iPhone 12 Pro (128gb) - $370 USD
+            </option>
+            <option value="iphone12pro_256" data-price="400" data-currency="USD">
+              📱 iPhone 12 Pro (256gb) - $400 USD
+            </option>
+            <option value="iphone12pro_512" data-price="419" data-currency="USD">
+              📱 iPhone 12 Pro (512gb) - $419 USD
+            </option>
+            <option value="iphone12promax_128" data-price="449" data-currency="USD">
+              📱 iPhone 12 Pro Max (128gb) - $449 USD
+            </option>
+            <option value="iphone12promax_256" data-price="479" data-currency="USD">
+              📱 iPhone 12 Pro Max (256gb) - $479 USD
+            </option>
+            <option value="iphone12promax_512" data-price="520" data-currency="USD">
+              📱 iPhone 12 Pro Max (512gb) - $520 USD
+            </option>
+            
+            <option value="iphone13_128" data-price="385" data-currency="USD">
+              📱 iPhone 13 (128gb) - $385 USD
+            </option>
+            <option value="iphone13_256" data-price="409" data-currency="USD">
+              📱 iPhone 13 (256gb) - $409 USD
+            </option>
+            <option value="iphone13_512" data-price="460" data-currency="USD">
+              📱 iPhone 13 (512gb) - $460 USD
+            </option>
+            <option value="iphone13pro_128" data-price="509" data-currency="USD">
+              📱 iPhone 13 Pro (128gb) - $509 USD
+            </option>
+            <option value="iphone13pro_256" data-price="539" data-currency="USD">
+              📱 iPhone 13 Pro (256gb) - $539 USD
+            </option>
+            <option value="iphone13pro_512" data-price="559" data-currency="USD">
+              📱 iPhone 13 Pro (512gb) - $559 USD
+            </option>
+            <option value="iphone13pro_1tb" data-price="580" data-currency="USD">
+              📱 iPhone 13 Pro (1TB) - $580 USD
+            </option>
+            <option value="iphone13promax_128" data-price="589" data-currency="USD">
+              📱 iPhone 13 Pro Max (128gb) - $589 USD
+            </option>
+            <option value="iphone13promax_256" data-price="619" data-currency="USD">
+              📱 iPhone 13 Pro Max (256gb) - $619 USD
+            </option>
+            <option value="iphone13promax_512" data-price="659" data-currency="USD">
+              📱 iPhone 13 Pro Max (512gb) - $659 USD
+            </option>
+            <option value="iphone13promax_1tb" data-price="669" data-currency="USD">
+              📱 iPhone 13 Pro Max (1TB) - $669 USD
+            </option>
+            
+            <option value="iphone14_128" data-price="439" data-currency="USD">
+              📱 iPhone 14 (128gb) - $439 USD
+            </option>
+            <option value="iphone14_256" data-price="469" data-currency="USD">
+              📱 iPhone 14 (256gb) - $469 USD
+            </option>
+            <option value="iphone14_512" data-price="489" data-currency="USD">
+              📱 iPhone 14 (512gb) - $489 USD
+            </option>
+            <option value="iphone14plus_128" data-price="499" data-currency="USD">
+              📱 iPhone 14 Plus (128gb) - $499 USD
+            </option>
+            <option value="iphone14plus_256" data-price="519" data-currency="USD">
+              📱 iPhone 14 Plus (256gb) - $519 USD
+            </option>
+            <option value="iphone14pro_128" data-price="609" data-currency="USD">
+              📱 iPhone 14 Pro (128gb) - $609 USD
+            </option>
+            <option value="iphone14pro_256" data-price="629" data-currency="USD">
+              📱 iPhone 14 Pro (256gb) - $629 USD
+            </option>
+            <option value="iphone14pro_512" data-price="649" data-currency="USD">
+              📱 iPhone 14 Pro (512gb) - $649 USD
+            </option>
+            <option value="iphone14promax_128" data-price="689" data-currency="USD">
+              📱 iPhone 14 Pro Max (128gb) - $689 USD
+            </option>
+            <option value="iphone14promax_256" data-price="739" data-currency="USD">
+              📱 iPhone 14 Pro Max (256gb) - $739 USD
+            </option>
+            <option value="iphone14promax_512" data-price="779" data-currency="USD">
+              📱 iPhone 14 Pro Max (512gb) - $779 USD
+            </option>
+            
+            <option value="iphone15_128" data-price="619" data-currency="USD">
+              📱 iPhone 15 (128gb) - $619 USD
+            </option>
+            <option value="iphone15_256" data-price="679" data-currency="USD">
+              📱 iPhone 15 (256gb) - $679 USD
+            </option>
+            <option value="iphone15_512" data-price="689" data-currency="USD">
+              📱 iPhone 15 (512gb) - $689 USD
+            </option>
+            <option value="iphone15plus_128" data-price="670" data-currency="USD">
+              📱 iPhone 15 Plus (128gb) - $670 USD
+            </option>
+            <option value="iphone15plus_256" data-price="710" data-currency="USD">
+              📱 iPhone 15 Plus (256gb) - $710 USD
+            </option>
+            <option value="iphone15pro_128" data-price="760" data-currency="USD">
+              📱 iPhone 15 Pro (128gb) - $760 USD
+            </option>
+            <option value="iphone15pro_256" data-price="790" data-currency="USD">
+              📱 iPhone 15 Pro (256gb) - $790 USD
+            </option>
+            <option value="iphone15promax_256" data-price="890" data-currency="USD">
+              📱 iPhone 15 Pro Max (256gb, baterías bajas) - $890 USD
+            </option>
+            <option value="iphone15promax_256_baja" data-price="930" data-currency="USD">
+              📱 iPhone 15 Pro Max - $930 USD
+            </option>
+            <option value="iphone15promax_512" data-price="979" data-currency="USD">
+              📱 iPhone 15 Pro Max (512gb) - $979 USD
+            </option>
+            <option value="iphone15promax_1tb" data-price="1019" data-currency="USD">
+              📱 iPhone 15 Pro Max (1TB) - $1,019 USD
+            </option>
+            
+            <option value="iphone16_128" data-price="819" data-currency="USD">
+              📱 iPhone 16 (128gb) - $819 USD
+            </option>
+            <option value="iphone16_256" data-price="849" data-currency="USD">
+              📱 iPhone 16 (256gb) - $849 USD
+            </option>
+            <option value="iphone16plus_128" data-price="869" data-currency="USD">
+              📱 iPhone 16 Plus (128gb) - $869 USD
+            </option>
+            <option value="iphone16plus_256" data-price="919" data-currency="USD">
+              📱 iPhone 16 Plus (256gb) - $919 USD
+            </option>
+            <option value="iphone16pro_128" data-price="980" data-currency="USD">
+              📱 iPhone 16 Pro (128gb) - $980 USD
+            </option>
+            <option value="iphone16pro_512" data-price="1120" data-currency="USD">
+              📱 iPhone 16 Pro (512gb) - $1,120 USD
+            </option>
+            <option value="iphone16pro_1tb" data-price="1160" data-currency="USD">
+              📱 iPhone 16 Pro (1TB) - $1,160 USD
+            </option>
+            <option value="iphone16promax_256" data-price="1159" data-currency="USD">
+              📱 iPhone 16 Pro Max (256gb) - $1,159 USD
+            </option>
+            <option value="iphone16promax_512" data-price="1230" data-currency="USD">
+              📱 iPhone 16 Pro Max (512gb) - $1,230 USD
+            </option>
+            <option value="iphone16promax_1tb" data-price="1319" data-currency="USD">
+              📱 iPhone 16 Pro Max (1TB) - $1,319 USD
+            </option>
+            
+            <option value="custom">✏️ Producto personalizado</option>
+          </select> -->
+        <select id="productSelect" class="w-full p-3 border border-gray-300 rounded-lg input-focus transition-all">
+          <!-- <option value="">Seleccionar producto...</option>
+          
+            <option value="applewatch_s8_45" data-price="280" data-currency="USD">
+              ⌚ Apple Watch serie 8 45 mm - $280 USD
+            </option>
+            <option value="applewatch_s9_45" data-price="319" data-currency="USD">
+              ⌚ Apple Watch serie 9 45 mm - $319 USD
+            </option>
+            <option value="applewatch_sx_42" data-price="469" data-currency="USD">
+              ⌚ Apple Watch serie X 42 mm - $469 USD
+            </option>
+            <option value="applewatch_sx_46" data-price="499" data-currency="USD">
+              ⌚ Apple Watch serie X 46 mm - $499 USD
+            </option>
+          
+           <option value="iphone11_64" data-price="249" data-currency="USD">📱 iPhone 11 (64gb) - $249 USD</option>
+<option value="iphone11_128" data-price="279" data-currency="USD">📱 iPhone 11 (128gb) - $279 USD</option>
+<option value="iphone11_256" data-price="299" data-currency="USD">📱 iPhone 11 (256gb) - $299 USD</option>
+<option value="iphone11pro_64" data-price="290" data-currency="USD">📱 iPhone 11 Pro (64gb) - $290 USD</option>
+<option value="iphone11pro_256" data-price="349" data-currency="USD">📱 iPhone 11 Pro (256gb) - $349 USD</option>
+<option value="iphone11promax_64" data-price="340" data-currency="USD">📱 iPhone 11 Pro Max (64gb) - $340 USD</option>
+<option value="iphone11promax_256" data-price="350" data-currency="USD">📱 iPhone 11 Pro Max (256gb) - $350 USD</option>
+
+<option value="iphone12_64" data-price="285" data-currency="USD">📱 iPhone 12 (64gb) - $285 USD</option>
+<option value="iphone12_128" data-price="310" data-currency="USD">📱 iPhone 12 (128gb) - $310 USD</option>
+<option value="iphone12_256" data-price="340" data-currency="USD">📱 iPhone 12 (256gb) - $340 USD</option>
+<option value="iphone12pro_128" data-price="380" data-currency="USD">📱 iPhone 12 Pro (128gb) - $380 USD</option>
+<option value="iphone12pro_256" data-price="410" data-currency="USD">📱 iPhone 12 Pro (256gb) - $410 USD</option>
+<option value="iphone12pro_512" data-price="445" data-currency="USD">📱 iPhone 12 Pro (512gb) - $445 USD</option>
+<option value="iphone12promax_128" data-price="449" data-currency="USD">📱 iPhone 12 Pro Max (128gb) - $449 USD</option>
+<option value="iphone12promax_256" data-price="479" data-currency="USD">📱 iPhone 12 Pro Max (256gb) - $479 USD</option>
+<option value="iphone12promax_512" data-price="520" data-currency="USD">📱 iPhone 12 Pro Max (512gb) - $520 USD</option>
+
+<option value="iphone13_128" data-price="390" data-currency="USD">📱 iPhone 13 (128gb) - $390 USD</option>
+<option value="iphone13_256" data-price="419" data-currency="USD">📱 iPhone 13 (256gb) - $419 USD</option>
+<option value="iphone13_512" data-price="429" data-currency="USD">📱 iPhone 13 (512gb) - $429 USD</option>
+<option value="iphone13pro_128" data-price="489" data-currency="USD">📱 iPhone 13 Pro (128gb) - $489 USD</option>
+<option value="iphone13pro_256" data-price="529" data-currency="USD">📱 iPhone 13 Pro (256gb) - $529 USD</option>
+<option value="iphone13pro_512" data-price="559" data-currency="USD">📱 iPhone 13 Pro (512gb) - $559 USD</option>
+<option value="iphone13pro_1tb" data-price="580" data-currency="USD">📱 iPhone 13 Pro (1TB) - $580 USD</option>
+<option value="iphone13promax_128" data-price="570" data-currency="USD">📱 iPhone 13 Pro Max (128gb) - $580 USD</option>
+<option value="iphone13promax_256" data-price="620" data-currency="USD">📱 iPhone 13 Pro Max (256gb) - $620 USD</option>
+<option value="iphone13promax_512" data-price="649" data-currency="USD">📱 iPhone 13 Pro Max (512gb) - $649 USD</option>
+<option value="iphone13promax_1tb" data-price="669" data-currency="USD">📱 iPhone 13 Pro Max (1TB) - $669 USD</option>
+
+<option value="iphone14_128" data-price="429" data-currency="USD">📱 iPhone 14 (128gb) - $429 USD</option>
+<option value="iphone14_256" data-price="459" data-currency="USD">📱 iPhone 14 (256gb) - $459 USD</option>
+<option value="iphone14_512" data-price="489" data-currency="USD">📱 iPhone 14 (512gb) - $489 USD</option>
+<option value="iphone14plus_128" data-price="439" data-currency="USD">📱 iPhone 14 Plus (128gb) - $439 USD</option>
+<option value="iphone14plus_256" data-price="479" data-currency="USD">📱 iPhone 14 Plus (256gb) - $479 USD</option>
+<option value="iphone14pro_128" data-price="599" data-currency="USD">📱 iPhone 14 Pro (128gb) - $599 USD</option>
+<option value="iphone14pro_256" data-price="629" data-currency="USD">📱 iPhone 14 Pro (256gb) - $629 USD</option>
+<option value="iphone14pro_512" data-price="649" data-currency="USD">📱 iPhone 14 Pro (512gb) - $649 USD</option>
+<option value="iphone14promax_128" data-price="699" data-currency="USD">📱 iPhone 14 Pro Max (128gb) - $699 USD</option>
+<option value="iphone14promax_256" data-price="729" data-currency="USD">📱 iPhone 14 Pro Max (256gb) - $729 USD</option>
+<option value="iphone14promax_512" data-price="779" data-currency="USD">📱 iPhone 14 Pro Max (512gb) - $779 USD</option>
+
+<option value="iphone15_128" data-price="639" data-currency="USD">📱 iPhone 15 (128gb) - $639 USD</option>
+<option value="iphone15_256" data-price="679" data-currency="USD">📱 iPhone 15 (256gb) - $679 USD</option>
+<option value="iphone15_512" data-price="689" data-currency="USD">📱 iPhone 15 (512gb) - $689 USD</option>
+<option value="iphone15plus_128" data-price="690" data-currency="USD">📱 iPhone 15 Plus (128gb) - $690 USD</option>
+<option value="iphone15plus_256" data-price="720" data-currency="USD">📱 iPhone 15 Plus (256gb) - $720 USD</option>
+<option value="iphone15pro_128" data-price="780" data-currency="USD">📱 iPhone 15 Pro (128gb) - $780 USD</option>
+<option value="iphone15pro_256" data-price="820" data-currency="USD">📱 iPhone 15 Pro (256gb) - $820 USD</option>
+<option value="iphone15promax_256" data-price="870" data-currency="USD">📱 iPhone 15 Pro Max (256gb) - $870 USD</option>
+<option value="iphone15promax_512" data-price="930" data-currency="USD">📱 iPhone 15 Pro Max (512gb) - $930 USD</option>
+<option value="iphone15promax_1tb" data-price="960" data-currency="USD">📱 iPhone 15 Pro Max (1TB) - $960 USD</option>
+
+<option value="iphone16_128" data-price="819" data-currency="USD">📱 iPhone 16 (128gb) - $819 USD</option>
+<option value="iphone16_256" data-price="849" data-currency="USD">📱 iPhone 16 (256gb) - $849 USD</option>
+<option value="iphone16plus_128" data-price="819" data-currency="USD">📱 iPhone 16 Plus (128gb) - $870 USD</option>
+<option value="iphone16plus_256" data-price="890" data-currency="USD">📱 iPhone 16 Plus (256gb) - $900 USD</option>
+<option value="iphone16pro_128" data-price="970" data-currency="USD">📱 iPhone 16 Pro (128gb) - $970 USD</option>
+<option value="iphone16pro_512" data-price="1120" data-currency="USD">📱 iPhone 16 Pro (512gb) - $1,120 USD</option>
+<option value="iphone16pro_1tb" data-price="1160" data-currency="USD">📱 iPhone 16 Pro (1TB) - $1,160 USD</option>
+<option value="iphone16promax_256" data-price="1159" data-currency="USD">📱 iPhone 16 Pro Max (256gb) - $1,159 USD</option>
+<option value="iphone16promax_512" data-price="1230" data-currency="USD">📱 iPhone 16 Pro Max (512gb) - $1,230 USD</option>
+<option value="iphone16promax_1tb" data-price="1350" data-currency="USD">📱 iPhone 16 Pro Max (1TB) - $1,350 USD</option>
+ -->
+
+          <option value="custom">✏️ Producto personalizado</option>
+        </select>
+
+
+      </div>
+
+      <!-- Precio personalizado -->
+      <div id="customPriceDiv" class="mb-6 hidden">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Precio del Equipo
+        </label>
+        <div class="flex gap-2">
+          <input type="number" id="customPrice" placeholder="Ingresa el precio..."
+            class="flex-1 p-3 border border-gray-300 rounded-lg input-focus">
+          <select id="customCurrency" class="p-3 border border-gray-300 rounded-lg input-focus">
+            <option value="USD">USD ($)</option>
+            <option value="EUR">EUR (€)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mt-3 flex items-center">
+        <input type="checkbox" id="batteryFullCheckbox" class="mr-2" />
+        <label for="batteryFullCheckbox" class="select-none cursor-pointer">
+          Equipo del 95% al 100% de batería (+$20 USD)
+        </label>
+      </div>
+
+      <!-- Método de Pago -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Método de Pago
+        </label>
+        <select id="paymentMethod" class="w-full p-3 border border-gray-300 rounded-lg input-focus">
+          <option value="transfer">🏦 Transferencia</option>
+          <option value="cash">💵 Efectivo/Divisas</option>
+          <option value="zelle">💳 Zelle</option>
+          <option value="binance">₿ Binance</option>
+          <option value="mixed">🔄 Pago Mixto</option>
+        </select>
+      </div>
+
+      <!-- Pago Mixto -->
+      <div id="mixedPaymentDiv" class="mb-6 hidden">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Monto en Transferencia ($)
+        </label>
+        <input type="number" id="transferAmount" class="w-full p-3 border border-gray-300 rounded-lg input-focus"
+          placeholder="Cantidad a pagar por transferencia">
+      </div>
+
+      <!-- Tasa de Transferencia -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          USDT Rate
+        </label>
+        <input type="password" id="transferRate" value="15" step="0.1"
+          class="w-full p-3 border border-gray-300 rounded-lg input-focus" placeholder="Ej: 15.5">
+      </div>
+
+      <!-- Valor API (simulado) -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Tasa BCV
+        </label>
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-2">
+          <div class="text-xs text-blue-600">
+            Última actualización: <span id="lastUpdate">--:--:--</span>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <input type="number" id="apiValue" value="3.8" step="0.01"
+            class="flex-1 p-3 border border-gray-300 rounded-lg input-focus">
+          <button onclick="updateApiValue()" class="px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+            🔄 Actualizar API
+          </button>
+        </div>
+      </div>
+
+      <!-- Valor API Dinámico EUR/VES -->
+      <!-- <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Tasa EUR/VES
+          </label>
+          <div class="bg-green-50 border border-green-200 rounded-lg p-3 mb-2">
+
+            <div class="text-xs text-green-600">
+              Última actualización: <span id="lastUpdateEUR">--:--:--</span>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <input type="number" id="apiValueEUR" value="17.2" step="0.01"
+                   class="flex-1 p-3 border border-gray-300 rounded-lg input-focus">
+            <button onclick="updateApiValueEUR()"
+                    class="px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600">
+              🔄 Actualizar API
+            </button>
+          </div>
+        </div> --> <!-- EN CAMINO -->
+
+
+
+      <div class="bg-gradient-to-r from-purple-100 to-blue-100 border border-purple-200 rounded-lg p-4 text-center">
+        <div class="flex items-center justify-center gap-2 text-purple-700">
+          <span class="animate-pulse">⚡</span>
+          <span class="font-semibold">Cálculo en Tiempo Real Activado</span>
+          <span class="animate-pulse">⚡</span>
+        </div>
+        <p class="text-sm text-purple-600 mt-1">
+          Los resultados se actualizan automáticamente
+        </p>
+      </div>
+    </div>
+
+    <!-- Panel de Resultados -->
+    <div class="bg-white rounded-2xl p-6 card-shadow">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
+        📊 Resultados
+      </h2>
+
+      <div id="results" class="space-y-4">
+        <div class="text-center text-gray-500 py-8">
+          <div class="text-6xl mb-4">🧮</div>
+          <p>
+            Configura los parámetros y presiona "Calcular" para ver los resultados
+          </p>
+        </div>
+      </div>
+
+      <!-- Comparación de Métodos -->
+      <div id="comparison" class="mt-8 hidden">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          📈 Comparación de Métodos
+        </h3>
+        <div id="comparisonContent" class="space-y-3"></div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <!-- Lógica JavaScript -->
+  <script src="script.js" type="module"></script>
+</body>
+
+</html>

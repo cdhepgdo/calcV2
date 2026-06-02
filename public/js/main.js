@@ -629,7 +629,7 @@ class App {
 
         // El monto total es solo el pago en efectivo/digital, NO incluye equipo recibido
         montoTotalMixto.textContent = total.toFixed(2);
-        montoTotalVenta.value = total.toFixed(2);  // ✅ CORRECTO
+        //montoTotalVenta.value = total.toFixed(2);  // ✅ CORRECTO
     }
 
     /**

@@ -130,7 +130,7 @@ export class Venta {
             const equipoRecibidoValor = this.equipoRecibido ? this.equipoRecibido.valor : 0;
             const totalEsperado = totalPagoMixto + equipoRecibidoValor + (this.totalAbonosPrevios || 0);
             const diferencia = Math.abs(totalEsperado - this.montoTotal);
-
+            console.log(diferencia, 'esto es la diferencia')
             if (diferencia > 0.01 && !this.weppa) {
                 errores.push(`El total del pago mixto ($${totalPagoMixto.toFixed(2)}) + equipo recibido ($${equipoRecibidoValor.toFixed(2)}) no coincide con el monto total ($${this.montoTotal.toFixed(2)}). Active WEPPA si es intencional.`);
             }

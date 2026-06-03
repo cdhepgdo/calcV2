@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro Diario - Sistema de Inventario</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/registro.css">
+</head>
+
+<body>
+    <!-- Menú de Navegación -->
+    <nav
+        class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white shadow-lg">
+        <div class="flex gap-2" id="menuOptions">
+            <a href="lista.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">LISTADO PRECIOS</a>
+            <a href="intercambio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cálculo Trading</a>
+            <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Principal</a>
+            <a href="cierree.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cierre</a>
+            <a href="inv-precio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Inv</a>
+            <a href="ingreso-mercancia.html" class="px-3 py-2 rounded hover:bg-blue-900 transition border border-indigo-400 bg-indigo-800">📦 Ingreso</a>
+            <a href="admin.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Admin</a>
+            <button id="btnLogout"
+                class="px-3 py-2 rounded bg-red-600 hover:bg-red-700 font-bold transition ml-2">Cerrar Sesión</button>
+        </div>
+        <button id="menuToggle" class="hidden text-2xl focus:outline-none relative z-50">☰</button>
+        <div id="floatingMenu"
+            class="hidden fixed bottom-20 right-6 bg-blue-700 text-white rounded-lg shadow-lg py-2 flex flex-col gap-1 z-40">
+            <a href="lista.html" class="px-4 py-2 hover:bg-blue-900 rounded">LISTADO PRECIOS</a>
+            <a href="intercambio.html" class="px-4 py-2 hover:bg-blue-900 rounded">Cálculo Trading</a>
+            <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Principal</a>
+            <a href="cierree.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cierre</a>
+            <a href="inv-precio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Inv</a>
+            <a href="ingreso-mercancia.html" class="px-4 py-2 hover:bg-blue-900 rounded border-y border-indigo-500 bg-indigo-800">📦 Ingreso</a>
+            <a href="admin.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Admin</a>
+            <button id="btnLogoutMobile"
+                class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white font-bold transition rounded mt-2">Cerrar
+                Sesión</button>
+        </div>
+    </nav>
+
+    <!-- Espaciador -->
+    <div class="h-14"></div>
+    <div class="container">
+        <header>
+            <h1>📊 Registro Diario de Operaciones</h1>
+            <div class="header-actions">
+                <button id="btnExportar" class="btn-secondary">📥 Exportar</button>
+                <button id="btnVolver" class="btn-primary">← Volver</button>
+            </div>
+        </header>
+
+        <div class="filtros">
+            <div class="filtro-grupo">
+                <label>Período:</label>
+                <select id="filtroPeriodo">
+                    <option value="7">Últimos 7 días</option>
+                    <option value="15">Últimos 15 días</option>
+                    <option value="30" selected>Últimos 30 días</option>
+                    <option value="60">Últimos 60 días</option>
+                    <option value="90">Últimos 90 días</option>
+                    <option value="todos">Todos</option>
+                    <!-- Ahora se agregó: -->
+                    <option value="personalizado">Personalizado...</option> ← nueva opción
+                </select>
+                </select>
+
+                <!-- Y este bloque NUEVO justo debajo del select: -->
+                <div id="diasPersonalizadoDiv" style="display:none;">
+                    <input type="number" id="diasPersonalizado" min="1" max="3650" placeholder="Cantidad de días" ...>
+                </div>
+            </div>
+            <div class="filtro-grupo">
+                <label>Desde:</label>
+                <input type="date" id="filtroDesde">
+            </div>
+            <div class="filtro-grupo">
+                <label>Hasta:</label>
+                <input type="date" id="filtroHasta">
+            </div>
+        </div>
+
+        <div class="resumen-general">
+            <div class="stat-card">
+                <div class="stat-label">Total Días</div>
+                <div class="stat-value" id="totalDias">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Ventas</div>
+                <div class="stat-value" id="totalVentas">$0.00</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Operaciones</div>
+                <div class="stat-value" id="totalOperaciones">0</div>
+            </div>
+        </div>
+
+        <!-- Resumen de Accesorios del Período -->
+        <div class="accesorios-periodo">
+            <h2 class="accesorios-periodo-titulo">🛡️ Resumen de Accesorios del Período</h2>
+            <div id="resumenAccesoriosPeriodo" class="accesorios-periodo-contenido">
+                <p class="text-gray-500 text-center">Cargando...</p>
+            </div>
+        </div>
+
+        <div id="contenedorRegistro" class="registro-container">
+            <!-- Aquí se generarán las tablas por día -->
+        </div>
+    </div>
+
+    <script type="module" src="js/registro.js"></script>
+</body>
+
+</html>

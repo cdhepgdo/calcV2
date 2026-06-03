@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Sistema de Control</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/registro.css">
+    <style>
+        /* Estilos personalizados para complementar Tailwind y el CSS base */
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        .metric-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+    <script>
+        // Guard de autenticación frontend inmediato
+        const rol = localStorage.getItem('usuario_rol');
+        if (rol !== 'admin') {
+            alert('Acceso restringido. Se requieren privilegios de Administrador.');
+            window.location.href = 'index.html';
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 font-sans text-gray-800 flex min-h-screen">
+    <!-- Barra Lateral (Sidebar) -->
+    <aside class="sidebar w-64 bg-slate-900 text-slate-100 flex flex-col fixed inset-y-0 left-0 z-30 shadow-xl">
+        <div class="p-6 border-b border-slate-800 flex items-center gap-3">
+            <span class="text-2xl">💼</span>
+            <div>
+                <h2 class="font-bold text-lg leading-none">Admin Panel</h2>
+                <span class="text-xs text-emerald-400 font-semibold uppercase tracking-wider">Supervisión Global</span>
+            </div>
+        </div>
+
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <a href="#dashboard" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white font-medium transition">
+                <span>📊</span> Dashboard General
+            </a>
+            <a href="#historial" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition">
+                <span>📅</span> Historial por Días
+            </a>
+            <hr class="border-slate-800 my-4">
+            <a href="index.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition">
+                <span>🏠</span> Menú Principal
+            </a>
+            <a href="cierree.html" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition">
+                <span>🔒</span> Registrar Cierre
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-slate-800">
+            <button id="btnLogoutAdmin" class="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold transition">
+                <span>🚪</span> Cerrar Sesión
+            </button>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="flex-1 pl-64 min-h-screen flex flex-col">
+        <!-- Barra superior de control -->
+        <header class="bg-white border-b border-gray-200 sticky top-0 z-20 px-8 py-4 flex flex-wrap items-center justify-between gap-4 shadow-sm">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Consolidado Multitienda</h1>
+                <p class="text-sm text-gray-500">Visualiza el rendimiento integrado de todas tus sucursales</p>
+            </div>
+
+            <!-- Selector de Tiendas -->
+            <div class="flex items-center gap-3 bg-slate-100 p-2 rounded-xl border border-gray-200">
+                <span class="text-sm font-semibold text-slate-700 pl-2">🏪 Tienda:</span>
+                <select id="selectorSedeAdmin" class="bg-white border border-gray-300 rounded-lg py-1.5 px-3 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="todos" selected>🌍 Todas las Tiendas (Consolidado)</option>
+                    <option value="sede_1">🏪 Tienda Principal</option>
+                    <option value="sede_2">🏪 Sucursal Norte</option>
+                    <option value="sede_3">🏪 Sucursal Centro</option>
+                    <option value="sede_4">🏪 Sucursal Sur</option>
+                    <option value="sede_5">🏪 Sucursal Oeste</option>
+                    <option value="sede_6">🏪 Sucursal Este</option>
+                </select>
+            </div>
+        </header>
+
+        <!-- Contenedor del Dashboard -->
+        <div class="flex-1 p-8 space-y-8 max-w-7xl w-full mx-auto">
+            <!-- Sección 1: Filtros de Periodo -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-wrap items-center justify-between gap-6">
+                <div class="flex items-center gap-4 flex-wrap">
+                    <div class="flex flex-col">
+                        <label class="text-xs font-bold text-gray-400 uppercase mb-1">Rango del Reporte</label>
+                        <select id="filtroPeriodoAdmin" class="bg-gray-50 border border-gray-300 rounded-xl py-2 px-4 font-semibold text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="7">Últimos 7 días</option>
+                            <option value="15">Últimos 15 días</option>
+                            <option value="30" selected>Últimos 30 días</option>
+                            <option value="60">Últimos 60 días</option>
+                            <option value="90">Últimos 90 días</option>
+                            <option value="todos">Histórico Completo</option>
+                            <option value="personalizado">Días Personalizados...</option>
+                        </select>
+                    </div>
+                    <div id="diasPersonalizadoDivAdmin" class="hidden flex flex-col">
+                        <label class="text-xs font-bold text-gray-400 uppercase mb-1">Cantidad de Días</label>
+                        <input type="number" id="diasPersonalizadoAdmin" min="1" max="3650" placeholder="Ej: 45" class="bg-gray-50 border border-gray-300 rounded-xl py-2 px-4 font-semibold text-gray-700 w-32 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="flex flex-col">
+                        <label class="text-xs font-bold text-gray-400 uppercase mb-1">Desde</label>
+                        <input type="date" id="filtroDesdeAdmin" class="bg-gray-50 border border-gray-300 rounded-xl py-2 px-4 font-semibold text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-xs font-bold text-gray-400 uppercase mb-1">Hasta</label>
+                        <input type="date" id="filtroHastaAdmin" class="bg-gray-50 border border-gray-300 rounded-xl py-2 px-4 font-semibold text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 2: Tarjetas de Indicadores (KPIs) -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <!-- KPI 1: Total Ventas -->
+                <div class="metric-card bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-6 text-white shadow-md flex items-center justify-between">
+                    <div>
+                        <span class="text-sm font-semibold uppercase tracking-wider opacity-80">Total Facturado</span>
+                        <h3 id="totalVentasAdmin" class="text-3xl font-extrabold mt-1">$0.00</h3>
+                        <p class="text-xs mt-2 opacity-90">Ventas brutas acumuladas</p>
+                    </div>
+                    <div class="text-4xl bg-white/20 p-3 rounded-xl">💰</div>
+                </div>
+
+                <!-- KPI 2: Ingresos Netos / Efectivo -->
+                <div class="metric-card bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 text-white shadow-md flex items-center justify-between">
+                    <div>
+                        <span class="text-sm font-semibold uppercase tracking-wider opacity-80">Ingreso Neto (Caja)</span>
+                        <h3 id="totalIngresosAdmin" class="text-3xl font-extrabold mt-1">$0.00</h3>
+                        <p class="text-xs mt-2 opacity-90">Efectivo total ingresado</p>
+                    </div>
+                    <div class="text-4xl bg-white/20 p-3 rounded-xl">💵</div>
+                </div>
+
+                <!-- KPI 3: Total Operaciones -->
+                <div class="metric-card bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-6 text-white shadow-md flex items-center justify-between">
+                    <div>
+                        <span class="text-sm font-semibold uppercase tracking-wider opacity-80">Operaciones</span>
+                        <h3 id="totalOperacionesAdmin" class="text-3xl font-extrabold mt-1">0</h3>
+                        <p class="text-xs mt-2 opacity-90">Ventas y movimientos registrados</p>
+                    </div>
+                    <div class="text-4xl bg-white/20 p-3 rounded-xl">📊</div>
+                </div>
+
+                <!-- KPI 4: Equipos Vendidos -->
+                <div class="metric-card bg-gradient-to-br from-orange-500 to-amber-600 rounded-2xl p-6 text-white shadow-md flex items-center justify-between">
+                    <div>
+                        <span class="text-sm font-semibold uppercase tracking-wider opacity-80">iPhones Vendidos</span>
+                        <h3 id="equiposVendidosAdmin" class="text-3xl font-extrabold mt-1">0</h3>
+                        <p class="text-xs mt-2 opacity-90">Ventas de teléfonos completadas</p>
+                    </div>
+                    <div class="text-4xl bg-white/20 p-3 rounded-xl">📱</div>
+                </div>
+            </div>
+
+            <!-- Sección 3: Gráficos de Ventas -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Gráfico de Comparación entre Sucursales -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 lg:col-span-2 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-gray-800 text-lg">📈 Ventas por Sucursal</h3>
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-blue-50 text-blue-600 rounded-full">Comparativo</span>
+                    </div>
+                    <div class="relative h-72">
+                        <canvas id="chartVentasSede"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Ventas por Forma de Pago -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-gray-800 text-lg">💳 Métodos de Pago</h3>
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-purple-50 text-purple-600 rounded-full">Distribución</span>
+                    </div>
+                    <div class="relative h-72 flex items-center justify-center">
+                        <canvas id="chartMetodosPago"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 4: Resumen de Accesorios del Periodo -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
+                <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+                    <span>🛡️</span> Resumen Global de Accesorios del Período
+                </h3>
+                <div id="resumenAccesoriosPeriodoAdmin" class="accesorios-periodo-contenido">
+                    <p class="text-gray-500 text-center py-6">Cargando datos de inventario...</p>
+                </div>
+            </div>
+
+            <!-- Sección 5: Historial y Tablas por Día -->
+            <div id="historial" class="space-y-6 pt-4">
+                <div class="flex items-center justify-between border-b border-gray-200 pb-3">
+                    <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                        <span>📅</span> Desglose Diario de Operaciones
+                    </h3>
+                    <button id="btnExportarAdmin" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition text-sm shadow-sm">
+                        <span>📥</span> Exportar Todo en JSON
+                    </button>
+                </div>
+
+                <div id="contenedorRegistroAdmin" class="registro-container space-y-6">
+                    <!-- Tablas por día dinámicas -->
+                    <p class="text-gray-500 text-center py-12">Procesando y agrupando ventas consolidadas...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Mapeo modular para admin.js -->
+    <script type="module" src="js/admin.js"></script>
+</body>
+
+</html>

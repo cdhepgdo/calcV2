@@ -86,6 +86,11 @@
             border-color: #ef4444 !important;
         }
 
+        .imei-duplicado {
+            border-color: #f59e0b !important;
+            background: rgba(245, 158, 11, 0.15) !important;
+        }
+
         .bat-warn {
             border-color: #f97316 !important;
             color: #f97316 !important;
@@ -189,6 +194,12 @@
 
         .btn-success:active {
             transform: scale(0.98);
+        }
+
+        .btn-success:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
         }
 
         ::-webkit-scrollbar {
@@ -497,6 +508,41 @@
         let activeSelectedIdx = -1;
         let activeCell = null;
         let panelHideTimer = null;
+        let inventarioCargado = false;
+
+        // Función para verificar IMEI duplicado en tiempo real
+        function verificarImeiDuplicado(imei, filaActual) {
+            if (!imei || imei.length !== 15) return { duplicado: false };
+            
+            // Verificar en otras filas de la tabla actual
+            const filas = tablaBody.querySelectorAll('tr');
+            for (const tr of filas) {
+                if (tr === filaActual) continue;
+                const otroImei = tr.querySelector('.campo-imei')?.value || '';
+                if (otroImei === imei) {
+                    return { 
+                        duplicado: true, 
+                        origen: 'lote',
+                        mensaje: '⚠️ IMEI duplicado en este lote'
+                    };
+                }
+            }
+            
+            // Verificar en el inventario existente
+            if (inventarioCargado) {
+                const existente = inventarioService.buscarPorImei(imei);
+                if (existente) {
+                    return { 
+                        duplicado: true, 
+                        origen: 'inventario',
+                        mensaje: `⚠️ IMEI ya existe en inventario (${existente.estado})`,
+                        equipo: existente
+                    };
+                }
+            }
+            
+            return { duplicado: false };
+        }
 
         authService.onAuthChange(async (user) => {
             if (!user) {
@@ -507,6 +553,22 @@
             const sedeId = localStorage.getItem('usuario_sede_id') || 'sede_1';
             document.getElementById('badgeSede').textContent = `📍 ${sedeId}`;
             document.getElementById('fechaHoy').textContent = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+            
+            // Inicializar inventario y esperar a que esté listo
+            const btnGuardar = document.getElementById('btnGuardarLote');
+            btnGuardar.disabled = true;
+            btnGuardar.textContent = '⏳ Cargando inventario...';
+            
+            try {
+                await inventarioService.esperarListo();
+                inventarioCargado = true;
+                btnGuardar.disabled = false;
+                btnGuardar.innerHTML = '💾 Guardar Todo al Inventario';
+                console.log('✅ Inventario listo para validaciones en tiempo real');
+            } catch (error) {
+                console.error('❌ Error al cargar inventario:', error);
+                showToast('⚠️ Error al cargar inventario. Recarga la página.', 'error');
+            }
         });
 
         const doLogout = async () => {
@@ -555,20 +617,33 @@
             const filas = tablaBody.querySelectorAll('tr');
             const modelos = {};
             let validos = 0;
+            let conAdvertencias = 0;
 
             filas.forEach(tr => {
                 const modelo = tr.querySelector('.campo-modelo')?.value.trim() || '';
                 const gb = tr.querySelector('.campo-gb')?.value || '';
                 const imei = tr.querySelector('.campo-imei')?.value || '';
                 const color = tr.querySelector('.campo-color')?.value || '';
+                const imeiInput = tr.querySelector('.campo-imei');
+                
+                const tieneDuplicado = imeiInput?.classList.contains('imei-duplicado');
+                
                 if (modelo && gb && imei.length === 15 && color) {
-                    validos++;
-                    const key = `${modelo} ${gb}`;
-                    modelos[key] = (modelos[key] || 0) + 1;
+                    if (tieneDuplicado) {
+                        conAdvertencias++;
+                    } else {
+                        validos++;
+                        const key = `${modelo} ${gb}`;
+                        modelos[key] = (modelos[key] || 0) + 1;
+                    }
                 }
             });
 
-            document.getElementById('contadorFilas').textContent = validos;
+            const textoContador = conAdvertencias > 0 
+                ? `${validos} válidos, ${conAdvertencias} ⚠️` 
+                : `${validos}`;
+            
+            document.getElementById('contadorFilas').textContent = textoContador;
             document.getElementById('totalEquiposResumen').textContent = validos;
 
             const lista = document.getElementById('listaResumen');
@@ -757,18 +832,38 @@
 
             const imeiInput = tr.querySelector('.campo-imei');
             const imeiStatus = tr.querySelector('.imei-status');
+            
             imeiInput.addEventListener('input', () => {
                 const v = imeiInput.value.replace(/\D/g, '');
                 imeiInput.value = v;
-                imeiInput.classList.remove('imei-ok', 'imei-error');
+                imeiInput.classList.remove('imei-ok', 'imei-error', 'imei-duplicado');
                 imeiStatus.textContent = '';
+                imeiInput.title = '';
+                
                 if (v.length === 15) {
-                    imeiInput.classList.add('imei-ok');
-                    imeiStatus.textContent = '✅';
+                    // Verificar duplicados en tiempo real
+                    const resultado = verificarImeiDuplicado(v, tr);
+                    
+                    if (resultado.duplicado) {
+                        imeiInput.classList.add('imei-duplicado');
+                        imeiStatus.textContent = '⚠️';
+                        imeiInput.title = resultado.mensaje;
+                        
+                        if (resultado.origen === 'inventario' && resultado.equipo) {
+                            const info = ` | ${resultado.equipo.modelo} ${resultado.equipo.gb} ${resultado.equipo.color}`;
+                            imeiInput.title += info;
+                        }
+                    } else {
+                        imeiInput.classList.add('imei-ok');
+                        imeiStatus.textContent = '✅';
+                        imeiInput.title = 'IMEI válido y único';
+                    }
                 } else if (v.length > 0) {
                     imeiInput.classList.add('imei-error');
                     imeiStatus.textContent = '❌';
+                    imeiInput.title = `Faltan ${15 - v.length} dígitos`;
                 }
+                
                 actualizarResumen();
             });
 
@@ -801,6 +896,9 @@
                 renumerarFilas();
                 actualizarResumen();
                 if (activeCell && tr.contains(activeInput)) hideAutocomplete();
+                
+                // Re-validar todos los IMEIs por si había duplicados en el lote
+                revalidarTodosLosImeis();
             });
 
             tablaBody.appendChild(tr);
@@ -811,6 +909,17 @@
         function renumerarFilas() {
             tablaBody.querySelectorAll('tr').forEach((tr, i) => {
                 tr.querySelector('.num-col').textContent = i + 1;
+            });
+        }
+
+        function revalidarTodosLosImeis() {
+            const filas = tablaBody.querySelectorAll('tr');
+            filas.forEach(tr => {
+                const imeiInput = tr.querySelector('.campo-imei');
+                if (imeiInput && imeiInput.value.length === 15) {
+                    // Disparar evento input para re-validar
+                    imeiInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
             });
         }
 
@@ -863,6 +972,24 @@
                 showToast('⚠️ Agrega al menos un equipo', 'error');
                 return;
             }
+            
+            // Verificar que el inventario esté cargado
+            if (!inventarioCargado) {
+                showToast('⚠️ Esperando carga del inventario. Intenta de nuevo en un momento.', 'error');
+                return;
+            }
+            
+            // Verificar si hay IMEIs con advertencias
+            const imeisDuplicados = Array.from(tablaBody.querySelectorAll('.campo-imei.imei-duplicado'));
+            if (imeisDuplicados.length > 0) {
+                const numFilas = imeisDuplicados.map(input => {
+                    const tr = input.closest('tr');
+                    return tr.querySelector('.num-col').textContent;
+                }).join(', ');
+                
+                showToast(`⚠️ Hay IMEIs duplicados en las filas: ${numFilas}. Corrígelos antes de guardar.`, 'error');
+                return;
+            }
 
             const { equipos, errores } = recolectarEquipos();
 
@@ -891,7 +1018,7 @@
                 actualizarResumen();
                 crearFila();
             } else {
-                showToast(`❌ Error al guardar: ${resultado.error}`, 'error');
+                showToast(`❌ ${resultado.error}`, 'error');
             }
         });
 

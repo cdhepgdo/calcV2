@@ -276,6 +276,37 @@
             }
         }
 
+        /* Estilos para indicador de conexión */
+        .connection-dot {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .connection-dot.online {
+            background: #22c55e;
+        }
+
+        .connection-dot.offline {
+            background: #ef4444;
+            animation: none;
+        }
+
+        .connection-text.online {
+            color: #22c55e;
+        }
+
+        .connection-text.offline {
+            color: #ef4444;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
         #panelResumen {
             position: sticky;
             top: 80px;
@@ -340,6 +371,14 @@
 
     <div id="toast"></div>
     <div id="autocompletePanel" class="autocomplete-panel"></div>
+
+    <!-- Indicador de conexión -->
+    <div id="connectionBadge" class="fixed top-16 right-4 z-50 hidden">
+        <div class="glass rounded-lg px-3 py-2 flex items-center gap-2 shadow-lg">
+            <span class="connection-dot w-2 h-2 rounded-full"></span>
+            <span class="connection-text text-xs font-medium"></span>
+        </div>
+    </div>
 
     <nav
         class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white shadow-lg">
@@ -628,6 +667,7 @@
     <script type="module">
         import { authService } from './js/services/AuthService.js';
         import { inventarioService } from './js/services/InventarioService.js';
+        import { movimientoService } from './js/services/MovimientoService.js';
         import { EquipoInventario } from './js/models/EquipoInventario.js';
         import { MODELOS_CORTOS, COLORES_IPHONE, CAPACIDADES_IPHONE } from './js/config/constants.js';
 
@@ -650,6 +690,60 @@
         // Variables para modo salida
         let modoActual = 'ingreso'; // 'ingreso' o 'salida'
         let equiposSeleccionadosSalida = []; // Array de IDs de equipos seleccionados para salida
+
+        // ====== MONITOR DE CONEXIÓN ======
+        
+        const connectionBadge = document.getElementById('connectionBadge');
+        const connectionDot = connectionBadge?.querySelector('.connection-dot');
+        const connectionText = connectionBadge?.querySelector('.connection-text');
+        let hideConnectionTimer = null;
+
+        function actualizarEstadoConexion(online) {
+            if (!connectionBadge) return;
+            
+            connectionBadge.classList.remove('hidden');
+            
+            if (online) {
+                connectionDot?.classList.add('online');
+                connectionDot?.classList.remove('offline');
+                connectionText?.classList.add('online');
+                connectionText?.classList.remove('offline');
+                connectionText.textContent = 'En línea';
+                
+                // Ocultar después de 3 segundos
+                clearTimeout(hideConnectionTimer);
+                hideConnectionTimer = setTimeout(() => {
+                    connectionBadge.classList.add('hidden');
+                }, 3000);
+            } else {
+                connectionDot?.classList.add('offline');
+                connectionDot?.classList.remove('online');
+                connectionText?.classList.add('offline');
+                connectionText?.classList.remove('online');
+                connectionText.textContent = 'Sin conexión - Modo offline';
+                
+                // No ocultar en modo offline
+                clearTimeout(hideConnectionTimer);
+            }
+        }
+
+        // Detectar cambios de conexión
+        window.addEventListener('online', () => {
+            console.log('🟢 Conexión restaurada');
+            actualizarEstadoConexion(true);
+            showToast('✅ Conexión restaurada. Sincronizando...', 'success');
+        });
+
+        window.addEventListener('offline', () => {
+            console.log('🔴 Sin conexión - Modo offline activado');
+            actualizarEstadoConexion(false);
+            showToast('⚠️ Sin conexión. Trabajando en modo offline', 'error');
+        });
+
+        // Verificar estado inicial
+        if (!navigator.onLine) {
+            actualizarEstadoConexion(false);
+        }
 
         // Función para verificar IMEI duplicado en tiempo real
         function verificarImeiDuplicado(imei, filaActual) {
@@ -1519,10 +1613,38 @@
 
             setLoading(true);
             const origenLote = document.getElementById('origenLote').value.trim();
+            const notasLote = document.getElementById('notasLote').value.trim();
+            const registrarMovimiento = document.getElementById('chkRegistrarMovimiento').checked;
+            
             const resultado = await inventarioService.guardarLote(equipos, origenLote);
             setLoading(false);
 
             if (resultado.exito) {
+                // Registrar movimientos si el checkbox está marcado
+                if (registrarMovimiento) {
+                    try {
+                        // Registrar un movimiento por cada equipo ingresado
+                        for (const equipo of equipos) {
+                            await movimientoService.crearMovimiento({
+                                tipo: 'Ingreso Equipo',
+                                datos: {
+                                    modelo: equipo.modelo,
+                                    capacidad: equipo.gb,
+                                    color: equipo.color,
+                                    imei: equipo.imei,
+                                    origen: origenLote || 'No especificado',
+                                    bateria: equipo.bateria,
+                                    notas: notasLote || ''
+                                }
+                            });
+                        }
+                        console.log(`✅ ${equipos.length} movimiento(s) de ingreso registrado(s)`);
+                    } catch (error) {
+                        console.error('Error al registrar movimientos:', error);
+                        showToast('⚠️ Equipos guardados, pero error al registrar movimientos', 'error');
+                    }
+                }
+                
                 showToast(`✅ ${equipos.length} equipo(s) guardados correctamente`, 'success');
                 tablaBody.innerHTML = '';
                 filaCounter = 0;
@@ -1599,6 +1721,11 @@
             setLoading(true);
             
             try {
+                // Obtener equipos para registrar movimientos antes de cambiar su estado
+                const equiposParaMovimiento = equiposSeleccionadosSalida.map(id => {
+                    return inventarioService.obtenerDisponibles().find(e => e.id === id);
+                }).filter(Boolean);
+
                 // Cambiar estado de cada equipo a "transferido"
                 for (const equipoId of equiposSeleccionadosSalida) {
                     await inventarioService.cambiarEstado(equipoId, 'transferido', {
@@ -1610,11 +1737,31 @@
                     });
                 }
 
-                // TODO: Si checkbox está marcado, registrar movimiento en caja
+                // Registrar movimientos si el checkbox está marcado
                 const registrarMovimiento = document.getElementById('chkRegistrarMovimientoSalida').checked;
                 if (registrarMovimiento) {
-                    // Aquí se registrará el movimiento cuando integremos con MovimientoService
-                    console.log('📝 Movimiento de salida registrado (pendiente integración)');
+                    try {
+                        // Registrar un movimiento por cada equipo de salida
+                        for (const equipo of equiposParaMovimiento) {
+                            await movimientoService.crearMovimiento({
+                                tipo: 'Salida Equipo',
+                                datos: {
+                                    modelo: equipo.modelo,
+                                    capacidad: equipo.gb,
+                                    color: equipo.color,
+                                    imei: equipo.imei,
+                                    destino: destino,
+                                    persona: responsable || 'No especificado',
+                                    bateria: equipo.bateria,
+                                    notas: notas || ''
+                                }
+                            });
+                        }
+                        console.log(`✅ ${equiposParaMovimiento.length} movimiento(s) de salida registrado(s)`);
+                    } catch (error) {
+                        console.error('Error al registrar movimientos de salida:', error);
+                        showToast('⚠️ Equipos transferidos, pero error al registrar movimientos', 'error');
+                    }
                 }
 
                 showToast(`✅ ${equiposSeleccionadosSalida.length} equipo(s) dados de baja correctamente`, 'success');

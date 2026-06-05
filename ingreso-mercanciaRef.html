@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📦 Ingreso de Mercancía — Inventario</title>
+    <meta name="description"
+        content="Registra el ingreso masivo de equipos al inventario de tu sede de forma rápida y eficiente.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            min-height: 100vh;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-dark {
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        #tablaBody tr {
+            transition: background 0.15s;
+        }
+
+        #tablaBody tr:hover {
+            background: rgba(99, 102, 241, 0.08);
+        }
+
+        #tablaBody tr.fila-nueva {
+            animation: slideIn 0.2s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cell-input {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            color: #e2e8f0;
+            padding: 5px 8px;
+            font-size: 13px;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        .cell-input:focus {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.12);
+        }
+
+        .cell-input::placeholder {
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        .imei-ok {
+            border-color: #22c55e !important;
+        }
+
+        .imei-error {
+            border-color: #ef4444 !important;
+        }
+
+        .bat-warn {
+            border-color: #f97316 !important;
+            color: #f97316 !important;
+        }
+
+        .bat-low {
+            border-color: #ef4444 !important;
+            color: #ef4444 !important;
+        }
+
+        .gb-chip {
+            cursor: pointer;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #94a3b8;
+            transition: all 0.15s;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        .gb-chip:hover {
+            background: rgba(99, 102, 241, 0.25);
+            color: #c7d2fe;
+        }
+
+        .gb-chip.active {
+            background: #4f46e5;
+            border-color: #6366f1;
+            color: #fff;
+        }
+
+        .autocomplete-panel {
+            position: fixed;
+            display: none;
+            z-index: 99999;
+            background: #1e1b4b;
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            min-width: 160px;
+            max-width: 320px;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+
+        .autocomplete-panel.show {
+            display: block;
+        }
+
+        .autocomplete-panel ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .autocomplete-panel li {
+            padding: 8px 12px;
+            font-size: 13px;
+            color: #c7d2fe;
+            cursor: pointer;
+            transition: background 0.1s;
+            white-space: nowrap;
+        }
+
+        .autocomplete-panel li:hover,
+        .autocomplete-panel li.selected {
+            background: rgba(99, 102, 241, 0.35);
+            color: #fff;
+        }
+
+        .caja-fields {
+            display: none;
+        }
+
+        .caja-fields.visible {
+            display: flex;
+        }
+
+        .sede-badge {
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            color: #a5b4fc;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        .btn-success:hover {
+            opacity: 0.9;
+        }
+
+        .btn-success:active {
+            transform: scale(0.98);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.4);
+            border-radius: 3px;
+        }
+
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            padding: 14px 22px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #toast.success {
+            background: #059669;
+            color: #fff;
+        }
+
+        #toast.error {
+            background: #dc2626;
+            color: #fff;
+        }
+
+        #loadingOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        #loadingOverlay.visible {
+            display: flex;
+        }
+
+        .spinner {
+            width: 44px;
+            height: 44px;
+            border: 4px solid rgba(99, 102, 241, 0.3);
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        #panelResumen {
+            position: sticky;
+            top: 80px;
+        }
+
+        #appContent {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="loadingOverlay">
+        <div class="text-center">
+            <div class="spinner mx-auto mb-3"></div>
+            <p class="text-indigo-300 font-medium text-sm">Guardando lote...</p>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+    <div id="autocompletePanel" class="autocomplete-panel"></div>
+
+    <nav
+        class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white shadow-lg">
+        <div class="flex gap-2 flex-wrap" id="menuOptions">
+            <a href="cierree.html" class="px-3 py-2 rounded hover:bg-blue-900 transition text-sm">🏠 Ventas</a>
+            <a href="lista.html" class="px-3 py-2 rounded hover:bg-blue-900 transition text-sm">LISTADO PRECIOS</a>
+            <a href="intercambio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition text-sm">Cálculo
+                Trading</a>
+            <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition text-sm">Principal</a>
+            <a href="registro.html" class="px-3 py-2 rounded hover:bg-blue-900 transition text-sm">📊 Registro</a>
+            <a href="ingreso-mercancia.html" class="px-3 py-2 rounded bg-indigo-600 font-bold text-sm">📦 Ingreso</a>
+            <button id="btnLogout"
+                class="px-3 py-2 rounded bg-red-600 hover:bg-red-700 font-bold transition ml-2 text-sm">Cerrar
+                Sesión</button>
+        </div>
+        <button id="menuToggle" class="hidden text-2xl focus:outline-none relative z-50">☰</button>
+        <div id="floatingMenu"
+            class="hidden fixed bottom-20 right-6 bg-blue-700 text-white rounded-lg shadow-lg py-2 flex flex-col gap-1 z-40">
+            <a href="cierree.html" class="px-4 py-2 hover:bg-blue-900 rounded text-sm">🏠 Ventas</a>
+            <a href="lista.html" class="px-4 py-2 hover:bg-blue-900 rounded text-sm">LISTADO PRECIOS</a>
+            <a href="intercambio.html" class="px-4 py-2 hover:bg-blue-900 rounded text-sm">Cálculo Trading</a>
+            <a href="index.html" class="px-4 py-2 hover:bg-blue-900 rounded text-sm">Principal</a>
+            <a href="registro.html" class="px-4 py-2 hover:bg-blue-900 rounded text-sm">📊 Registro</a>
+            <a href="ingreso-mercancia.html" class="px-4 py-2 hover:bg-blue-900 rounded font-bold text-sm">📦
+                Ingreso</a>
+            <button id="btnLogoutMobile"
+                class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white font-bold transition rounded mt-2 text-sm">Cerrar
+                Sesión</button>
+        </div>
+    </nav>
+
+    <div class="h-14"></div>
+
+    <div id="appContent" class="max-w-screen-2xl mx-auto px-3 pb-10 pt-4">
+        <!-- HEADER Y TOGGLE DE MODOS -->
+        <div class="glass rounded-2xl p-5 mb-5 flex flex-col sm:flex-row sm:items-center gap-4">
+            <div class="flex-1">
+                <h1 class="text-2xl font-bold text-white flex items-center gap-2" id="tituloModo">
+                    📦 <span>Nota de Ingreso de Mercancía</span>
+                </h1>
+                <div class="flex items-center gap-2 mt-3 bg-white/5 p-1 rounded-lg w-max">
+                    <button id="btnModoIngreso" class="px-4 py-1.5 rounded-md text-sm font-bold bg-indigo-600 text-white shadow transition">📦 Ingreso</button>
+                    <button id="btnModoSalida" class="px-4 py-1.5 rounded-md text-sm font-bold text-white opacity-50 hover:bg-white/10 transition">📤 Salida</button>
+                </div>
+            </div>
+            <div class="flex flex-col items-end gap-3">
+                <div class="flex gap-3 items-center">
+                    <span class="sede-badge" id="badgeSede">📍 Cargando sede...</span>
+                    <div class="text-indigo-300 text-sm font-medium" id="fechaHoy"></div>
+                </div>
+                <button id="btnImprimirLote" class="text-white bg-slate-700 hover:bg-slate-600 font-medium py-2 px-4 rounded-lg text-sm transition flex items-center gap-2">
+                    🖨️ Imprimir Nota
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- MODO SALIDA (Oculto por defecto)          -->
+        <!-- ========================================== -->
+        <div id="seccionSalida" class="hidden">
+            <div class="glass rounded-2xl p-5 mb-5">
+                <h2 class="text-indigo-300 text-xs font-bold uppercase tracking-wider mb-4">Información de Traslado</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-slate-400 text-xs font-medium block mb-1">Destino (Sede o Cliente)</label>
+                        <input type="text" id="salidaDestino" placeholder="Ej: Sede Cumbayá" class="cell-input rounded-lg py-2 px-3 text-sm w-full border border-white/10">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 text-xs font-medium block mb-1">Persona Responsable</label>
+                        <input type="text" id="salidaResponsable" placeholder="Ej: Juan Pérez" class="cell-input rounded-lg py-2 px-3 text-sm w-full border border-white/10">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-4 flex-col lg:flex-row">
+                <!-- Buscador de equipos para salida -->
+                <div class="lg:w-1/3 flex flex-col gap-4">
+                    <div class="glass rounded-2xl p-5">
+                        <label class="text-indigo-300 text-xs font-bold uppercase tracking-wider mb-3 block">Buscar Equipo en Stock</label>
+                        <input type="text" id="salidaBuscadorInput" placeholder="Buscar por modelo o IMEI..." class="cell-input rounded-lg py-3 px-4 text-sm w-full border border-indigo-500/30 bg-indigo-900/20 text-white placeholder-indigo-300 focus:outline-none focus:border-indigo-400 mb-3">
+                        <div id="salidaSugerencias" class="flex flex-col gap-1 max-h-64 overflow-y-auto pr-2"></div>
+                    </div>
+                </div>
+
+                <!-- Lista de seleccionados -->
+                <div class="flex-1">
+                    <div class="glass rounded-2xl p-5 h-full flex flex-col">
+                        <h2 class="text-indigo-300 text-xs font-bold uppercase tracking-wider mb-4">Equipos Seleccionados para Salida</h2>
+                        
+                        <div id="listaSalidaSeleccionados" class="flex flex-col gap-2 flex-1 mb-6">
+                            <p class="text-slate-500 text-xs text-center italic py-4">Sin equipos seleccionados</p>
+                        </div>
+
+                        <div class="flex flex-col gap-3 mt-auto pt-4 border-t border-white/10">
+                            <label class="flex items-center gap-2 cursor-pointer text-slate-300 text-sm">
+                                <input type="checkbox" id="chkRegistrarMovimientoSalida" class="rounded accent-indigo-500 w-4 h-4" checked>
+                                Registrar movimiento en la caja del día (Salida Equipo)
+                            </label>
+                            
+                            <button id="btnConfirmarSalida" class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold py-3.5 px-6 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg transition">
+                                📤 Confirmar Salida y Dar de Baja
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- MODO INGRESO                               -->
+        <!-- ========================================== -->
+        <div id="seccionIngreso">
+            <div class="glass rounded-2xl p-5 mb-5">
+                <h2 class="text-indigo-300 text-xs font-bold uppercase tracking-wider mb-3">Información del Lote</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-slate-400 text-xs font-medium block mb-1">Origen / Proveedor</label>
+                        <input type="text" id="origenLote" placeholder="Ej: USA Import, Panamá, Trade-in..."
+                            class="cell-input rounded-lg py-2 px-3 text-sm w-full border border-white/10">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 text-xs font-medium block mb-1">Notas del lote (opcional)</label>
+                        <input type="text" id="notasLote" placeholder="Ej: Lote de nov, mercancía revisada..."
+                            class="cell-input rounded-lg py-2 px-3 text-sm w-full border border-white/10">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-4 flex-col xl:flex-row">
+                <div class="flex-1 min-w-0">
+                    <div class="glass rounded-2xl overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm" style="min-width:900px">
+                                <thead>
+                                    <tr class="border-b border-white/10">
+                                        <th class="text-left py-3 px-3 text-indigo-300 font-semibold text-xs w-8">#</th>
+                                        <th class="text-left py-3 px-2 text-indigo-300 font-semibold text-xs" style="min-width:130px">Modelo</th>
+                                        <th class="text-left py-3 px-2 text-indigo-300 font-semibold text-xs" style="min-width:180px">GB</th>
+                                        <th class="text-left py-3 px-2 text-indigo-300 font-semibold text-xs" style="min-width:130px">Color</th>
+                                        <th class="text-left py-3 px-2 text-indigo-300 font-semibold text-xs w-16">Bat%</th>
+                                        <th class="text-left py-3 px-2 text-indigo-300 font-semibold text-xs" style="min-width:165px">IMEI</th>
+                                        <th class="text-left py-3 px-2 text-indigo-300 font-semibold text-xs" style="min-width:240px">Caja / Detalles</th>
+                                        <th class="py-3 px-2 w-8"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaBody"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="p-3 border-t border-white/10 flex items-center justify-between gap-3 flex-wrap">
+                            <button id="btnAgregarFila"
+                                class="flex items-center gap-2 text-indigo-300 hover:text-white text-sm font-medium transition px-3 py-1.5 rounded-lg hover:bg-indigo-700/40">
+                                <span class="text-lg leading-none">+</span> Agregar equipo
+                            </button>
+                            <span class="text-slate-400 text-xs">
+                                <span id="contadorFilas" class="text-indigo-300 font-bold">0</span> equipos válidos
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 flex flex-col gap-3">
+                        <div class="flex items-center">
+                            <label class="flex items-center gap-2 cursor-pointer text-slate-300 text-sm ml-1">
+                                <input type="checkbox" id="chkRegistrarMovimiento" class="rounded accent-indigo-500 w-4 h-4" checked>
+                                Registrar movimiento en la caja del día (Ingreso Equipo)
+                            </label>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button id="btnGuardarLote"
+                                class="btn-success flex-1 text-white font-bold py-3.5 px-6 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg">
+                                💾 Guardar Todo al Inventario
+                            </button>
+                            <button id="btnLimpiarTodo"
+                                class="text-slate-400 hover:text-white border border-slate-600 hover:border-slate-400 font-medium py-3.5 px-6 rounded-xl text-sm transition">
+                                🗑️ Limpiar todo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="panelResumen" class="xl:w-64 shrink-0">
+                    <div class="glass-dark rounded-2xl p-4">
+                        <h3 class="text-indigo-300 text-xs font-bold uppercase tracking-wider mb-3">Resumen del Lote</h3>
+                        <div class="text-center mb-3">
+                            <p class="text-3xl font-bold text-white" id="totalEquiposResumen">0</p>
+                            <p class="text-slate-400 text-xs">equipos en este lote</p>
+                        </div>
+                        <div class="border-t border-white/10 pt-3 space-y-1.5" id="listaResumen">
+                            <p class="text-slate-500 text-xs text-center italic">Sin equipos aún...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <template id="filaTpl">
+        <tr class="fila-nueva border-b border-white/5">
+            <td class="py-2 px-3 text-slate-500 text-xs font-mono num-col"></td>
+            <td class="py-2 px-2">
+                <input type="text" class="cell-input campo-modelo" placeholder="13 Pro" autocomplete="off"
+                    data-campo="modelo">
+            </td>
+            <td class="py-2 px-2">
+                <div class="flex flex-wrap gap-1 items-center">
+                    <span class="gb-chip" data-gb="64GB">64</span>
+                    <span class="gb-chip" data-gb="128GB">128</span>
+                    <span class="gb-chip" data-gb="256GB">256</span>
+                    <span class="gb-chip" data-gb="512GB">512</span>
+                    <span class="gb-chip" data-gb="1TB">1TB</span>
+                    <input type="hidden" class="campo-gb" value="">
+                </div>
+            </td>
+            <td class="py-2 px-2">
+                <select class="cell-input campo-color" data-campo="color">
+                    <option value="">— Color —</option>
+                </select>
+            </td>
+            <td class="py-2 px-2">
+                <input type="number" class="cell-input campo-bateria text-center" placeholder="100" min="1" max="100"
+                    data-campo="bateria" style="width:58px">
+            </td>
+            <td class="py-2 px-2">
+                <div class="flex items-center gap-1">
+                    <input type="text" class="cell-input campo-imei font-mono" placeholder="15 dígitos" maxlength="15"
+                        data-campo="imei" style="width:140px">
+                    <span class="imei-status text-xs w-4 text-center cursor-help"></span>
+                </div>
+            </td>
+            <td class="py-2 px-2">
+                <div class="space-y-1.5">
+                    <div class="flex items-center gap-2">
+                        <label
+                            class="flex items-center gap-1.5 cursor-pointer text-slate-400 text-xs whitespace-nowrap">
+                            <input type="checkbox" class="campo-caja rounded accent-indigo-500" data-campo="caja">
+                            <span>📦 Caja</span>
+                        </label>
+                        <div class="caja-fields gap-1 flex-1">
+                            <input type="text" class="cell-input campo-caja-modelo flex-1" placeholder="Modelo caja"
+                                data-campo="cajaModelo" style="min-width:0">
+                            <select class="cell-input campo-caja-color" data-campo="cajaColor" style="min-width:90px">
+                                <option value="">Color</option>
+                            </select>
+                        </div>
+                    </div>
+                    <input type="text" class="cell-input campo-detalles"
+                        placeholder="Detalles / falla (→ nota de venta)" data-campo="detalles">
+                </div>
+            </td>
+            <td class="py-2 px-2">
+                <button class="btn-eliminar text-slate-600 hover:text-red-400 text-lg leading-none transition"
+                    title="Eliminar fila">✕</button>
+            </td>
+        </tr>
+    </template>
+
+    <script type="module" src="js/ingreso-mercancia.js"></script>
+</body>
+
+</html>

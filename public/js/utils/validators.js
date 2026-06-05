@@ -102,3 +102,51 @@ export function validarCampos(validaciones) {
         errores
     };
 }
+
+/**
+ * Valida un IMEI: longitud exacta de 15 dígitos y unicidad
+ * contra otras filas en la tabla y contra el inventario existente.
+ *
+ * @param {string} imei
+ * @param {HTMLElement} filaActual - El <tr> que se excluye del chequeo de duplicados
+ * @param {HTMLElement} tablaBody  - El <tbody> con todas las filas del lote
+ * @param {Object}  inventarioService - Servicio con método buscarPorImei(imei)
+ * @param {boolean} inventarioCargado - Si el servicio de inventario está inicializado
+ * @returns {{ valido: boolean, duplicado: boolean, origen?: string, mensaje?: string, equipo?: Object }}
+ */
+export function validarIMEI(imei, filaActual, tablaBody, inventarioService, inventarioCargado) {
+    if (!imei || imei.length !== 15) {
+        return { valido: false, duplicado: false };
+    }
+
+    // Duplicado en otras filas del lote activo
+    const filas = tablaBody.querySelectorAll('tr');
+    for (const tr of filas) {
+        if (tr === filaActual) continue;
+        const otroImei = tr.querySelector('.campo-imei')?.value || '';
+        if (otroImei === imei) {
+            return {
+                valido: false,
+                duplicado: true,
+                origen: 'lote',
+                mensaje: '⚠️ IMEI duplicado en este lote'
+            };
+        }
+    }
+
+    // Duplicado en el inventario existente
+    if (inventarioCargado && inventarioService) {
+        const existente = inventarioService.buscarPorImei(imei);
+        if (existente) {
+            return {
+                valido: false,
+                duplicado: true,
+                origen: 'inventario',
+                mensaje: `⚠️ IMEI ya existe en inventario (${existente.estado})`,
+                equipo: existente
+            };
+        }
+    }
+
+    return { valido: true, duplicado: false };
+}

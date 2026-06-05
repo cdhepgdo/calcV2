@@ -19,6 +19,8 @@ class InventarioService {
         this._unsubscribe = null;
         this._inventarioListo = false;
         this._imeisRecienIngresados = new Set(); // Para evitar duplicados por doble submit
+        this._readyPromise = null;
+        this._readyResolve = null;
     }
 
     _getBasePath() {
@@ -27,7 +29,12 @@ class InventarioService {
     }
 
     inicializar() {
-        if (this._unsubscribe) return;
+        if (this._unsubscribe) return this._readyPromise;
+        
+        // Crear promesa que se resolverá cuando el inventario esté listo
+        this._readyPromise = new Promise((resolve) => {
+            this._readyResolve = resolve;
+        });
         
         console.log('🚀 Inicializando InventarioService (Sincronización en background)...');
         const q = query(
@@ -39,12 +46,38 @@ class InventarioService {
             this._cacheInventario = snapshot.docs.map(docSnap =>
                 EquipoInventario.fromJSON({ id: docSnap.id, ...docSnap.data() })
             );
+            
+            const wasReady = this._inventarioListo;
             this._inventarioListo = true;
+            
             console.log(`✅ Inventario sincronizado: ${this._cacheInventario.length} equipos`);
+            
+            // Resolver la promesa solo la primera vez
+            if (!wasReady && this._readyResolve) {
+                this._readyResolve();
+            }
+            
             this._notificarCambio();
         }, (error) => {
             console.error('❌ Error en listener de inventario:', error);
         });
+        
+        return this._readyPromise;
+    }
+    
+    // Método para esperar a que el inventario esté listo
+    async esperarListo() {
+        if (this._inventarioListo) return true;
+        if (!this._readyPromise) {
+            this.inicializar();
+        }
+        await this._readyPromise;
+        return true;
+    }
+    
+    // Método público para saber si está listo
+    estaListo() {
+        return this._inventarioListo;
     }
 
     onCambio(fn) {
@@ -75,6 +108,12 @@ class InventarioService {
 
     async guardarLote(equiposArray, origenLote = "") {
         try {
+            // ⚠️ VALIDACIÓN CRÍTICA: Esperar a que el inventario esté sincronizado
+            if (!this._inventarioListo) {
+                console.warn('⏳ Esperando sincronización del inventario...');
+                await this.esperarListo();
+            }
+            
             // Validación 1: Verificar IMEIs duplicados dentro del mismo lote
             const imeisEnLote = new Set();
             const duplicadosEnLote = [];
@@ -193,6 +232,30 @@ class InventarioService {
             return { exito: true };
         } catch (error) {
             console.error(`❌ Error al actualizar equipo ${equipoId}:`, error);
+            return { exito: false, error: error.message };
+        }
+    }
+
+    async procesarSalidaLote(equipoIds, nuevoEstado, datosExtra = {}) {
+        if (!equipoIds || !equipoIds.length) return { exito: false, error: 'Lista de equipos vacía' };
+        try {
+            const batch = writeBatch(db);
+            const fecha = new Date().toISOString();
+            
+            equipoIds.forEach(equipoId => {
+                const docRef = doc(db, `${this._getBasePath()}/inventario`, equipoId);
+                batch.update(docRef, {
+                    estado: nuevoEstado,
+                    fechaActualizacion: fecha,
+                    ...datosExtra
+                });
+            });
+
+            await batch.commit();
+            console.log(`✅ Salida de ${equipoIds.length} equipos procesada exitosamente en batch.`);
+            return { exito: true };
+        } catch (error) {
+            console.error('❌ Error al procesar salida en lote:', error);
             return { exito: false, error: error.message };
         }
     }

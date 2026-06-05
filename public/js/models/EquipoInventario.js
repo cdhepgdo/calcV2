@@ -19,7 +19,7 @@ export class EquipoInventario {
     }) {
         this.id = id;
         this.tipoItem = tipoItem;
-        this.modelo = modelo;
+        this.modelo = modelo.replace(/^iPhone\s+/i, '').trim();
         this.gb = gb;
         this.color = color;
         this.bateria = parseInt(bateria) || 0;

@@ -1,0 +1,365 @@
+/* ============================================================
+   ingreso-mercancia.css
+   Estilos para la página de Ingreso/Salida de Mercancía
+   ============================================================ */
+
+* {
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+    min-height: 100vh;
+}
+
+/* ── Glass morphism ── */
+.glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-dark {
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* ── Tabla de ingreso ── */
+#tablaBody tr {
+    transition: background 0.15s;
+}
+
+#tablaBody tr:hover {
+    background: rgba(99, 102, 241, 0.08);
+}
+
+#tablaBody tr.fila-nueva {
+    animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Inputs de celda ── */
+.cell-input {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    color: #e2e8f0;
+    padding: 5px 8px;
+    font-size: 13px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.cell-input:focus {
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.12);
+}
+
+.cell-input::placeholder {
+    color: rgba(255, 255, 255, 0.25);
+}
+
+/* ── Estados IMEI ── */
+.imei-ok {
+    border-color: #22c55e !important;
+}
+
+.imei-error {
+    border-color: #ef4444 !important;
+}
+
+.imei-duplicado {
+    border-color: #f59e0b !important;
+    background: rgba(245, 158, 11, 0.15) !important;
+}
+
+/* ── Estado batería ── */
+.bat-warn {
+    border-color: #f97316 !important;
+    color: #f97316 !important;
+}
+
+.bat-low {
+    border-color: #ef4444 !important;
+    color: #ef4444 !important;
+}
+
+/* ── GB chips ── */
+.gb-chip {
+    cursor: pointer;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #94a3b8;
+    transition: all 0.15s;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.gb-chip:hover {
+    background: rgba(99, 102, 241, 0.25);
+    color: #c7d2fe;
+}
+
+.gb-chip.active {
+    background: #4f46e5;
+    border-color: #6366f1;
+    color: #fff;
+}
+
+/* ── Panel de autocompletado ── */
+.autocomplete-panel {
+    position: fixed;
+    display: none;
+    z-index: 99999;
+    background: #1e1b4b;
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    min-width: 160px;
+    max-width: 320px;
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.autocomplete-panel.show {
+    display: block;
+}
+
+.autocomplete-panel ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.autocomplete-panel li {
+    padding: 8px 12px;
+    font-size: 13px;
+    color: #c7d2fe;
+    cursor: pointer;
+    transition: background 0.1s;
+    white-space: nowrap;
+}
+
+.autocomplete-panel li:hover,
+.autocomplete-panel li.selected {
+    background: rgba(99, 102, 241, 0.35);
+    color: #fff;
+}
+
+/* ── Caja fields ── */
+.caja-fields {
+    display: none;
+}
+
+.caja-fields.visible {
+    display: flex;
+}
+
+/* ── Badges y botones ── */
+.sede-badge {
+    background: rgba(99, 102, 241, 0.2);
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    color: #a5b4fc;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    transition: opacity 0.2s, transform 0.1s;
+}
+
+.btn-success:hover {
+    opacity: 0.9;
+}
+
+.btn-success:active {
+    transform: scale(0.98);
+}
+
+.btn-success:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ── Scrollbar personalizado ── */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.4);
+    border-radius: 3px;
+}
+
+/* ── Toast de notificaciones ── */
+#toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    padding: 14px 22px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+}
+
+#toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#toast.success {
+    background: #059669;
+    color: #fff;
+}
+
+#toast.error {
+    background: #dc2626;
+    color: #fff;
+}
+
+/* ── Loading overlay ── */
+#loadingOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+}
+
+#loadingOverlay.visible {
+    display: flex;
+}
+
+.spinner {
+    width: 44px;
+    height: 44px;
+    border: 4px solid rgba(99, 102, 241, 0.3);
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Indicador de conexión ── */
+.connection-dot {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.connection-dot.online {
+    background: #22c55e;
+}
+
+.connection-dot.offline {
+    background: #ef4444;
+    animation: none;
+}
+
+.connection-text.online {
+    color: #22c55e;
+}
+
+.connection-text.offline {
+    color: #ef4444;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* ── Panel de resumen (sticky) ── */
+#panelResumen {
+    position: sticky;
+    top: 80px;
+}
+
+/* ── Contenido principal (oculto hasta auth) ── */
+#appContent {
+    display: none;
+}
+
+/* ── Cards modo salida ── */
+.equipo-sugerencia {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.equipo-sugerencia:hover {
+    background: rgba(99, 102, 241, 0.15);
+    border-color: rgba(99, 102, 241, 0.3);
+    transform: translateX(4px);
+}
+
+.equipo-seleccionado {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    padding: 10px;
+    animation: slideIn 0.2s ease-out;
+}
+
+/* ── Estilos de impresión ── */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #printArea, #printArea * {
+        visibility: visible;
+    }
+    #printArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+    nav, #toast, #loadingOverlay {
+        display: none !important;
+    }
+}

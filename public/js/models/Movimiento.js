@@ -284,15 +284,15 @@ Movimiento.prototype.obtenerDetalles = function () {
     }
 
     if (tipoLower.includes('salida') && tipoLower.includes('equipo')) {
-        return `${this.datos.modelo || ''} ${this.datos.capacidad || ''} ${this.datos.color || ''} | Destino: ${this.datos.destino || 'N/A'} | Retirado por: ${sanitizar(this.datos.persona) || 'N/A'}`;
+        return `${this.datos.modelo || ''} ${this.datos.capacidad || ''} ${this.datos.color || ''} (IMEI: ${sanitizar(this.datos.imei) || 'N/A'}) | Destino: ${this.datos.destino || 'N/A'} | Retirado por: ${sanitizar(this.datos.persona) || 'N/A'}`;
     }
 
     if (tipoLower.includes('ingreso') && tipoLower.includes('equipo')) {
-        return `${this.datos.modelo || ''} ${this.datos.capacidad || ''} ${this.datos.color || ''} | Origen: ${this.datos.origen || 'N/A'}`;
+        return `${this.datos.modelo || ''} ${this.datos.capacidad || ''} ${this.datos.color || ''} (IMEI: ${sanitizar(this.datos.imei) || 'N/A'}) | Origen: ${this.datos.origen || 'N/A'}`;
     }
 
     if (tipoLower.includes('compra')) {
-        return `${this.datos.modelo || ''} ${this.datos.capacidad || ''} ${this.datos.color || ''} | Precio: $${this.datos.precio || 0} | Proveedor: ${sanitizar(this.datos.proveedor) || 'N/A'}`;
+        return `${this.datos.modelo || ''} ${this.datos.capacidad || ''} ${this.datos.color || ''} (IMEI: ${sanitizar(this.datos.imei) || 'N/A'}) | Precio: $${this.datos.precio || 0} | Proveedor: ${sanitizar(this.datos.proveedor) || 'N/A'}`;
     }
 
     if (tipoLower.includes('accesorio')) {

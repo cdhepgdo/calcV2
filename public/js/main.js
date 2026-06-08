@@ -333,7 +333,7 @@ class App {
 
         // Movimientos de Inventario
         this.inicializarEventosMovimientos();
-        
+
         // Buscadores de Inventario Estrictos
         this.inicializarBuscadoresInventario();
 
@@ -1011,8 +1011,8 @@ class App {
 
             // ── VALIDACIÓN DE EQUIPO RECIBIDO (TRADE-IN) ───────────────
             if (document.getElementById('recibirEquipo')?.checked) {
-                const imeiR     = (document.getElementById('equipoImeiR')?.value || '').trim();
-                const imeiVenta = (document.getElementById('equipoImei')?.value  || '').trim();
+                const imeiR = (document.getElementById('equipoImeiR')?.value || '').trim();
+                const imeiVenta = (document.getElementById('equipoImei')?.value || '').trim();
 
                 // Formato mínimo
                 if (imeiR && imeiR.length < 15) {
@@ -1033,7 +1033,7 @@ class App {
                 // Validar contra inventario y ventas existentes
                 if (imeiR) {
                     const conflicto = this._obtenerConflictoImeiRecibido(
-                        imeiR, 
+                        imeiR,
                         this.ventaEnEdicion,
                         this._tradeInImeiOriginal  // Pasar el IMEI original del trade-in
                     );
@@ -1125,7 +1125,7 @@ class App {
                 if (this.ventaEnEdicion) {
                     // EDICIÓN DE VENTA
                     const imeiActual = (document.getElementById('equipoImei')?.value || '').trim();
-                    
+
                     if (this._equipoInventarioIdAnterior) {
                         // Caso 1: La venta original tenía un equipo del inventario
                         // Verificar si el usuario cambió a modo manual (no seleccionó nuevo equipo)
@@ -1133,7 +1133,7 @@ class App {
                             // Usuario fue a modo manual Y cambió el IMEI - liberar el equipo anterior
                             inventarioService.marcarDisponible(this._equipoInventarioIdAnterior)
                                 .catch(err => console.warn('⚠️ No se pudo liberar equipo anterior:', err));
-                        } 
+                        }
                         // Caso 2: Seleccionó un equipo diferente del inventario
                         else if (this._equipoInventarioId !== this._equipoInventarioIdAnterior) {
                             // Revertir el equipo anterior y marcar el nuevo
@@ -1156,8 +1156,8 @@ class App {
 
                 // ── INVENTARIO: Sincronización de Trade-In (O4, O5) ───────
                 // Ahora funciona tanto para nuevas ventas como para ediciones
-                const ventaAnterior = this.ventaEnEdicion 
-                    ? await ventaService.obtenerVentaPorId(this.ventaEnEdicion) 
+                const ventaAnterior = this.ventaEnEdicion
+                    ? await ventaService.obtenerVentaPorId(this.ventaEnEdicion)
                     : null;
                 await this._sincronizarTradeinInventario(datosVenta.equipoRecibido, ventaAnterior);
                 // ───────────────────────────────────────────────────────────
@@ -1234,14 +1234,14 @@ class App {
             // CASO B: Estado "vendido" → verificar si es de esta venta
             if (estado === 'vendido') {
                 // EXCEPCIÓN: Es el equipo de ESTA MISMA venta (doble validación)
-                const esEquipoDeEstaVenta = 
+                const esEquipoDeEstaVenta =
                     (ventaAsociadaId === ventaIdActual) ||           // Validación 1: por ID de venta
                     (imei === this._equipoImeiOriginal);              // Validación 2: por IMEI original
-                
+
                 if (esEquipoDeEstaVenta) {
                     return { esValido: true, tipo: 'ok', mensaje: '', equipoSugerido: null };
                 }
-                
+
                 // Si está vendido en otra venta, BLOQUEAR
                 return {
                     esValido: false,
@@ -1257,10 +1257,10 @@ class App {
 
         // 2. Buscar en ventas del día (por si hay duplicado antes de sincronizar)
         const ventas = storageService.obtenerVentas();
-        const ventaConMismoImei = ventas.find(v => 
-            v.id !== ventaIdActual && 
-            v.fecha === fechaHoy && 
-            v.equipo && 
+        const ventaConMismoImei = ventas.find(v =>
+            v.id !== ventaIdActual &&
+            v.fecha === fechaHoy &&
+            v.equipo &&
             v.equipo.imei === imei &&
             v.tipoVenta === 'completa'
         );
@@ -1374,8 +1374,8 @@ class App {
             // Detectar mediante dos validaciones de refuerzo:
             // A) El IMEI es exactamente el mismo que tenía la venta originalmente
             // B) El origen del equipo contiene "Trade-in" Y el ID de la venta actual
-            const esTradeInDeEstaVenta = 
-                (imei === imeiTradeInOriginal) || 
+            const esTradeInDeEstaVenta =
+                (imei === imeiTradeInOriginal) ||
                 (origen && origen.includes('Trade-in') && ventaIdExcluir && origen.includes(ventaIdExcluir));
 
             if (esTradeInDeEstaVenta) {
@@ -1419,12 +1419,12 @@ class App {
      * @param {object|null} conflicto - Resultado de _obtenerConflictoImeiRecibido
      */
     _mostrarToastConflictoImeiRecibido(conflicto) {
-        const banner      = document.getElementById('imeiTradeInBanner');
-        const iconoEl     = document.getElementById('imeiTradeInBannerIcono');
-        const tituloEl    = document.getElementById('imeiTradeInBannerTitulo');
-        const detalleEl   = document.getElementById('imeiTradeInBannerDetalle');
-        const btnWrap     = document.getElementById('imeiTradeInBannerBtnWrap');
-        const btn         = document.getElementById('imeiTradeInBannerBtn');
+        const banner = document.getElementById('imeiTradeInBanner');
+        const iconoEl = document.getElementById('imeiTradeInBannerIcono');
+        const tituloEl = document.getElementById('imeiTradeInBannerTitulo');
+        const detalleEl = document.getElementById('imeiTradeInBannerDetalle');
+        const btnWrap = document.getElementById('imeiTradeInBannerBtnWrap');
+        const btn = document.getElementById('imeiTradeInBannerBtn');
 
         if (!banner) return;
 
@@ -1435,8 +1435,8 @@ class App {
         }
 
         // Definir apariencia y mensaje según el tipo
-        let icono   = '⚠️';
-        let titulo  = '';
+        let icono = '⚠️';
+        let titulo = '';
         let detalle = '';
         let colorClases = 'border-red-300 bg-red-50';           // rojo por defecto (bloqueado)
         let tituloClases = 'text-red-800';
@@ -1448,37 +1448,37 @@ class App {
         switch (conflicto.tipo) {
             case 'bloqueado-disponible': {
                 const batColor = eq.bateria < 50 ? 'text-red-600' : eq.bateria < 80 ? 'text-amber-600' : 'text-green-700';
-                titulo  = 'Este equipo está disponible en inventario';
+                titulo = 'Este equipo está disponible en inventario';
                 detalle = `📱 iPhone ${eq.modelo} ${eq.gb}GB — ${eq.color} — ` +
-                          `<span class="${batColor}">🔋 ${eq.bateria}%</span> (IMEI: ${eq.imei}). ` +
-                          `No puede recibirse como parte de pago: todavía es stock disponible.`;
+                    `<span class="${batColor}">🔋 ${eq.bateria}%</span> (IMEI: ${eq.imei}). ` +
+                    `No puede recibirse como parte de pago: todavía es stock disponible.`;
                 break;
             }
             case 'bloqueado-defectuoso': {
-                titulo  = 'Este equipo está registrado como defectuoso';
+                titulo = 'Este equipo está registrado como defectuoso';
                 detalle = `📱 iPhone ${eq.modelo} ${eq.gb}GB — ${eq.color} (IMEI: ${eq.imei}). ` +
-                          `Ya está en inventario como defectuoso y no puede usarse como trade-in.`;
+                    `Ya está en inventario como defectuoso y no puede usarse como trade-in.`;
                 break;
             }
             case 'bloqueado-otro-estado': {
-                titulo  = `Este IMEI ya está en inventario (estado: ${eq.estado})`;
+                titulo = `Este IMEI ya está en inventario (estado: ${eq.estado})`;
                 detalle = `📱 iPhone ${eq.modelo} ${eq.gb}GB — ${eq.color} (IMEI: ${eq.imei}).`;
                 break;
             }
             case 'autocompletar-vendido': {
                 // Estado vendido → permitir + ofrecer autocompletar
-                icono  = 'ℹ️';
+                icono = 'ℹ️';
                 titulo = 'Este IMEI corresponde a un equipo vendido';
                 detalle = `📱 iPhone ${eq.modelo} ${eq.gb}GB — ${eq.color} (IMEI: ${eq.imei}). ` +
-                          `Puedes autocompletar los datos del equipo.`;
-                colorClases   = 'border-blue-300 bg-blue-50';
-                tituloClases  = 'text-blue-800';
+                    `Puedes autocompletar los datos del equipo.`;
+                colorClases = 'border-blue-300 bg-blue-50';
+                tituloClases = 'text-blue-800';
                 detalleClases = 'text-blue-700';
                 mostrarBtn = true;
                 break;
             }
             case 'venta-recibido': {
-                titulo  = 'Este IMEI ya fue usado como trade-in en otra venta';
+                titulo = 'Este IMEI ya fue usado como trade-in en otra venta';
                 detalle = 'No se puede registrar el mismo equipo recibido más de una vez.';
                 break;
             }
@@ -1486,9 +1486,9 @@ class App {
 
         // Aplicar estilos
         banner.className = `mt-3 rounded-xl px-4 py-3 border ${colorClases}`;
-        if (iconoEl)   iconoEl.textContent = icono;
-        if (tituloEl)  { tituloEl.textContent = titulo;          tituloEl.className  = `font-semibold text-sm ${tituloClases}`; }
-        if (detalleEl) { detalleEl.innerHTML  = detalle;         detalleEl.className = `text-xs mt-0.5 ${detalleClases}`; }
+        if (iconoEl) iconoEl.textContent = icono;
+        if (tituloEl) { tituloEl.textContent = titulo; tituloEl.className = `font-semibold text-sm ${tituloClases}`; }
+        if (detalleEl) { detalleEl.innerHTML = detalle; detalleEl.className = `text-xs mt-0.5 ${detalleClases}`; }
 
         // Botón de autocompletar
         if (btnWrap) btnWrap.classList.toggle('hidden', !mostrarBtn);
@@ -1513,7 +1513,7 @@ class App {
         const imeiInput = document.getElementById('equipoImeiR');
         if (!imeiInput) return;
         const conflicto = this._obtenerConflictoImeiRecibido(
-            imeiInput.value, 
+            imeiInput.value,
             this.ventaEnEdicion,
             this._tradeInImeiOriginal  // Pasar el IMEI original del trade-in
         );
@@ -1538,7 +1538,7 @@ class App {
             // Si no encontró match, intentar buscar por texto
             if (selectModelo.value !== equipo.modelo) {
                 const opciones = Array.from(selectModelo.options);
-                const match = opciones.find(opt => 
+                const match = opciones.find(opt =>
                     opt.value.toLowerCase() === (equipo.modelo || '').toLowerCase() ||
                     opt.text.toLowerCase() === (equipo.modelo || '').toLowerCase()
                 );
@@ -2792,20 +2792,20 @@ class App {
 
         // ── INVENTARIO: recordar el IMEI original para detectar cambios
         this._equipoImeiOriginal = venta.equipo?.imei || null;
-        
+
         // ── TRADE-IN: recordar el IMEI original del trade-in (si existía)
         this._tradeInImeiOriginal = venta.equipoRecibido?.imei || null;
-        
+
         // ── INVENTARIO: recordar qué equipo del inventario está asociado a
         // esta venta ANTES de la edición, para poder revertirlo a "disponible"
         // si el usuario elige otro en el buscador.
         // Se hace ANTES de tocar el formulario para no perder la referencia.
         this._equipoInventarioIdAnterior = null;
         this._equipoInventarioId = null;
-        
+
         if (venta.tipoVenta === 'completa' && venta.equipo && venta.equipo.imei) {
             const equipoPrevio = inventarioService.buscarPorImei(venta.equipo.imei);
-            
+
             // Si el equipo existe en el inventario, guardar su ID como "anterior"
             // Esto nos permite:
             // 1. Revertirlo a "disponible" si el usuario cambia a modo manual
@@ -3239,7 +3239,7 @@ class App {
                 }
             });
         }
-        
+
         // Limpiar banners al cambiar de form
         ['imeiSalidaBanner', 'imeiIngresoBanner', 'imeiCompraBanner'].forEach(id => {
             const banner = document.getElementById(id);
@@ -3319,7 +3319,7 @@ class App {
                 // Autocompletar form
                 const selectModelo = document.getElementById('salidaEquipoModelo');
                 if (selectModelo) selectModelo.value = equipo.modelo;
-                
+
                 const selectCapacidad = document.getElementById('salidaEquipoCapacidad');
                 if (selectCapacidad) selectCapacidad.value = equipo.gb;
 
@@ -3414,7 +3414,7 @@ class App {
         // ═══════════════════════════════════════════════
         // SALIDA DE ACCESORIOS - CHECKBOXES
         // ═══════════════════════════════════════════════
-        
+
         // Forro Salida
         const salidaForroCheckbox = document.getElementById('salidaForro');
         if (salidaForroCheckbox) {
@@ -3503,7 +3503,7 @@ class App {
         // ═══════════════════════════════════════════════
         // INGRESO DE ACCESORIOS - CHECKBOXES
         // ═══════════════════════════════════════════════
-        
+
         // Forro Ingreso
         const ingresoForroCheckbox = document.getElementById('ingresoForro');
         if (ingresoForroCheckbox) {
@@ -3666,7 +3666,7 @@ class App {
             // ═══════════════════════════════════════════════
             // BOTONES "+" - AGREGAR FILA (verde)
             // ═══════════════════════════════════════════════
-            
+
             // Botones de Forro (salida/ingreso)
             if (e.target.classList.contains('btn-add-salida-forro') || e.target.classList.contains('btn-add-ingreso-forro')) {
                 const prefijo = e.target.classList.contains('btn-add-salida-forro') ? 'salida' : 'ingreso';
@@ -3741,7 +3741,7 @@ class App {
             // ═══════════════════════════════════════════════
             // BOTONES "-" - ELIMINAR FILA (rojo)
             // ═══════════════════════════════════════════════
-            
+
             // Eliminar Forro
             if (e.target.classList.contains('btn-remove-salida-forro') || e.target.classList.contains('btn-remove-ingreso-forro')) {
                 const fila = e.target.closest('.forro-item');
@@ -3792,8 +3792,36 @@ class App {
             // CASO ESPECIAL: ACCESORIOS MÚLTIPLES
             // ══════════════════════════════════════════
             if (datos.esMultipleAccesorios) {
-                // Guardar cada accesorio como movimiento separado
-                for (const acc of datos.accesorios) {
+                // ── Defensa #1: detectar accesorios mal formados ANTES de guardar ──
+                // Política "todo o nada": si hay un accesorio corrupto, NO se
+                // guarda NINGUNO. Esto evita registros a medias.
+                const esValido = acc => acc && typeof acc === 'object' && acc.tipo;
+                const accesoriosValidos = (datos.accesorios || []).filter(esValido);
+                const accesoriosInvalidos = (datos.accesorios || []).filter(a => !esValido(a));
+
+                if (accesoriosInvalidos.length > 0) {
+                    console.error('❌ Accesorios inválidos detectados (no se guardó nada):', accesoriosInvalidos);
+                    alert(
+                        `❌ Error interno: hay ${accesoriosInvalidos.length} accesorio(s) con datos corruptos.\n\n` +
+                        `No se guardó NINGÚN movimiento. Revisa el formulario y vuelve a intentar.`
+                    );
+                    return;
+                }
+
+                if (accesoriosValidos.length === 0) {
+                    alert('❌ No hay accesorios válidos para guardar. Revisa los datos del formulario.');
+                    return;
+                }
+
+                // ── Guardar cada accesorio como movimiento separado ──
+                // Si CUALQUIER iteración falla, se ABORTA el bucle (break) y
+                // NO se guardan los accesorios restantes. Ya los que se hayan
+                // guardado en iteraciones previas quedan, pero se reporta
+                // explícitamente al usuario cuántos se guardaron.
+                let guardadosOk = 0;
+                let falloEn = null;
+
+                for (const acc of accesoriosValidos) {
                     const datosMovimiento = {
                         tipo: acc.tipo,
                         modelos: acc.modelos || [],
@@ -3802,20 +3830,37 @@ class App {
                         destino: datos.destino,
                         proveedor: datos.proveedor
                     };
-                    
-                    const resultado = await movimientoService.crearMovimiento({
-                        tipo: datos.tipo,
-                        datos: datosMovimiento
-                    });
-                    
-                    if (!resultado.exito) {
-                        const errores = resultado.errores ? resultado.errores.join('\n') : 'Error desconocido';
-                        alert(`❌ Error al guardar ${acc.tipo}:\n${errores}`);
-                        return;
+
+                    try {
+                        const resultado = await movimientoService.crearMovimiento({
+                            tipo: datos.tipo,
+                            datos: datosMovimiento
+                        });
+
+                        if (!resultado.exito) {
+                            const errores = resultado.errores ? resultado.errores.join('\n') : 'Error desconocido';
+                            falloEn = { acc, errores };
+                            break; // ← ABORTA el bucle, no sigue con los siguientes
+                        }
+
+                        guardadosOk++;
+                    } catch (errAcc) {
+                        console.error(`❌ Error guardando accesorio ${acc.tipo}:`, errAcc);
+                        falloEn = { acc, errores: errAcc.message || 'Error inesperado' };
+                        break; // ← ABORTA el bucle
                     }
                 }
-                
-                alert(`✅ ${datos.accesorios.length} movimiento(s) de accesorios registrado(s) correctamente`);
+
+                if (falloEn) {
+                    alert(
+                        `❌ Error al guardar ${falloEn.acc.tipo}:\n${falloEn.errores}\n\n` +
+                        `Se guardaron ${guardadosOk} de ${accesoriosValidos.length} accesorios.\n` +
+                        `⚠️ Los movimientos restantes NO se guardaron para evitar inconsistencia.`
+                    );
+                    return;
+                }
+
+                alert(`✅ ${guardadosOk} movimiento(s) de accesorios registrado(s) correctamente`);
                 this.cancelarMovimiento();
                 await this.actualizarResumenMovimientos();
                 await this.actualizarResumenVentas();
@@ -3907,7 +3952,7 @@ class App {
                 const resultadoSalida = await inventarioService.procesarSalidaLote(
                     [equipo.id],
                     'transferido',
-                    { 
+                    {
                         destinoSalida: datos.datos.destino || 'No especificado',
                         personaRetiro: datos.datos.persona || 'No especificado',
                         fechaSalida: new Date().toISOString()
@@ -4017,25 +4062,42 @@ class App {
             case 'formIngresoAccesorio':
                 const esSalida = this.tipoMovimientoActual === 'formSalidaAccesorio';
                 const prefijo = esSalida ? 'salida' : 'ingreso';
-                
+
                 tipo = esSalida ? 'Salida Accesorio' : 'Ingreso Accesorio';
-                
+
                 // ✨ VALIDACIÓN USANDO AccesorioValidator
                 const validacionAccesorios = AccesorioValidator.validarYRecopilar(prefijo);
-                
+
                 if (!validacionAccesorios.valido) {
                     const mensajeError = validacionAccesorios.errores.join('\n\n');
                     alert(`⚠️ Por favor corrija los siguientes errores:\n\n${mensajeError}`);
                     return null;
                 }
-                
+
+                // ── Defensa #2: integridad de accesorios (todo o nada) ──
+                // Si el validator retornó accesorios sin .tipo o no-objetos,
+                // NO procedemos. Cortamos acá para que no lleguen al loop
+                // de guardado (que también tiene su propia defensa).
+                const accIntegro = acc => acc && typeof acc === 'object' && acc.tipo;
+                const accesoriosIntegros = (validacionAccesorios.accesorios || []).filter(accIntegro);
+                const accesoriosCorruptos = (validacionAccesorios.accesorios || []).filter(a => !accIntegro(a));
+
+                if (accesoriosCorruptos.length > 0) {
+                    console.error('❌ Accesorios corruptos en validarYRecopilar:', accesoriosCorruptos);
+                    alert(
+                        `❌ Error interno: hay ${accesoriosCorruptos.length} accesorio(s) con datos corruptos.\n\n` +
+                        `No se guardó NINGÚN movimiento. Contacta al administrador.`
+                    );
+                    return null;
+                }
+
                 // Validar campos comunes (destino/proveedor)
                 const validacionCampos = AccesorioValidator.validarCamposComunes(prefijo, esSalida);
                 if (!validacionCampos.valido) {
                     alert(validacionCampos.errores.join('\n'));
                     return null;
                 }
-                
+
                 // Retornar estructura especial para accesorios
                 return {
                     tipo: tipo,
@@ -4101,7 +4163,7 @@ class App {
         buscadores.forEach(b => {
             const input = document.getElementById(b.input);
             const resultados = document.getElementById(b.resultados);
-            
+
             // Botón de quitar
             const btnQuitar = document.getElementById(`btnQuitarEquipo${b.tipo}`);
             if (btnQuitar) {
@@ -4120,7 +4182,7 @@ class App {
 
                 // Obtener todos los disponibles y filtrar
                 const equipos = inventarioService.obtenerDisponibles();
-                const filtrados = equipos.filter(eq => 
+                const filtrados = equipos.filter(eq =>
                     (eq.imei && eq.imei.toLowerCase().includes(query)) ||
                     (eq.modelo && eq.modelo.toLowerCase().includes(query))
                 );
@@ -4134,7 +4196,7 @@ class App {
                     resultados.classList.add('hidden');
                 }
             });
-            
+
             // Mostrar de nuevo si hace focus y tiene texto
             input.addEventListener('focus', () => {
                 if (input.value.trim().length >= 2) {
@@ -4184,7 +4246,7 @@ class App {
     _seleccionarEquipoDesdeBuscador(tipo, equipo) {
         // 1. Ocultar el contenedor del buscador
         document.getElementById(`buscador${tipo === 'Venta' ? 'Venta' : tipo}Container`).classList.add('hidden');
-        
+
         // 2. Mostrar la tarjeta
         document.getElementById(`tarjetaEquipo${tipo}`).classList.remove('hidden');
         document.getElementById(`btnQuitarEquipo${tipo}`).classList.remove('hidden');
@@ -4203,10 +4265,10 @@ class App {
             document.getElementById('almacenamiento').value = equipo.gb;
             document.getElementById('bateria').value = equipo.bateria;
             document.getElementById('equipoImei').value = equipo.imei;
-            
+
             // Disparar eventos change si es necesario (ej: accesorios o validación)
             document.getElementById('modelo').dispatchEvent(new Event('change'));
-            
+
             // Si hay un banner de IMEI existente para la venta normal, lo ocultamos
             if (this._ocultarBannerImei) {
                 this._ocultarBannerImei();
@@ -4218,7 +4280,7 @@ class App {
             document.getElementById('salidaEquipoColor').value = equipo.color;
             document.getElementById('salidaEquipoBateria').value = equipo.bateria;
             document.getElementById('salidaEquipoImei').value = equipo.imei;
-            
+
         } else if (tipo === 'Garantia') {
             document.getElementById('nuevoModelo').value = equipo.modelo;
             document.getElementById('nuevoCapacidad').value = equipo.gb;
@@ -4234,7 +4296,7 @@ class App {
         if (container) container.classList.remove('hidden');
         const inputBuscador = document.getElementById(`inputBuscador${tipo}`);
         if (inputBuscador) inputBuscador.value = '';
-        
+
         // 2. Ocultar tarjeta
         const tarjeta = document.getElementById(`tarjetaEquipo${tipo}`);
         if (tarjeta) tarjeta.classList.add('hidden');

@@ -1,6 +1,6 @@
 # 📊 Análisis: Optimización de Movimientos de Accesorios
 
-## 🎯 Propuesta del Usuario
+## 🎯 Propuesta del Usuario 
 
 Replicar la **interfaz de checkboxes de accesorios** del formulario de ventas en la sección de **Movimientos de Inventario** (Salida/Ingreso de Accesorios).
 

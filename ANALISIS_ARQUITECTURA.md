@@ -4,7 +4,7 @@
 
 ### ✅ **RESPUESTA: SÍ, TIENE SOPORTE OFFLINE COMPLETO**
 
----
+--- 
 
 ## 🔍 Análisis Técnico del Soporte Offline
 

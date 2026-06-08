@@ -60,6 +60,7 @@ class AccesorioValidator {
         const accesoriosSimples = [
             { id: 'Cargador', nombre: 'Cargador' },
             { id: 'ProtectorCamara', nombre: 'Protector de Cámara' },
+            { id: 'Protector', nombre: 'Protector de Cámara' },
             { id: 'Cubo', nombre: 'Cubo' },
             { id: 'CableLightning', nombre: 'Cable Lightning' },
             { id: 'CableCC', nombre: 'Cable C+C' }

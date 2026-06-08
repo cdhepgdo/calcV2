@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/styles.css">
 </head>
- 
+
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-4">
 
     <!-- Menú de Navegación -->
@@ -20,7 +20,9 @@
             <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Principal</a>
             <a href="registro.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">📊 Registro</a>
             <a href="inv-precio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Inv</a>
-            <a href="ingreso-mercancia.html" class="px-3 py-2 rounded hover:bg-blue-900 transition border border-indigo-400 bg-indigo-800">📦 Ingreso</a>
+            <a href="ingreso-mercancia.html"
+                class="px-3 py-2 rounded hover:bg-blue-900 transition border border-indigo-400 bg-indigo-800">📦
+                Ingreso</a>
             <a href="admin.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Admin</a>
             <button id="btnLogout"
                 class="px-3 py-2 rounded bg-red-600 hover:bg-red-700 font-bold transition ml-2">Cerrar Sesión</button>
@@ -33,7 +35,8 @@
             <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Principal</a>
             <a href="registro.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">📊 Registro</a>
             <a href="inv-precio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Inv</a>
-            <a href="ingreso-mercancia.html" class="px-4 py-2 hover:bg-blue-900 rounded border-y border-indigo-500 bg-indigo-800">📦 Ingreso</a>
+            <a href="ingreso-mercancia.html"
+                class="px-4 py-2 hover:bg-blue-900 rounded border-y border-indigo-500 bg-indigo-800">📦 Ingreso</a>
             <a href="admin.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Admin</a>
             <button id="btnLogoutMobile"
                 class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white font-bold transition rounded mt-2">Cerrar
@@ -124,13 +127,13 @@
                         <h2 class="text-lg font-semibold text-indigo-800 flex items-center gap-2">
                             📦 Buscar equipo en el inventario de mi sede
                         </h2>
-                        <span id="invStockBadge" class="text-xs font-bold bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full"></span>
+                        <span id="invStockBadge"
+                            class="text-xs font-bold bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full"></span>
                     </div>
 
                     <div class="relative">
                         <input type="text" id="invBuscadorInput"
-                            placeholder="Escribe modelo, color o IMEI para buscar..."
-                            autocomplete="off"
+                            placeholder="Escribe modelo, color o IMEI para buscar..." autocomplete="off"
                             class="w-full p-3 border-2 border-indigo-200 rounded-lg focus:border-indigo-500 focus:outline-none bg-white text-gray-800">
                         <!-- Dropdown resultados -->
                         <ul id="invDropdown"
@@ -139,7 +142,8 @@
                     </div>
 
                     <!-- Equipo seleccionado -->
-                    <div id="invEquipoSeleccionado" class="hidden mt-3 p-3 bg-indigo-100 border border-indigo-300 rounded-lg flex items-center justify-between gap-3 flex-wrap">
+                    <div id="invEquipoSeleccionado"
+                        class="hidden mt-3 p-3 bg-indigo-100 border border-indigo-300 rounded-lg flex items-center justify-between gap-3 flex-wrap">
                         <div>
                             <p class="text-sm font-bold text-indigo-800" id="invEquipoLabel">—</p>
                             <p class="text-xs text-indigo-600" id="invEquipoImeiLabel">IMEI: —</p>
@@ -151,14 +155,15 @@
                     </div>
 
                     <p class="text-xs text-indigo-500 mt-2">
-                        Al seleccionar un equipo, los campos se rellenan automáticamente y se bloquean para evitar errores.
-                        Si el equipo no está en inventario, puedes <button type="button" id="invModoManual" class="underline font-semibold hover:text-indigo-700">ingresar manualmente</button>.
+                        <strong>Nota:</strong> Solo se pueden vender equipos que estén registrados en el inventario. Si
+                        el equipo no aparece, debe ingresarlo primero en el módulo de Ingreso de Mercancía.
                     </p>
                 </div>
 
                 <!-- ══ BANNER ADVERTENCIA IMEI EN INVENTARIO ══ -->
                 <!-- Se muestra/oculta dinámicamente desde main.js cuando el usuario escribe un IMEI disponible -->
-                <div id="imeiInventarioBanner" class="hidden border border-amber-300 bg-amber-50 rounded-xl px-5 py-4 mb-2">
+                <div id="imeiInventarioBanner"
+                    class="hidden border border-amber-300 bg-amber-50 rounded-xl px-5 py-4 mb-2">
                     <div class="flex items-start gap-3">
                         <span class="text-amber-500 text-lg mt-0.5 shrink-0">⚠️</span>
                         <div class="flex-1 min-w-0">
@@ -176,36 +181,23 @@
                     </div>
                 </div>
 
-                <!-- Información del iPhone -->
+                <!-- Detalles de Venta (Garantía y campos ocultos) -->
                 <div id="infoIphone" class="border-b pb-6 bg-blue-50 rounded-xl p-6">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4">📱 Información del iPhone</h2>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Modelo</label>
-                            <select id="modelo" class="w-full p-3 border rounded-lg"></select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
-                            <select id="color" class="w-full p-3 border rounded-lg"></select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Almacenamiento</label>
-                            <select id="almacenamiento" class="w-full p-3 border rounded-lg"></select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">% Batería</label>
-                            <input type="number" id="bateria" min="1" max="100" class="w-full p-3 border rounded-lg"
-                                placeholder="85">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">IMEI</label>
-                            <input type="text" id="equipoImei" class="w-full p-3 border rounded-lg"
-                                placeholder="IMEI del equipo">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Garantía</label>
-                            <select id="equipoGarantia" class="w-full p-3 border rounded-lg"></select>
-                        </div>
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">🛡️ Garantía del Equipo a Vender</h2>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tiempo de Garantía</label>
+                        <select id="equipoGarantia"
+                            class="w-full md:w-1/2 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></select>
+                    </div>
+
+                    <!-- Campos Ocultos (se llenan automáticamente al seleccionar del inventario) -->
+                    <div id="camposManualesVenta" class="hidden">
+                        <select id="modelo"></select>
+                        <select id="color"></select>
+                        <select id="almacenamiento"></select>
+                        <input type="number" id="bateria">
+                        <input type="text" id="equipoImei">
                     </div>
                 </div>
 
@@ -639,13 +631,55 @@
 
                     <!-- Equipo Nuevo (Entregado) -->
                     <div class="bg-green-100 p-4 rounded-lg border border-green-300">
-                        <h4 class="font-semibold text-green-800 mb-3">📱✅ Equipo Nuevo (Entregado)</h4>
-                        <div class="grid md:grid-cols-3 gap-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h4 class="font-semibold text-green-800">📱✅ Equipo Nuevo (Entregado)</h4>
+                            <button type="button" id="btnQuitarEquipoGarantia"
+                                class="hidden text-xs text-red-600 hover:text-red-800 font-semibold px-2 py-1 rounded bg-red-100 border border-red-300">❌
+                                Quitar Equipo</button>
+                        </div>
+
+                        <!-- Buscador de Inventario -->
+                        <div id="buscadorGarantiaContainer" class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Buscar en Inventario (IMEI o
+                                Modelo)</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">🔍</span>
+                                <input type="text" id="inputBuscadorGarantia"
+                                    class="w-full p-2 pl-10 border border-green-400 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 outline-none bg-white"
+                                    placeholder="Escanea o escribe IMEI o modelo...">
+                            </div>
+                            <div id="resultadosBuscadorGarantia"
+                                class="hidden absolute z-50 w-full max-w-md mt-1 bg-white border rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                            </div>
+                        </div>
+
+                        <!-- Tarjeta de Equipo Seleccionado -->
+                        <div id="tarjetaEquipoGarantia"
+                            class="hidden bg-white p-3 rounded-xl border-2 border-green-500 shadow-sm relative mb-2">
+                            <div
+                                class="absolute top-0 right-0 bg-green-500 text-white px-2 py-1 rounded-bl-xl rounded-tr-lg text-[10px] font-bold">
+                                SELECCIONADO</div>
+                            <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2">
+                                <span id="tarjetaGarantiaModelo">iPhone</span>
+                            </h3>
+                            <p class="text-xs text-gray-600 mt-1 flex gap-1 flex-wrap">
+                                <span id="tarjetaGarantiaCapacidad"
+                                    class="bg-gray-100 px-1.5 py-0.5 rounded text-[10px] font-semibold border">256GB</span>
+                                <span id="tarjetaGarantiaColor"
+                                    class="bg-gray-100 px-1.5 py-0.5 rounded text-[10px] font-semibold border">Color</span>
+                                <span id="tarjetaGarantiaBateria"
+                                    class="bg-gray-100 px-1.5 py-0.5 rounded text-[10px] font-semibold border">🔋
+                                    100%</span>
+                            </p>
+                            <p class="text-[10px] text-gray-500 mt-2 font-mono bg-gray-50 p-1 rounded border"
+                                id="tarjetaGarantiaImei">IMEI: 123456789012345</p>
+                        </div>
+
+                        <!-- Campos Ocultos (se mantienen para no romper la lógica existente) -->
+                        <div id="camposManualesGarantia" class="hidden grid md:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
-                                <select id="nuevoModelo" class="w-full p-2 border rounded-lg">
-                                    <option value="">Seleccionar</option>
-                                </select>
+                                <select id="nuevoModelo" class="w-full p-2 border rounded-lg"></select>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Capacidad</label>
@@ -660,9 +694,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
-                                <select id="nuevoColor" class="w-full p-2 border rounded-lg">
-                                    <option value="">Seleccionar</option>
-                                </select>
+                                <select id="nuevoColor" class="w-full p-2 border rounded-lg"></select>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">% Batería</label>
@@ -916,37 +948,84 @@
 
                 <!-- Salida de Equipo -->
                 <div id="formSalidaEquipo" class="movimiento-form hidden bg-orange-50 p-4 rounded-lg">
-                    <h3 class="font-semibold text-orange-800 mb-3">📱➡️ Salida de Equipo</h3>
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-semibold text-orange-800">📱➡️ Salida de Equipo</h3>
+                        <button type="button" id="btnQuitarEquipoSalida"
+                            class="hidden text-xs text-red-600 hover:text-red-800 font-semibold px-2 py-1 rounded bg-red-100 border border-red-300 transition-colors">❌
+                            Quitar Equipo</button>
+                    </div>
+
+                    <!-- Buscador de Inventario -->
+                    <div id="buscadorSalidaContainer" class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Buscar en Inventario (IMEI o
+                            Modelo)</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">🔍</span>
+                            <input type="text" id="inputBuscadorSalida"
+                                class="w-full p-2 pl-10 border rounded-lg shadow-sm focus:ring-2 focus:ring-orange-500 outline-none"
+                                placeholder="Escanea o escribe IMEI o modelo...">
+                        </div>
+                        <div id="resultadosBuscadorSalida"
+                            class="hidden absolute z-50 w-full max-w-md mt-1 bg-white border rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta de Equipo Seleccionado -->
+                    <div id="tarjetaEquipoSalida"
+                        class="hidden bg-white p-3 rounded-xl border-2 border-orange-500 shadow-sm relative mb-4">
+                        <div
+                            class="absolute top-0 right-0 bg-orange-500 text-white px-2 py-1 rounded-bl-xl rounded-tr-lg text-[10px] font-bold">
+                            SELECCIONADO</div>
+                        <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2">
+                            <span id="tarjetaSalidaModelo">iPhone</span>
+                        </h3>
+                        <p class="text-xs text-gray-600 mt-1 flex gap-1 flex-wrap">
+                            <span id="tarjetaSalidaCapacidad"
+                                class="bg-gray-100 px-1.5 py-0.5 rounded text-[10px] font-semibold border">256GB</span>
+                            <span id="tarjetaSalidaColor"
+                                class="bg-gray-100 px-1.5 py-0.5 rounded text-[10px] font-semibold border">Color</span>
+                            <span id="tarjetaSalidaBateria"
+                                class="bg-gray-100 px-1.5 py-0.5 rounded text-[10px] font-semibold border">🔋
+                                100%</span>
+                        </p>
+                        <p class="text-[10px] text-gray-500 mt-2 font-mono bg-gray-50 p-1 rounded border"
+                            id="tarjetaSalidaImei">IMEI: 123456789012345</p>
+                    </div>
+
                     <div class="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
-                            <select id="salidaEquipoModelo" class="w-full p-2 border rounded-lg"></select>
+                        <!-- Campos Ocultos (se mantienen para no romper la lógica existente) -->
+                        <div id="camposManualesSalida" class="hidden md:col-span-2 grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
+                                <select id="salidaEquipoModelo" class="w-full p-2 border rounded-lg"></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Capacidad</label>
+                                <select id="salidaEquipoCapacidad" class="w-full p-2 border rounded-lg">
+                                    <option value="">Seleccionar</option>
+                                    <option value="64GB">64GB</option>
+                                    <option value="128GB">128GB</option>
+                                    <option value="256GB">256GB</option>
+                                    <option value="512GB">512GB</option>
+                                    <option value="1TB">1TB</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                                <select id="salidaEquipoColor" class="w-full p-2 border rounded-lg"></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">% Batería</label>
+                                <input type="number" id="salidaEquipoBateria" min="1" max="100"
+                                    class="w-full p-2 border rounded-lg" placeholder="85">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
+                                <input type="text" id="salidaEquipoImei" class="w-full p-2 border rounded-lg"
+                                    placeholder="Número IMEI">
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Capacidad</label>
-                            <select id="salidaEquipoCapacidad" class="w-full p-2 border rounded-lg">
-                                <option value="">Seleccionar</option>
-                                <option value="64GB">64GB</option>
-                                <option value="128GB">128GB</option>
-                                <option value="256GB">256GB</option>
-                                <option value="512GB">512GB</option>
-                                <option value="1TB">1TB</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
-                            <select id="salidaEquipoColor" class="w-full p-2 border rounded-lg"></select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">% Batería</label>
-                            <input type="number" id="salidaEquipoBateria" min="1" max="100"
-                                class="w-full p-2 border rounded-lg" placeholder="85">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
-                            <input type="text" id="salidaEquipoImei" class="w-full p-2 border rounded-lg"
-                                placeholder="Número IMEI">
-                        </div>
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Destino</label>
                             <select id="salidaEquipoDestino" class="w-full p-2 border rounded-lg">
@@ -1002,6 +1081,16 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
                             <input type="text" id="ingresoEquipoImei" class="w-full p-2 border rounded-lg"
                                 placeholder="Número IMEI">
+                            <!-- Banner de validación IMEI Ingreso -->
+                            <div id="imeiIngresoBanner" class="hidden mt-2 rounded-lg px-3 py-2 border">
+                                <div class="flex items-start gap-2">
+                                    <span id="imeiIngresoBannerIcono" class="text-sm mt-0.5 shrink-0">⚠️</span>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-semibold text-xs" id="imeiIngresoBannerTitulo"></p>
+                                        <p class="text-[10px] mt-0.5 leading-tight" id="imeiIngresoBannerDetalle"></p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">% Batería</label>
@@ -1065,6 +1154,16 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
                             <input type="text" id="compraEquipoImei" class="w-full p-2 border rounded-lg"
                                 placeholder="Número IMEI">
+                            <!-- Banner de validación IMEI Compra -->
+                            <div id="imeiCompraBanner" class="hidden mt-2 rounded-lg px-3 py-2 border">
+                                <div class="flex items-start gap-2">
+                                    <span id="imeiCompraBannerIcono" class="text-sm mt-0.5 shrink-0">⚠️</span>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-semibold text-xs" id="imeiCompraBannerTitulo"></p>
+                                        <p class="text-[10px] mt-0.5 leading-tight" id="imeiCompraBannerDetalle"></p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Precio de Compra ($)</label>
@@ -1098,65 +1197,297 @@
                 <!-- Salida de Accesorio -->
                 <div id="formSalidaAccesorio" class="movimiento-form hidden bg-yellow-50 p-4 rounded-lg">
                     <h3 class="font-semibold text-yellow-800 mb-3">🛡️➡️ Salida de Accesorio</h3>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Accesorio</label>
-                            <select id="salidaAccesorioTipo" class="w-full p-2 border rounded-lg">
-                                <option value="">Seleccionar</option>
-                                <option value="Forro">Forro</option>
-                                <option value="Vidrio Templado">Vidrio Templado</option>
-                                <option value="Cargador">Cargador</option>
-                                <option value="Cable">Cable</option>
-                                <option value="Cubo">Cubo</option>
-                                <option value="Caja">Caja</option>
-                                <option value="Protector de Cámara">Protector de Cámara</option>
-                                <option value="Otro">Otro</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Destino</label>
-                            <select id="salidaAccesorioDestino" class="w-full p-2 border rounded-lg">
-                                <option value="">Seleccionar</option>
-                                <option value="Aviadores">Aviadores</option>
-                                <option value="Estación Central">Estación Central</option>
-                                <option value="Principal de Valencia">Principal de Valencia</option>
-                                <option value="Otro">Otro</option>
-                            </select>
-                        </div>
-                        <div id="salidaAccesorioDestinoPersonalizadoDiv" class="hidden md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Destino Personalizado</label>
-                            <input type="text" id="salidaAccesorioDestinoPersonalizado"
-                                class="w-full p-2 border rounded-lg" placeholder="Especificar destino">
+                    
+                    <!-- Destino -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Destino</label>
+                        <select id="salidaAccesorioDestino" class="w-full p-2 border rounded-lg">
+                            <option value="">Seleccionar</option>
+                            <option value="Aviadores">Aviadores</option>
+                            <option value="Estación Central">Estación Central</option>
+                            <option value="Principal de Valencia">Principal de Valencia</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+
+                    <!-- Accesorios (Checkboxes) -->
+                    <div class="border-t pt-4">
+                        <h4 class="font-semibold text-gray-700 mb-3">Seleccione los accesorios:</h4>
+                        <div class="grid md:grid-cols-3 gap-3">
+                            
+                            <!-- Forro -->
+                            <div class="bg-white p-3 rounded-lg border">
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="salidaForro" class="mr-2">
+                                    <span class="font-medium">Forro</span>
+                                </label>
+                                <div id="salidaForroContenedor" class="hidden flex-col gap-2">
+                                    <div id="salidaForroLista" class="flex flex-col gap-2">
+                                        <div class="forro-item grid grid-cols-[1fr,auto,auto] gap-2 items-center">
+                                            <select class="p-2 border rounded-lg accModelo text-sm"></select>
+                                            <input type="number" min="1" value="1" class="p-2 border rounded-lg w-16 forro-cant text-sm" placeholder="Cant.">
+                                            <button type="button" class="btn-add-salida-forro bg-green-500 text-white w-8 h-8 rounded font-bold hover:bg-green-600 transition">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Vidrio -->
+                            <div class="bg-white p-3 rounded-lg border">
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="salidaVidrio" class="mr-2">
+                                    <span class="font-medium">Vidrio</span>
+                                </label>
+                                <div id="salidaVidrioContenedor" class="hidden flex-col gap-2">
+                                    <div id="salidaVidrioLista" class="flex flex-col gap-2">
+                                        <div class="vidrio-item grid grid-cols-[1fr,auto,auto] gap-2 items-center">
+                                            <select class="p-2 border rounded-lg accModelo text-sm"></select>
+                                            <input type="number" min="1" value="1" class="p-2 border rounded-lg w-16 vidrio-cant text-sm" placeholder="Cant.">
+                                            <button type="button" class="btn-add-salida-vidrio bg-green-500 text-white w-8 h-8 rounded font-bold hover:bg-green-600 transition">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Caja -->
+                            <div class="bg-white p-3 rounded-lg border">
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="salidaCaja" class="mr-2">
+                                    <span class="font-medium">Caja</span>
+                                </label>
+                                <div id="salidaCajaContenedor" class="hidden flex-col gap-2">
+                                    <div id="salidaCajaLista" class="flex flex-col gap-2">
+                                        <div class="caja-item flex flex-col gap-2">
+                                            <select class="p-2 border rounded-lg accModelo text-sm w-full"></select>
+                                            <div class="grid grid-cols-[1fr,auto,auto] gap-2">
+                                                <select class="p-2 border rounded-lg caja-color text-sm"></select>
+                                                <input type="number" min="1" value="1" class="p-2 border rounded-lg w-16 caja-cant text-sm" placeholder="Cant.">
+                                                <button type="button" class="btn-add-salida-caja bg-green-500 text-white w-8 h-8 rounded font-bold hover:bg-green-600 transition">+</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cargador -->
+                            <div class="bg-white p-3 rounded-lg border">
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="salidaCargador" class="mr-2">
+                                    <span class="font-medium">Cargador</span>
+                                </label>
+                                <div id="salidaCargadorCantidad" class="hidden">
+                                    <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg text-sm" placeholder="Cant.">
+                                </div>
+                            </div>
+
+                            <!-- Protector Cámara -->
+                            <div class="bg-white p-3 rounded-lg border">
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="salidaProtectorCamara" class="mr-2">
+                                    <span class="font-medium">Protector Cámara</span>
+                                </label>
+                                <div id="salidaProtectorCantidad" class="hidden">
+                                    <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg text-sm" placeholder="Cant.">
+                                </div>
+                            </div>
+
+                            <!-- Cubo -->
+                            <div class="bg-white p-3 rounded-lg border">
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="salidaCubo" class="mr-2">
+                                    <span class="font-medium">Cubo</span>
+                                </label>
+                                <div id="salidaCuboCantidad" class="hidden">
+                                    <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg text-sm" placeholder="Cant.">
+                                </div>
+                            </div>
+
+                            <!-- Cable Lightning -->
+                            <div class="bg-white p-3 rounded-lg border">
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="salidaCableLightning" class="mr-2">
+                                    <span class="font-medium">Cable Lightning</span>
+                                </label>
+                                <div id="salidaCableLightningCantidad" class="hidden">
+                                    <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg text-sm" placeholder="Cant.">
+                                </div>
+                            </div>
+
+                            <!-- Cable C+C -->
+                            <div class="bg-white p-3 rounded-lg border">
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="salidaCableCC" class="mr-2">
+                                    <span class="font-medium">Cable C+C</span>
+                                </label>
+                                <div id="salidaCableCCCantidad" class="hidden">
+                                    <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg text-sm" placeholder="Cant.">
+                                </div>
+                            </div>
+
+                            <!-- Otro Accesorio -->
+                            <div class="bg-white p-3 rounded-lg border">
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="salidaOtroAccesorio" class="mr-2">
+                                    <span class="font-medium">Otro Accesorio</span>
+                                </label>
+                                <div id="salidaOtroContenedor" class="hidden flex-col gap-2">
+                                    <div id="salidaOtroLista" class="flex flex-col gap-2">
+                                        <div class="otro-item grid grid-cols-[1fr,auto,auto] gap-2 items-center">
+                                            <input type="text" class="p-2 border rounded-lg flex-1 otro-nombre text-sm" placeholder="¿Qué es?">
+                                            <input type="number" min="1" value="1" class="p-2 border rounded-lg w-16 otro-cant text-sm" placeholder="Cant.">
+                                            <button type="button" class="btn-add-salida-otro bg-green-500 text-white w-8 h-8 rounded font-bold hover:bg-green-600 transition">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
-                    <div id="salidaAccesorioDetalles" class="mt-4"></div>
                 </div>
 
                 <!-- Ingreso de Accesorio -->
                 <div id="formIngresoAccesorio" class="movimiento-form hidden bg-purple-50 p-4 rounded-lg">
                     <h3 class="font-semibold text-purple-800 mb-3">🛡️⬅️ Ingreso de Accesorio</h3>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Accesorio</label>
-                            <select id="ingresoAccesorioTipo" class="w-full p-2 border rounded-lg">
-                                <option value="">Seleccionar</option>
-                                <option value="Forro">Forro</option>
-                                <option value="Vidrio Templado">Vidrio Templado</option>
-                                <option value="Cargador">Cargador</option>
-                                <option value="Cable">Cable</option>
-                                <option value="Cubo">Cubo</option>
-                                <option value="Caja">Caja</option>
-                                <option value="Protector de Cámara">Protector de Cámara</option>
-                                <option value="Otro">Otro</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
-                            <input type="text" id="ingresoAccesorioProveedor" class="w-full p-2 border rounded-lg"
-                                placeholder="Nombre del proveedor">
+                    
+                    <!-- Proveedor -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
+                        <input type="text" id="ingresoAccesorioProveedor" class="w-full p-2 border rounded-lg" placeholder="Nombre del proveedor">
+                    </div>
+
+                    <!-- Accesorios (Checkboxes) -->
+                    <div class="border-t pt-4">
+                        <h4 class="font-semibold text-gray-700 mb-3">Seleccione los accesorios:</h4>
+                        <div class="grid md:grid-cols-3 gap-3">
+                            
+                            <!-- Forro -->
+                            <div class="bg-white p-3 rounded-lg border">
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="ingresoForro" class="mr-2">
+                                    <span class="font-medium">Forro</span>
+                                </label>
+                                <div id="ingresoForroContenedor" class="hidden flex-col gap-2">
+                                    <div id="ingresoForroLista" class="flex flex-col gap-2">
+                                        <div class="forro-item grid grid-cols-[1fr,auto,auto] gap-2 items-center">
+                                            <select class="p-2 border rounded-lg accModelo text-sm"></select>
+                                            <input type="number" min="1" value="1" class="p-2 border rounded-lg w-16 forro-cant text-sm" placeholder="Cant.">
+                                            <button type="button" class="btn-add-ingreso-forro bg-green-500 text-white w-8 h-8 rounded font-bold hover:bg-green-600 transition">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Vidrio -->
+                            <div class="bg-white p-3 rounded-lg border">
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="ingresoVidrio" class="mr-2">
+                                    <span class="font-medium">Vidrio</span>
+                                </label>
+                                <div id="ingresoVidrioContenedor" class="hidden flex-col gap-2">
+                                    <div id="ingresoVidrioLista" class="flex flex-col gap-2">
+                                        <div class="vidrio-item grid grid-cols-[1fr,auto,auto] gap-2 items-center">
+                                            <select class="p-2 border rounded-lg accModelo text-sm"></select>
+                                            <input type="number" min="1" value="1" class="p-2 border rounded-lg w-16 vidrio-cant text-sm" placeholder="Cant.">
+                                            <button type="button" class="btn-add-ingreso-vidrio bg-green-500 text-white w-8 h-8 rounded font-bold hover:bg-green-600 transition">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Caja -->
+                            <div class="bg-white p-3 rounded-lg border">
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="ingresoCaja" class="mr-2">
+                                    <span class="font-medium">Caja</span>
+                                </label>
+                                <div id="ingresoCajaContenedor" class="hidden flex-col gap-2">
+                                    <div id="ingresoCajaLista" class="flex flex-col gap-2">
+                                        <div class="caja-item flex flex-col gap-2">
+                                            <select class="p-2 border rounded-lg accModelo text-sm w-full"></select>
+                                            <div class="grid grid-cols-[1fr,auto,auto] gap-2">
+                                                <select class="p-2 border rounded-lg caja-color text-sm"></select>
+                                                <input type="number" min="1" value="1" class="p-2 border rounded-lg w-16 caja-cant text-sm" placeholder="Cant.">
+                                                <button type="button" class="btn-add-ingreso-caja bg-green-500 text-white w-8 h-8 rounded font-bold hover:bg-green-600 transition">+</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cargador -->
+                            <div class="bg-white p-3 rounded-lg border">
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="ingresoCargador" class="mr-2">
+                                    <span class="font-medium">Cargador</span>
+                                </label>
+                                <div id="ingresoCargadorCantidad" class="hidden">
+                                    <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg text-sm" placeholder="Cant.">
+                                </div>
+                            </div>
+
+                            <!-- Protector Cámara -->
+                            <div class="bg-white p-3 rounded-lg border">
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="ingresoProtectorCamara" class="mr-2">
+                                    <span class="font-medium">Protector Cámara</span>
+                                </label>
+                                <div id="ingresoProtectorCantidad" class="hidden">
+                                    <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg text-sm" placeholder="Cant.">
+                                </div>
+                            </div>
+
+                            <!-- Cubo -->
+                            <div class="bg-white p-3 rounded-lg border">
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="ingresoCubo" class="mr-2">
+                                    <span class="font-medium">Cubo</span>
+                                </label>
+                                <div id="ingresoCuboCantidad" class="hidden">
+                                    <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg text-sm" placeholder="Cant.">
+                                </div>
+                            </div>
+
+                            <!-- Cable Lightning -->
+                            <div class="bg-white p-3 rounded-lg border">
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="ingresoCableLightning" class="mr-2">
+                                    <span class="font-medium">Cable Lightning</span>
+                                </label>
+                                <div id="ingresoCableLightningCantidad" class="hidden">
+                                    <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg text-sm" placeholder="Cant.">
+                                </div>
+                            </div>
+
+                            <!-- Cable C+C -->
+                            <div class="bg-white p-3 rounded-lg border">
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="ingresoCableCC" class="mr-2">
+                                    <span class="font-medium">Cable C+C</span>
+                                </label>
+                                <div id="ingresoCableCCCantidad" class="hidden">
+                                    <input type="number" min="1" value="1" class="w-full p-2 border rounded-lg text-sm" placeholder="Cant.">
+                                </div>
+                            </div>
+
+                            <!-- Otro Accesorio -->
+                            <div class="bg-white p-3 rounded-lg border">
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="ingresoOtroAccesorio" class="mr-2">
+                                    <span class="font-medium">Otro Accesorio</span>
+                                </label>
+                                <div id="ingresoOtroContenedor" class="hidden flex-col gap-2">
+                                    <div id="ingresoOtroLista" class="flex flex-col gap-2">
+                                        <div class="otro-item grid grid-cols-[1fr,auto,auto] gap-2 items-center">
+                                            <input type="text" class="p-2 border rounded-lg flex-1 otro-nombre text-sm" placeholder="¿Qué es?">
+                                            <input type="number" min="1" value="1" class="p-2 border rounded-lg w-16 otro-cant text-sm" placeholder="Cant.">
+                                            <button type="button" class="btn-add-ingreso-otro bg-green-500 text-white w-8 h-8 rounded font-bold hover:bg-green-600 transition">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
-                    <div id="ingresoAccesorioDetalles" class="mt-4"></div>
                 </div>
 
                 <!-- Botones de Acción -->

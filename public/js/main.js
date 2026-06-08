@@ -12,6 +12,7 @@ import { inventarioService } from './services/InventarioService.js';
 import { EquipoInventario } from './models/EquipoInventario.js';
 import { printService } from './services/PrintService.js';
 import { Caja } from './models/Caja.js';
+import { AccesorioValidator } from './services/AccesorioValidator.js';
 import {
     MODELOS_IPHONE,
     COLORES_IPHONE,
@@ -332,6 +333,9 @@ class App {
 
         // Movimientos de Inventario
         this.inicializarEventosMovimientos();
+        
+        // Buscadores de Inventario Estrictos
+        this.inicializarBuscadoresInventario();
 
         // WEPPA - Permitir edición manual del monto total
         document.getElementById('weppa').addEventListener('change', (e) => {
@@ -1387,8 +1391,8 @@ class App {
             if (estado === 'defectuoso') {
                 return { tipo: 'bloqueado-defectuoso', equipo: equipoEnInventario };
             }
-            if (estado === 'vendido') {
-                // Vendido: permitir con autocompletar (ya no es stock activo)
+            if (estado === 'vendido' || estado === 'eliminado' || estado === 'transferido') {
+                // Ya no es stock activo → permitir como trade-in con autocompletar
                 return { tipo: 'autocompletar-vendido', equipo: equipoEnInventario };
             }
             // Cualquier otro estado desconocido → bloquear por precaución
@@ -3173,6 +3177,21 @@ class App {
 
         // Eventos para tipos de accesorios
         this.inicializarTiposAccesorios();
+
+        // Validaciones en tiempo real de IMEI en Movimientos
+        const inputsImeiMovimientos = [
+            { id: 'salidaEquipoImei', tipo: 'Salida Equipo', bannerPrefix: 'imeiSalidaBanner' },
+            { id: 'ingresoEquipoImei', tipo: 'Ingreso Equipo', bannerPrefix: 'imeiIngresoBanner' },
+            { id: 'compraEquipoImei', tipo: 'Compra Equipo', bannerPrefix: 'imeiCompraBanner' }
+        ];
+
+        inputsImeiMovimientos.forEach(config => {
+            const input = document.getElementById(config.id);
+            if (input) {
+                input.addEventListener('input', () => this._revalidarImeiMovimiento(config));
+                input.addEventListener('change', () => this._revalidarImeiMovimiento(config));
+            }
+        });
     }
 
     /**
@@ -3209,6 +3228,145 @@ class App {
 
         // Guardar tipo de movimiento actual
         this.tipoMovimientoActual = formId;
+
+        // Limpiar inputs al cambiar de form
+        if (formSeleccionado) {
+            formSeleccionado.querySelectorAll('input, select, textarea').forEach(input => {
+                if (input.type === 'number') {
+                    input.value = input.min || '';
+                } else {
+                    input.value = '';
+                }
+            });
+        }
+        
+        // Limpiar banners al cambiar de form
+        ['imeiSalidaBanner', 'imeiIngresoBanner', 'imeiCompraBanner'].forEach(id => {
+            const banner = document.getElementById(id);
+            if (banner) banner.classList.add('hidden');
+        });
+    }
+
+    /**
+     * Valida en tiempo real el IMEI en los formularios de Movimientos
+     */
+    _revalidarImeiMovimiento(config) {
+        const input = document.getElementById(config.id);
+        const banner = document.getElementById(config.bannerPrefix);
+        const titulo = document.getElementById(config.bannerPrefix + 'Titulo');
+        const detalle = document.getElementById(config.bannerPrefix + 'Detalle');
+        const icono = document.getElementById(config.bannerPrefix + 'Icono');
+
+        if (!input || !banner || !titulo || !detalle || !icono) return;
+
+        const imei = (input.value || '').trim();
+
+        // 1. Ocultar si está vacío o muy corto
+        if (imei.length < 15) {
+            banner.classList.add('hidden');
+            return;
+        }
+
+        // 2. Si tiene más de 15, no es válido
+        if (imei.length > 15 || !/^\d{15}$/.test(imei)) {
+            banner.classList.remove('hidden', 'bg-blue-50', 'border-blue-200', 'bg-green-50', 'border-green-200');
+            banner.classList.add('bg-red-50', 'border-red-200');
+            icono.textContent = '❌';
+            titulo.textContent = 'IMEI Inválido';
+            titulo.className = 'font-semibold text-xs text-red-800';
+            detalle.textContent = 'El IMEI debe tener exactamente 15 dígitos numéricos.';
+            detalle.className = 'text-[10px] mt-0.5 leading-tight text-red-600';
+            return;
+        }
+
+        // Buscar en inventario
+        const equipo = inventarioService.buscarPorImei(imei);
+
+        // 3. Lógica según tipo de formulario
+        if (config.tipo === 'Salida Equipo') {
+            if (!equipo) {
+                banner.classList.remove('hidden', 'bg-blue-50', 'border-blue-200', 'bg-green-50', 'border-green-200');
+                banner.classList.add('bg-red-50', 'border-red-200');
+                icono.textContent = '❌';
+                titulo.textContent = 'IMEI No Encontrado';
+                titulo.className = 'font-semibold text-xs text-red-800';
+                detalle.textContent = 'Este equipo no existe en el inventario actual de la sede.';
+                detalle.className = 'text-[10px] mt-0.5 leading-tight text-red-600';
+            } else if (equipo.estado !== 'disponible') {
+                const estadosTexto = {
+                    vendido: 'VENDIDO',
+                    transferido: 'TRANSFERIDO',
+                    defectuoso: 'DEFECTUOSO',
+                    eliminado: 'ELIMINADO'
+                };
+                banner.classList.remove('hidden', 'bg-blue-50', 'border-blue-200', 'bg-green-50', 'border-green-200');
+                banner.classList.add('bg-red-50', 'border-red-200');
+                icono.textContent = '❌';
+                titulo.textContent = `Equipo ${estadosTexto[equipo.estado] || equipo.estado.toUpperCase()}`;
+                titulo.className = 'font-semibold text-xs text-red-800';
+                detalle.textContent = 'Solo puedes dar salida a equipos que estén disponibles en inventario.';
+                detalle.className = 'text-[10px] mt-0.5 leading-tight text-red-600';
+            } else {
+                // Éxito: autocompletar!
+                banner.classList.remove('hidden', 'bg-red-50', 'border-red-200', 'bg-green-50', 'border-green-200');
+                banner.classList.add('bg-blue-50', 'border-blue-200');
+                icono.textContent = 'ℹ️';
+                titulo.textContent = 'Equipo Encontrado';
+                titulo.className = 'font-semibold text-xs text-blue-800';
+                detalle.textContent = `📱 ${equipo.modelo} ${equipo.gb} ${equipo.color} - Autocompletando datos...`;
+                detalle.className = 'text-[10px] mt-0.5 leading-tight text-blue-600';
+
+                // Autocompletar form
+                const selectModelo = document.getElementById('salidaEquipoModelo');
+                if (selectModelo) selectModelo.value = equipo.modelo;
+                
+                const selectCapacidad = document.getElementById('salidaEquipoCapacidad');
+                if (selectCapacidad) selectCapacidad.value = equipo.gb;
+
+                // Forzar trigger de evento change en modelo para que llene los colores, y luego elegir el color
+                if (selectModelo) {
+                    const evt = new Event('change');
+                    selectModelo.dispatchEvent(evt);
+                    setTimeout(() => {
+                        const selectColor = document.getElementById('salidaEquipoColor');
+                        if (selectColor) selectColor.value = equipo.color;
+                    }, 50);
+                }
+
+                const inputBateria = document.getElementById('salidaEquipoBateria');
+                if (inputBateria && equipo.bateria) inputBateria.value = parseInt(equipo.bateria);
+            }
+
+        } else if (config.tipo === 'Ingreso Equipo' || config.tipo === 'Compra Equipo') {
+            if (equipo && equipo.estado === 'disponible') {
+                banner.classList.remove('hidden', 'bg-blue-50', 'border-blue-200', 'bg-green-50', 'border-green-200');
+                banner.classList.add('bg-red-50', 'border-red-200');
+                icono.textContent = '❌';
+                titulo.textContent = 'Equipo Ya Disponible';
+                titulo.className = 'font-semibold text-xs text-red-800';
+                detalle.textContent = `Ya tienes un ${equipo.modelo} ${equipo.gb} ${equipo.color} DISPONIBLE con este IMEI.`;
+                detalle.className = 'text-[10px] mt-0.5 leading-tight text-red-600';
+            } else if (equipo) {
+                // Existe pero no está disponible (vendido, transferido, eliminado, etc.)
+                // Lo informamos pero lo permitimos (el guardado ya lo permitía, creando uno nuevo o regrabando si se acepta, pero en realidad crea otro registro o lo sobreescribe).
+                banner.classList.remove('hidden', 'bg-red-50', 'border-red-200', 'bg-green-50', 'border-green-200');
+                banner.classList.add('bg-blue-50', 'border-blue-200');
+                icono.textContent = 'ℹ️';
+                titulo.textContent = `Equipo ${equipo.estado.toUpperCase()}`;
+                titulo.className = 'font-semibold text-xs text-blue-800';
+                detalle.textContent = `Este IMEI pertenece a un ${equipo.modelo} que fue ${equipo.estado}. Se registrará su reingreso.`;
+                detalle.className = 'text-[10px] mt-0.5 leading-tight text-blue-600';
+            } else {
+                // Nuevo IMEI, perfecto para ingreso
+                banner.classList.remove('hidden', 'bg-red-50', 'border-red-200', 'bg-blue-50', 'border-blue-200');
+                banner.classList.add('bg-green-50', 'border-green-200');
+                icono.textContent = '✅';
+                titulo.textContent = 'IMEI Libre';
+                titulo.className = 'font-semibold text-xs text-green-800';
+                detalle.textContent = 'El equipo se registrará como nuevo ingreso en el inventario.';
+                detalle.className = 'text-[10px] mt-0.5 leading-tight text-green-600';
+            }
+        }
     }
 
     /**
@@ -3250,232 +3408,375 @@ class App {
     }
 
     /**
-     * Inicializa eventos para tipos de accesorios
+     * Inicializa eventos para checkboxes de accesorios
      */
     inicializarTiposAccesorios() {
-        // Salida de accesorio
-        const salidaTipo = document.getElementById('salidaAccesorioTipo');
-        if (salidaTipo) {
-            salidaTipo.addEventListener('change', (e) => {
-                this.mostrarDetallesAccesorio('salida', e.target.value);
+        // ═══════════════════════════════════════════════
+        // SALIDA DE ACCESORIOS - CHECKBOXES
+        // ═══════════════════════════════════════════════
+        
+        // Forro Salida
+        const salidaForroCheckbox = document.getElementById('salidaForro');
+        if (salidaForroCheckbox) {
+            salidaForroCheckbox.addEventListener('change', (e) => {
+                const contenedor = document.getElementById('salidaForroContenedor');
+                if (contenedor) {
+                    if (e.target.checked) {
+                        contenedor.classList.remove('hidden');
+                        contenedor.classList.add('flex');
+                        this._inicializarModeloSelects('salidaForroLista');
+                    } else {
+                        contenedor.classList.add('hidden');
+                        contenedor.classList.remove('flex');
+                    }
+                }
             });
         }
 
-        // Ingreso de accesorio
-        const ingresoTipo = document.getElementById('ingresoAccesorioTipo');
-        if (ingresoTipo) {
-            ingresoTipo.addEventListener('change', (e) => {
-                this.mostrarDetallesAccesorio('ingreso', e.target.value);
+        // Vidrio Salida
+        const salidaVidrioCheckbox = document.getElementById('salidaVidrio');
+        if (salidaVidrioCheckbox) {
+            salidaVidrioCheckbox.addEventListener('change', (e) => {
+                const contenedor = document.getElementById('salidaVidrioContenedor');
+                if (contenedor) {
+                    if (e.target.checked) {
+                        contenedor.classList.remove('hidden');
+                        contenedor.classList.add('flex');
+                        this._inicializarModeloSelects('salidaVidrioLista');
+                    } else {
+                        contenedor.classList.add('hidden');
+                        contenedor.classList.remove('flex');
+                    }
+                }
             });
         }
-    }
 
-    /**
-     * Muestra detalles específicos según el tipo de accesorio
-     */
-    mostrarDetallesAccesorio(tipo, tipoAccesorio) {
-        const contenedor = document.getElementById(`${tipo}AccesorioDetalles`);
-        if (!contenedor) return;
-
-        contenedor.innerHTML = '';
-
-        if (!tipoAccesorio) return;
-
-        let html = '<div class="bg-white p-4 rounded-lg border mt-4">';
-        html += `<h4 class="font-medium text-gray-800 mb-3">Detalles del ${tipoAccesorio}</h4>`;
-
-        switch (tipoAccesorio) {
-            case 'Forro':
-            case 'Vidrio Templado':
-            case 'Caja':
-            case 'Protector de Cámara':
-                html += this.generarFormularioMultiModelo(tipo, tipoAccesorio);
-                break;
-            case 'Cargador':
-                html += this.generarFormularioCargador(tipo);
-                break;
-            case 'Cable':
-                html += this.generarFormularioCable(tipo);
-                break;
-            case 'Cubo':
-                html += this.generarFormularioCubo(tipo);
-                break;
-            case 'Otro':
-                html += this.generarFormularioOtro(tipo);
-                break;
-        }
-
-        html += '</div>';
-        contenedor.innerHTML = html;
-
-        // Si es multi-modelo, inicializar evento de cantidad
-        if (['Forro', 'Vidrio Templado', 'Caja', 'Protector de Cámara'].includes(tipoAccesorio)) {
-            this.inicializarCantidadModelos(tipo, tipoAccesorio);
-        }
-    }
-
-    /**
-     * Genera formulario para accesorios con múltiples modelos
-     */
-    generarFormularioMultiModelo(tipo, tipoAccesorio) {
-        const maxModelos = tipoAccesorio === 'Forro' ? 10 : 10;
-        let html = '<div class="mb-3">';
-        html += '<label class="block text-sm font-medium text-gray-700 mb-1">¿Cuántos modelos diferentes?</label>';
-        html += `<select id="${tipo}${tipoAccesorio.replace(/ /g, '')}CantidadModelos" class="w-full p-2 border rounded-lg">`;
-        for (let i = 1; i <= maxModelos; i++) {
-            html += `<option value="${i}">${i} modelo${i > 1 ? 's' : ''}</option>`;
-        }
-        html += '</select></div>';
-        html += `<div id="${tipo}${tipoAccesorio.replace(/ /g, '')}Modelos"></div>`;
-        return html;
-    }
-
-    /**
-     * Genera formulario para cargador
-     */
-    generarFormularioCargador(tipo) {
-        return `
-            <div class="grid md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
-                    <input type="number" id="${tipo}CargadorCantidad" min="1" value="1" class="w-full p-2 border rounded-lg">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Modelo/Descripción</label>
-                    <input type="text" id="${tipo}CargadorModelo" class="w-full p-2 border rounded-lg" placeholder="Ej: 20W USB-C">
-                </div>
-            </div>
-        `;
-    }
-
-    /**
-     * Genera formulario para cable
-     */
-    generarFormularioCable(tipo) {
-        return `
-            <div class="grid md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Cable</label>
-                    <select id="${tipo}CableTipo" class="w-full p-2 border rounded-lg">
-                        <option value="">Seleccionar</option>
-                        <option value="USB-C a USB-C">USB-C a USB-C</option>
-                        <option value="Lightning">Lightning</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
-                    <input type="number" id="${tipo}CableCantidad" min="1" value="1" class="w-full p-2 border rounded-lg">
-                </div>
-            </div>
-        `;
-    }
-
-    /**
-     * Genera formulario para cubo
-     */
-    generarFormularioCubo(tipo) {
-        return `
-            <div class="grid md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
-                    <input type="number" id="${tipo}CuboCantidad" min="1" value="1" class="w-full p-2 border rounded-lg">
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Descripción adicional</label>
-                    <textarea id="${tipo}CuboDescripcion" rows="2" class="w-full p-2 border rounded-lg" placeholder="Especificaciones, potencia, etc."></textarea>
-                </div>
-            </div>
-        `;
-    }
-
-    /**
-     * Genera formulario para otro accesorio
-     */
-    generarFormularioOtro(tipo) {
-        return `
-            <div class="grid md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
-                    <input type="number" id="${tipo}OtroCantidad" min="1" value="1" class="w-full p-2 border rounded-lg">
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Descripción completa</label>
-                    <textarea id="${tipo}OtroDescripcion" rows="3" class="w-full p-2 border rounded-lg" placeholder="Descripción detallada del accesorio"></textarea>
-                </div>
-            </div>
-        `;
-    }
-
-    /**
-     * Inicializa evento de cambio de cantidad de modelos
-     */
-    inicializarCantidadModelos(tipo, tipoAccesorio) {
-        const selectId = `${tipo}${tipoAccesorio.replace(/ /g, '')}CantidadModelos`;
-        const select = document.getElementById(selectId);
-
-        if (select) {
-            select.addEventListener('change', (e) => {
-                this.generarCamposModelos(tipo, tipoAccesorio, parseInt(e.target.value));
+        // Caja Salida
+        const salidaCajaCheckbox = document.getElementById('salidaCaja');
+        if (salidaCajaCheckbox) {
+            salidaCajaCheckbox.addEventListener('change', (e) => {
+                const contenedor = document.getElementById('salidaCajaContenedor');
+                if (contenedor) {
+                    if (e.target.checked) {
+                        contenedor.classList.remove('hidden');
+                        contenedor.classList.add('flex');
+                        this._inicializarModeloSelects('salidaCajaLista');
+                        this._inicializarColorSelects('salidaCajaLista');
+                    } else {
+                        contenedor.classList.add('hidden');
+                        contenedor.classList.remove('flex');
+                    }
+                }
             });
-
-            // Generar campos iniciales
-            this.generarCamposModelos(tipo, tipoAccesorio, 1);
         }
-    }
 
-    /**
-     * Genera campos para cada modelo
-     */
-    generarCamposModelos(tipo, tipoAccesorio, cantidad) {
-        const contenedorId = `${tipo}${tipoAccesorio.replace(/ /g, '')}Modelos`;
-        const contenedor = document.getElementById(contenedorId);
-
-        if (!contenedor) return;
-
-        let html = '';
-        for (let i = 1; i <= cantidad; i++) {
-            html += '<div class="bg-gray-50 p-3 rounded-lg mb-3">';
-            html += `<p class="text-sm font-medium text-gray-700 mb-2">Modelo ${i}</p>`;
-            html += '<div class="grid md:grid-cols-2 gap-3">';
-
-            // Modelo de iPhone
-            html += '<div>';
-            html += '<label class="block text-xs text-gray-600 mb-1">Modelo iPhone</label>';
-            html += `<select class="w-full p-2 border rounded-lg text-sm" data-modelo="${i}">`;
-            html += '<option value="">Seleccionar</option>';
-            MODELOS_IPHONE.forEach(modelo => {
-                html += `<option value="${modelo.valor}">${modelo.etiqueta}</option>`;
-            });
-            html += '</select></div>';
-
-            // Cantidad
-            html += '<div>';
-            html += '<label class="block text-xs text-gray-600 mb-1">Cantidad</label>';
-            html += `<input type="number" min="1" value="1" class="w-full p-2 border rounded-lg text-sm" data-cantidad="${i}">`;
-            html += '</div>';
-
-            // Si es Caja, agregar color
-            if (tipoAccesorio === 'Caja') {
-                html += '<div class="md:col-span-2">';
-                html += '<label class="block text-xs text-gray-600 mb-1">Color</label>';
-                html += `<select class="w-full p-2 border rounded-lg text-sm" data-color="${i}">`;
-                html += '<option value="">Seleccionar</option>';
-                COLORES_IPHONE.forEach(color => {
-                    html += `<option value="${color.valor}">${color.etiqueta}</option>`;
+        // Accesorios simples - Salida
+        ['Cargador', 'ProtectorCamara', 'Cubo', 'CableLightning', 'CableCC'].forEach(tipo => {
+            const checkbox = document.getElementById(`salida${tipo}`);
+            if (checkbox) {
+                checkbox.addEventListener('change', (e) => {
+                    const contenedor = document.getElementById(`salida${tipo}Cantidad`);
+                    if (contenedor) {
+                        contenedor.classList.toggle('hidden', !e.target.checked);
+                    }
                 });
-                html += '</select></div>';
+            }
+        });
+
+        // Otro Accesorio - Salida
+        const salidaOtroCheckbox = document.getElementById('salidaOtroAccesorio');
+        if (salidaOtroCheckbox) {
+            salidaOtroCheckbox.addEventListener('change', (e) => {
+                const contenedor = document.getElementById('salidaOtroContenedor');
+                if (contenedor) {
+                    if (e.target.checked) {
+                        contenedor.classList.remove('hidden');
+                        contenedor.classList.add('flex');
+                    } else {
+                        contenedor.classList.add('hidden');
+                        contenedor.classList.remove('flex');
+                    }
+                }
+            });
+        }
+
+        // ═══════════════════════════════════════════════
+        // INGRESO DE ACCESORIOS - CHECKBOXES
+        // ═══════════════════════════════════════════════
+        
+        // Forro Ingreso
+        const ingresoForroCheckbox = document.getElementById('ingresoForro');
+        if (ingresoForroCheckbox) {
+            ingresoForroCheckbox.addEventListener('change', (e) => {
+                const contenedor = document.getElementById('ingresoForroContenedor');
+                if (contenedor) {
+                    if (e.target.checked) {
+                        contenedor.classList.remove('hidden');
+                        contenedor.classList.add('flex');
+                        this._inicializarModeloSelects('ingresoForroLista');
+                    } else {
+                        contenedor.classList.add('hidden');
+                        contenedor.classList.remove('flex');
+                    }
+                }
+            });
+        }
+
+        // Vidrio Ingreso
+        const ingresoVidrioCheckbox = document.getElementById('ingresoVidrio');
+        if (ingresoVidrioCheckbox) {
+            ingresoVidrioCheckbox.addEventListener('change', (e) => {
+                const contenedor = document.getElementById('ingresoVidrioContenedor');
+                if (contenedor) {
+                    if (e.target.checked) {
+                        contenedor.classList.remove('hidden');
+                        contenedor.classList.add('flex');
+                        this._inicializarModeloSelects('ingresoVidrioLista');
+                    } else {
+                        contenedor.classList.add('hidden');
+                        contenedor.classList.remove('flex');
+                    }
+                }
+            });
+        }
+
+        // Caja Ingreso
+        const ingresoCajaCheckbox = document.getElementById('ingresoCaja');
+        if (ingresoCajaCheckbox) {
+            ingresoCajaCheckbox.addEventListener('change', (e) => {
+                const contenedor = document.getElementById('ingresoCajaContenedor');
+                if (contenedor) {
+                    if (e.target.checked) {
+                        contenedor.classList.remove('hidden');
+                        contenedor.classList.add('flex');
+                        this._inicializarModeloSelects('ingresoCajaLista');
+                        this._inicializarColorSelects('ingresoCajaLista');
+                    } else {
+                        contenedor.classList.add('hidden');
+                        contenedor.classList.remove('flex');
+                    }
+                }
+            });
+        }
+
+        // Accesorios simples - Ingreso
+        ['Cargador', 'ProtectorCamara', 'Cubo', 'CableLightning', 'CableCC'].forEach(tipo => {
+            const checkbox = document.getElementById(`ingreso${tipo}`);
+            if (checkbox) {
+                checkbox.addEventListener('change', (e) => {
+                    const contenedor = document.getElementById(`ingreso${tipo}Cantidad`);
+                    if (contenedor) {
+                        contenedor.classList.toggle('hidden', !e.target.checked);
+                    }
+                });
+            }
+        });
+
+        // Otro Accesorio - Ingreso
+        const ingresoOtroCheckbox = document.getElementById('ingresoOtroAccesorio');
+        if (ingresoOtroCheckbox) {
+            ingresoOtroCheckbox.addEventListener('change', (e) => {
+                const contenedor = document.getElementById('ingresoOtroContenedor');
+                if (contenedor) {
+                    if (e.target.checked) {
+                        contenedor.classList.remove('hidden');
+                        contenedor.classList.add('flex');
+                    } else {
+                        contenedor.classList.add('hidden');
+                        contenedor.classList.remove('flex');
+                    }
+                }
+            });
+        }
+
+        // ═══════════════════════════════════════════════
+        // BOTONES "+" para agregar filas dinámicas
+        // ═══════════════════════════════════════════════
+        this._inicializarBotonesAgregarFila();
+    }
+
+    /**
+     * Inicializa los selects de modelo con opciones de iPhone
+     * @private
+     */
+    _inicializarModeloSelects(contenedorId) {
+        const contenedor = document.getElementById(contenedorId);
+        if (!contenedor) return;
+
+        const selects = contenedor.querySelectorAll('.accModelo');
+        selects.forEach(select => {
+            if (select.options.length === 0) {
+                select.innerHTML = '<option value="">Seleccionar</option>';
+                MODELOS_IPHONE.forEach(modelo => {
+                    const option = document.createElement('option');
+                    option.value = modelo.valor;
+                    option.textContent = modelo.etiqueta;
+                    select.appendChild(option);
+                });
+            }
+        });
+    }
+
+    /**
+     * Inicializa un select de colores con opciones de iPhone
+     * @private
+     */
+    _inicializarColorSelect(selectId) {
+        const select = document.getElementById(selectId);
+        if (!select || select.options.length > 0) return;
+
+        select.innerHTML = '<option value="">Seleccionar</option>';
+        COLORES_IPHONE.forEach(color => {
+            const option = document.createElement('option');
+            option.value = color.valor;
+            option.textContent = color.etiqueta;
+            select.appendChild(option);
+        });
+    }
+
+    /**
+     * Inicializa todos los selects de color dentro de un contenedor
+     * @private
+     */
+    _inicializarColorSelects(contenedorId) {
+        const contenedor = document.getElementById(contenedorId);
+        if (!contenedor) return;
+
+        const selects = contenedor.querySelectorAll('.caja-color');
+        selects.forEach(select => {
+            if (select.options.length === 0) {
+                select.innerHTML = '<option value="">Seleccionar</option>';
+                COLORES_IPHONE.forEach(color => {
+                    const option = document.createElement('option');
+                    option.value = color.valor;
+                    option.textContent = color.etiqueta;
+                    select.appendChild(option);
+                });
+            }
+        });
+    }
+
+    /**
+     * Inicializa botones "+" para agregar filas dinámicas y "-" para eliminar
+     * @private
+     */
+    _inicializarBotonesAgregarFila() {
+        // Usar delegación de eventos para manejar botones dinámicos
+        document.addEventListener('click', (e) => {
+            // ═══════════════════════════════════════════════
+            // BOTONES "+" - AGREGAR FILA (verde)
+            // ═══════════════════════════════════════════════
+            
+            // Botones de Forro (salida/ingreso)
+            if (e.target.classList.contains('btn-add-salida-forro') || e.target.classList.contains('btn-add-ingreso-forro')) {
+                const prefijo = e.target.classList.contains('btn-add-salida-forro') ? 'salida' : 'ingreso';
+                const lista = document.getElementById(`${prefijo}ForroLista`);
+                if (lista) {
+                    const nuevaFila = document.createElement('div');
+                    nuevaFila.className = 'forro-item grid grid-cols-[1fr,auto,auto] gap-2 items-center';
+                    nuevaFila.innerHTML = `
+                        <select class="p-2 border rounded-lg accModelo text-sm"></select>
+                        <input type="number" min="1" value="1" class="p-2 border rounded-lg w-16 forro-cant text-sm" placeholder="Cant.">
+                        <button type="button" class="btn-remove-${prefijo}-forro bg-red-500 text-white w-8 h-8 rounded font-bold hover:bg-red-600 transition">-</button>
+                    `;
+                    lista.appendChild(nuevaFila);
+                    this._inicializarModeloSelects(`${prefijo}ForroLista`);
+                }
             }
 
-            html += '</div></div>';
-        }
+            // Botones de Vidrio (salida/ingreso)
+            if (e.target.classList.contains('btn-add-salida-vidrio') || e.target.classList.contains('btn-add-ingreso-vidrio')) {
+                const prefijo = e.target.classList.contains('btn-add-salida-vidrio') ? 'salida' : 'ingreso';
+                const lista = document.getElementById(`${prefijo}VidrioLista`);
+                if (lista) {
+                    const nuevaFila = document.createElement('div');
+                    nuevaFila.className = 'vidrio-item grid grid-cols-[1fr,auto,auto] gap-2 items-center';
+                    nuevaFila.innerHTML = `
+                        <select class="p-2 border rounded-lg accModelo text-sm"></select>
+                        <input type="number" min="1" value="1" class="p-2 border rounded-lg w-16 vidrio-cant text-sm" placeholder="Cant.">
+                        <button type="button" class="btn-remove-${prefijo}-vidrio bg-red-500 text-white w-8 h-8 rounded font-bold hover:bg-red-600 transition">-</button>
+                    `;
+                    lista.appendChild(nuevaFila);
+                    this._inicializarModeloSelects(`${prefijo}VidrioLista`);
+                }
+            }
 
-        contenedor.innerHTML = html;
+            // Botones de Caja (salida/ingreso)
+            if (e.target.classList.contains('btn-add-salida-caja') || e.target.classList.contains('btn-add-ingreso-caja')) {
+                const prefijo = e.target.classList.contains('btn-add-salida-caja') ? 'salida' : 'ingreso';
+                const lista = document.getElementById(`${prefijo}CajaLista`);
+                if (lista) {
+                    const nuevaFila = document.createElement('div');
+                    nuevaFila.className = 'caja-item flex flex-col gap-2';
+                    nuevaFila.innerHTML = `
+                        <select class="p-2 border rounded-lg accModelo text-sm w-full"></select>
+                        <div class="grid grid-cols-[1fr,auto,auto] gap-2">
+                            <select class="p-2 border rounded-lg caja-color text-sm"></select>
+                            <input type="number" min="1" value="1" class="p-2 border rounded-lg w-16 caja-cant text-sm" placeholder="Cant.">
+                            <button type="button" class="btn-remove-${prefijo}-caja bg-red-500 text-white w-8 h-8 rounded font-bold hover:bg-red-600 transition">-</button>
+                        </div>
+                    `;
+                    lista.appendChild(nuevaFila);
+                    this._inicializarModeloSelects(`${prefijo}CajaLista`);
+                    this._inicializarColorSelects(`${prefijo}CajaLista`);
+                }
+            }
+
+            // Botones de Otro (salida/ingreso)
+            if (e.target.classList.contains('btn-add-salida-otro') || e.target.classList.contains('btn-add-ingreso-otro')) {
+                const prefijo = e.target.classList.contains('btn-add-salida-otro') ? 'salida' : 'ingreso';
+                const lista = document.getElementById(`${prefijo}OtroLista`);
+                if (lista) {
+                    const nuevaFila = document.createElement('div');
+                    nuevaFila.className = 'otro-item grid grid-cols-[1fr,auto,auto] gap-2 items-center';
+                    nuevaFila.innerHTML = `
+                        <input type="text" class="p-2 border rounded-lg flex-1 otro-nombre text-sm" placeholder="¿Qué es?">
+                        <input type="number" min="1" value="1" class="p-2 border rounded-lg w-16 otro-cant text-sm" placeholder="Cant.">
+                        <button type="button" class="btn-remove-${prefijo}-otro bg-red-500 text-white w-8 h-8 rounded font-bold hover:bg-red-600 transition">-</button>
+                    `;
+                    lista.appendChild(nuevaFila);
+                }
+            }
+
+            // ═══════════════════════════════════════════════
+            // BOTONES "-" - ELIMINAR FILA (rojo)
+            // ═══════════════════════════════════════════════
+            
+            // Eliminar Forro
+            if (e.target.classList.contains('btn-remove-salida-forro') || e.target.classList.contains('btn-remove-ingreso-forro')) {
+                const fila = e.target.closest('.forro-item');
+                if (fila) fila.remove();
+            }
+
+            // Eliminar Vidrio
+            if (e.target.classList.contains('btn-remove-salida-vidrio') || e.target.classList.contains('btn-remove-ingreso-vidrio')) {
+                const fila = e.target.closest('.vidrio-item');
+                if (fila) fila.remove();
+            }
+
+            // Eliminar Caja
+            if (e.target.classList.contains('btn-remove-salida-caja') || e.target.classList.contains('btn-remove-ingreso-caja')) {
+                const fila = e.target.closest('.caja-item');
+                if (fila) fila.remove();
+            }
+
+            // Eliminar Otro
+            if (e.target.classList.contains('btn-remove-salida-otro') || e.target.classList.contains('btn-remove-ingreso-otro')) {
+                const fila = e.target.closest('.otro-item');
+                if (fila) fila.remove();
+            }
+        });
     }
+
+
 
     /**
      * Guarda el movimiento de inventario
      */
     async guardarMovimiento() {
+        if (this._guardandoMovimiento) return; // Guard contra doble-click
+        this._guardandoMovimiento = true;
+
         try {
             const datos = this.recopilarDatosMovimiento();
             console.log('📝 Datos recopilados:', datos);
@@ -3485,8 +3786,142 @@ class App {
                 return;
             }
 
+            const sedeId = localStorage.getItem('usuario_sede_id') || 'sede_1';
 
-            // Guardar usando el servicio
+            // ══════════════════════════════════════════
+            // CASO ESPECIAL: ACCESORIOS MÚLTIPLES
+            // ══════════════════════════════════════════
+            if (datos.esMultipleAccesorios) {
+                // Guardar cada accesorio como movimiento separado
+                for (const acc of datos.accesorios) {
+                    const datosMovimiento = {
+                        tipo: acc.tipo,
+                        modelos: acc.modelos || [],
+                        cantidad: acc.cantidad || 0,
+                        descripcion: acc.descripcion || '',
+                        destino: datos.destino,
+                        proveedor: datos.proveedor
+                    };
+                    
+                    const resultado = await movimientoService.crearMovimiento({
+                        tipo: datos.tipo,
+                        datos: datosMovimiento
+                    });
+                    
+                    if (!resultado.exito) {
+                        const errores = resultado.errores ? resultado.errores.join('\n') : 'Error desconocido';
+                        alert(`❌ Error al guardar ${acc.tipo}:\n${errores}`);
+                        return;
+                    }
+                }
+                
+                alert(`✅ ${datos.accesorios.length} movimiento(s) de accesorios registrado(s) correctamente`);
+                this.cancelarMovimiento();
+                await this.actualizarResumenMovimientos();
+                await this.actualizarResumenVentas();
+                return;
+            }
+
+            // ── INGRESO EQUIPO o COMPRA EQUIPO: sincronizar con inventario ──
+            if (datos.tipo === 'Ingreso Equipo' || datos.tipo === 'Compra Equipo') {
+                const imei = (datos.datos.imei || '').trim();
+
+                // Validación 1: IMEI obligatorio y de 15 dígitos
+                if (!imei || imei.length !== 15 || !/^\d{15}$/.test(imei)) {
+                    alert(`❌ El IMEI "${imei}" no es válido. Debe tener exactamente 15 dígitos numéricos.`);
+                    return;
+                }
+
+                // Validación 2: No existe ya como disponible
+                const existente = inventarioService.buscarPorImei(imei);
+                if (existente && existente.estado === 'disponible') {
+                    alert(`❌ El IMEI ${imei} ya está registrado en el inventario como DISPONIBLE.\n📱 ${existente.modelo} ${existente.gb} ${existente.color}\n\nNo se puede ingresar el mismo equipo dos veces.`);
+                    return;
+                }
+
+                // Validación 3: Campos de equipo completos
+                if (!datos.datos.modelo || !datos.datos.capacidad || !datos.datos.color) {
+                    alert('❌ Debes completar el Modelo, Capacidad y Color del equipo para registrar el ingreso en inventario.');
+                    return;
+                }
+
+                // Crear equipo en inventario
+                const origen = datos.datos.origen || datos.datos.proveedor || 'Caja';
+                const nuevoEquipo = new EquipoInventario({
+                    modelo: datos.datos.modelo,
+                    gb: datos.datos.capacidad,
+                    color: datos.datos.color,
+                    bateria: parseInt(datos.datos.bateria) || 100,
+                    imei: imei,
+                    origen: origen,
+                    detalles: datos.datos.nota || '',
+                    estado: 'disponible',
+                    creadoPor: sedeId
+                });
+
+                const resultadoInv = await inventarioService.guardarLote([nuevoEquipo], origen);
+                if (!resultadoInv.exito) {
+                    alert(`❌ Error al agregar al inventario: ${resultadoInv.error}`);
+                    return;
+                }
+                console.log(`✅ Equipo IMEI ${imei} agregado al inventario por movimiento de Caja.`);
+            }
+
+            // ── SALIDA EQUIPO: sincronizar con inventario ──
+            if (datos.tipo === 'Salida Equipo') {
+                const imei = (datos.datos.imei || '').trim();
+
+                // Validación 1: IMEI obligatorio y de 15 dígitos
+                if (!imei || imei.length !== 15 || !/^\d{15}$/.test(imei)) {
+                    alert(`❌ El IMEI "${imei}" no es válido. Debe tener exactamente 15 dígitos numéricos para poder dar salida.`);
+                    return;
+                }
+
+                // Validación 2: Equipo existe en el inventario
+                const equipo = inventarioService.buscarPorImei(imei);
+                if (!equipo) {
+                    alert(`❌ El IMEI ${imei} no existe en el inventario de esta sede.\n\nVerifica el número e intenta de nuevo.`);
+                    return;
+                }
+
+                // Validación 3: Debe estar disponible (no vendido, no transferido, etc.)
+                if (equipo.estado !== 'disponible') {
+                    const estadosTexto = {
+                        vendido: 'ya fue VENDIDO',
+                        transferido: 'fue TRANSFERIDO a otra sede',
+                        defectuoso: 'está marcado como DEFECTUOSO',
+                        eliminado: 'fue ELIMINADO del sistema'
+                    };
+                    const desc = estadosTexto[equipo.estado] || `tiene estado "${equipo.estado}"`;
+                    alert(`❌ El equipo con IMEI ${imei} (${equipo.modelo} ${equipo.gb} ${equipo.color}) no se puede dar salida porque ${desc}.\n\nSolo se pueden dar salida a equipos DISPONIBLES.`);
+                    return;
+                }
+
+                // Validación 4: Pertenece a la sede actual
+                if (equipo.creadoPor && equipo.creadoPor !== sedeId) {
+                    // Advertencia blanda — no bloquea si fue ingresado desde otra sede por algún traslado
+                    console.warn(`⚠️ El equipo ${imei} fue creado por ${equipo.creadoPor} pero se está dando salida desde ${sedeId}.`);
+                }
+
+                // Marcar como transferido en inventario
+                const resultadoSalida = await inventarioService.procesarSalidaLote(
+                    [equipo.id],
+                    'transferido',
+                    { 
+                        destinoSalida: datos.datos.destino || 'No especificado',
+                        personaRetiro: datos.datos.persona || 'No especificado',
+                        fechaSalida: new Date().toISOString()
+                    }
+                );
+
+                if (!resultadoSalida.exito) {
+                    alert(`❌ Error al actualizar el inventario: ${resultadoSalida.error}`);
+                    return;
+                }
+                console.log(`✅ Equipo IMEI ${imei} marcado como 'transferido' por movimiento de Caja.`);
+            }
+
+            // Guardar usando el servicio de movimientos
             const resultado = await movimientoService.crearMovimiento(datos);
             console.log('💾 Resultado del guardado:', resultado);
 
@@ -3500,7 +3935,6 @@ class App {
                     await this.actualizarResumenVentas();
                 } catch (errorResumen) {
                     console.error('Error al actualizar resumen:', errorResumen);
-                    // No mostrar alert aquí, el movimiento ya se guardó correctamente
                 }
             } else {
                 const errores = resultado.errores ? resultado.errores.join('\n') : 'Error desconocido';
@@ -3509,6 +3943,8 @@ class App {
         } catch (error) {
             console.error('Error al guardar movimiento:', error);
             alert('❌ Error al guardar el movimiento: ' + error.message);
+        } finally {
+            this._guardandoMovimiento = false;
         }
     }
 
@@ -3581,22 +4017,33 @@ class App {
             case 'formIngresoAccesorio':
                 const esSalida = this.tipoMovimientoActual === 'formSalidaAccesorio';
                 const prefijo = esSalida ? 'salida' : 'ingreso';
-                console.log(this.tipoMovimientoActual)
+                
                 tipo = esSalida ? 'Salida Accesorio' : 'Ingreso Accesorio';
-                datosMovimiento.tipo = document.getElementById(`${prefijo}AccesorioTipo`)?.value || '';
-
-                if (esSalida) {
-                    datosMovimiento.destino = document.getElementById('salidaAccesorioDestino')?.value || '';
-                    if (datosMovimiento.destino === 'Otro') {
-                        datosMovimiento.destino = document.getElementById('salidaAccesorioDestinoPersonalizado')?.value || '';
-                    }
-                } else {
-                    datosMovimiento.proveedor = document.getElementById('ingresoAccesorioProveedor')?.value || '';
+                
+                // ✨ VALIDACIÓN USANDO AccesorioValidator
+                const validacionAccesorios = AccesorioValidator.validarYRecopilar(prefijo);
+                
+                if (!validacionAccesorios.valido) {
+                    const mensajeError = validacionAccesorios.errores.join('\n\n');
+                    alert(`⚠️ Por favor corrija los siguientes errores:\n\n${mensajeError}`);
+                    return null;
                 }
-
-                // Recopilar detalles específicos del accesorio
-                const detalles = this.recopilarDetallesAccesorio(prefijo, datosMovimiento.tipo);
-                Object.assign(datosMovimiento, detalles);
+                
+                // Validar campos comunes (destino/proveedor)
+                const validacionCampos = AccesorioValidator.validarCamposComunes(prefijo, esSalida);
+                if (!validacionCampos.valido) {
+                    alert(validacionCampos.errores.join('\n'));
+                    return null;
+                }
+                
+                // Retornar estructura especial para accesorios
+                return {
+                    tipo: tipo,
+                    esMultipleAccesorios: true,
+                    accesorios: validacionAccesorios.accesorios,
+                    destino: esSalida ? document.getElementById('salidaAccesorioDestino')?.value : undefined,
+                    proveedor: !esSalida ? document.getElementById('ingresoAccesorioProveedor')?.value : undefined
+                };
                 break;
         }
         console.log(datosMovimiento, tipo);
@@ -3607,59 +4054,7 @@ class App {
         };
     }
 
-    /**
-     * Recopila detalles específicos del accesorio
-     */
-    recopilarDetallesAccesorio(prefijo, tipoAccesorio) {
-        const detalles = {};
-        const tipoSinEspacios = tipoAccesorio.replace(/ /g, '');
 
-        switch (tipoAccesorio) {
-            case 'Forro':
-            case 'Vidrio Templado':
-            case 'Caja':
-            case 'Protector de Cámara':
-                const cantidadModelos = document.getElementById(`${prefijo}${tipoSinEspacios}CantidadModelos`)?.value || 1;
-                detalles.modelos = [];
-
-                const contenedor = document.getElementById(`${prefijo}${tipoSinEspacios}Modelos`);
-                if (contenedor) {
-                    for (let i = 1; i <= cantidadModelos; i++) {
-                        const modelo = contenedor.querySelector(`[data-modelo="${i}"]`)?.value || '';
-                        const cantidad = contenedor.querySelector(`[data-cantidad="${i}"]`)?.value || 1;
-                        const color = tipoAccesorio === 'Caja' ?
-                            (contenedor.querySelector(`[data-color="${i}"]`)?.value || '') : '';
-
-                        if (modelo) {
-                            detalles.modelos.push({ modelo, cantidad: parseInt(cantidad), color });
-                        }
-                    }
-                }
-                break;
-
-            case 'Cargador':
-                detalles.cantidad = document.getElementById(`${prefijo}CargadorCantidad`)?.value || 1;
-                detalles.modelo = document.getElementById(`${prefijo}CargadorModelo`)?.value || '';
-                break;
-
-            case 'Cable':
-                detalles.tipo = document.getElementById(`${prefijo}CableTipo`)?.value || '';
-                detalles.cantidad = document.getElementById(`${prefijo}CableCantidad`)?.value || 1;
-                break;
-
-            case 'Cubo':
-                detalles.cantidad = document.getElementById(`${prefijo}CuboCantidad`)?.value || 1;
-                detalles.descripcion = document.getElementById(`${prefijo}CuboDescripcion`)?.value || '';
-                break;
-
-            case 'Otro':
-                detalles.cantidad = document.getElementById(`${prefijo}OtroCantidad`)?.value || 1;
-                detalles.descripcion = document.getElementById(`${prefijo}OtroDescripcion`)?.value || '';
-                break;
-        }
-        console.log(detalles);
-        return detalles;
-    }
 
     /**
      * Cancela el movimiento actual
@@ -3692,6 +4087,182 @@ class App {
         this.tipoMovimientoActual = null;
     }
 
+    // ==========================================
+    // BUSCADOR ESTRICTO DE INVENTARIO
+    // ==========================================
+
+    inicializarBuscadoresInventario() {
+        const buscadores = [
+            { tipo: 'Venta', input: 'inputBuscadorVenta', resultados: 'resultadosBuscadorVenta' },
+            { tipo: 'Salida', input: 'inputBuscadorSalida', resultados: 'resultadosBuscadorSalida' },
+            { tipo: 'Garantia', input: 'inputBuscadorGarantia', resultados: 'resultadosBuscadorGarantia' }
+        ];
+
+        buscadores.forEach(b => {
+            const input = document.getElementById(b.input);
+            const resultados = document.getElementById(b.resultados);
+            
+            // Botón de quitar
+            const btnQuitar = document.getElementById(`btnQuitarEquipo${b.tipo}`);
+            if (btnQuitar) {
+                btnQuitar.addEventListener('click', () => this._limpiarBuscador(b.tipo));
+            }
+
+            if (!input || !resultados) return;
+
+            // Evento input para buscar
+            input.addEventListener('input', (e) => {
+                const query = e.target.value.trim().toLowerCase();
+                if (query.length < 2) {
+                    resultados.classList.add('hidden');
+                    return;
+                }
+
+                // Obtener todos los disponibles y filtrar
+                const equipos = inventarioService.obtenerDisponibles();
+                const filtrados = equipos.filter(eq => 
+                    (eq.imei && eq.imei.toLowerCase().includes(query)) ||
+                    (eq.modelo && eq.modelo.toLowerCase().includes(query))
+                );
+
+                this._renderizarResultadosBuscador(b.tipo, filtrados, resultados);
+            });
+
+            // Ocultar resultados si se hace click afuera
+            document.addEventListener('click', (e) => {
+                if (!input.contains(e.target) && !resultados.contains(e.target)) {
+                    resultados.classList.add('hidden');
+                }
+            });
+            
+            // Mostrar de nuevo si hace focus y tiene texto
+            input.addEventListener('focus', () => {
+                if (input.value.trim().length >= 2) {
+                    resultados.classList.remove('hidden');
+                }
+            });
+        });
+    }
+
+    _renderizarResultadosBuscador(tipo, equipos, contenedor) {
+        if (equipos.length === 0) {
+            contenedor.innerHTML = '<div class="p-3 text-sm text-gray-500 text-center">No se encontraron equipos disponibles con ese dato.</div>';
+            contenedor.classList.remove('hidden');
+            return;
+        }
+
+        const html = equipos.slice(0, 10).map(eq => `
+            <div class="p-3 border-b hover:bg-blue-50 cursor-pointer flex items-center justify-between" data-imei="${eq.imei}">
+                <div>
+                    <p class="font-semibold text-gray-800 text-sm">📱 ${eq.modelo}</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <span class="bg-gray-100 px-1 rounded">${eq.gb}</span> • 
+                        <span class="bg-gray-100 px-1 rounded">${eq.color}</span> • 
+                        <span class="bg-gray-100 px-1 rounded">Batería: ${eq.bateria}%</span>
+                    </p>
+                </div>
+                <div class="text-xs text-gray-400 font-mono">${eq.imei}</div>
+            </div>
+        `).join('');
+
+        contenedor.innerHTML = html;
+        contenedor.classList.remove('hidden');
+
+        // Agregar eventos de click
+        contenedor.querySelectorAll('div[data-imei]').forEach(div => {
+            div.addEventListener('click', () => {
+                const imei = div.dataset.imei;
+                const equipo = inventarioService.buscarPorImei(imei);
+                if (equipo) {
+                    this._seleccionarEquipoDesdeBuscador(tipo, equipo);
+                    contenedor.classList.add('hidden');
+                }
+            });
+        });
+    }
+
+    _seleccionarEquipoDesdeBuscador(tipo, equipo) {
+        // 1. Ocultar el contenedor del buscador
+        document.getElementById(`buscador${tipo === 'Venta' ? 'Venta' : tipo}Container`).classList.add('hidden');
+        
+        // 2. Mostrar la tarjeta
+        document.getElementById(`tarjetaEquipo${tipo}`).classList.remove('hidden');
+        document.getElementById(`btnQuitarEquipo${tipo}`).classList.remove('hidden');
+
+        // 3. Llenar los datos visuales de la tarjeta
+        document.getElementById(`tarjeta${tipo}Modelo`).textContent = equipo.modelo;
+        document.getElementById(`tarjeta${tipo}Capacidad`).textContent = equipo.gb;
+        document.getElementById(`tarjeta${tipo}Color`).textContent = equipo.color;
+        document.getElementById(`tarjeta${tipo}Bateria`).textContent = `🔋 ${equipo.bateria}%`;
+        document.getElementById(`tarjeta${tipo}Imei`).textContent = `IMEI: ${equipo.imei}`;
+
+        // 4. Llenar los campos ocultos subyacentes para no romper main.js
+        if (tipo === 'Venta') {
+            document.getElementById('modelo').value = equipo.modelo;
+            document.getElementById('color').value = equipo.color;
+            document.getElementById('almacenamiento').value = equipo.gb;
+            document.getElementById('bateria').value = equipo.bateria;
+            document.getElementById('equipoImei').value = equipo.imei;
+            
+            // Disparar eventos change si es necesario (ej: accesorios o validación)
+            document.getElementById('modelo').dispatchEvent(new Event('change'));
+            
+            // Si hay un banner de IMEI existente para la venta normal, lo ocultamos
+            if (this._ocultarBannerImei) {
+                this._ocultarBannerImei();
+            }
+
+        } else if (tipo === 'Salida') {
+            document.getElementById('salidaEquipoModelo').value = equipo.modelo;
+            document.getElementById('salidaEquipoCapacidad').value = equipo.gb;
+            document.getElementById('salidaEquipoColor').value = equipo.color;
+            document.getElementById('salidaEquipoBateria').value = equipo.bateria;
+            document.getElementById('salidaEquipoImei').value = equipo.imei;
+            
+        } else if (tipo === 'Garantia') {
+            document.getElementById('nuevoModelo').value = equipo.modelo;
+            document.getElementById('nuevoCapacidad').value = equipo.gb;
+            document.getElementById('nuevoColor').value = equipo.color;
+            document.getElementById('nuevoBateria').value = equipo.bateria;
+            document.getElementById('nuevoImei').value = equipo.imei;
+        }
+    }
+
+    _limpiarBuscador(tipo) {
+        // 1. Mostrar buscador y limpiar input
+        const container = document.getElementById(`buscador${tipo === 'Venta' ? 'Venta' : tipo}Container`);
+        if (container) container.classList.remove('hidden');
+        const inputBuscador = document.getElementById(`inputBuscador${tipo}`);
+        if (inputBuscador) inputBuscador.value = '';
+        
+        // 2. Ocultar tarjeta
+        const tarjeta = document.getElementById(`tarjetaEquipo${tipo}`);
+        if (tarjeta) tarjeta.classList.add('hidden');
+        const btn = document.getElementById(`btnQuitarEquipo${tipo}`);
+        if (btn) btn.classList.add('hidden');
+
+        // 3. Limpiar campos ocultos
+        if (tipo === 'Venta') {
+            document.getElementById('modelo').value = '';
+            document.getElementById('color').value = '';
+            document.getElementById('almacenamiento').value = '';
+            document.getElementById('bateria').value = '';
+            document.getElementById('equipoImei').value = '';
+            document.getElementById('modelo').dispatchEvent(new Event('change'));
+        } else if (tipo === 'Salida') {
+            document.getElementById('salidaEquipoModelo').value = '';
+            document.getElementById('salidaEquipoCapacidad').value = '';
+            document.getElementById('salidaEquipoColor').value = '';
+            document.getElementById('salidaEquipoBateria').value = '';
+            document.getElementById('salidaEquipoImei').value = '';
+        } else if (tipo === 'Garantia') {
+            document.getElementById('nuevoModelo').value = '';
+            document.getElementById('nuevoCapacidad').value = '';
+            document.getElementById('nuevoColor').value = '';
+            document.getElementById('nuevoBateria').value = '';
+            document.getElementById('nuevoImei').value = '';
+        }
+    }
 
 }
 

@@ -3792,8 +3792,18 @@ class App {
             // CASO ESPECIAL: ACCESORIOS MÚLTIPLES
             // ══════════════════════════════════════════
             if (datos.esMultipleAccesorios) {
+                // ── Defensa: descartar entradas inválidas ──
+                const accesoriosValidos = (datos.accesorios || []).filter(
+                    acc => acc && typeof acc === 'object' && acc.tipo
+                );
+
+                if (accesoriosValidos.length === 0) {
+                    alert('❌ No hay accesorios válidos para guardar. Revisa los datos del formulario.');
+                    return;
+                }
+
                 // Guardar cada accesorio como movimiento separado
-                for (const acc of datos.accesorios) {
+                for (const acc of accesoriosValidos) {
                     const datosMovimiento = {
                         tipo: acc.tipo,
                         modelos: acc.modelos || [],
@@ -3802,20 +3812,26 @@ class App {
                         destino: datos.destino,
                         proveedor: datos.proveedor
                     };
-                    
-                    const resultado = await movimientoService.crearMovimiento({
-                        tipo: datos.tipo,
-                        datos: datosMovimiento
-                    });
-                    
-                    if (!resultado.exito) {
-                        const errores = resultado.errores ? resultado.errores.join('\n') : 'Error desconocido';
-                        alert(`❌ Error al guardar ${acc.tipo}:\n${errores}`);
+
+                    try {
+                        const resultado = await movimientoService.crearMovimiento({
+                            tipo: datos.tipo,
+                            datos: datosMovimiento
+                        });
+
+                        if (!resultado.exito) {
+                            const errores = resultado.errores ? resultado.errores.join('\n') : 'Error desconocido';
+                            alert(`❌ Error al guardar ${acc.tipo}:\n${errores}`);
+                            return;
+                        }
+                    } catch (errAcc) {
+                        console.error(`Error guardando accesorio ${acc.tipo}:`, errAcc);
+                        alert(`❌ Error inesperado al guardar ${acc.tipo}: ${errAcc.message}`);
                         return;
                     }
                 }
-                
-                alert(`✅ ${datos.accesorios.length} movimiento(s) de accesorios registrado(s) correctamente`);
+
+                alert(`✅ ${accesoriosValidos.length} movimiento(s) de accesorios registrado(s) correctamente`);
                 this.cancelarMovimiento();
                 await this.actualizarResumenMovimientos();
                 await this.actualizarResumenVentas();

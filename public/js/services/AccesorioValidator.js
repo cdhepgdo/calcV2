@@ -50,7 +50,8 @@ class AccesorioValidator {
             if (!resultadoCaja.valido) {
                 errores.push(...resultadoCaja.errores);
             } else {
-                accesorios.push(resultadoCaja.accesorio);
+                //accesorios.push(resultadoCaja.accesorio);
+                accesorios.push(...resultadoCaja.accesorios);
             }
         }
         

@@ -299,15 +299,15 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "IPhone 17 pro 256 open",
-    "usd": 1100
+    "usd": 1080
   },
   {
     "nombre": "IPhone 17 pro max 256 open",
-    "usd": 1250
+    "usd": 1190
   },
   {
     "nombre": "Iphone 17 pro 256gb",
-    "usd": 1240
+    "usd": 1219
   },
   {
     "nombre": "Iphone 17 pro 512gb",
@@ -315,11 +315,11 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "Iphone 17 pro Max 256gb",
-    "usd": 1349
+    "usd": 1289
   },
   {
     "nombre": "Iphone 17 pro Max 512gb",
-    "usd": 1619
+    "usd": 1599
   },
   {
     "nombre": "IPhone 17 pro Max 1TB",

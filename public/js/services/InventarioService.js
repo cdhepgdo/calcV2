@@ -300,6 +300,224 @@ class InventarioService {
         console.log('🔴 InventarioService desconectado');
     }
 
+    /**
+     * Crea/actualiza una venta Y sincroniza el inventario en UNA sola operación atómica.
+     *
+     * Por qué esto es importante:
+     * ──────────────────────────
+     * Antes se hacían 3 llamadas separadas:
+     *   1) guardarVenta()         → fire-and-forget
+     *   2) marcarVendido(eq1)     → fire-and-forget
+     *   3) marcarVendido(eq2)     → fire-and-forget
+     *
+     * Si el WiFi se caía entre (1) y (2), la venta quedaba guardada
+     * pero el inventario desincronizado. Con este batch, Firestore
+     * aplica TODO o NADA: o se commitea la venta con su inventario
+     * actualizado, o no se aplica nada.
+     *
+     * Patrón local-first se mantiene:
+     * - El batch se dispara sin await bloqueante
+     * - IndexedDB persiste todo al instante
+     * - Sincronización al servidor en background
+     * - onSnapshot refresca la UI
+     *
+     * @param {Object} params
+     * @param {Object} params.venta              Instancia de Venta (o el JSON)
+     * @param {Array}  params.equiposIds        IDs de inventario a marcar como vendido
+     * @param {Array}  params.tradeInsNuevos    Array de {id, datos} para nuevos trade-ins a ingresar
+     * @param {Array}  params.tradeInsActualizar Array de {id, datos} para trade-ins ya en inventario
+     * @param {string} [params.ventaAnteriorId] Si es edición, ID de la venta anterior
+     * @param {Array}  [params.equiposLiberar]  IDs a liberar (volver a disponible) en edición
+     * @param {Array}  [params.tradeInsEliminar] IDs de trade-ins a soft-deleted en edición/eliminación
+     * @returns {Promise<{exito: boolean, error?: string}>}
+     */
+    async commitVentaConInventario({
+        venta,
+        equiposIds = [],
+        tradeInsNuevos = [],
+        tradeInsActualizar = [],
+        equiposLiberar = [],
+        tradeInsEliminar = []
+    }) {
+        try {
+            const batch = writeBatch(db);
+            const sedePath = this._getBasePath();
+            const ahora = new Date().toISOString();
+
+            // 1) Set venta
+            const ventaJSON = typeof venta.toJSON === 'function' ? venta.toJSON() : venta;
+            const ventaRef = doc(db, `${sedePath}/ventas`, venta.id);
+            batch.set(ventaRef, this._cleanForFirestore(ventaJSON));
+
+            // 2) Marcar cada equipo vendido
+            equiposIds.forEach(id => {
+                if (!id) return;
+                const ref = doc(db, `${sedePath}/inventario`, id);
+                batch.update(ref, {
+                    estado: 'vendido',
+                    ventaAsociadaId: venta.id,
+                    fechaVenta: ahora
+                });
+            });
+
+            // 3) Liberar equipos (edición: equipo que se quitó de la venta)
+            equiposLiberar.forEach(({ id }) => {
+                if (!id) return;
+                const ref = doc(db, `${sedePath}/inventario`, id);
+                batch.update(ref, {
+                    estado: 'disponible',
+                    ventaAsociadaId: null,
+                    fechaVenta: null
+                });
+            });
+
+            // 4) Ingresar trade-ins nuevos (los que el cliente entrega y no estaban en inventario)
+            tradeInsNuevos.forEach(({ id, datos }) => {
+                if (!id || !datos) return;
+                const ref = doc(db, `${sedePath}/inventario`, id);
+                const equipo = { ...datos, id, estado: 'disponible' };
+                batch.set(ref, this._cleanForFirestore(equipo));
+            });
+
+            // 5) Actualizar trade-ins ya existentes (edición: se modifican campos)
+            tradeInsActualizar.forEach(({ id, datos }) => {
+                if (!id || !datos) return;
+                const ref = doc(db, `${sedePath}/inventario`, id);
+                batch.update(ref, this._cleanForFirestore(datos));
+            });
+
+            // 6) Soft-delete trade-ins (venta eliminada o trade-in removido en edición)
+            tradeInsEliminar.forEach(({ id, motivo }) => {
+                if (!id) return;
+                const ref = doc(db, `${sedePath}/inventario`, id);
+                batch.update(ref, {
+                    estado: 'eliminado',
+                    motivo: motivo || 'Eliminado',
+                    fechaEliminacion: ahora
+                });
+            });
+
+            await batch.commit();
+            console.log(`✅ Batch venta+inventario commiteado: ${equiposIds.length} vendidos, ${tradeInsNuevos.length} trade-ins nuevos, ${equiposLiberar.length} liberados, ${tradeInsEliminar.length} eliminados`);
+            return { exito: true };
+        } catch (error) {
+            console.error('❌ Error en batch venta+inventario:', error);
+            return { exito: false, error: error.message };
+        }
+    }
+
+    /**
+     * Elimina una venta Y restaura el inventario en UNA sola operación atómica.
+     *
+     * Caso de uso: operador elimina una venta del registro de cierree.html.
+     *
+     * Reglas (las que pediste):
+     *   - Equipos vendidos en esa venta → vuelven a `disponible`
+     *     (pueden volver a venderse o asignarse como trade-in)
+     *   - Trade-ins que fueron ingresados POR ESTA VENTA → soft-delete
+     *     (estado = 'eliminado', motivo documentado, fecha documentada)
+     *     NO se borran físicamente para mantener trazabilidad.
+     *   - Trade-ins que NO pertenecen a esta venta (caso raro: ya
+     *     referenciados o vendidos en otra venta) → NO se tocan.
+     *
+     * Todo se hace en un writeBatch: o se aplica todo (delete venta +
+     * restore inventario + soft-delete trade-ins) o nada.
+     *
+     * @param {Object} params
+     * @param {Object} params.venta   Objeto venta (JSON) con .equipos[] y .equiposRecibidos[]
+     * @returns {Promise<{exito: boolean, error?: string}>}
+     */
+    async commitEliminarVentaConInventario({ venta }) {
+        try {
+            if (!venta || !venta.id) {
+                return { exito: false, error: 'Venta inválida' };
+            }
+
+            const batch = writeBatch(db);
+            const sedePath = this._getBasePath();
+            const ahora = new Date().toISOString();
+
+            // 1) Eliminar la venta
+            const ventaRef = doc(db, `${sedePath}/ventas`, venta.id);
+            batch.delete(ventaRef);
+
+            // 2) Restaurar equipos vendidos a "disponible"
+            // Soporta tanto singular (venta.equipo) como plural (venta.equipos[])
+            const equipos = [];
+            if (Array.isArray(venta.equipos) && venta.equipos.length > 0) {
+                equipos.push(...venta.equipos);
+            } else if (venta.equipo && venta.equipo.imei) {
+                equipos.push(venta.equipo);
+            }
+
+            equipos.forEach(eq => {
+                if (!eq || !eq.imei) return;
+                const inv = this.buscarPorImei(eq.imei);
+                if (inv && inv.estado === 'vendido') {
+                    const ref = doc(db, `${sedePath}/inventario`, inv.id);
+                    batch.update(ref, {
+                        estado: 'disponible',
+                        ventaAsociadaId: null,
+                        fechaVenta: null
+                    });
+                }
+            });
+
+            // 3) Soft-delete de trade-ins que fueron ingresados por ESTA venta
+            const recibidos = [];
+            if (Array.isArray(venta.equiposRecibidos) && venta.equiposRecibidos.length > 0) {
+                recibidos.push(...venta.equiposRecibidos);
+            } else if (venta.equipoRecibido && venta.equipoRecibido.imei) {
+                recibidos.push(venta.equipoRecibido);
+            }
+
+            recibidos.forEach(r => {
+                if (!r || !r.imei) return;
+                const inv = this.buscarPorImei(r.imei);
+                if (!inv) return;
+
+                // Solo tocar los que fueron ingresados por esta venta
+                const esDeEstaVenta = inv.origen && (
+                    inv.origen.includes(`Venta: ${venta.id}`) ||
+                    inv.origen.toLowerCase().includes('trade-in')
+                );
+                if (!esDeEstaVenta) {
+                    console.log(`ℹ️ Trade-in ${r.imei} no pertenece a la venta ${venta.id} → NO se elimina`);
+                    return;
+                }
+
+                const ref = doc(db, `${sedePath}/inventario`, inv.id);
+                batch.update(ref, {
+                    estado: 'eliminado',
+                    motivo: `Venta ${venta.id} eliminada`,
+                    fechaEliminacion: ahora
+                });
+            });
+
+            await batch.commit();
+            console.log(`✅ Batch eliminar venta+inventario commiteado: ${equipos.length} equipos restaurados, ${recibidos.length} trade-ins procesados`);
+            return { exito: true };
+        } catch (error) {
+            console.error('❌ Error en batch eliminar venta+inventario:', error);
+            return { exito: false, error: error.message };
+        }
+    }
+
+    /**
+     * Sanitiza un objeto para Firestore (reemplaza undefined por null).
+     * Equivalente al _sanitize de StorageService.
+     */
+    _cleanForFirestore(obj) {
+        if (obj === undefined) return null;
+        if (obj === null || typeof obj !== 'object') return obj;
+        if (Array.isArray(obj)) return obj.map(item => this._cleanForFirestore(item));
+        const clean = {};
+        for (const [key, value] of Object.entries(obj)) {
+            clean[key] = this._cleanForFirestore(value);
+        }
+        return clean;
+    }
+
     async eliminarEquipo(equipoId) {
         if (!equipoId) return { exito: false, error: 'ID inválido' };
         try {

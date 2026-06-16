@@ -20,7 +20,7 @@ export class Venta {
             telefono: ''
         };
 
-        // Equipo (si es venta completa)
+        // Equipo (si es venta completa) — singular (compatibilidad con ventas viejas)
         this.equipo = data.equipo || {
             modelo: '',
             color: '',
@@ -29,6 +29,19 @@ export class Venta {
             imei: '',
             garantia: ''
         };
+
+        // ════════════════════════════════════════════════════════════════
+        // MULTI-EQUIPO: normalizar plural ↔ singular
+        // Compatibilidad: ventas viejas (solo `equipo`) siguen funcionando.
+        // Ventas nuevas usan el array `equipos`.
+        // ════════════════════════════════════════════════════════════════
+        if (Array.isArray(data.equipos)) {
+            this.equipos = data.equipos;
+        } else if (data.equipo) {
+            this.equipos = [data.equipo];
+        } else {
+            this.equipos = [];
+        }
 
         // Accesorios
         this.accesorios = data.accesorios || {
@@ -62,8 +75,17 @@ export class Venta {
         this.pagoMovilDetalles = data.pagoMovilDetalles || null;
         this.transferenciaDetalles = data.transferenciaDetalles || null;
 
-        // Equipo recibido
+        // Equipo recibido — singular (compatibilidad con ventas viejas)
         this.equipoRecibido = data.equipoRecibido || null;
+
+        // MULTI-TRADE-IN: normalizar plural ↔ singular
+        if (Array.isArray(data.equiposRecibidos)) {
+            this.equiposRecibidos = data.equiposRecibidos;
+        } else if (data.equipoRecibido) {
+            this.equiposRecibidos = [data.equipoRecibido];
+        } else {
+            this.equiposRecibidos = [];
+        }
 
         // Abonos previos (para cierres)
         this.abonosPrevios = data.abonosPrevios || []; // Array de {fecha, monto}
@@ -96,17 +118,42 @@ export class Venta {
 
         // Validar datos del equipo si es venta completa
         if (this.tipoVenta === 'completa') {
-            if (!this.equipo.modelo) errores.push('Debe seleccionar un modelo de iPhone');
-            if (!this.equipo.color) errores.push('Debe seleccionar un color');
-            if (!this.equipo.almacenamiento) errores.push('Debe seleccionar capacidad de almacenamiento');
-            if (!this.equipo.bateria) errores.push('Debe ingresar el porcentaje de batería');
-            if (!this.equipo.garantia) errores.push('Debe seleccionar el tipo de garantía');
+            // Sincronizar singular con el primer elemento del array (compat multi-equipo)
+            const eqPrincipal = (this.equipos && this.equipos[0]) || this.equipo;
+            if (eqPrincipal) this.equipo = eqPrincipal;
+
+            // Validar que haya al menos 1 equipo seleccionado
+            if (!this.equipo || !this.equipo.modelo) {
+                errores.push('Debe seleccionar al menos un equipo del inventario para la venta');
+            } else {
+                if (!this.equipo.color) errores.push('Debe seleccionar un color');
+                if (!this.equipo.almacenamiento) errores.push('Debe seleccionar capacidad de almacenamiento');
+                if (!this.equipo.bateria) errores.push('Falta el porcentaje de batería del equipo');
+                if (!this.equipo.garantia) errores.push('Debe seleccionar el tipo de garantía');
+                if (!this.equipo.imei) errores.push('Falta el IMEI del equipo');
+            }
 
             // Validar datos del cliente
             if (!this.cliente.nombre) errores.push('Debe ingresar el nombre del cliente');
             if (!this.cliente.cedula) errores.push('Debe ingresar la cédula del cliente');
             if (!this.cliente.telefono) errores.push('Debe ingresar el teléfono del cliente');
+
+            // Validar que cada equipo del array tenga los datos mínimos
+            if (Array.isArray(this.equipos)) {
+                this.equipos.forEach((eq, idx) => {
+                    if (!eq || !eq.modelo) return; // ya reportado arriba
+                    if (!eq.imei) errores.push(`El equipo #${idx + 1} no tiene IMEI`);
+                    if (!eq.almacenamiento) errores.push(`El equipo #${idx + 1} no tiene capacidad de almacenamiento`);
+                    if (eq.precio == null || eq.precio < 0) errores.push(`El equipo #${idx + 1} no tiene precio asignado`);
+                });
+            }
         }
+
+        // Sincronizar singular con el primer elemento del array (compat multi-trade-in)
+        if (this.equiposRecibidos && this.equiposRecibidos.length > 0) {
+            this.equipoRecibido = this.equiposRecibidos[0];
+        }
+
         if (this.equipoRecibido) {
             if (!this.equipoRecibido.modelo) errores.push('Debe seleccionar un modelo de iPhone recibido');
             if (!this.equipoRecibido.color) errores.push('Debe seleccionar un color del equipo recibido');
@@ -129,13 +176,13 @@ export class Venta {
                 (this.pagoMixto.pagoMovil || 0) +
                 (this.pagoMixto.transferencia || 0);
 
-            // Agregar equipo recibido al cálculo
-            const equipoRecibidoValor = this.equipoRecibido ? this.equipoRecibido.valor : 0;
+            // Sumar TODOS los equipos recibidos (plural o singular)
+            const equipoRecibidoValor = this.sumarValoresRecibidos();
             const totalEsperado = totalPagoMixto + equipoRecibidoValor + (this.totalAbonosPrevios || 0);
             const diferencia = Math.abs(totalEsperado - this.montoTotal);
 
             if (diferencia > 0.01 && !this.weppa) {
-                errores.push(`El total del pago mixto ($${totalPagoMixto.toFixed(2)}) + equipo recibido ($${equipoRecibidoValor.toFixed(2)}) no coincide con el monto total ($${this.montoTotal.toFixed(2)}). Active WEPPA si es intencional.`);
+                errores.push(`El total del pago mixto ($${totalPagoMixto.toFixed(2)}) + equipo(s) recibido(s) ($${equipoRecibidoValor.toFixed(2)}) no coincide con el monto total ($${this.montoTotal.toFixed(2)}). Active WEPPA si es intencional.`);
             }
 
         } else if (this.formaPago === 'pagomovil') {
@@ -143,14 +190,14 @@ export class Venta {
                 errores.push(`Coloca la tasa`)
             } else {
                 // VALIDACIÓN PAGO MÓVIL
-                const equipoRecibidoValor = this.equipoRecibido ? this.equipoRecibido.valor : 0;
+                const equipoRecibidoValor = this.sumarValoresRecibidos();
                 const totalEsperado = this.pagoMovilDetalles.dolares + equipoRecibidoValor + (this.totalAbonosPrevios || 0);
                 const diferencia = this.montoTotal - totalEsperado;
                 console.log('pagomovilio', diferencia)
                 if (diferencia > 0.01 && !this.weppa) {
-                    errores.push(`El monto total ($${this.montoTotal.toFixed(2)}) no puede ser mayor al pago móvil ($${this.pagoMovilDetalles.dolares.toFixed(2)}) + equipo recibido ($${equipoRecibidoValor.toFixed(2)}). Active WEPPA si es intencional.`);
+                    errores.push(`El monto total ($${this.montoTotal.toFixed(2)}) no puede ser mayor al pago móvil ($${this.pagoMovilDetalles.dolares.toFixed(2)}) + equipo(s) recibido(s) ($${equipoRecibidoValor.toFixed(2)}). Active WEPPA si es intencional.`);
                 } else if (diferencia < 0 && !this.weppa) {
-                    errores.push(`El monto total ($${this.montoTotal.toFixed(2)}) no puede ser menor al pago móvil ($${this.pagoMovilDetalles.dolares.toFixed(2)}) + equipo recibido ($${equipoRecibidoValor.toFixed(2)}). Active WEPPA si es intencional.`);
+                    errores.push(`El monto total ($${this.montoTotal.toFixed(2)}) no puede ser menor al pago móvil ($${this.pagoMovilDetalles.dolares.toFixed(2)}) + equipo(s) recibido(s) ($${equipoRecibidoValor.toFixed(2)}). Active WEPPA si es intencional.`);
                 }
             }
 
@@ -159,14 +206,14 @@ export class Venta {
                 errores.push(`Coloca la Tasa`)
             } else {
                 // VALIDACIÓN TRANSFERENCIA
-                const equipoRecibidoValor = this.equipoRecibido ? this.equipoRecibido.valor : 0;
+                const equipoRecibidoValor = this.sumarValoresRecibidos();
                 const totalEsperado = this.transferenciaDetalles.dolares + equipoRecibidoValor + (this.totalAbonosPrevios || 0);
                 const diferencia = this.montoTotal - totalEsperado;
 
                 if (diferencia > 0.01 && !this.weppa) {
-                    errores.push(`El monto total ($${this.montoTotal.toFixed(2)}) no puede ser mayor a la transferencia ($${this.transferenciaDetalles.dolares.toFixed(2)}) + equipo recibido ($${equipoRecibidoValor.toFixed(2)}). Active WEPPA si es intencional.`);
+                    errores.push(`El monto total ($${this.montoTotal.toFixed(2)}) no puede ser mayor a la transferencia ($${this.transferenciaDetalles.dolares.toFixed(2)}) + equipo(s) recibido(s) ($${equipoRecibidoValor.toFixed(2)}). Active WEPPA si es intencional.`);
                 } else if (diferencia < 0 && !this.weppa) {
-                    errores.push(`El monto total ($${this.montoTotal.toFixed(2)}) no puede ser menor a la transferencia ($${this.transferenciaDetalles.dolares.toFixed(2)}) + equipo recibido ($${equipoRecibidoValor.toFixed(2)}). Active WEPPA si es intencional.`);
+                    errores.push(`El monto total ($${this.montoTotal.toFixed(2)}) no puede ser menor a la transferencia ($${this.transferenciaDetalles.dolares.toFixed(2)}) + equipo(s) recibido(s) ($${equipoRecibidoValor.toFixed(2)}). Active WEPPA si es intencional.`);
                 }
             }
 
@@ -177,6 +224,32 @@ export class Venta {
             // Aquí solo validamos que sea positivo
             if (this.montoTotal <= 0) {
                 errores.push('El monto total debe ser mayor a cero.');
+            }
+        }
+
+        // WEPPA: la deuda total (montoTotal) debe ser >= a lo que el cliente paga HOY (inicial).
+        // Si montoTotal < inicial, no es un crédito real, es un error de captura.
+        if (this.weppa) {
+            let inicial = this.sumarValoresRecibidos() + (this.totalAbonosPrevios || 0);
+
+            if (this.formaPago === 'mixto' && this.pagoMixto) {
+                inicial += (this.pagoMixto.efectivo || 0)
+                         + (this.pagoMixto.zelle || 0)
+                         + (this.pagoMixto.binance || 0)
+                         + (this.pagoMixto.pagoMovil || 0)
+                         + (this.pagoMixto.transferencia || 0);
+            } else if (this.formaPago === 'pagomovil' && this.pagoMovilDetalles) {
+                inicial += this.pagoMovilDetalles.dolares || 0;
+            } else if (this.formaPago === 'transferencia' && this.transferenciaDetalles) {
+                inicial += this.transferenciaDetalles.dolares || 0;
+            } else if (['efectivo', 'zelle', 'binance', 'paypal'].includes(this.formaPago)) {
+                inicial += this.montoPago || 0;
+            }
+
+            if (this.montoTotal < inicial - 0.01) {
+                errores.push(
+                    `WEPPA: el monto total ($${this.montoTotal.toFixed(2)}) no puede ser menor a lo que el cliente paga HOY ($${inicial.toFixed(2)}). La deuda debe ser mayor o igual a la inicial.`
+                );
             }
         }
 
@@ -208,6 +281,16 @@ export class Venta {
     }
 
     /**
+     * Suma el valor de TODOS los equipos recibidos (plural) o del singular
+     */
+    sumarValoresRecibidos() {
+        const lista = (this.equiposRecibidos && this.equiposRecibidos.length > 0)
+            ? this.equiposRecibidos
+            : (this.equipoRecibido ? [this.equipoRecibido] : []);
+        return lista.reduce((s, e) => s + (e && e.valor ? Number(e.valor) : 0), 0);
+    }
+
+    /**
      * Calcula el efectivo involucrado en esta venta
      */
     calcularEfectivo() {
@@ -217,7 +300,7 @@ export class Venta {
             if (this.montoPago !== null && this.montoPago !== undefined) {
                 efectivo = this.montoPago;
             } else {
-                efectivo = this.montoTotal - (this.equipoRecibido ? this.equipoRecibido.valor : 0) - (this.totalAbonosPrevios || 0);
+                efectivo = this.montoTotal - this.sumarValoresRecibidos() - (this.totalAbonosPrevios || 0);
             }
         } else if (this.formaPago === 'mixto' && this.pagoMixto) {
             efectivo = this.pagoMixto.efectivo || 0;
@@ -271,8 +354,20 @@ export class Venta {
 
     /**
      * Convierte la venta a un objeto plano para almacenamiento
+     * Persiste AMBOS formatos (singular + plural) para retrocompatibilidad.
+     * - `equipo` / `equipoRecibido` (singular): primer elemento del array
+     * - `equipos` / `equiposRecibidos` (plural): array completo
      */
     toJSON() {
+        // Sincronizar singular con el primer elemento del array
+        // (para que `equipo` siempre sea coherente con `equipos[0]`)
+        if (Array.isArray(this.equipos) && this.equipos.length > 0) {
+            this.equipo = this.equipos[0];
+        }
+        if (Array.isArray(this.equiposRecibidos) && this.equiposRecibidos.length > 0) {
+            this.equipoRecibido = this.equiposRecibidos[0];
+        }
+
         return {
             id: this.id,
             fecha: this.fecha,
@@ -280,7 +375,12 @@ export class Venta {
             tipoVenta: this.tipoVenta,
             tipoTransaccion: this.tipoTransaccion,
             cliente: this.cliente,
+            // Compat singular (lectores viejos: admin.js, registro.js)
             equipo: this.equipo,
+            equipoRecibido: this.equipoRecibido,
+            // Nuevos plurales (multi-equipo / multi-trade-in)
+            equipos: this.equipos || [],
+            equiposRecibidos: this.equiposRecibidos || [],
             accesorios: this.accesorios,
             formaPago: this.formaPago,
             montoTotal: this.montoTotal,
@@ -288,7 +388,6 @@ export class Venta {
             pagoMixto: this.pagoMixto,
             pagoMovilDetalles: this.pagoMovilDetalles,
             transferenciaDetalles: this.transferenciaDetalles,
-            equipoRecibido: this.equipoRecibido,
             abonosPrevios: this.abonosPrevios,
             totalAbonosPrevios: this.totalAbonosPrevios,
             weppa: this.weppa,

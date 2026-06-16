@@ -78,8 +78,8 @@ class VentaService {
      */
     async eliminarVenta(ventaId) {
         try {
-            // 1. Primero obtener los datos de la venta antes de eliminarla
-            const venta = await storageService.obtenerVentaPorId(ventaId);
+            // 1. Obtener la venta del caché local (instantáneo, sin red)
+            const venta = storageService.obtenerVentaPorId(ventaId);
             if (!venta) {
                 return {
                     exito: false,
@@ -87,89 +87,29 @@ class VentaService {
                 };
             }
 
-            // 2. Si la venta tenía un equipo vendido del inventario, restaurarlo a "disponible"
-            if (venta.equipo && venta.equipo.imei) {
-                try {
-                    const equipoExistente = inventarioService.buscarPorImei(venta.equipo.imei);
-                    if (equipoExistente && equipoExistente.estado === 'vendido') {
-                        await inventarioService.marcarDisponible(equipoExistente.id);
-                        console.log(`✅ Equipo ${venta.equipo.imei} restaurado a "disponible" tras eliminar venta`);
-                    }
-                } catch (error) {
-                    console.warn('⚠️ No se pudo restaurar equipo del inventario:', error);
-                    // Continuamos con la eliminación aunque falle la restauración
-                }
-            }
+            // 2. Marcar como eliminada en el caché local (la UI la oculta al instante)
+            this._deletedVentaIds = this._deletedVentaIds || new Set();
+            this._deletedVentaIds.add(ventaId);
+            this._cacheVentas = (this._cacheVentas || []).filter(v => v.id !== ventaId);
+            this._notificarCambio?.();
 
-            // 3. Si la venta tenía trade-in (equipo recibido), eliminarlo del inventario
-            if (venta.equipoRecibido && venta.equipoRecibido.imei) {
-                try {
-                    const equipoTradeIn = inventarioService.buscarPorImei(venta.equipoRecibido.imei);
-                    
-                    if (equipoTradeIn) {
-                        let debeEliminar = false;
-                        
-                        // CASO 1: Trade-in está "disponible" → Eliminar siempre
-                        if (equipoTradeIn.estado === 'disponible') {
-                            debeEliminar = true;
-                            console.log(`ℹ️ Trade-in ${venta.equipoRecibido.imei} está disponible → se eliminará`);
-                        }
-                        
-                        // CASO 2: Trade-in está "vendido" → Verificar si pertenece a OTRA venta
-                        else if (equipoTradeIn.estado === 'vendido') {
-                            // Verificar si fue vendido en otra venta diferente
-                            const ventas = await storageService.obtenerVentas();
-                            const fueVendidoEnOtraVenta = ventas.some(v => 
-                                v.id !== ventaId && 
-                                v.equipo?.imei === venta.equipoRecibido.imei
-                            );
-                            
-                            if (fueVendidoEnOtraVenta) {
-                                // El trade-in se vendió en otra venta → NO eliminar
-                                debeEliminar = false;
-                                console.log(`ℹ️ Trade-in ${venta.equipoRecibido.imei} fue vendido en otra venta → NO se eliminará`);
-                            } else {
-                                // El trade-in NO fue vendido en otra venta → Eliminar
-                                debeEliminar = true;
-                                console.log(`ℹ️ Trade-in ${venta.equipoRecibido.imei} no fue vendido en otra venta → se eliminará`);
-                            }
-                        }
-                        
-                        // CASO 3: Trade-in con cualquier otro estado (defectuoso, etc.) → Verificar origen
-                        else {
-                            const esDeEstaVenta = equipoTradeIn.origen && (
-                                equipoTradeIn.origen.includes(`Venta: ${venta.id}`) ||
-                                equipoTradeIn.origen.includes('Trade-in')
-                            );
-                            debeEliminar = esDeEstaVenta;
-                            console.log(`ℹ️ Trade-in ${venta.equipoRecibido.imei} estado: ${equipoTradeIn.estado}, origen: ${equipoTradeIn.origen} → ${debeEliminar ? 'se eliminará' : 'NO se eliminará'}`);
-                        }
-                        
-                        if (debeEliminar) {
-                            await inventarioService.eliminarEquipo(equipoTradeIn.id);
-                            console.log(`✅ Trade-in ${venta.equipoRecibido.imei} eliminado del inventario tras eliminar venta`);
-                        }
-                    }
-                } catch (error) {
-                    console.warn('⚠️ No se pudo eliminar trade-in del inventario:', error);
-                    // Continuamos con la eliminación
-                }
-            }
+            // 3. COMMIT ATÓMICO: delete venta + restore inventario + soft-delete trade-ins
+            const resultado = await inventarioService.commitEliminarVentaConInventario({ venta });
 
-            // 4. Ahora eliminar la venta
-            const resultado = await storageService.eliminarVenta(ventaId);
-
-            if (resultado.exito) {
-                return {
-                    exito: true,
-                    mensaje: MENSAJES.VENTA_ELIMINADA
-                };
-            } else {
+            if (!resultado.exito) {
+                // Si falló el batch, revertir el cambio local
+                this._deletedVentaIds.delete(ventaId);
+                console.error('❌ Error en batch eliminar venta:', resultado.error);
                 return {
                     exito: false,
-                    errores: [resultado.error]
+                    errores: [`❌ No se pudo eliminar la venta: ${resultado.error || 'desconocido'}`]
                 };
             }
+
+            return {
+                exito: true,
+                mensaje: MENSAJES.VENTA_ELIMINADA
+            };
         } catch (error) {
             console.error('❌ Error en el proceso de eliminación de venta:', error);
             return {
@@ -214,11 +154,15 @@ class VentaService {
         const ventas = await this.obtenerVentas();
         const fechaHoy = new Date().toLocaleDateString('es-ES');
 
-        return ventas.filter(v =>
+        const ventasDelDia = ventas.filter(v =>
             v.fecha === fechaHoy &&
             v.tipoVenta === 'completa' &&
             v.tipoTransaccion !== 'abono'
-        ).length;
+        );
+
+        return ventasDelDia.reduce((total, venta) => {
+            return total + ((venta.equipos && venta.equipos.length) || (venta.equipo ? 1 : 0));
+        }, 0);
     }
 
     /**

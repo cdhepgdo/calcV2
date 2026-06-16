@@ -5,6 +5,7 @@
 import { authService } from './services/AuthService.js';
 import { CambioGarantia } from './models/CambioGarantia.js';
 import { Movimiento } from './models/Movimiento.js';
+import { Venta } from './models/Venta.js';
 import { ventaService } from './services/VentaService.js';
 import { movimientoService } from './services/MovimientoService.js';
 import { storageService } from './services/StorageService.js';
@@ -299,7 +300,8 @@ class App {
             const imei = (document.getElementById('equipoImei')?.value || '').trim();
             const equipo = inventarioService.buscarPorImei(imei);
             if (equipo && equipo.estado === 'disponible') {
-                this._aplicarEquipoDelInventario(equipo);
+                const target = this._obtenerFilaVentaTarget();
+                this._aplicarEquipoDelInventario(equipo, target);
                 this._ocultarBannerImei();
             }
         });
@@ -345,14 +347,17 @@ class App {
             if (weppaActivo) {
                 // Mostrar campo editable
                 campoEditable.classList.remove('hidden');
+                // Activar required solo cuando el campo es visible
+                document.getElementById('montoTotalManual').setAttribute('required', 'required');
                 // Copiar el inicial calculado al campo manual como sugerencia
                 const totalInicial = parseFloat(document.getElementById('montoTotal').value) || 0;
                 document.getElementById('montoTotalManual').value = totalInicial.toFixed(2);
                 // Actualizar el display del inicial
                 document.getElementById('weppaInicial').textContent = totalInicial.toFixed(2);
             } else {
-                // Ocultar campo editable
+                // Ocultar campo editable y quitar required
                 campoEditable.classList.add('hidden');
+                document.getElementById('montoTotalManual').removeAttribute('required');
                 // Recalcular automáticamente
                 this.calcularYMostrarTotal();
             }
@@ -365,6 +370,8 @@ class App {
             document.getElementById('montoTotal').value = montoManual.toFixed(2);
             // Actualizar el display
             document.getElementById('montoTotalDisplay').textContent = `$${montoManual.toFixed(2)}`;
+            // Refrescar el banner de diferencia con el nuevo monto manual
+            this._actualizarBannerDiferencia();
         });
     }
 
@@ -402,6 +409,13 @@ class App {
         this.manejarFilasDinamicas('.btn-add-forro', 'forroLista', '.forro-item');
         this.manejarFilasDinamicas('.btn-add-vidrio', 'vidrioLista', '.vidrio-item');
         this.manejarFilasDinamicas('.btn-add-otro', 'otroLista', '.otro-item');
+
+        // ════════════════════════════════════════════════════════════════
+        // MULTI-EQUIPO / MULTI-TRADE-IN (Fase 1 - enfoque conservador)
+        // El primer equipo se sigue capturando con los IDs singulares.
+        // Los equipos 2..N se crean dinámicamente con clases.
+        // ════════════════════════════════════════════════════════════════
+        this.inicializarMultiEquipo();
 
         // Evento para auto-seleccionar cuando cambia el modelo del iPhone
         const modeloSelect = document.getElementById('modelo');
@@ -454,6 +468,300 @@ class App {
                 contenedor.appendChild(nuevoItem);
             }
         });
+    }
+
+    /**
+     * Inicializa el manejo multi-equipo y multi-trade-in.
+     * Enfoque conservador: el primer equipo usa IDs singulares (compat 100%).
+     * Los equipos 2..N se crean con clases .equipo-vendido-item / .equipo-recibido-item.
+     */
+    inicializarMultiEquipo() {
+        // Botón que muestra el wrapper multi-equipo
+        const btnActivar = document.getElementById('btnActivarMultiEquipo');
+        if (btnActivar) {
+            btnActivar.addEventListener('click', () => {
+                btnActivar.classList.add('hidden');
+                const wrapper = document.getElementById('equiposVendidosAdicionalesWrapper');
+                if (wrapper) wrapper.classList.remove('hidden');
+                this._agregarFilaEquipoVendido();
+            });
+        }
+
+        // Botón "+" para agregar más filas de equipos vendidos
+        const btnAdd = document.getElementById('btnAddEquipoVendido');
+        if (btnAdd) {
+            btnAdd.addEventListener('click', () => this._agregarFilaEquipoVendido());
+        }
+
+        // Botón que muestra el wrapper multi-trade-in
+        const btnActivarT = document.getElementById('btnActivarMultiTradeIn');
+        if (btnActivarT) {
+            btnActivarT.addEventListener('click', () => {
+                btnActivarT.classList.add('hidden');
+                const wrapper = document.getElementById('equiposRecibidosAdicionalesWrapper');
+                if (wrapper) wrapper.classList.remove('hidden');
+                this._agregarFilaEquipoRecibido();
+            });
+        }
+
+        // Botón "+" para agregar más filas de trade-ins
+        const btnAddT = document.getElementById('btnAddEquipoRecibido');
+        if (btnAddT) {
+            btnAddT.addEventListener('click', () => this._agregarFilaEquipoRecibido());
+        }
+    }
+
+    /**
+     * Recalcula el montoTotal a partir de la suma de precios de equipos vendidos
+     * menos el valor de los trade-ins. Solo se aplica si hay al menos 1 precio cargado.
+     */
+    _recalcularTotalDesdePrecios() {
+        const totalEquipos = this._sumarPreciosEquiposVendidos();
+        const totalRecibidos = this._sumarValoresRecibidos();
+        if (totalEquipos > 0) {
+            const nuevoTotal = Math.max(0, totalEquipos - totalRecibidos);
+            const montoInput = document.getElementById('montoTotal');
+            if (montoInput) montoInput.value = nuevoTotal.toFixed(2);
+        }
+    }
+
+    /**
+     * Suma los precios de todos los equipos vendidos (singular + adicionales)
+     */
+    _sumarPreciosEquiposVendidos() {
+        // Precio singular eliminado: la suma total viene ahora desde la lista apilada
+        // (#equiposSeleccionadosVenta) que se renderiza en #listaEquiposVentaSeleccionados.
+        let total = 0;
+        document.querySelectorAll('#equiposVendidosAdicionales .eq-vendido-precio').forEach(inp => {
+            total += parseFloat(inp.value) || 0;
+        });
+        return total;
+    }
+
+    /**
+     * Suma los valores de todos los equipos recibidos (singular + adicionales)
+     */
+    _sumarValoresRecibidos() {
+        let total = 0;
+        if (document.getElementById('recibirEquipo')?.checked) {
+            total = parseFloat(document.getElementById('equipoValor')?.value) || 0;
+            document.querySelectorAll('#equiposRecibidosAdicionales .eq-recibido-valor').forEach(inp => {
+                total += parseFloat(inp.value) || 0;
+            });
+        }
+        return total;
+    }
+
+    /**
+     * Crea y agrega una nueva fila de equipo vendido (N≥2)
+     */
+    _agregarFilaEquipoVendido() {
+        const contenedor = document.getElementById('equiposVendidosAdicionales');
+        if (!contenedor) return;
+
+        const idx = contenedor.querySelectorAll('.equipo-vendido-item').length + 2; // 2, 3, 4...
+        const fila = document.createElement('div');
+        fila.className = 'equipo-vendido-item bg-white p-3 rounded-lg border-2 border-blue-200 relative';
+        fila.innerHTML = `
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-semibold text-blue-700 flex items-center gap-2">
+                    📱 Equipo #${idx}
+                    <span class="inv-badge hidden text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium">
+                        🎯 Del inventario
+                    </span>
+                </span>
+                <div class="flex items-center gap-2">
+                    <button type="button" class="btn-buscar-inv-fila text-indigo-600 hover:text-indigo-800 text-xs font-medium underline">
+                        🎯 Buscar en inventario
+                    </button>
+                    <button type="button" class="btn-remove-equipo-vendido text-red-500 hover:text-red-700 text-xs font-medium">
+                        ✕ Quitar
+                    </button>
+                </div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Modelo</label>
+                    <select class="eq-vendido-modelo w-full p-2 border rounded-lg text-sm"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Color</label>
+                    <select class="eq-vendido-color w-full p-2 border rounded-lg text-sm"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Capacidad</label>
+                    <select class="eq-vendido-almacenamiento w-full p-2 border rounded-lg text-sm">
+                        <option value="">—</option>
+                        <option value="64GB">64GB</option>
+                        <option value="128GB">128GB</option>
+                        <option value="256GB">256GB</option>
+                        <option value="512GB">512GB</option>
+                        <option value="1TB">1TB</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">% Batería</label>
+                    <input type="number" min="1" max="100" class="eq-vendido-bateria w-full p-2 border rounded-lg text-sm" placeholder="%">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">IMEI</label>
+                    <input type="text" class="eq-vendido-imei w-full p-2 border rounded-lg text-sm" placeholder="IMEI">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Precio ($)</label>
+                    <input type="number" step="0.01" min="0" class="eq-vendido-precio w-full p-2 border rounded-lg text-sm" placeholder="0.00">
+                </div>
+            </div>
+        `;
+        contenedor.appendChild(fila);
+
+        // Llenar los selects con las opciones disponibles
+        this._poblarSelectoresEquipoVendido(fila);
+
+        // Listener: cambio de precio → recalcular total
+        const inpPrecio = fila.querySelector('.eq-vendido-precio');
+        if (inpPrecio) inpPrecio.addEventListener('input', () => this._recalcularTotalDesdePrecios());
+
+        // Botón quitar
+        fila.querySelector('.btn-remove-equipo-vendido').addEventListener('click', () => {
+            fila.remove();
+            this._actualizarContadorEquiposVendidos();
+            this._recalcularTotalDesdePrecios();
+        });
+
+        // Botón "Buscar en inventario" para esta fila
+        fila.querySelector('.btn-buscar-inv-fila').addEventListener('click', () => {
+            // Marcar esta fila como target antes de abrir el buscador
+            this._filaInvTarget = fila;
+            const buscador = document.getElementById('invBuscadorInput');
+            if (buscador) {
+                buscador.focus();
+                buscador.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+
+        this._actualizarContadorEquiposVendidos();
+    }
+
+    /**
+     * Puebla los selects de modelo y color de una fila adicional con las opciones del inventario
+     */
+    _poblarSelectoresEquipoVendido(fila) {
+        // Reutilizar las opciones que ya están en los selects singulares #modelo y #color
+        const modeloSingular = document.getElementById('modelo');
+        const colorSingular = document.getElementById('color');
+        if (!modeloSingular || !colorSingular) return;
+
+        const selModelo = fila.querySelector('.eq-vendido-modelo');
+        const selColor = fila.querySelector('.eq-vendido-color');
+        if (selModelo) {
+            selModelo.innerHTML = modeloSingular.innerHTML;
+        }
+        if (selColor) {
+            selColor.innerHTML = colorSingular.innerHTML;
+        }
+    }
+
+    /**
+     * Actualiza el contador visible de equipos adicionales vendidos
+     */
+    _actualizarContadorEquiposVendidos() {
+        const contenedor = document.getElementById('equiposVendidosAdicionales');
+        const count = contenedor ? contenedor.querySelectorAll('.equipo-vendido-item').length : 0;
+        const span = document.getElementById('equiposAdicionalesCount');
+        if (span) span.textContent = `(${count})`;
+    }
+
+    /**
+     * Crea y agrega una nueva fila de trade-in (N≥2)
+     */
+    _agregarFilaEquipoRecibido() {
+        const contenedor = document.getElementById('equiposRecibidosAdicionales');
+        if (!contenedor) return;
+
+        const idx = contenedor.querySelectorAll('.equipo-recibido-item').length + 2;
+        const fila = document.createElement('div');
+        fila.className = 'equipo-recibido-item bg-white p-3 rounded-lg border-2 border-orange-200 relative';
+        fila.innerHTML = `
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-semibold text-orange-700">📱 Equipo Recibido #${idx}</span>
+                <button type="button" class="btn-remove-equipo-recibido text-red-500 hover:text-red-700 text-xs font-medium">
+                    ✕ Quitar
+                </button>
+            </div>
+            <div class="grid md:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Modelo</label>
+                    <select class="eq-recibido-modelo w-full p-2 border rounded-lg text-sm"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Capacidad</label>
+                    <select class="eq-recibido-capacidad w-full p-2 border rounded-lg text-sm">
+                        <option value="">—</option>
+                        <option value="64GB">64GB</option>
+                        <option value="128GB">128GB</option>
+                        <option value="256GB">256GB</option>
+                        <option value="512GB">512GB</option>
+                        <option value="1TB">1TB</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Color</label>
+                    <select class="eq-recibido-color w-full p-2 border rounded-lg text-sm"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">% Batería</label>
+                    <input type="number" min="1" max="100" class="eq-recibido-bateria w-full p-2 border rounded-lg text-sm" placeholder="%">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">IMEI</label>
+                    <input type="text" class="eq-recibido-imei w-full p-2 border rounded-lg text-sm" placeholder="IMEI">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Valor ($)</label>
+                    <input type="number" step="0.01" min="0" class="eq-recibido-valor w-full p-2 border rounded-lg text-sm" placeholder="0.00">
+                </div>
+            </div>
+        `;
+        contenedor.appendChild(fila);
+
+        this._poblarSelectoresEquipoRecibido(fila);
+
+        // Listener: cambio de valor → recalcular total
+        const inpValor = fila.querySelector('.eq-recibido-valor');
+        if (inpValor) inpValor.addEventListener('input', () => this._recalcularTotalDesdePrecios());
+
+        fila.querySelector('.btn-remove-equipo-recibido').addEventListener('click', () => {
+            fila.remove();
+            this._actualizarContadorEquiposRecibidos();
+            this._recalcularTotalDesdePrecios();
+        });
+
+        this._actualizarContadorEquiposRecibidos();
+    }
+
+    /**
+     * Puebla los selects de una fila adicional de trade-in con las opciones del singular
+     */
+    _poblarSelectoresEquipoRecibido(fila) {
+        const modeloSingular = document.getElementById('equipoModelo');
+        const colorSingular = document.getElementById('equipoColor');
+        if (!modeloSingular || !colorSingular) return;
+
+        const selModelo = fila.querySelector('.eq-recibido-modelo');
+        const selColor = fila.querySelector('.eq-recibido-color');
+        if (selModelo) selModelo.innerHTML = modeloSingular.innerHTML;
+        if (selColor) selColor.innerHTML = colorSingular.innerHTML;
+    }
+
+    /**
+     * Actualiza el contador visible de trade-ins adicionales
+     */
+    _actualizarContadorEquiposRecibidos() {
+        const contenedor = document.getElementById('equiposRecibidosAdicionales');
+        const count = contenedor ? contenedor.querySelectorAll('.equipo-recibido-item').length : 0;
+        const span = document.getElementById('equiposRecibidosAdicionalesCount');
+        if (span) span.textContent = `(${count})`;
     }
 
     /**
@@ -753,6 +1061,76 @@ class App {
         } else {
             equipoLinea.style.display = 'none';
         }
+
+        // ── Banner de diferencia: pago HOY vs suma de precios de equipos vendidos ──
+        this._actualizarBannerDiferencia();
+    }
+
+    /**
+     * Muestra/oculta el banner de diferencia entre lo que el cliente paga HOY
+     * y la suma de precios tipeados en la lista de equipos a vender.
+     * - Sin equipos vendidos → banner oculto
+     * - Venta normal cuadra (|diff| < 0.01) → banner oculto
+     * - WEPPA + pago < deuda → banner verde "Crédito: $X.XX (saldo a deber)"
+     * - Venta normal + pago > deuda → banner ámbar "Pagaste $X.XX de más"
+     * - Venta normal + pago < deuda → banner rojo "Faltan $X.XX para cuadrar"
+     */
+    _actualizarBannerDiferencia() {
+        const banner = document.getElementById('diferenciaPago');
+        if (!banner) return;
+
+        const icono = document.getElementById('diferenciaPagoIcono');
+        const texto = document.getElementById('diferenciaPagoTexto');
+
+        const totalEsperado = this._sumarPreciosEquiposVendidos();
+        const totalIngresado = parseFloat(document.getElementById('montoTotal')?.value) || 0;
+        const weppaActivo = document.getElementById('weppa')?.checked;
+
+        // Si no hay equipos vendidos o no hay precio tipeado, ocultar
+        if (totalEsperado <= 0) {
+            banner.classList.add('hidden');
+            return;
+        }
+
+        const diferencia = totalIngresado - totalEsperado;
+        const absDiff = Math.abs(diferencia);
+
+        // Resetear clases
+        banner.className = 'mt-3 p-2 rounded-lg text-sm font-medium flex items-center gap-2';
+
+        if (weppaActivo) {
+            // WEPPA: el inicial puede ser menor al total esperado → es crédito
+            if (diferencia >= -0.01) {
+                // Inicial >= total esperado (raro pero válido)
+                banner.classList.add('bg-yellow-400', 'bg-opacity-30', 'text-yellow-900');
+                icono.textContent = '💰';
+                texto.textContent = `WEPPA: pago inicial cubre o iguala el total ($${totalIngresado.toFixed(2)} ≥ $${totalEsperado.toFixed(2)}).`;
+            } else {
+                // Crédito normal
+                const credito = absDiff;
+                banner.classList.add('bg-yellow-400', 'bg-opacity-30', 'text-yellow-900');
+                icono.textContent = '🟢';
+                texto.textContent = `WEPPA: crédito de $${credito.toFixed(2)} (saldo a deber). Inicial: $${totalIngresado.toFixed(2)} / Total: $${totalEsperado.toFixed(2)}.`;
+            }
+            banner.classList.remove('hidden');
+        } else {
+            // Venta normal: la diferencia debe ser ~0
+            if (absDiff < 0.01) {
+                banner.classList.add('hidden');
+            } else if (diferencia > 0) {
+                // Pagó de más
+                banner.classList.add('bg-amber-100', 'text-amber-900', 'border', 'border-amber-300');
+                icono.textContent = '⚠️';
+                texto.textContent = `Pagaste $${diferencia.toFixed(2)} de más (quedará como crédito a favor del cliente).`;
+                banner.classList.remove('hidden');
+            } else {
+                // Falta dinero
+                banner.classList.add('bg-red-100', 'text-red-900', 'border', 'border-red-300');
+                icono.textContent = '❌';
+                texto.textContent = `Faltan $${absDiff.toFixed(2)} para cuadrar con la suma de precios de los equipos ($${totalEsperado.toFixed(2)}).`;
+                banner.classList.remove('hidden');
+            }
+        }
     }
 
     /**
@@ -1005,186 +1383,323 @@ class App {
         const textoOriginal = submitBtn.innerHTML;
         submitBtn.disabled = true;
         submitBtn.innerHTML = '⏳ Guardando...';
+        const esEdicion = !!this.ventaEnEdicion;
 
         try {
             const datosVenta = this.recopilarDatosVenta();
 
-            // ── VALIDACIÓN DE EQUIPO RECIBIDO (TRADE-IN) ───────────────
+            // Auto-corregir montoTotal con la suma de precios - trade-ins (si hay precios cargados)
+            const totalEquipos = (datosVenta.equipos || []).reduce((s, e) => s + (parseFloat(e.precio) || 0), 0);
+            if (totalEquipos > 0) {
+                const totalRecibidos = (datosVenta.equiposRecibidos || []).reduce((s, e) => s + (parseFloat(e.valor) || 0), 0);
+                datosVenta.montoTotal = Math.max(0, totalEquipos - totalRecibidos);
+                const montoInput = document.getElementById('montoTotal');
+                if (montoInput) montoInput.value = datosVenta.montoTotal.toFixed(2);
+            }
+
+            // ════════════════════════════════════════════════════════════════
+            // VALIDACIÓN DE IMEIS DE EQUIPOS RECIBIDOS (TRADE-IN) — N equipos
+            // Itera sobre TODOS los trade-ins, no solo el primero
+            // ════════════════════════════════════════════════════════════════
             if (document.getElementById('recibirEquipo')?.checked) {
-                const imeiR = (document.getElementById('equipoImeiR')?.value || '').trim();
-                const imeiVenta = (document.getElementById('equipoImei')?.value || '').trim();
+                const imeiVentaSingular = (document.getElementById('equipoImei')?.value || '').trim();
+                const equiposV = datosVenta.equipos || [];
+                const recibidos = datosVenta.equiposRecibidos || [];
+                const imeisVendidosSet = new Set(equiposV.map(e => (e.imei || '').trim()).filter(i => i.length >= 15));
 
-                // Formato mínimo
-                if (imeiR && imeiR.length < 15) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = textoOriginal;
-                    mostrarAlerta('❌ El IMEI del equipo recibido debe tener al menos 15 caracteres.', 'error');
-                    return;
-                }
+                for (let i = 0; i < recibidos.length; i++) {
+                    const r = recibidos[i];
+                    const imeiR = (r.imei || '').trim();
+                    if (!imeiR || imeiR.length < 15) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = textoOriginal;
+                        mostrarAlerta(`❌ El IMEI del equipo recibido #${i + 1} debe tener al menos 15 caracteres.`, 'error');
+                        return;
+                    }
+                    if (imeiR === imeiVentaSingular || imeisVendidosSet.has(imeiR)) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = textoOriginal;
+                        mostrarAlerta(`❌ El IMEI del equipo recibido #${i + 1} (${imeiR}) coincide con un equipo que se vende en esta misma venta.`, 'error');
+                        return;
+                    }
 
-                // No puede ser el mismo equipo que se vende
-                if (imeiR && imeiVenta && imeiR === imeiVenta) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = textoOriginal;
-                    mostrarAlerta(`❌ El IMEI del equipo recibido (${imeiR}) es igual al del equipo que se vende. No es posible recibir como parte de pago el mismo equipo.`, 'error');
-                    return;
-                }
+                    // Determinar el IMEI original (para edición)
+                    let imeiTradeInOriginal = null;
+                    if (this.ventaEnEdicion) {
+                        imeiTradeInOriginal = this._tradeInImeiOriginal;
+                    }
 
-                // Validar contra inventario y ventas existentes
-                if (imeiR) {
-                    const conflicto = this._obtenerConflictoImeiRecibido(
-                        imeiR,
-                        this.ventaEnEdicion,
-                        this._tradeInImeiOriginal  // Pasar el IMEI original del trade-in
-                    );
-                    if (conflicto) {
-                        if (conflicto.tipo === 'autocompletar-vendido') {
-                            // Estado "vendido" O es el trade-in de esta misma venta: PERMITIR
-                            console.log(`ℹ️ Trade-in IMEI ${imeiR} permitido (vendido o de esta venta).`);
-                        } else {
-                            // Todos los demás casos: BLOQUEAR
-                            let msgError = '';
-                            const eq = conflicto.equipo;
-                            switch (conflicto.tipo) {
-                                case 'bloqueado-disponible':
-                                    msgError = `✕ El IMEI ${imeiR} pertenece a un iPhone ${eq.modelo} ${eq.gb}GB — ${eq.color} disponible en inventario. No puede recibirse como parte de pago: es stock activo.`;
-                                    break;
-                                case 'bloqueado-defectuoso':
-                                    msgError = `✕ El IMEI ${imeiR} está registrado en inventario como defectuoso (iPhone ${eq.modelo} ${eq.gb}GB). No puede usarse como trade-in.`;
-                                    break;
-                                case 'bloqueado-otro-estado':
-                                    msgError = `✕ El IMEI ${imeiR} ya está en inventario (estado: ${eq.estado}). No puede usarse como trade-in.`;
-                                    break;
-                                case 'venta-recibido':
-                                    msgError = `✕ El IMEI ${imeiR} ya fue registrado como trade-in en otra venta.`;
-                                    break;
-                                default:
-                                    msgError = `✕ El IMEI ${imeiR} no puede usarse como equipo recibido.`;
-                            }
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = textoOriginal;
-                            mostrarAlerta(msgError, 'error');
-                            return;
+                    const conflicto = this._obtenerConflictoImeiRecibido(imeiR, this.ventaEnEdicion, imeiTradeInOriginal);
+                    if (conflicto && conflicto.tipo !== 'autocompletar-vendido') {
+                        let msgError = '';
+                        const eq = conflicto.equipo;
+                        switch (conflicto.tipo) {
+                            case 'bloqueado-disponible':
+                                msgError = `✕ Equipo recibido #${i + 1}: IMEI ${imeiR} pertenece a un iPhone ${eq.modelo} ${eq.gb}GB — ${eq.color} disponible en inventario. No puede recibirse como parte de pago: es stock activo.`;
+                                break;
+                            case 'bloqueado-defectuoso':
+                                msgError = `✕ Equipo recibido #${i + 1}: IMEI ${imeiR} está registrado en inventario como defectuoso. No puede usarse como trade-in.`;
+                                break;
+                            case 'bloqueado-otro-estado':
+                                msgError = `✕ Equipo recibido #${i + 1}: IMEI ${imeiR} ya está en inventario (estado: ${eq.estado}).`;
+                                break;
+                            case 'venta-recibido':
+                                msgError = `✕ Equipo recibido #${i + 1}: IMEI ${imeiR} ya fue registrado como trade-in en otra venta.`;
+                                break;
+                            default:
+                                msgError = `✕ Equipo recibido #${i + 1}: IMEI ${imeiR} no puede usarse como equipo recibido.`;
                         }
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = textoOriginal;
+                        mostrarAlerta(msgError, 'error');
+                        return;
                     }
                 }
             }
 
-            // ── VALIDACIÓN DE IMEI DEL EQUIPO A VENDER ───────────────
-            // Nueva validación centralizada para evitar doble venta
-            // SOLO se ejecuta si el equipo NO fue seleccionado del inventario (modo manual)
-            const imeiVenta = (document.getElementById('equipoImei')?.value || '').trim();
+            // ════════════════════════════════════════════════════════════════
+            // VALIDACIÓN DE IMEIS DE EQUIPOS A VENDER — N equipos
+            // Cada equipo en `datosVenta.equipos` trae `idInventario` cuando
+            // fue seleccionado del buscador. Si lo tiene, NO se valida de
+            // nuevo contra inventario (ya viene de ahí). Si NO tiene
+            // idInventario, el IMEI fue tipeado a mano → validar.
+            // ════════════════════════════════════════════════════════════════
             const tipoVenta = document.querySelector('input[name="tipoVenta"]:checked')?.value;
+            if (tipoVenta === 'completa') {
+                const equipos = datosVenta.equipos || [];
 
-            if (tipoVenta === 'completa' && imeiVenta && !this._equipoInventarioId) {
-                // El usuario escribió el IMEI manualmente (no lo seleccionó del inventario)
-                const validacion = this._validarImeiParaVenta(imeiVenta);
+                for (let i = 0; i < equipos.length; i++) {
+                    const eq = equipos[i];
+                    const imei = (eq.imei || '').trim();
+                    if (!imei || imei.length < 15) continue;
 
-                if (validacion.tipo === 'error') {
-                    // ERROR: El IMEI ya fue vendido en otra transacción — bloquear siempre
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = textoOriginal;
-                    mostrarAlerta(`✕ ${validacion.mensaje}`, 'error');
-                    return;
-                }
+                    // Equipo seleccionado del inventario (lista apilada) → saltar validación
+                    if (eq.idInventario) continue;
 
-                if (validacion.tipo === 'advertencia' && validacion.equipoSugerido) {
-                    // ADVERTENCIA: El IMEI está disponible en inventario.
-                    // Bloqueamos la venta y mostramos el error con instrucción clara.
-                    // El usuario debe usar el botón del banner para seleccionarlo,
-                    // o cambiar el IMEI a uno que no esté en el inventario.
-                    const equipo = validacion.equipoSugerido;
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = textoOriginal;
-                    mostrarAlerta(
-                        `✕ El IMEI ${imeiVenta} pertenece a un iPhone ${equipo.modelo} ${equipo.gb}GB — ${equipo.color} disponible en inventario. ` +
-                        `Selecciónalo del buscador (botón "🎯 Seleccionar del inventario") o usa otro IMEI.`,
-                        'error'
-                    );
-                    // Asegurar que el banner esté visible
-                    this._actualizarBannerImei();
-                    return;
+                    // Equipo tipeado a mano (no debería pasar con la nueva UX, pero por las dudas)
+                    const validacion = this._validarImeiParaVenta(imei);
+                    if (validacion.tipo === 'error') {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = textoOriginal;
+                        mostrarAlerta(`✕ Equipo #${i + 1}: ${validacion.mensaje}`, 'error');
+                        return;
+                    }
+                    if (validacion.tipo === 'advertencia' && validacion.equipoSugerido) {
+                        const equipo = validacion.equipoSugerido;
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = textoOriginal;
+                        mostrarAlerta(
+                            `✕ Equipo #${i + 1}: IMEI ${imei} pertenece a un iPhone ${equipo.modelo} ${equipo.gb}GB — ${equipo.color} disponible en inventario. Selecciónalo del buscador.`,
+                            'error'
+                        );
+                        return;
+                    }
                 }
             }
 
-            let resultado;
-            if (this.ventaEnEdicion) {
-                datosVenta.id = this.ventaEnEdicion;
-                resultado = await ventaService.actualizarVenta(datosVenta);
-            } else {
-                resultado = await ventaService.crearVenta(datosVenta);
+            // ════════════════════════════════════════════════════════════════
+            // VALIDACIÓN CRUZADA N×N (multi-equipo / multi-trade-in)
+            // Reglas:
+            //   N.1: 2 IMEIs vendidos distintos en la misma venta → BLOQUEAR
+            //   N.2: 2 IMEIs recibidos distintos en la misma venta → BLOQUEAR
+            //   N.3: IMEI vendido no puede estar en equiposRecibidos de la misma venta
+            //   N.4: IMEI recibido no puede estar en equipos de la misma venta
+            // ════════════════════════════════════════════════════════════════
+            const equipos = datosVenta.equipos || (datosVenta.equipo ? [datosVenta.equipo] : []);
+            const recibidos = datosVenta.equiposRecibidos || (datosVenta.equipoRecibido ? [datosVenta.equipoRecibido] : []);
+            const erroresCruzados = this._validarImeisDuplicadosEnVenta(equipos, recibidos);
+            if (erroresCruzados.length > 0) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = textoOriginal;
+                mostrarAlerta(erroresCruzados.join('<br>'), 'error');
+                return;
             }
+
+            // ════════════════════════════════════════════════════════════════
+            // COMMIT ATÓMICO: Venta + Inventario en una sola operación
+            // ════════════════════════════════════════════════════════════════
+            // Antes se hacían N escrituras fire-and-forget separadas.
+            // Si se caía la conexión a mitad, quedaba venta guardada pero
+            // inventario desincronizado. Ahora todo va en un writeBatch:
+            // o se aplica TODO (venta + inventario) o NADA.
+            //
+            // El batch sigue siendo local-first:
+            //   - IndexedDB persiste todo al instante
+            //   - Sincronización al servidor en background
+            //   - onSnapshot refresca la UI cuando confirma
+            // ════════════════════════════════════════════════════════════════
+
+            // Construir instancia de Venta (asigna id si no tiene)
+            const ventaIdFinal = this.ventaEnEdicion || `venta_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+            const ventaInstancia = new Venta({ ...datosVenta, id: ventaIdFinal });
+
+            // ════════════════════════════════════════════════════════════════
+            // VALIDACIÓN DEL MODELO (capa de negocio)
+            // Chequea: forma de pago, monto, equipos, cliente, IMEIs,
+            //          pago mixto/móvil/transferencia, accesorios.
+            // Si falla, NO se hace commit. La venta no se guarda.
+            // UX: 1 solo alert con TODOS los errores (estilo ya usado en
+            //     _validarImeisDuplicadosEnVenta).
+            // ════════════════════════════════════════════════════════════════
+            const validacion = ventaInstancia.validar();
+            if (!validacion.valido) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = textoOriginal;
+                const erroresConBala = validacion.errores.map(e => `• ${e}`).join('<br>');
+                mostrarAlerta(`❌ No se puede registrar la venta:<br>${erroresConBala}`, 'error');
+                return;
+            }
+
+            // IDs de inventario de los equipos a vender
+            const inventarioIdsActuales = (datosVenta.equipos || [])
+                .map(eq => eq.idInventario)
+                .filter(Boolean);
+
+            // Obtener venta anterior para calcular diff (edición)
+            const ventaAnterior = this.ventaEnEdicion
+                ? await ventaService.obtenerVentaPorId(this.ventaEnEdicion)
+                : null;
+
+            let idsAnteriores = [];
+            if (ventaAnterior) {
+                if (ventaAnterior.equipos && ventaAnterior.equipos.length > 0) {
+                    idsAnteriores = ventaAnterior.equipos.map(eq => eq.idInventario).filter(Boolean);
+                } else if (ventaAnterior.equipo) {
+                    if (ventaAnterior.equipo.idInventario) {
+                        idsAnteriores.push(ventaAnterior.equipo.idInventario);
+                    } else if (ventaAnterior.equipo.imei) {
+                        const eqAntInv = inventarioService.buscarPorImei(ventaAnterior.equipo.imei);
+                        if (eqAntInv) idsAnteriores.push(eqAntInv.id);
+                    }
+                }
+            }
+
+            // Equipos a liberar (estaban en la venta anterior, ya no están)
+            const equiposLiberar = idsAnteriores
+                .filter(id => id && !inventarioIdsActuales.includes(id))
+                .map(id => ({ id }));
+
+            console.log('--- DEBUG EDICIÓN INVENTARIO ---');
+            console.log('1. inventarioIdsActuales (Los que quedan en la venta):', inventarioIdsActuales);
+            console.log('2. idsAnteriores (Los que estaban originalmente):', idsAnteriores);
+            console.log('3. equiposLiberar (Los que se deben restaurar a disponible):', equiposLiberar);
+            console.log('--------------------------------');
+
+            // Trade-ins actuales
+            const recibidosActuales = datosVenta.equiposRecibidos || [];
+            const recibidosAnteriores = ventaAnterior
+                ? (ventaAnterior.equiposRecibidos || (ventaAnterior.equipoRecibido ? [ventaAnterior.equipoRecibido] : []))
+                : [];
+
+            const tradeInsNuevos = [];
+            const tradeInsActualizar = [];
+            const tradeInsEliminar = [];
+
+            // Detectar IMEIs de trade-ins que estaban antes y ya no → soft-delete
+            const imeisAnteriores = new Set(recibidosAnteriores.map(r => (r.imei || '').trim()).filter(Boolean));
+            const imeisActuales = new Set(recibidosActuales.map(r => (r.imei || '').trim()).filter(Boolean));
+
+            imeisAnteriores.forEach(imei => {
+                if (!imeisActuales.has(imei)) {
+                    const inv = inventarioService.buscarPorImei(imei);
+                    if (inv) {
+                        // Solo eliminar los que fueron ingresados por esta venta
+                        const esDeEstaVenta = inv.origen && (
+                            inv.origen.includes(`Venta: ${this.ventaEnEdicion}`) ||
+                            inv.origen.toLowerCase().includes('trade-in')
+                        );
+                        if (esDeEstaVenta) {
+                            tradeInsEliminar.push({
+                                id: inv.id,
+                                motivo: this.ventaEnEdicion
+                                    ? `Quitado de la venta ${this.ventaEnEdicion}`
+                                    : 'Venta eliminada'
+                            });
+                        }
+                    }
+                }
+            });
+
+            // Detectar IMEIs de trade-ins nuevos (no están en inventario) → crear
+            // IMEIs que sí están → actualizar campos
+            recibidosActuales.forEach(r => {
+                const imei = (r.imei || '').trim();
+                if (!imei || imei.length < 15) return;
+
+                const inv = inventarioService.buscarPorImei(imei);
+                const datosEquipo = {
+                    tipoItem: 'equipo',
+                    modelo: r.modelo,
+                    gb: r.capacidad,
+                    color: r.color,
+                    bateria: parseInt(r.bateria) || 0,
+                    imei: imei,
+                    detalles: r.comentarios || '',
+                    origen: `Trade-in (Venta: ${ventaIdFinal})`,
+                    estado: 'disponible',
+                    fechaIngreso: new Date().toISOString()
+                };
+
+                if (!inv) {
+                    // No existe → crear con ID nuevo
+                    const nuevoId = (typeof generarUUID === 'function' ? generarUUID() : `eq-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`);
+                    tradeInsNuevos.push({ id: nuevoId, datos: { ...datosEquipo, id: nuevoId } });
+                } else {
+                    // Ya existe (caso edición) → actualizar
+                    tradeInsActualizar.push({
+                        id: inv.id,
+                        datos: {
+                            modelo: r.modelo,
+                            gb: r.capacidad,
+                            color: r.color,
+                            bateria: parseInt(r.bateria) || 0,
+                            detalles: r.comentarios || ''
+                        }
+                    });
+                }
+            });
+
+            // COMMIT ATÓMICO
+            const resultado = await inventarioService.commitVentaConInventario({
+                venta: ventaInstancia,
+                equiposIds: inventarioIdsActuales,
+                equiposLiberar,
+                tradeInsNuevos,
+                tradeInsActualizar,
+                tradeInsEliminar
+            });
 
             submitBtn.disabled = false;
 
-            if (resultado.exito) {
-                const ventaId = resultado.venta?.id || datosVenta.id || '';
-
-                // ── INVENTARIO: Gestión de estado del equipo ────────────────
-                // Esta lógica ahora es más robusta gracias a la validación previa de IMEI
-                if (this.ventaEnEdicion) {
-                    // EDICIÓN DE VENTA
-                    const imeiActual = (document.getElementById('equipoImei')?.value || '').trim();
-
-                    if (this._equipoInventarioIdAnterior) {
-                        // Caso 1: La venta original tenía un equipo del inventario
-                        // Verificar si el usuario cambió a modo manual (no seleccionó nuevo equipo)
-                        if (!this._equipoInventarioId && imeiActual !== this._equipoImeiOriginal) {
-                            // Usuario fue a modo manual Y cambió el IMEI - liberar el equipo anterior
-                            inventarioService.marcarDisponible(this._equipoInventarioIdAnterior)
-                                .catch(err => console.warn('⚠️ No se pudo liberar equipo anterior:', err));
-                        }
-                        // Caso 2: Seleccionó un equipo diferente del inventario
-                        else if (this._equipoInventarioId !== this._equipoInventarioIdAnterior) {
-                            // Revertir el equipo anterior y marcar el nuevo
-                            inventarioService.marcarDisponible(this._equipoInventarioIdAnterior)
-                                .catch(err => console.warn('⚠️ No se pudo revertir equipo anterior:', err));
-                            inventarioService.marcarVendido(this._equipoInventarioId, ventaId)
-                                .catch(err => console.warn('⚠️ No se pudo marcar equipo nuevo:', err));
-                        }
-                        // Caso 3: Mantuvo el mismo equipo del inventario - no hacer nada
-                    } else if (this._equipoInventarioId) {
-                        // Caso 4: La venta original era manual, ahora seleccionó uno del inventario
-                        inventarioService.marcarVendido(this._equipoInventarioId, ventaId)
-                            .catch(err => console.warn('⚠️ No se pudo marcar equipo como vendido:', err));
-                    }
-                } else if (this._equipoInventarioId) {
-                    // NUEVA VENTA: marcar el equipo seleccionado como vendido
-                    inventarioService.marcarVendido(this._equipoInventarioId, ventaId)
-                        .catch(err => console.warn('⚠️ No se pudo marcar equipo como vendido:', err));
-                }
-
-                // ── INVENTARIO: Sincronización de Trade-In (O4, O5) ───────
-                // Ahora funciona tanto para nuevas ventas como para ediciones
-                const ventaAnterior = this.ventaEnEdicion
-                    ? await ventaService.obtenerVentaPorId(this.ventaEnEdicion)
-                    : null;
-                await this._sincronizarTradeinInventario(datosVenta.equipoRecibido, ventaAnterior);
-                // ───────────────────────────────────────────────────────────
-
-                // Restaurar botón y limpiar estado de edición
-                submitBtn.innerHTML = '✅ Registrar Venta';
-                submitBtn.classList.remove('bg-orange-600', 'hover:bg-orange-700');
-                submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-
-                const cancelBtn = document.getElementById('cancelarEdicion');
-                if (cancelBtn) cancelBtn.remove();
-
-                this.ventaEnEdicion = null;
-                this._equipoInventarioIdAnterior = null;
-                this._equipoImeiOriginal = null;
-                this._tradeInImeiOriginal = null;
-
-                mostrarAlerta(resultado.mensaje, 'success');
-                this.limpiarFormularioVenta();
-
-                this.actualizarUI().catch(err =>
-                    console.warn('⚠️ Error actualizando UI después de guardar (no bloqueante):', err)
-                );
-            } else {
+            if (!resultado.exito) {
                 submitBtn.innerHTML = textoOriginal;
-                mostrarAlerta(resultado.errores.join('<br>'), 'error');
+                mostrarAlerta(`❌ Error al guardar la venta: ${resultado.error || 'desconocido'}. Si el problema persiste, contacta al administrador.`, 'error');
+                console.error('Commit venta+inventario falló:', resultado);
+                return;
             }
+
+            // ✅ ÉXITO
+            // Restaurar botón y limpiar estado de edición
+            submitBtn.innerHTML = '✅ Registrar Venta';
+            submitBtn.classList.remove('bg-orange-600', 'hover:bg-orange-700');
+            submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+
+            const cancelBtn = document.getElementById('cancelarEdicion');
+            if (cancelBtn) cancelBtn.remove();
+
+            this.ventaEnEdicion = null;
+            this._equipoInventarioIdAnterior = null;
+            this._equiposInventarioIdsAnteriores = null;
+            this._equipoImeiOriginal = null;
+            this._tradeInImeiOriginal = null;
+            this._equiposInventarioIds = null;
+
+            mostrarAlerta(esEdicion ? '✅ Venta editada exitosamente' : '✅ Venta registrada exitosamente', 'success');
+            this.limpiarFormularioVenta();
+
+            this.actualizarUI().catch(err =>
+                console.warn('⚠️ Error actualizando UI después de guardar (no bloqueante):', err)
+            );
         } catch (error) {
             console.error('Error al guardar venta:', error);
             mostrarAlerta('❌ Error al guardar la venta. Intente de nuevo.', 'error');
@@ -1362,6 +1877,39 @@ class App {
      *   { tipo: 'autocompletar-vendido', equipo }
      *   { tipo: 'venta-recibido' }
      */
+    _validarImeisDuplicadosEnVenta(equipos, equiposRecibidos) {
+        const errores = [];
+        const norm = s => (s || '').toString().trim();
+        const imeisValidos = s => {
+            const n = norm(s);
+            return n.length >= 15 ? n : null;
+        };
+
+        const imeisVendidos = (equipos || []).map(e => imeisValidos(e.imei)).filter(Boolean);
+        const imeisRecibidos = (equiposRecibidos || []).map(e => imeisValidos(e.imei)).filter(Boolean);
+
+        // N.1: IMEIs duplicados entre equipos vendidos
+        const dupVendidos = imeisVendidos.filter((imei, idx) => imeisVendidos.indexOf(imei) !== idx);
+        if (dupVendidos.length > 0) {
+            errores.push(`❌ Hay IMEIs duplicados entre los equipos vendidos: ${[...new Set(dupVendidos)].join(', ')}`);
+        }
+
+        // N.2: IMEIs duplicados entre equipos recibidos
+        const dupRecibidos = imeisRecibidos.filter((imei, idx) => imeisRecibidos.indexOf(imei) !== idx);
+        if (dupRecibidos.length > 0) {
+            errores.push(`❌ Hay IMEIs duplicados entre los equipos recibidos: ${[...new Set(dupRecibidos)].join(', ')}`);
+        }
+
+        // N.3 y N.4: cruce vendido ↔ recibido
+        for (const iv of imeisVendidos) {
+            if (imeisRecibidos.includes(iv)) {
+                errores.push(`❌ El IMEI ${iv} aparece como vendido y como recibido en la misma venta.`);
+            }
+        }
+
+        return errores;
+    }
+
     _obtenerConflictoImeiRecibido(imei, ventaIdExcluir = null, imeiTradeInOriginal = null) {
         if (!imei || imei.length < 6) return null;
 
@@ -1647,6 +2195,68 @@ class App {
     }
 
     /**
+     * Sincroniza N trade-ins con el inventario.
+     * Compara la lista actual con la anterior y aplica diff:
+     * - IMEI nuevo → ingresar al inventario
+     * - IMEI que estaba pero ya no → marcar como eliminado
+     * - IMEI que se mantiene → actualizar campos
+     * - IMEI que cambió (otro mismo equipo) → actualizar registro
+     */
+    async _sincronizarTradeinsInventario(recibidosActuales, recibidosAnteriores, ventaId) {
+        const anteriores = (recibidosAnteriores || []).map(r => (r.imei || '').trim()).filter(Boolean);
+        const actuales = (recibidosActuales || []).map(r => (r.imei || '').trim()).filter(Boolean);
+
+        const anterioresSet = new Set(anteriores);
+        const actualesSet = new Set(actuales);
+
+        // 1) IMEIs que estaban antes pero ya no → eliminar del inventario
+        for (const imeiAnt of anteriores) {
+            if (!actualesSet.has(imeiAnt)) {
+                const eq = inventarioService.buscarPorImei(imeiAnt);
+                if (eq) {
+                    await inventarioService.cambiarEstado(eq.id, 'eliminado', {
+                        motivo: 'Trade-in eliminado de la venta',
+                        fechaCambio: new Date().toISOString()
+                    });
+                }
+            }
+        }
+
+        // 2) IMEIs actuales: ingresar nuevos, actualizar existentes
+        for (const r of (recibidosActuales || [])) {
+            const imei = (r.imei || '').trim();
+            if (!imei) continue;
+
+            const eqExistente = inventarioService.buscarPorImei(imei);
+
+            if (!eqExistente) {
+                // No existe → ingresar
+                const nuevo = new EquipoInventario({
+                    tipoItem: 'equipo',
+                    modelo: r.modelo,
+                    gb: r.capacidad,
+                    color: r.color,
+                    bateria: parseInt(r.bateria) || 0,
+                    imei,
+                    detalles: r.comentarios || '',
+                    origen: `Trade-in (Venta: ${ventaId || 'Nueva'})`,
+                    estado: 'disponible'
+                });
+                await inventarioService.ingresarEquipo(nuevo);
+            } else {
+                // Ya existe (caso de edición) → actualizar campos
+                await inventarioService.actualizarEquipo(eqExistente.id, {
+                    modelo: r.modelo,
+                    gb: r.capacidad,
+                    color: r.color,
+                    bateria: parseInt(r.bateria) || 0,
+                    detalles: r.comentarios || ''
+                });
+            }
+        }
+    }
+
+    /**
      * Recopila los datos del formulario de venta
      */
     recopilarDatosVenta() {
@@ -1688,14 +2298,34 @@ class App {
                 telefono: document.getElementById('clienteTelefono').value
             };
 
-            datos.equipo = {
-                modelo: document.getElementById('modelo').value,
-                color: document.getElementById('color').value,
-                almacenamiento: document.getElementById('almacenamiento').value,
-                bateria: document.getElementById('bateria').value + '%',
-                imei: document.getElementById('equipoImei').value,
-                garantia: document.getElementById('equipoGarantia').value
-            };
+            // ════════════════════════════════════════════════════════════════
+            // MULTI-EQUIPO: leer desde this._equiposSeleccionadosVenta (lista apilada)
+            // Cada equipo ya tiene modelo, color, gb, imei, bateria del inventario.
+            // El precio lo tipea el operador en la pila.
+            // La garantía se comparte entre todos los equipos de la venta.
+            // ════════════════════════════════════════════════════════════════
+            const garantiaCompartida = document.getElementById('equipoGarantia')?.value || '';
+
+            datos.equipos = (this._equiposSeleccionadosVenta || []).map(eq => ({
+                idInventario: eq.id,
+                modelo: eq.modelo,
+                color: eq.color,
+                almacenamiento: eq.gb,
+                bateria: (eq.bateria != null ? eq.bateria : '') + (eq.bateria != null ? '%' : ''),
+                imei: eq.imei,
+                detalles: eq.detalles || '',
+                precio: parseFloat(eq.precio) || 0,
+                garantia: garantiaCompartida
+            }));
+
+            // Alias singular = primer equipo (compat con ventas viejas y admin/registro)
+            datos.equipo = datos.equipos[0] || null;
+
+            // Auto-llenar montoTotal con la suma de precios si está en 0
+            if (datos.montoTotal === 0 && datos.equipos.length > 0) {
+                const sumaPrecios = datos.equipos.reduce((s, e) => s + (e.precio || 0), 0);
+                if (sumaPrecios > 0) datos.montoTotal = sumaPrecios;
+            }
         }
 
         // Accesorios
@@ -1784,8 +2414,9 @@ class App {
             };
         }
 
-        // Equipo recibido (si aplica)
+        // Equipo recibido (si aplica) — multi-trade-in
         if (document.getElementById('recibirEquipo').checked) {
+            // Primer equipo recibido (compat: IDs singulares)
             datos.equipoRecibido = {
                 modelo: document.getElementById('equipoModelo').value,
                 capacidad: document.getElementById('equipoCapacidad').value,
@@ -1795,6 +2426,26 @@ class App {
                 valor: parseFloat(document.getElementById('equipoValor').value) || 0,
                 comentarios: document.getElementById('equipoComentarios').value
             };
+
+            // Construir array `equiposRecibidos`
+            datos.equiposRecibidos = [datos.equipoRecibido];
+            const filasAdicionales = document.querySelectorAll('#equiposRecibidosAdicionales .equipo-recibido-item');
+            filasAdicionales.forEach(fila => {
+                const modelo = fila.querySelector('.eq-recibido-modelo')?.value || '';
+                const capacidad = fila.querySelector('.eq-recibido-capacidad')?.value || '';
+                const color = fila.querySelector('.eq-recibido-color')?.value || '';
+                const bateria = fila.querySelector('.eq-recibido-bateria')?.value || '';
+                const imei = fila.querySelector('.eq-recibido-imei')?.value || '';
+                const valor = parseFloat(fila.querySelector('.eq-recibido-valor')?.value) || 0;
+
+                // Fila vacía → descartar
+                if (!modelo && !imei && valor === 0) return;
+
+                datos.equiposRecibidos.push({
+                    modelo, capacidad, color, bateria, imei, valor,
+                    comentarios: ''
+                });
+            });
         }
 
         return datos;
@@ -2023,11 +2674,64 @@ class App {
     }
 
     /**
+     * Determina en qué fila debe caer la próxima selección del inventario.
+     * - Si la fila #1 (singular) está vacía → retorna null (compat: usar singulares)
+     * - Si la fila #1 está llena → retorna la primera fila adicional vacía,
+     *   o crea una nueva si no hay vacías
+     */
+    _obtenerFilaVentaTarget() {
+        // Si el usuario clickeó "Buscar en inventario" en una fila específica,
+        // usar ESA fila (puede que ya tenga IMEI si va a reemplazar)
+        if (this._filaInvTarget && document.body.contains(this._filaInvTarget)) {
+            const target = this._filaInvTarget;
+            this._filaInvTarget = null; // reset
+            return target;
+        }
+
+        const imeiSingular = (document.getElementById('equipoImei')?.value || '').trim();
+        const modeloSingular = (document.getElementById('modelo')?.value || '').trim();
+
+        // Fila #1 vacía → usar singulares
+        if (!imeiSingular && !modeloSingular) return null;
+
+        // Fila #1 ya está llena → asegurar wrapper multi visible
+        const wrapper = document.getElementById('equiposVendidosAdicionalesWrapper');
+        if (wrapper && wrapper.classList.contains('hidden')) {
+            wrapper.classList.remove('hidden');
+            const btnActivar = document.getElementById('btnActivarMultiEquipo');
+            if (btnActivar) btnActivar.classList.add('hidden');
+        }
+
+        // Buscar la primera fila adicional vacía
+        const contenedor = document.getElementById('equiposVendidosAdicionales');
+        if (!contenedor) return null;
+
+        const filas = contenedor.querySelectorAll('.equipo-vendido-item');
+        for (const fila of filas) {
+            const imei = (fila.querySelector('.eq-vendido-imei')?.value || '').trim();
+            const modelo = (fila.querySelector('.eq-vendido-modelo')?.value || '').trim();
+            if (!imei && !modelo) return fila;
+        }
+
+        // No hay vacías → crear una nueva
+        this._agregarFilaEquipoVendido();
+        return contenedor.querySelector('.equipo-vendido-item:last-child');
+    }
+
+    /**
      * Limpia el selector de inventario y desbloquea los campos del formulario.
      * Se llama al limpiar el formulario o al hacer clic en "Cambiar equipo".
      */
     _limpiarSelectorInventario() {
         this._equipoInventarioId = null;
+        this._equiposInventarioIds = [];
+
+        // MULTI-EQUIPO: vaciar la pila apilada y re-renderizar
+        this._equiposSeleccionadosVenta = [];
+        this._renderListaEquiposVenta();
+        this._renderBuscadorEquiposVenta();
+        this._actualizarBannerInventarioVacio();
+        this._actualizarContadoresMulti();
 
         const input = document.getElementById('invBuscadorInput');
         const seleccionado = document.getElementById('invEquipoSeleccionado');
@@ -2046,6 +2750,18 @@ class App {
             }
         });
 
+        // Limpiar todas las filas adicionales de equipos vendidos
+        // (siguen activas para compatibilidad con edición y banner de IMEI)
+        const contenedor = document.getElementById('equiposVendidosAdicionales');
+        if (contenedor) {
+            contenedor.querySelectorAll('.equipo-vendido-item').forEach(fila => fila.remove());
+        }
+        const wrapper = document.getElementById('equiposVendidosAdicionalesWrapper');
+        if (wrapper) wrapper.classList.add('hidden');
+        const btnActivar = document.getElementById('btnActivarMultiEquipo');
+        if (btnActivar) btnActivar.classList.remove('hidden');
+        this._actualizarContadorEquiposVendidos();
+
         // Ocultar el banner: al cambiar de equipo el IMEI puede ser otro
         this._ocultarBannerImei();
     }
@@ -2053,75 +2769,87 @@ class App {
     /**
      * Autorrellena los campos del formulario de venta con los datos del equipo
      * seleccionado del inventario y bloquea los campos para evitar edición accidental.
+     *
+     * @param {Object} equipo - Equipo del inventario seleccionado
+     * @param {HTMLElement|null} targetFila - Si es null, llena los IDs singulares (compat).
+     *                                       Si es una fila .equipo-vendido-item, la llena.
      */
-    _aplicarEquipoDelInventario(equipo) {
-        this._equipoInventarioId = equipo.id;
+    _aplicarEquipoDelInventario(equipo, targetFila = null) {
+        // Trackear TODOS los IDs de inventario seleccionados (uno por fila)
+        if (!Array.isArray(this._equiposInventarioIds)) {
+            this._equiposInventarioIds = [];
+        }
+
+        if (targetFila) {
+            targetFila.dataset.inventarioId = equipo.id;
+            this._equiposInventarioIds.push(equipo.id);
+        } else {
+            this._equipoInventarioId = equipo.id;
+        }
+
+        // Helpers
+        const selModelo = targetFila ? targetFila.querySelector('.eq-vendido-modelo') : document.getElementById('modelo');
+        const selColor = targetFila ? targetFila.querySelector('.eq-vendido-color') : document.getElementById('color');
+        const selAlm = targetFila ? targetFila.querySelector('.eq-vendido-almacenamiento') : document.getElementById('almacenamiento');
+        const inpBat = targetFila ? targetFila.querySelector('.eq-vendido-bateria') : document.getElementById('bateria');
+        const inpImei = targetFila ? targetFila.querySelector('.eq-vendido-imei') : document.getElementById('equipoImei');
+        const chkNota = document.getElementById('notaVenta');
+        const campoNota = document.getElementById('notaVentaInfo');
+        const inputNota = document.getElementById('notaVentaDetalles');
 
         // ── Autorrellenar campos ──────────────────────────────
-        // Modelo: buscar la opción que contenga el modelo corto del equipo
-        const modeloSelect = document.getElementById('modelo');
-        if (modeloSelect) {
-            // Normaliza eliminando espacios, guiones y pasando a minúsculas
-            const normalizar = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (selModelo) {
+            const normalizar = (str) => (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
             const modInv = normalizar(equipo.modelo);
-
-            // 1. Intentar coincidencia exacta normalizada
-            let opcion = Array.from(modeloSelect.options).find(o =>
-                normalizar(o.value) === normalizar('iPhone ' + equipo.modelo) ||
-                normalizar(o.value) === modInv
+            let opcion = Array.from(selModelo.options).find(o =>
+                normalizar(o.value) === normalizar('iPhone ' + equipo.modelo) || normalizar(o.value) === modInv
             );
-
-            // 2. Fallback: fuzzy includes (ej: "13" dentro de "iphone13")
-            // NOTA: se ordena por longitud para preferir "13" sobre "13pro" si se ingresó "13"
             if (!opcion) {
-                opcion = Array.from(modeloSelect.options)
+                opcion = Array.from(selModelo.options)
                     .filter(o => normalizar(o.value).includes(modInv))
                     .sort((a, b) => a.value.length - b.value.length)[0];
             }
-
-            if (opcion) modeloSelect.value = opcion.value;
+            if (opcion) selModelo.value = opcion.value;
         }
-
-        // Almacenamiento
-        const almSelect = document.getElementById('almacenamiento');
-        if (almSelect && equipo.gb) {
-            const opAlm = Array.from(almSelect.options).find(o => o.value === equipo.gb);
-            if (opAlm) almSelect.value = opAlm.value;
+        if (selAlm && equipo.gb) {
+            const opAlm = Array.from(selAlm.options).find(o => o.value === equipo.gb);
+            if (opAlm) selAlm.value = opAlm.value;
         }
-
-        // Color
-        const colorSelect = document.getElementById('color');
-        if (colorSelect && equipo.color) {
-            const opColor = Array.from(colorSelect.options).find(o => o.value === equipo.color);
-            if (opColor) colorSelect.value = opColor.value;
+        if (selColor && equipo.color) {
+            const opColor = Array.from(selColor.options).find(o => o.value === equipo.color);
+            if (opColor) selColor.value = opColor.value;
         }
+        if (inpBat && equipo.bateria != null) inpBat.value = equipo.bateria;
+        if (inpImei && equipo.imei) inpImei.value = equipo.imei;
 
-        // Batería
-        const batInput = document.getElementById('bateria');
-        if (batInput && equipo.bateria != null) batInput.value = equipo.bateria;
-
-        // IMEI
-        const imeiInput = document.getElementById('equipoImei');
-        if (imeiInput && equipo.imei) imeiInput.value = equipo.imei;
-
-        // ── Nota de venta automática (si el equipo tiene detalles) ──
-        if (equipo.detalles && equipo.detalles.trim()) {
-            const chkNota = document.getElementById('notaVenta');
-            const campoNota = document.getElementById('notaVentaInfo');
-            const inputNota = document.getElementById('notaVentaDetalles');
+        // Nota de venta automática (solo para el primer equipo, no la duplicamos)
+        if (!targetFila && equipo.detalles && equipo.detalles.trim()) {
             if (chkNota) chkNota.checked = true;
             if (campoNota) campoNota.classList.remove('hidden');
             if (inputNota) inputNota.value = equipo.detalles;
         }
 
         // ── Bloquear campos (solo lectura) ────────────────────
-        ['modelo', 'color', 'almacenamiento', 'bateria', 'equipoImei'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.disabled = true;
-                el.classList.add('bg-indigo-50', 'border-indigo-300');
-            }
-        });
+        if (!targetFila) {
+            ['modelo', 'color', 'almacenamiento', 'bateria', 'equipoImei'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.disabled = true;
+                    el.classList.add('bg-indigo-50', 'border-indigo-300');
+                }
+            });
+        } else {
+            // Bloquear solo los selects e inputs de la fila adicional (NO el precio)
+            [selModelo, selColor, selAlm, inpBat, inpImei].forEach(el => {
+                if (el) {
+                    el.disabled = true;
+                    el.classList.add('bg-indigo-50', 'border-indigo-300');
+                }
+            });
+            // Marcar visualmente que fue seleccionado del inventario
+            const badge = targetFila.querySelector('.inv-badge');
+            if (badge) badge.classList.remove('hidden');
+        }
 
         // ── Mostrar panel de equipo seleccionado ─────────────────
         const label = document.getElementById('invEquipoLabel');
@@ -2149,85 +2877,275 @@ class App {
      */
     inicializarBuscadorInventario() {
         const input = document.getElementById('invBuscadorInput');
-        const dropdown = document.getElementById('invDropdown');
-        const btnLimpiar = document.getElementById('invLimpiarEquipo');
-        const btnModoManual = document.getElementById('invModoManual');
+        const sugerencias = document.getElementById('invSugerencias');
 
         // Si el widget no está en el DOM (otra página), salir sin error
         if (!input) return;
 
+        // Estado en memoria de la selección multi-equipo
+        this._equiposSeleccionadosVenta = [];
+
         // Actualizar badge de stock inicial (el inventario puede tardar unos ms en cargar)
         this._actualizarBadgeStock();
+        this._actualizarBannerInventarioVacio();
+        this._renderBuscadorEquiposVenta();
+        this._renderListaEquiposVenta();
 
-        // ── Input: filtrar equipos al escribir ────────────────────
+        // ── Input: re-renderizar sugerencias al escribir ────────
         input.addEventListener('input', () => {
-            const q = input.value.trim().toLowerCase();
-            dropdown.innerHTML = '';
-            dropdown.classList.add('hidden');
+            this._renderBuscadorEquiposVenta();
+        });
 
-            if (q.length < 1) return;
+        // Re-renderizar cuando el inventario cambia (snapshot de Firestore)
+        inventarioService.onCambio(() => {
+            this._actualizarBadgeStock();
+            this._actualizarBannerInventarioVacio();
+            this._renderBuscadorEquiposVenta();
+        });
+    }
 
-            const disponibles = inventarioService.obtenerDisponibles();
-            const resultados = disponibles.filter(e =>
-                e.modelo.toLowerCase().includes(q) ||
-                (e.color && e.color.toLowerCase().includes(q)) ||
-                (e.gb && e.gb.toLowerCase().includes(q)) ||
-                (e.imei && e.imei.includes(q))
-            ).slice(0, 10);
+    /**
+     * Renderiza la lista de sugerencias del buscador.
+     - Filtra inventario disponible por el texto del input
+     - Excluye los IDs ya seleccionados (estos aparecen deshabilitados con "✓ Seleccionado")
+     - Muestra hasta 15 resultados
+     */
+    _renderBuscadorEquiposVenta() {
+        const input = document.getElementById('invBuscadorInput');
+        const sugerencias = document.getElementById('invSugerencias');
+        if (!input || !sugerencias) return;
 
-            if (!resultados.length) {
-                dropdown.innerHTML = `<li class="px-4 py-3 text-gray-400 text-sm italic">Sin resultados para "${q}"</li>`;
-                dropdown.classList.remove('hidden');
-                return;
-            }
+        const query = input.value.trim().toLowerCase();
+        let disponibles = inventarioService.obtenerDisponibles();
 
-            resultados.forEach(equipo => {
-                const li = document.createElement('li');
-                const batColor = equipo.bateria < 50 ? 'text-red-500' : equipo.bateria < 80 ? 'text-orange-500' : 'text-green-600';
-                li.className = 'px-4 py-2 cursor-pointer hover:bg-indigo-50 border-b border-gray-100 last:border-0';
-                li.innerHTML = `
+        if (query) {
+            disponibles = disponibles.filter(eq =>
+                (eq.modelo || '').toLowerCase().includes(query) ||
+                (eq.color || '').toLowerCase().includes(query) ||
+                (eq.gb || '').toLowerCase().includes(query) ||
+                (eq.imei || '').includes(query)
+            );
+        }
+
+        if (disponibles.length === 0) {
+            sugerencias.innerHTML = '<p class="text-slate-500 text-xs text-center italic py-3">No hay equipos disponibles que coincidan.</p>';
+            return;
+        }
+
+        sugerencias.innerHTML = disponibles.slice(0, 15).map(eq => {
+            const yaSel = this._equiposSeleccionadosVenta.some(e => e.id === eq.id);
+            const batColor = eq.bateria < 50 ? 'text-red-500' : eq.bateria < 80 ? 'text-orange-500' : 'text-green-600';
+            return `
+                <div class="equipo-sugerencia p-2 rounded-lg border ${yaSel ? 'opacity-40 bg-gray-50' : 'cursor-pointer hover:bg-indigo-50 bg-white border-gray-200'}"
+                     data-equipo-id="${eq.id}">
                     <div class="flex items-center justify-between gap-2">
-                        <span class="font-semibold text-gray-800 text-sm">📱 iPhone ${equipo.modelo} ${equipo.gb}</span>
-                        <span class="text-xs text-gray-500">${equipo.color}</span>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-semibold text-gray-800 text-sm truncate">📱 iPhone ${eq.modelo} ${eq.gb} — ${eq.color}</p>
+                            <div class="flex items-center gap-3 mt-0.5 flex-wrap">
+                                <span class="text-xs ${batColor}">🔋 ${eq.bateria}%</span>
+                                <span class="text-xs font-mono text-gray-400">${eq.imei}</span>
+                                ${eq.detalles ? `<span class="text-xs text-amber-600">⚠️ ${eq.detalles}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="shrink-0">
+                            ${yaSel
+                    ? '<span class="text-yellow-600 text-xs font-medium">✓ Seleccionado</span>'
+                    : `<button type="button" data-action="agregar" data-id="${eq.id}"
+                                     class="text-indigo-600 hover:text-indigo-800 text-xs font-semibold border border-indigo-300 rounded px-2 py-1 transition">
+                                     + Agregar
+                                   </button>`}
+                        </div>
                     </div>
-                    <div class="flex items-center gap-3 mt-0.5">
-                        <span class="text-xs ${batColor}">🔋 ${equipo.bateria}%</span>
-                        <span class="text-xs font-mono text-gray-400">${equipo.imei}</span>
-                        ${equipo.detalles ? `<span class="text-xs text-amber-600">⚠️ ${equipo.detalles}</span>` : ''}
-                    </div>
-                `;
-                li.addEventListener('mousedown', e => {
-                    e.preventDefault(); // evita que el input pierda foco antes
-                    this._aplicarEquipoDelInventario(equipo);
-                });
-                dropdown.appendChild(li);
+                </div>
+            `;
+        }).join('');
+
+        // Listener delegado: un solo listener para todos los botones "+ Agregar"
+        sugerencias.querySelectorAll('button[data-action="agregar"]').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.preventDefault();
+                const id = btn.getAttribute('data-id');
+                this._agregarEquipoVenta(id);
             });
+        });
+    }
 
-            dropdown.classList.remove('hidden');
+    /**
+     * Agrega un equipo del inventario a la lista de equipos a vender.
+     * Si ya está seleccionado, no hace nada.
+     */
+    _agregarEquipoVenta(equipoId) {
+        if (this._equiposSeleccionadosVenta.some(e => e.id === equipoId)) return;
+        const eq = inventarioService.obtenerDisponibles().find(e => e.id === equipoId);
+        if (!eq) return;
+
+        this._equiposSeleccionadosVenta.push({
+            id: eq.id,
+            modelo: eq.modelo,
+            gb: eq.gb,
+            color: eq.color,
+            imei: eq.imei,
+            bateria: eq.bateria,
+            detalles: eq.detalles || '',
+            precio: 0
         });
 
-        // Cerrar dropdown al perder foco
-        input.addEventListener('blur', () => {
-            setTimeout(() => dropdown.classList.add('hidden'), 200);
-        });
+        // Limpiar el input de búsqueda para que el operador pueda buscar el siguiente
+        const input = document.getElementById('invBuscadorInput');
+        if (input) input.value = '';
 
-        // ── Botón "Cambiar equipo" ────────────────────────────
-        btnLimpiar?.addEventListener('click', () => {
-            this._limpiarSelectorInventario();
-            input.focus();
-        });
+        this._renderBuscadorEquiposVenta();
+        this._renderListaEquiposVenta();
+        this._recalcularTotalDesdePrecios();
+        this._actualizarContadoresMulti();
+    }
 
-        // ── Botón "Ingresar manualmente" ────────────────────
-        btnModoManual?.addEventListener('click', () => {
-            this._limpiarSelectorInventario();
-            // Ocultar el buscador temporalmente para que el usuario entienda que está en modo manual
-            const buscadorSection = document.getElementById('inventarioBuscadorSection');
-            if (buscadorSection) {
-                buscadorSection.style.opacity = '0.4';
-                buscadorSection.title = 'Modo manual activo. Los campos del equipo están desbloqueados.';
-            }
-            document.getElementById('modelo')?.focus();
-        });
+    /**
+     * Quita un equipo de la lista de equipos a vender.
+     */
+    _quitarEquipoVenta(equipoId) {
+        this._equiposSeleccionadosVenta = this._equiposSeleccionadosVenta.filter(e => e.id !== equipoId);
+        this._renderBuscadorEquiposVenta();
+        this._renderListaEquiposVenta();
+        this._recalcularTotalDesdePrecios();
+        this._actualizarContadoresMulti();
+    }
+
+    /**
+     * Renderiza la lista apilada de equipos a vender con input de precio editable.
+     */
+    _renderListaEquiposVenta() {
+        const lista = document.getElementById('listaEquiposVentaSeleccionados');
+        const resumen = document.getElementById('listaResumenEquiposVenta');
+        const totalGrande = document.getElementById('totalEquiposVentaResumenGrande');
+        const totalInline = document.getElementById('totalEquiposVentaResumenInline');
+
+        const listaVacia = this._equiposSeleccionadosVenta.length === 0;
+
+        if (listaVacia) {
+            if (lista) lista.innerHTML = '<p class="text-slate-500 text-xs text-center italic py-4">Busca y selecciona los equipos a vender arriba ↑</p>';
+            if (resumen) resumen.innerHTML = '<p class="text-slate-500 text-xs text-center italic">Sin equipos aún...</p>';
+            if (totalGrande) totalGrande.textContent = '0';
+            if (totalInline) totalInline.textContent = '(0)';
+            return;
+        }
+
+        if (lista) {
+            lista.innerHTML = this._equiposSeleccionadosVenta.map((eq, idx) => `
+                <div class="equipo-seleccionado bg-white p-3 rounded-lg border-2 border-blue-200" data-equipo-id="${eq.id}">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-slate-500 text-xs font-mono">${idx + 1}</span>
+                                <p class="font-bold text-sm truncate">📱 iPhone ${eq.modelo} ${eq.gb} — ${eq.color}</p>
+                            </div>
+                            <p class="text-xs font-mono text-gray-500">IMEI: ${eq.imei}</p>
+                            <p class="text-xs text-gray-500 mt-1">🔋 ${eq.bateria}%${eq.detalles ? ' | ' + eq.detalles : ''}</p>
+                            <div class="mt-2 flex items-center gap-2">
+                                <label class="text-xs font-medium text-gray-700 whitespace-nowrap">Precio ($):</label>
+                                <input type="number" step="0.01" min="0"
+                                    class="eq-vendido-precio flex-1 p-1.5 border rounded text-sm"
+                                    value="${eq.precio}"
+                                    data-id="${eq.id}"
+                                    placeholder="0.00">
+                            </div>
+                        </div>
+                        <button type="button" data-action="quitar" data-id="${eq.id}"
+                                class="text-red-500 hover:text-red-700 text-lg leading-none shrink-0 transition"
+                                title="Quitar de la venta">✕</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Listeners para inputs de precio y botones ✕
+            lista.querySelectorAll('input.eq-vendido-precio').forEach(inp => {
+                inp.addEventListener('input', e => {
+                    const id = inp.getAttribute('data-id');
+                    this._actualizarPrecioEquipoVenta(id, inp.value);
+                });
+            });
+            lista.querySelectorAll('button[data-action="quitar"]').forEach(btn => {
+                btn.addEventListener('click', e => {
+                    const id = btn.getAttribute('data-id');
+                    this._quitarEquipoVenta(id);
+                });
+            });
+        }
+
+        if (totalGrande) totalGrande.textContent = this._equiposSeleccionadosVenta.length;
+        if (totalInline) totalInline.textContent = `(${this._equiposSeleccionadosVenta.length})`;
+
+        if (resumen) {
+            const modelos = {};
+            this._equiposSeleccionadosVenta.forEach(eq => {
+                const key = `${eq.modelo} ${eq.gb}`;
+                modelos[key] = (modelos[key] || 0) + 1;
+            });
+            resumen.innerHTML = Object.entries(modelos)
+                .sort((a, b) => b[1] - a[1])
+                .map(([k, v]) => `<div class="flex justify-between items-center text-xs">
+                    <span class="text-slate-300 truncate">${k}</span>
+                    <span class="text-indigo-300 font-bold ml-2 shrink-0">×${v}</span>
+                </div>`).join('');
+        }
+    }
+
+    /**
+     * Actualiza el precio de un equipo seleccionado y recalcula el total.
+     */
+    _actualizarPrecioEquipoVenta(equipoId, valor) {
+        const eq = this._equiposSeleccionadosVenta.find(e => e.id === equipoId);
+        if (eq) {
+            eq.precio = parseFloat(valor) || 0;
+            this._recalcularTotalDesdePrecios();
+        }
+    }
+
+    /**
+     * Suma los precios de todos los equipos seleccionados.
+     * Fuente única para el total de la venta.
+     */
+    _sumarPreciosEquiposVendidos() {
+        return this._equiposSeleccionadosVenta.reduce((s, e) => s + (e.precio || 0), 0);
+    }
+
+    /**
+     * Recalcula el montoTotal = Σ precios - Σ trade-ins (si hay precios cargados).
+     * Luego actualiza el banner de diferencia para que el operador vea
+     * si cuadra lo que paga con lo que pidió.
+     */
+    _recalcularTotalDesdePrecios() {
+        const totalEquipos = this._sumarPreciosEquiposVendidos();
+        const totalRecibidos = this._sumarValoresRecibidos();
+        if (totalEquipos > 0 || this._equiposSeleccionadosVenta.length > 0) {
+            const nuevoTotal = Math.max(0, totalEquipos - totalRecibidos);
+            const montoInput = document.getElementById('montoTotal');
+            if (montoInput) montoInput.value = nuevoTotal.toFixed(2);
+        }
+        // Refrescar el banner de diferencia con el nuevo montoTotal
+        this._actualizarBannerDiferencia();
+    }
+
+    /**
+     * Muestra u oculta el banner de inventario vacío según el estado actual.
+     */
+    _actualizarBannerInventarioVacio() {
+        const banner = document.getElementById('invVacioBanner');
+        if (!banner) return;
+        const disponibles = inventarioService.obtenerDisponibles();
+        if (disponibles.length === 0) {
+            banner.classList.remove('hidden');
+        } else {
+            banner.classList.add('hidden');
+        }
+    }
+
+    /**
+     * Actualiza contadores en panel resumen lateral y resumen de cierre.
+     */
+    _actualizarContadoresMulti() {
+        const span = document.getElementById('equiposAdicionalesCount');
+        if (span) span.textContent = `(${this._equiposSeleccionadosVenta.length})`;
     }
 
     /**
@@ -2412,20 +3330,47 @@ class App {
 
         // Sección Equipo (solo si es venta completa)
         if (venta.tipoVenta === 'completa') {
-            seccionEquipo = `
-                <div class="bg-blue-50 p-3 rounded-lg">
-                    <h5 class="font-semibold text-blue-800 text-xs mb-2 flex items-center">
-                        <span class="mr-1">📱</span> Equipo
-                    </h5>
-                    <div class="text-xs space-y-1">
-                        <p><strong>Modelo:</strong> ${venta.equipo.modelo}</p>
-                        <p><strong>Capacidad:</strong> ${venta.equipo.almacenamiento}</p>
-                        <p><strong>Color:</strong> ${venta.equipo.color}</p>
-                        <p><strong>Batería:</strong> ${venta.equipo.bateria}</p>
-                        <p><strong>Imei:</strong> ${sanitizar(venta.equipo.imei)}</p>
+            // MULTI-EQUIPO: iterar todos los equipos vendidos; fallback al singular.
+            const equiposVendidos = (venta.equipos && venta.equipos.length > 0)
+                ? venta.equipos
+                : (venta.equipo ? [venta.equipo] : []);
+
+            if (equiposVendidos.length > 0) {
+                const subCajasEquipos = equiposVendidos.map((eq, idx) => {
+                    const precioTxt = (eq.precio != null && eq.precio !== '')
+                        ? `<p><strong>Precio:</strong> ${formatearMoneda(eq.precio)}</p>`
+                        : '';
+                    const garantiaTxt = eq.garantia
+                        ? `<p><strong>Garantía:</strong> ${sanitizar(eq.garantia)}</p>`
+                        : '';
+                    const titulo = equiposVendidos.length > 1
+                        ? `📱 Equipo #${idx + 1} de ${equiposVendidos.length}`
+                        : '📱 Equipo';
+                    return `
+                        <div class="bg-white bg-opacity-60 p-2 rounded mb-2 ${idx > 0 ? 'border-t border-blue-200 pt-2' : ''}">
+                            <h6 class="font-semibold text-blue-900 text-xs mb-1">${titulo}</h6>
+                            <p><strong>Modelo:</strong> ${sanitizar(eq.modelo || '')}</p>
+                            <p><strong>Capacidad:</strong> ${sanitizar(eq.almacenamiento || '')}</p>
+                            <p><strong>Color:</strong> ${sanitizar(eq.color || '')}</p>
+                            <p><strong>Batería:</strong> ${sanitizar(eq.bateria || '')}</p>
+                            <p><strong>IMEI:</strong> ${sanitizar(eq.imei || '')}</p>
+                            ${precioTxt}
+                            ${garantiaTxt}
+                        </div>
+                    `;
+                }).join('');
+
+                seccionEquipo = `
+                    <div class="bg-blue-50 p-3 rounded-lg">
+                        <h5 class="font-semibold text-blue-800 text-xs mb-2 flex items-center">
+                            <span class="mr-1">📱</span> Equipos Vendidos ${equiposVendidos.length > 1 ? `(${equiposVendidos.length})` : ''}
+                        </h5>
+                        <div class="text-xs space-y-1">
+                            ${subCajasEquipos}
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
         }
 
         // Sección Accesorios (solo si hay accesorios)
@@ -2443,22 +3388,41 @@ class App {
         }
 
         // Sección Equipo Recibido (solo si existe)
-        if (venta.equipoRecibido) {
-            seccionEquipoRecibido = `
-                <div class="bg-orange-50 p-3 rounded-lg">
-                    <h5 class="font-semibold text-orange-800 text-xs mb-2 flex items-center">
-                        <span class="mr-1">📱⬅️</span> Equipo Recibido
-                    </h5>
-                    <div class="text-xs space-y-1">
-                        <p><strong>Modelo:</strong> ${venta.equipoRecibido.modelo}</p>
-                        <p><strong>Capacidad:</strong> ${venta.equipoRecibido.capacidad}</p>
-                        <p><strong>Color:</strong> ${venta.equipoRecibido.color}</p>
-                        <p><strong>Batería:</strong> ${venta.equipoRecibido.bateria}</p>
-                        <p><strong>IMEI:</strong> ${sanitizar(venta.equipoRecibido.imei) || 'N/A'}</p>
-                        <p><strong>Valor:</strong> ${formatearMoneda(venta.equipoRecibido.valor)}</p>
+        if (venta.equipoRecibido || (venta.equiposRecibidos && venta.equiposRecibidos.length > 0)) {
+            // MULTI-TRADE-IN: iterar todos los recibidos; fallback al singular.
+            const recibidos = (venta.equiposRecibidos && venta.equiposRecibidos.length > 0)
+                ? venta.equiposRecibidos
+                : (venta.equipoRecibido ? [venta.equipoRecibido] : []);
+
+            if (recibidos.length > 0) {
+                const subCajasRecibidos = recibidos.map((eq, idx) => {
+                    const titulo = recibidos.length > 1
+                        ? `📱⬅️ Equipo #${idx + 1} de ${recibidos.length}`
+                        : '📱⬅️ Equipo Recibido';
+                    return `
+                        <div class="bg-white bg-opacity-60 p-2 rounded mb-2 ${idx > 0 ? 'border-t border-orange-200 pt-2' : ''}">
+                            <h6 class="font-semibold text-orange-900 text-xs mb-1">${titulo}</h6>
+                            <p><strong>Modelo:</strong> ${sanitizar(eq.modelo || '')}</p>
+                            <p><strong>Capacidad:</strong> ${sanitizar(eq.capacidad || '')}</p>
+                            <p><strong>Color:</strong> ${sanitizar(eq.color || '')}</p>
+                            <p><strong>Batería:</strong> ${sanitizar(eq.bateria || '')}</p>
+                            <p><strong>IMEI:</strong> ${sanitizar(eq.imei || 'N/A')}</p>
+                            <p><strong>Valor:</strong> ${formatearMoneda(eq.valor || 0)}</p>
+                        </div>
+                    `;
+                }).join('');
+
+                seccionEquipoRecibido = `
+                    <div class="bg-orange-50 p-3 rounded-lg">
+                        <h5 class="font-semibold text-orange-800 text-xs mb-2 flex items-center">
+                            <span class="mr-1">📱⬅️</span> Equipos Recibidos ${recibidos.length > 1 ? `(${recibidos.length})` : ''}
+                        </h5>
+                        <div class="text-xs space-y-1">
+                            ${subCajasRecibidos}
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
         }
 
         // Sección Pago (siempre presente)
@@ -2501,6 +3465,11 @@ class App {
 
         if (venta.equipoRecibido) {
             detallesPago.push(`<p class="bg-orange-100 px-2 py-1 rounded">Equipo recibido: ${venta.equipoRecibido.modelo} (${formatearMoneda(venta.equipoRecibido.valor)})</p>`);
+        } else if (venta.equiposRecibidos && venta.equiposRecibidos.length > 0) {
+            // Multi-trade-in: mostrar un tag por cada uno
+            venta.equiposRecibidos.forEach((eq, idx) => {
+                detallesPago.push(`<p class="bg-orange-100 px-2 py-1 rounded">Eq. recibido #${idx + 1}: ${eq.modelo} (${formatearMoneda(eq.valor || 0)})</p>`);
+            });
         }
 
         if (venta.abonosPrevios && venta.abonosPrevios.length > 0) {
@@ -2555,11 +3524,20 @@ class App {
                     <button onclick="app.editarVenta('${venta.id}')" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1.5 rounded transition flex items-center gap-1">
                         <span>✏️</span> Editar
                     </button>
-                    ${venta.tipoVenta === 'completa' ? `
-                        <button onclick="app.imprimirGarantia('${venta.id}')" class="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded transition flex items-center gap-1">
-                            <span>🖨️</span> Garantía
-                        </button>
-                    ` : ''}
+                    ${venta.tipoVenta === 'completa' ? (() => {
+                        // MULTI-EQUIPO: 1 botón de garantía por equipo vendido.
+                        const equiposVendidos = (venta.equipos && venta.equipos.length > 0)
+                            ? venta.equipos
+                            : (venta.equipo ? [venta.equipo] : []);
+                        return equiposVendidos.map((eq, idx) => {
+                            const label = equiposVendidos.length > 1
+                                ? `Garantía #${idx + 1}`
+                                : 'Garantía';
+                            return `<button onclick="app.imprimirGarantia('${venta.id}', ${idx})" class="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded transition flex items-center gap-1" title="Imprimir garantía de ${sanitizar(eq.modelo || '')} ${sanitizar(eq.almacenamiento || '')} — IMEI ${sanitizar(eq.imei || 'N/A')}">
+                                <span>🖨️</span> ${label}
+                            </button>`;
+                        }).join('');
+                    })() : ''}
                     <button onclick="app.eliminarVenta('${venta.id}')" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded transition flex items-center gap-1">
                         <span>🗑️</span> Eliminar
                     </button>
@@ -2803,31 +3781,55 @@ class App {
         this._equipoInventarioIdAnterior = null;
         this._equipoInventarioId = null;
 
-        if (venta.tipoVenta === 'completa' && venta.equipo && venta.equipo.imei) {
-            const equipoPrevio = inventarioService.buscarPorImei(venta.equipo.imei);
-
-            // Si el equipo existe en el inventario, guardar su ID como "anterior"
-            // Esto nos permite:
-            // 1. Revertirlo a "disponible" si el usuario cambia a modo manual
-            // 2. Marcarlo correctamente si el usuario selecciona otro equipo del inventario
-            if (equipoPrevio) {
-                this._equipoInventarioIdAnterior = equipoPrevio.id;
-                console.log(`📦 Equipo del inventario detectado en edición: ${equipoPrevio.id} (IMEI: ${equipoPrevio.imei}, estado: ${equipoPrevio.estado})`);
-            }
-        }
-
-        // Cliente y Equipo (si es venta completa)
         if (venta.tipoVenta === 'completa') {
+            this._equiposSeleccionadosVenta = [];
+            
+            const equiposACargar = venta.equipos && venta.equipos.length > 0 
+                ? venta.equipos 
+                : (venta.equipo ? [venta.equipo] : []);
+
+            equiposACargar.forEach(eq => {
+                if (!eq) return;
+                const eqInv = inventarioService.buscarPorImei(eq.imei);
+                
+                this._equiposSeleccionadosVenta.push({
+                    id: eq.idInventario || (eqInv ? eqInv.id : `manual-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`),
+                    modelo: eq.modelo || '',
+                    color: eq.color || '',
+                    gb: eq.almacenamiento || '',
+                    bateria: eq.bateria ? parseInt(eq.bateria) : null,
+                    imei: eq.imei || '',
+                    precio: parseFloat(eq.precio) || 0,
+                    detalles: eq.detalles || '',
+                    desdeInventario: !!(eq.idInventario || eqInv)
+                });
+            });
+
+            if (typeof this._renderListaEquiposVenta === 'function') {
+                this._renderListaEquiposVenta();
+                this._renderBuscadorEquiposVenta();
+                this._actualizarContadoresMulti();
+            }
+
+            const primerEq = equiposACargar[0] || {};
+            if (primerEq.imei) {
+                const equipoPrevio = inventarioService.buscarPorImei(primerEq.imei);
+                if (equipoPrevio) {
+                    this._equipoInventarioIdAnterior = equipoPrevio.id;
+                    console.log(`📦 Equipo del inventario detectado en edición: ${equipoPrevio.id} (IMEI: ${equipoPrevio.imei})`);
+                }
+            }
+
             document.getElementById('clienteNombre').value = venta.cliente.nombre || '';
             document.getElementById('clienteCedula').value = venta.cliente.cedula || '';
             document.getElementById('clienteTelefono').value = venta.cliente.telefono || '';
 
-            document.getElementById('modelo').value = venta.equipo.modelo || '';
-            document.getElementById('color').value = venta.equipo.color || '';
-            document.getElementById('almacenamiento').value = venta.equipo.almacenamiento || '';
-            document.getElementById('bateria').value = venta.equipo.bateria.replace('%', '') || '';
-            document.getElementById('equipoImei').value = venta.equipo.imei || '';
-            document.getElementById('equipoGarantia').value = venta.equipo.garantia || '';
+            document.getElementById('modelo').value = primerEq.modelo || '';
+            document.getElementById('color').value = primerEq.color || '';
+            document.getElementById('almacenamiento').value = primerEq.almacenamiento || '';
+            document.getElementById('bateria').value = (primerEq.bateria || '').toString().replace('%', '') || '';
+            document.getElementById('equipoImei').value = primerEq.imei || '';
+            document.getElementById('equipoGarantia').value = primerEq.garantia || '';
         }
 
         // Accesorios - Usar setTimeout para asegurar que los elementos estén visibles
@@ -3003,18 +4005,51 @@ class App {
             }
         }, 150);
 
-        // Equipo recibido
-        if (venta.equipoRecibido) {
+        // Equipo recibido — soportar multi-trade-in
+        // Primero normalizamos a un array (compat con ventas viejas que sólo tienen singular)
+        const recibidos = (venta.equiposRecibidos && venta.equiposRecibidos.length > 0)
+            ? venta.equiposRecibidos
+            : (venta.equipoRecibido ? [venta.equipoRecibido] : []);
+
+        if (recibidos.length > 0) {
             document.getElementById('recibirEquipo').checked = true;
             document.getElementById('recibirEquipo').dispatchEvent(new Event('change'));
             setTimeout(() => {
-                document.getElementById('equipoModelo').value = venta.equipoRecibido.modelo || '';
-                document.getElementById('equipoCapacidad').value = venta.equipoRecibido.capacidad || '';
-                document.getElementById('equipoColor').value = venta.equipoRecibido.color || '';
-                document.getElementById('equipoBateria').value = venta.equipoRecibido.bateria.replace('%', '') || '';
-                document.getElementById('equipoImeiR').value = venta.equipoRecibido.imei || '';
-                document.getElementById('equipoValor').value = venta.equipoRecibido.valor || 0;
-                document.getElementById('equipoComentarios').value = venta.equipoRecibido.comentarios || '';
+                // Cargar el primer trade-in con los IDs singulares (compat con flujo actual)
+                const primero = recibidos[0];
+                document.getElementById('equipoModelo').value = primero.modelo || '';
+                document.getElementById('equipoCapacidad').value = primero.capacidad || '';
+                document.getElementById('equipoColor').value = primero.color || '';
+                document.getElementById('equipoBateria').value = (primero.bateria || '').toString().replace('%', '') || '';
+                document.getElementById('equipoImeiR').value = primero.imei || '';
+                document.getElementById('equipoValor').value = primero.valor || 0;
+                document.getElementById('equipoComentarios').value = primero.comentarios || '';
+
+                // Si hay 2+ trade-ins, generar las filas adicionales en
+                // #equiposRecibidosAdicionales con la misma estructura que crea
+                // _agregarFilaEquipoRecibido()
+                if (recibidos.length > 1) {
+                    const wrapper = document.getElementById('equiposRecibidosAdicionalesWrapper');
+                    const cont = document.getElementById('equiposRecibidosAdicionales');
+                    if (wrapper && cont) {
+                        wrapper.classList.remove('hidden');
+                        cont.innerHTML = ''; // limpiar
+                        for (let i = 1; i < recibidos.length; i++) {
+                            this._agregarFilaEquipoRecibido();
+                            // La fila recién creada es la última
+                            const fila = cont.querySelector('.equipo-recibido-item:last-child');
+                            if (!fila) continue;
+                            const eq = recibidos[i];
+                            const setVal = (sel, val) => { const el = fila.querySelector(sel); if (el) el.value = val || ''; };
+                            setVal('.eq-recibido-modelo', eq.modelo);
+                            setVal('.eq-recibido-capacidad', eq.capacidad);
+                            setVal('.eq-recibido-color', eq.color);
+                            setVal('.eq-recibido-bateria', (eq.bateria || '').toString().replace('%', ''));
+                            setVal('.eq-recibido-imei', eq.imei);
+                            setVal('.eq-recibido-valor', eq.valor);
+                        }
+                    }
+                }
             }, 150);
         }
 
@@ -3078,9 +4113,12 @@ class App {
     }
 
     /**
-     * Imprime la garantía de una venta
+     * Imprime la garantía de una venta.
+     * @param {string} ventaId
+     * @param {number} [equipoIdx=0] - índice del equipo vendido (0 para el primero).
+     *        Si la venta tiene N equipos, este parámetro elige cuál garantía imprimir.
      */
-    async imprimirGarantia(ventaId) {
+    async imprimirGarantia(ventaId, equipoIdx = 0) {
         const venta = await ventaService.obtenerVentaPorId(ventaId);
 
         if (!venta) {
@@ -3093,7 +4131,16 @@ class App {
             return;
         }
 
-        printService.imprimirGarantia(venta);
+        // Validar que el índice esté dentro de rango
+        const totalEquipos = (venta.equipos && venta.equipos.length > 0)
+            ? venta.equipos.length
+            : (venta.equipo ? 1 : 0);
+        if (equipoIdx < 0 || equipoIdx >= totalEquipos) {
+            mostrarAlerta(`Índice de equipo inválido (${equipoIdx + 1} de ${totalEquipos})`, 'error');
+            return;
+        }
+
+        printService.imprimirGarantia(venta, equipoIdx);
     }
 
     /**

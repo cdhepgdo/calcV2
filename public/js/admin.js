@@ -300,12 +300,12 @@ class AdminDashboard {
         const totalEgresos = dias.reduce((sum, dia) => sum + dia.totalEgresos, 0);
         const totalOperaciones = dias.reduce((sum, dia) => sum + dia.operaciones.length, 0);
 
-        // Contar equipos vendidos
+        // Contar equipos vendidos (soporte multi-equipo: 1 venta puede tener N)
         let equiposVendidos = 0;
         dias.forEach(d => {
             d.operaciones.forEach(op => {
                 if (op.tipo === 'venta' && op.detalles.tipoVenta === 'completa' && op.detalles.tipoTransaccion !== 'abono') {
-                    equiposVendidos++;
+                    equiposVendidos += (op.detalles.equipos && op.detalles.equipos.length) || (op.detalles.equipo ? 1 : 0);
                 }
             });
         });
@@ -1111,12 +1111,12 @@ class AdminDashboard {
         const totalEgresos = dias.reduce((sum, dia) => sum + dia.totalEgresos, 0);
         const totalOperaciones = dias.reduce((sum, dia) => sum + dia.operaciones.length, 0);
 
-        // Contar equipos vendidos
+        // Contar equipos vendidos (soporte multi-equipo: 1 venta puede tener N)
         let equiposVendidos = 0;
         dias.forEach(d => {
             d.operaciones.forEach(op => {
                 if (op.tipo === 'venta' && op.detalles.tipoVenta === 'completa' && op.detalles.tipoTransaccion !== 'abono') {
-                    equiposVendidos++;
+                    equiposVendidos += (op.detalles.equipos && op.detalles.equipos.length) || (op.detalles.equipo ? 1 : 0);
                 }
             });
         });

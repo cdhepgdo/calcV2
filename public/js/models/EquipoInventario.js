@@ -1,6 +1,15 @@
+// Fallback para crypto.randomUUID (no disponible en file:// o HTTP no-seguro)
+const generarUUID = () => {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+    }
+    // Fallback RFC4122-ish: time-based + random
+    return 'eq-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 11);
+};
+
 export class EquipoInventario {
     constructor({
-        id = crypto.randomUUID(),
+        id = generarUUID(),
         tipoItem = 'equipo',
         modelo = '',
         gb = '',

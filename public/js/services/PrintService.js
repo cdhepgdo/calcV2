@@ -31,25 +31,33 @@ class PrintService {
             totalPago = venta.montoPago;
         } else {
             // Fallback: Si no hay WEPPA, el monto total es el pago
-            // Si hay WEPPA pero no tiene montoPago, calcular: Total - Equipo
-            if (venta.weppa && venta.equipoRecibido) {
-                totalPago = venta.montoTotal - venta.equipoRecibido.valor;
+            // Si hay WEPPA pero no tiene montoPago, calcular: Total - suma de TODOS los trade-ins
+            if (venta.weppa) {
+                const totalRecibidosCalc = (venta.equiposRecibidos && venta.equiposRecibidos.length > 0)
+                    ? venta.equiposRecibidos.reduce((s, r) => s + (parseFloat(r.valor) || 0), 0)
+                    : (venta.equipoRecibido ? (parseFloat(venta.equipoRecibido.valor) || 0) : 0);
+                totalPago = venta.montoTotal - totalRecibidosCalc;
             } else {
                 totalPago = venta.montoTotal;
             }
         }
 
-        // Agregar equipo recibido al pago para obtener el inicial
-        const equipoRecibido = venta.equipoRecibido ? venta.equipoRecibido.valor : 0;
-        return totalPago + equipoRecibido;
+        // Agregar suma de TODOS los equipos recibidos al pago para obtener el inicial
+        const totalRecibidos = (venta.equiposRecibidos && venta.equiposRecibidos.length > 0)
+            ? venta.equiposRecibidos.reduce((s, r) => s + (parseFloat(r.valor) || 0), 0)
+            : (venta.equipoRecibido ? (parseFloat(venta.equipoRecibido.valor) || 0) : 0);
+        return totalPago + totalRecibidos;
     }
 
     /**
-     * Genera e imprime la garantía de una venta
+     * Genera e imprime la garantía de una venta.
+     * @param {object} venta
+     * @param {number} [equipoIdx=0] - índice del equipo vendido. Default 0 (primero).
+     *        Permite imprimir 1 garantía por equipo cuando la venta tiene N.
      */
-    imprimirGarantia(venta) {
+    imprimirGarantia(venta, equipoIdx = 0) {
         const ventanaImpresion = window.open('', '_blank');
-        const html = this.generarHTMLGarantia(venta);
+        const html = this.generarHTMLGarantia(venta, equipoIdx);
 
         ventanaImpresion.document.write(html);
         ventanaImpresion.document.close();
@@ -61,11 +69,37 @@ class PrintService {
     }
 
     /**
-     * Genera el HTML de la garantía
+     * Genera el HTML de la garantía de un equipo específico de la venta.
+     * @param {object} venta
+     * @param {number} [equipoIdx=0] - índice del equipo vendido dentro de venta.equipos.
+     *        Si no se pasa, usa venta.equipos[0] o el singular venta.equipo (compat).
      */
-    generarHTMLGarantia(venta) {
+    generarHTMLGarantia(venta, equipoIdx = 0) {
         const accesoriosTexto = venta.obtenerResumenAccesorios();
-        const modelo = `${venta.equipo.modelo} | ${venta.equipo.almacenamiento} | ${venta.equipo.color} | ${venta.equipo.bateria}`;
+
+        // Resolver el equipo específico para esta garantía.
+        // Si la venta tiene N equipos, elegir el del índice; si no, fallback al singular.
+        let equipo;
+        if (venta.equipos && venta.equipos.length > 0) {
+            equipo = venta.equipos[equipoIdx] || venta.equipos[0];
+        } else {
+            equipo = venta.equipo;
+        }
+
+        // Precio del equipo (si está disponible); si no, usar el total de la venta
+        const precioEquipo = (equipo && equipo.precio != null && equipo.precio !== '')
+            ? equipo.precio
+            : venta.montoTotal;
+
+        // Si la venta tiene N equipos, indicarlo en el documento
+        const totalEquipos = (venta.equipos && venta.equipos.length > 0)
+            ? venta.equipos.length
+            : 1;
+        const subtituloEquipo = totalEquipos > 1
+            ? ` <span style="font-size:13px;font-weight:600;color:#1e40af;">(Equipo ${equipoIdx + 1} de ${totalEquipos})</span>`
+            : '';
+
+        const modelo = `${equipo.modelo} | ${equipo.almacenamiento} | ${equipo.color} | ${equipo.bateria}`;
 
         return `
 <!DOCTYPE html>
@@ -329,24 +363,24 @@ class PrintService {
             <div class="juntos">
                 <!-- Cuerpo -->
                 <p class="paragraph">
-                    Nuestros equipos condición <strong>Like New (usado poco uso)</strong> cuentan con una garantía de 
-                    <strong>${venta.equipo.garantia} continuos por tienda</strong> estrictamente desde la fecha. 
-                    Dicha garantía no será válida en caso de que el equipo presente mal estado 
-                    <strong>(rayones, manchas en la pantalla, rasguños, desgaste en alguna de sus piezas ocasionadas por el cliente, 
+                    Nuestros equipos condición <strong>Like New (usado poco uso)</strong> cuentan con una garantía de
+                    <strong>${equipo.garantia} continuos por tienda</strong> estrictamente desde la fecha.
+                    Dicha garantía no será válida en caso de que el equipo presente mal estado
+                    <strong>(rayones, manchas en la pantalla, rasguños, desgaste en alguna de sus piezas ocasionadas por el cliente,
                     sulfatación o humedad, indicios de caída, violación a los tornillos de seguridad),</strong> perdiendo la garantía.
                 </p>
-                
+
                 <!-- Figura superior -->
                 <div class="figure" style="right: 79px;">
                     <img src="./width_200.webp" alt="logo">
                 </div>
             </div>
-            
+
             <p class="paragraph bullet">
-                No se cubre garantía por defectos de pantalla ni por defectos causados por que se moje el teléfono. 
-                La empresa cubre los <strong>${venta.equipo.garantia}</strong> haciéndose únicamente responsable por equipos 
-                que presenten defectos de fábrica y estén dentro del periodo de tiempo establecido, siempre y cuando no se violen 
-                las condiciones anteriormente mencionadas, mas no se devolverá dinero; en caso extremo se le hará un cambio de 
+                No se cubre garantía por defectos de pantalla ni por defectos causados por que se moje el teléfono.
+                La empresa cubre los <strong>${equipo.garantia}</strong> haciéndose únicamente responsable por equipos
+                que presenten defectos de fábrica y estén dentro del periodo de tiempo establecido, siempre y cuando no se violen
+                las condiciones anteriormente mencionadas, mas no se devolverá dinero; en caso extremo se le hará un cambio de
                 equipo por otro que no presente falla alguna.
             </p>
             
@@ -411,31 +445,31 @@ class PrintService {
                 
                 <div class="form-row">
                     <div class="field">
-                        <span class="label">•  Modelo del equipo:</span> 
-                        <span class="line">${modelo}</span>
+                        <span class="label">•  Modelo del equipo:</span>
+                        <span class="line">${modelo}${subtituloEquipo}</span>
                     </div>
                     <div class="field">
-                        <span class="label">•  Imei:</span> 
-                        <span class="line">${venta.equipo.imei || 'N/A'}</span>
+                        <span class="label">•  Imei:</span>
+                        <span class="line">${equipo.imei || 'N/A'}</span>
                     </div>
                 </div>
-                
+
                 <div class="form-row">
                     <div class="field full-width">
-                        <span class="label">•  Accesorio:</span> 
+                        <span class="label">•  Accesorio:</span>
                         <span class="line">
                             ${accesoriosTexto.length > 0 ? accesoriosTexto.join(' | ') : 'Sin accesorios'}
                         </span>
                     </div>
                 </div>
-                
+
                 <div class="form-row">
                     <div class="field">
-                        <span class="label">•  Precio del Equipo:</span> 
-                        <span class="line">${formatearMoneda(venta.montoTotal)}</span>
+                        <span class="label">•  Precio del Equipo:</span>
+                        <span class="line">${formatearMoneda(precioEquipo)}</span>
                     </div>
                     <div class="field">
-                        <span class="label">•  Total venta:</span> 
+                        <span class="label">•  Total venta:</span>
                         <span class="line">${formatearMoneda(venta.montoTotal)}</span>
                     </div>
                 </div>
@@ -494,7 +528,8 @@ class PrintService {
                 totalVentas += venta.montoTotal;
             }
             if (venta.tipoVenta === 'completa' && venta.tipoTransaccion !== 'abono') {
-                equiposVendidos++;
+                // Contar equipos REALES vendidos (soporte multi-equipo: 1 venta puede tener N equipos)
+                equiposVendidos += (venta.equipos && venta.equipos.length) || (venta.equipo ? 1 : 0);
             }
         });
 
@@ -627,6 +662,39 @@ class PrintService {
         .pago-tag { background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 3px; }
         .total-pago { margin-top: 8px !important; padding-top: 8px; border-top: 1px solid rgba(0,0,0,0.1); font-weight: bold; font-size: 11px; }
         .nota-box { margin: 0 15px 15px 15px; padding: 8px 12px; background: #f3e8ff; border-radius: 4px; font-size: 10px; color: #581c87; }
+
+        /* Lista de N equipos vendidos / recibidos (multi-equipo) */
+        .equipo-lista { margin: 0; padding: 0; list-style: none; }
+        .equipo-lista-item {
+            padding: 6px 8px;
+            margin-bottom: 4px;
+            background: rgba(255,255,255,0.55);
+            border-left: 3px solid #1e40af;
+            border-radius: 3px;
+            font-size: 10px;
+            line-height: 1.4;
+        }
+        .equipo-lista-item .eq-num {
+            display: inline-block;
+            background: #1e40af;
+            color: white;
+            font-weight: bold;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            text-align: center;
+            line-height: 16px;
+            font-size: 9px;
+            margin-right: 6px;
+        }
+        .equipo-lista-item .eq-precio {
+            color: #047857;
+            font-weight: bold;
+            margin-left: 4px;
+        }
+        .equipo-lista-item .eq-dato { color: #374151; }
+        .equipo-lista-item .eq-dato strong { color: #1f2937; }
+        .equipo-lista-vacio { font-size: 10px; color: #6b7280; font-style: italic; }
         
         .totales-table {
             width: 100%;
@@ -773,18 +841,51 @@ class PrintService {
         let seccionEquipoRecibido = '';
         let seccionPago = '';
 
-        // Sección Equipo
+        // Sección Equipo(s) — soporta multi-equipo
         if (venta.tipoVenta === 'completa') {
-            seccionEquipo = `
-                <div class="venta-box box-blue">
-                    <h5>📱 Equipo</h5>
-                    <p><strong>Modelo:</strong> ${venta.equipo.modelo}</p>
-                    <p><strong>Cap:</strong> ${venta.equipo.almacenamiento}</p>
-                    <p><strong>Color:</strong> ${venta.equipo.color}</p>
-                    <p><strong>Bat:</strong> ${venta.equipo.bateria}</p>
-                    <p><strong>Imei:</strong> ${venta.equipo.imei}</p>
-                </div>
-            `;
+            const equipos = (venta.equipos && venta.equipos.length > 0)
+                ? venta.equipos
+                : (venta.equipo ? [venta.equipo] : []);
+
+            if (equipos.length === 0) {
+                seccionEquipo = `
+                    <div class="venta-box box-blue">
+                        <h5>📱 Equipo</h5>
+                        <p class="equipo-lista-vacio">Sin equipo registrado</p>
+                    </div>
+                `;
+            } else if (equipos.length === 1) {
+                // Formato compacto (compat con layout 3/4 columnas)
+                const eq = equipos[0];
+                seccionEquipo = `
+                    <div class="venta-box box-blue">
+                        <h5>📱 Equipo</h5>
+                        <p><strong>Modelo:</strong> ${eq.modelo || '—'}</p>
+                        <p><strong>Cap:</strong> ${eq.almacenamiento || '—'}</p>
+                        <p><strong>Color:</strong> ${eq.color || '—'}</p>
+                        <p><strong>Bat:</strong> ${eq.bateria || '—'}</p>
+                        <p><strong>IMEI:</strong> ${eq.imei || '—'}</p>
+                        <p><strong>Precio:</strong> ${formatearMoneda(eq.precio || 0)}</p>
+                    </div>
+                `;
+            } else {
+                // N equipos → lista numerada dentro de la misma caja
+                seccionEquipo = `
+                    <div class="venta-box box-blue">
+                        <h5>📱 Equipos Vendidos (${equipos.length})</h5>
+                        <ul class="equipo-lista">
+                            ${equipos.map((eq, idx) => `
+                                <li class="equipo-lista-item">
+                                    <span class="eq-num">${idx + 1}</span>
+                                    <span class="eq-dato"><strong>${eq.modelo || '—'}</strong> ${eq.almacenamiento || ''} — ${eq.color || '—'}</span><br>
+                                    <span class="eq-dato" style="margin-left:22px">🔋 ${eq.bateria || '—'} | IMEI: <span style="font-family:monospace">${eq.imei || '—'}</span></span>
+                                    <span class="eq-precio">${formatearMoneda(eq.precio || 0)}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
         }
 
         // Sección Accesorios
@@ -797,17 +898,39 @@ class PrintService {
             `;
         }
 
-        // Sección Equipo Recibido
-        if (venta.equipoRecibido) {
+        // Sección Equipo(s) Recibido(s) — soporta multi-trade-in
+        const recibidos = (venta.equiposRecibidos && venta.equiposRecibidos.length > 0)
+            ? venta.equiposRecibidos
+            : (venta.equipoRecibido ? [venta.equipoRecibido] : []);
+
+        if (recibidos.length === 1) {
+            const r = recibidos[0];
             seccionEquipoRecibido = `
                 <div class="venta-box box-orange">
                     <h5>📱⬅️ Eq. Recibido</h5>
-                    <p><strong>Mod:</strong> ${venta.equipoRecibido.modelo}</p>
-                    <p><strong>Cap:</strong> ${venta.equipoRecibido.capacidad}</p>
-                    <p><strong>Color:</strong> ${venta.equipoRecibido.color}</p>
-                    <p><strong>Bat:</strong> ${venta.equipoRecibido.bateria}</p>
-                    <p><strong>IMEI:</strong> ${venta.equipoRecibido.imei || 'N/A'}</p>
-                    <p><strong>Valor:</strong> ${formatearMoneda(venta.equipoRecibido.valor)}</p>
+                    <p><strong>Mod:</strong> ${r.modelo || '—'}</p>
+                    <p><strong>Cap:</strong> ${r.capacidad || '—'}</p>
+                    <p><strong>Color:</strong> ${r.color || '—'}</p>
+                    <p><strong>Bat:</strong> ${r.bateria || '—'}</p>
+                    <p><strong>IMEI:</strong> ${r.imei || 'N/A'}</p>
+                    <p><strong>Valor:</strong> ${formatearMoneda(r.valor || 0)}</p>
+                </div>
+            `;
+        } else if (recibidos.length > 1) {
+            const totalRecibido = recibidos.reduce((s, r) => s + (parseFloat(r.valor) || 0), 0);
+            seccionEquipoRecibido = `
+                <div class="venta-box box-orange">
+                    <h5>📱⬅️ Equipos Recibidos (${recibidos.length}) — ${formatearMoneda(totalRecibido)}</h5>
+                    <ul class="equipo-lista">
+                        ${recibidos.map((r, idx) => `
+                            <li class="equipo-lista-item">
+                                <span class="eq-num">${idx + 1}</span>
+                                <span class="eq-dato"><strong>${r.modelo || '—'}</strong> ${r.capacidad || ''} — ${r.color || '—'}</span><br>
+                                <span class="eq-dato" style="margin-left:22px">🔋 ${r.bateria || '—'} | IMEI: <span style="font-family:monospace">${r.imei || 'N/A'}</span></span>
+                                <span class="eq-precio">${formatearMoneda(r.valor || 0)}</span>
+                            </li>
+                        `).join('')}
+                    </ul>
                 </div>
             `;
         }
@@ -843,14 +966,21 @@ class PrintService {
         } else if (venta.formaPago === 'transferencia' && venta.transferenciaDetalles) {
             detallesPago.push(`<span class="pago-tag">Transferencia: ${formatearMoneda(venta.transferenciaDetalles.dolares)} = ${formatearBs(venta.transferenciaDetalles.bolivares)} (${venta.transferenciaDetalles.tasa})</span>`);
         } else {
-            const pagoReal = (venta.montoPago !== null && venta.montoPago !== undefined) 
-                ? venta.montoPago 
-                : (venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0) - (venta.totalAbonosPrevios || 0));
+            // pagoReal = montoTotal - suma de TODOS los trade-ins - abonos previos
+            const totalRecibidosCalc = recibidos.reduce((s, r) => s + (parseFloat(r.valor) || 0), 0);
+            const pagoReal = (venta.montoPago !== null && venta.montoPago !== undefined)
+                ? venta.montoPago
+                : (venta.montoTotal - totalRecibidosCalc - (venta.totalAbonosPrevios || 0));
             detallesPago.push(`<span class="pago-tag">${venta.formaPago.toUpperCase()}: ${formatearMoneda(pagoReal)}</span>`);
         }
 
-        if (venta.equipoRecibido) {
-            detallesPago.push(`<span class="pago-tag">Equipo Recibido: ${venta.equipoRecibido.modelo} (${formatearMoneda(venta.equipoRecibido.valor)})</span>`);
+        if (recibidos.length > 0) {
+            if (recibidos.length === 1) {
+                detallesPago.push(`<span class="pago-tag">Equipo Recibido: ${recibidos[0].modelo} (${formatearMoneda(recibidos[0].valor)})</span>`);
+            } else {
+                const totalRecibido = recibidos.reduce((s, r) => s + (parseFloat(r.valor) || 0), 0);
+                detallesPago.push(`<span class="pago-tag">Equipos Recibidos (${recibidos.length}): ${formatearMoneda(totalRecibido)}</span>`);
+            }
         }
 
         if (venta.abonosPrevios && venta.abonosPrevios.length > 0) {
@@ -883,7 +1013,7 @@ class PrintService {
                     <span>${venta.hora}</span>
                 </div>
                 
-                <div class="venta-grid ${venta.equipoRecibido ? 'cols-4' : ''}">
+                <div class="venta-grid ${recibidos.length > 0 ? 'cols-4' : ''}">
                     ${seccionEquipo}
                     ${seccionAccesorios}
                     ${seccionEquipoRecibido}

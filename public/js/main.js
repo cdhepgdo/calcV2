@@ -1682,7 +1682,10 @@ class App {
                             gb: r.capacidad,
                             color: r.color,
                             bateria: parseInt(r.bateria) || 0,
-                            detalles: r.comentarios || ''
+                            detalles: r.comentarios || '',
+                            estado: 'disponible', // CRUCIAL: Si estaba 'eliminado' o 'vendido', vuelve a estar en stock
+                            origen: `Trade-in (Venta: ${ventaIdFinal})`,
+                            fechaIngreso: new Date().toISOString() // Opcional, pero útil para saber cuándo volvió
                         }
                     });
                 }

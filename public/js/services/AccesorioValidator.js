@@ -4,7 +4,7 @@
  * 
  * Responsabilidad: Validar que cada checkbox marcado tenga sus datos completos y válidos
  */
-
+ 
 class AccesorioValidator {
     /**
      * Valida y recopila accesorios de un formulario de movimiento

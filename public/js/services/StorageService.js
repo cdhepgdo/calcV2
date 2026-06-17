@@ -409,7 +409,7 @@ class StorageService {
                 fecha: fechaObj.toLocaleDateString('es-ES'),
                 fechaISO: fechaISO
             };
-            setDoc(doc(db, `${this._getBasePath()}/config/cierreCaja`, fechaISO), datosCierre)
+            setDoc(doc(db, `${this._getBasePath()}/cierresCaja`, fechaISO), datosCierre)
                 .catch(err => console.warn('⚠️ Cierre de caja en cola offline:', err.message));
             return { exito: true, fechaISO };
         } catch (error) {
@@ -431,7 +431,7 @@ class StorageService {
     async obtenerUltimoCierreCaja() {
         try {
             const hoyISO = this._fechaAISO(new Date());
-            const snap = await getDocs(collection(db, `${this._getBasePath()}/config/cierreCaja`));
+            const snap = await getDocs(collection(db, `${this._getBasePath()}/cierresCaja`));
             if (snap.empty) return null;
 
             let masReciente = null;
@@ -511,7 +511,7 @@ class StorageService {
             }
             await deleteDoc(doc(db, `${this._getBasePath()}/config`, "cajaInicial"));
             // Limpiar historial de cierres de caja (sub-colección nueva)
-            const cierresSnap = await getDocs(collection(db, `${this._getBasePath()}/config/cierreCaja`));
+            const cierresSnap = await getDocs(collection(db, `${this._getBasePath()}/cierresCaja`));
             for (const cierreDoc of cierresSnap.docs) {
                 await deleteDoc(cierreDoc.ref);
             }

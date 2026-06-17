@@ -5426,8 +5426,10 @@ class App {
 
         try {
             const fechaHoy = new Date().toLocaleDateString('es-ES');
-            const ventas = ventaService.obtenerVentas().filter(v => v.fecha === fechaHoy);
-            const movimientos = movimientoService.obtenerMovimientos().filter(m => m.fecha === fechaHoy);
+            /* const ventas = ventaService.obtenerVentas().filter(v => v.fecha === fechaHoy);
+            const movimientos = movimientoService.obtenerMovimientos().filter(m => m.fecha === fechaHoy); */
+            const ventas = (await ventaService.obtenerVentas()).filter(v => v.fecha === fechaHoy);
+            const movimientos = (await movimientoService.obtenerMovimientos()).filter(m => m.fecha === fechaHoy);
             const desgloseCaja = this.cajaActual.obtenerDesglose(ventas, movimientos);
 
             const result = await storageService.guardarCierreCajaDelDia(desgloseCaja.cajaFinal);

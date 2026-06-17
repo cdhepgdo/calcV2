@@ -532,16 +532,21 @@ class App {
     }
 
     /**
-     * Recalcula el montoTotal a partir de la suma de precios de equipos vendidos
-     * menos el valor de los trade-ins. Solo se aplica si hay al menos 1 precio cargado.
+     * Recalcula el montoTotal a partir de la suma de precios de equipos vendidos.
+     * Ya no se restan los trade-ins porque el montoTotal representa el valor bruto de la venta.
      */
     _recalcularTotalDesdePrecios() {
         const totalEquipos = this._sumarPreciosEquiposVendidos();
-        const totalRecibidos = this._sumarValoresRecibidos();
+        
         if (totalEquipos > 0) {
-            const nuevoTotal = Math.max(0, totalEquipos - totalRecibidos);
+            // Se asume el monto bruto como nuevo total
+            const nuevoTotal = totalEquipos;
+            
+            // Solo actualizamos si el monto actual es menor (por si hay accesorios incluidos en el manual)
             const montoInput = document.getElementById('montoTotal');
-            if (montoInput) montoInput.value = nuevoTotal.toFixed(2);
+            if (montoInput && parseFloat(montoInput.value || 0) < nuevoTotal) {
+                montoInput.value = nuevoTotal.toFixed(2);
+            }
         }
     }
 
@@ -1407,16 +1412,10 @@ class App {
 
         try {
             const datosVenta = this.recopilarDatosVenta();
-                
-            // Auto-corregir montoTotal con la suma de precios - trade-ins (si hay precios cargados)
+
             // Auto-corregir montoTotal con la suma de precios (si hay precios cargados)
             const totalEquipos = (datosVenta.equipos || []).reduce((s, e) => s + (parseFloat(e.precio) || 0), 0);
             if (totalEquipos > 0) {
-                /* const totalRecibidos = (datosVenta.equiposRecibidos || []).reduce((s, e) => s + (parseFloat(e.valor) || 0), 0);
-                datosVenta.montoTotal = Math.max(0, totalEquipos - totalRecibidos);
-                const montoInput = document.getElementById('montoTotal');
-                if (montoInput) montoInput.value = datosVenta.montoTotal.toFixed(2); */
-                
                 // El montoTotal es el monto BRUTO (incluye el trade-in).
                 // No debemos restar el totalRecibidos. Solo auto-corregimos si el monto ingresado
                 // es menor a la suma de los equipos vendidos (por si olvidaron actualizarlo).

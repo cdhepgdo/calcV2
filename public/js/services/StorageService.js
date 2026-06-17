@@ -21,6 +21,7 @@ import {
     collection,
     doc,
     getDoc,
+    getDocs,
     setDoc,
     deleteDoc,
     onSnapshot
@@ -369,11 +370,95 @@ class StorageService {
 
     // ═══════════════════════════════════════════════════════════════════
     // CIERRE DE CAJA
+    //
+    // HISTORIAL: cada cierre es un doc en /config/cierreCaja/{YYYY-MM-DD}.
+    // Esto evita el bug del doc único que se sobrescribía y provocaba
+    // que la sugerencia del día siguiente apuntara a un cierre viejo.
+    //
+    // Se mantiene `guardarCierreCaja(monto)` y `obtenerCierreCaja()`
+    // con la ruta legacy (doc único `config/cierreCaja`) por
+    // compatibilidad con `migrar-datos.html` y no romper consumidores
+    // externos. El flujo nuevo usa `guardarCierreCajaDelDia` /
+    // `obtenerUltimoCierreCaja`.
     // ═══════════════════════════════════════════════════════════════════
 
     /**
-     * Guarda el cierre de caja del día en Firestore.
-     * Fire-and-forget.
+     * Convierte una fecha a string YYYY-MM-DD (formato ISO local).
+     * Se usa como ID de documento en la colección cierreCaja.
+     */
+    _fechaAISO(fecha = new Date()) {
+        const y = fecha.getFullYear();
+        const m = String(fecha.getMonth() + 1).padStart(2, '0');
+        const d = String(fecha.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
+    /**
+     * Guarda el cierre de caja del día como documento en la sub-colección
+     * `/config/cierreCaja/{fechaISO}`. Esto preserva un historial por día.
+     *
+     * @param {number} monto - Caja final del día.
+     * @param {Date|string|null} [fecha=null] - Fecha a usar. Si se omite, hoy.
+     */
+    async guardarCierreCajaDelDia(monto, fecha = null) {
+        try {
+            const fechaObj = fecha ? (fecha instanceof Date ? fecha : new Date(fecha)) : new Date();
+            const fechaISO = this._fechaAISO(fechaObj);
+            const datosCierre = {
+                monto: monto,
+                fecha: fechaObj.toLocaleDateString('es-ES'),
+                fechaISO: fechaISO
+            };
+            setDoc(doc(db, `${this._getBasePath()}/config/cierreCaja`, fechaISO), datosCierre)
+                .catch(err => console.warn('⚠️ Cierre de caja en cola offline:', err.message));
+            return { exito: true, fechaISO };
+        } catch (error) {
+            console.error('❌ Error al guardar cierre de caja:', error);
+            return { exito: false, error: error.message };
+        }
+    }
+
+    /**
+     * Devuelve el cierre de caja más reciente cuyo día sea ANTERIOR a hoy.
+     *
+     * Antes este método (`obtenerCierreCaja`) leía un doc único sin
+     * importar la fecha, lo que provocaba sugerencias de días atrás.
+     * Ahora recorre la colección completa, filtra los cierres con
+     * `fechaISO < hoyISO` y devuelve el más reciente de esos.
+     *
+     * @returns {Promise<{monto:number, fecha:string, fechaISO:string}|null>}
+     */
+    async obtenerUltimoCierreCaja() {
+        try {
+            const hoyISO = this._fechaAISO(new Date());
+            const snap = await getDocs(collection(db, `${this._getBasePath()}/config/cierreCaja`));
+            if (snap.empty) return null;
+
+            let masReciente = null;
+            snap.forEach(docSnap => {
+                const data = docSnap.data();
+                // Solo cierres de días anteriores a hoy (un cierre del mismo
+                // día NO debe sugerir la caja inicial, porque aún no es "ayer").
+                if (!data.fechaISO || data.fechaISO >= hoyISO) return;
+                if (!masReciente || data.fechaISO > masReciente.fechaISO) {
+                    masReciente = data;
+                }
+            });
+            return masReciente;
+        } catch (error) {
+            console.error('❌ Error al obtener último cierre de caja:', error);
+            return null;
+        }
+    }
+
+    // ── Métodos legacy (compatibilidad) ──────────────────────────────
+    // Conservados para no romper `migrar-datos.html` ni cualquier
+    // llamada externa que aún use el doc único. El sistema nuevo
+    // trabaja con los métodos anteriores.
+
+    /**
+     * @deprecated Usar `guardarCierreCajaDelDia`. Conservado por
+     * compatibilidad con `migrar-datos.html`.
      */
     async guardarCierreCaja(monto) {
         try {
@@ -391,8 +476,8 @@ class StorageService {
     }
 
     /**
-     * Obtiene el último cierre de caja desde Firestore.
-     * Se llama solo al arrancar la app.
+     * @deprecated Usar `obtenerUltimoCierreCaja`. Conservado por
+     * compatibilidad con `migrar-datos.html`.
      */
     async obtenerCierreCaja() {
         try {
@@ -425,6 +510,12 @@ class StorageService {
                 await deleteDoc(doc(db, `${this._getBasePath()}/movimientos`, mov.id));
             }
             await deleteDoc(doc(db, `${this._getBasePath()}/config`, "cajaInicial"));
+            // Limpiar historial de cierres de caja (sub-colección nueva)
+            const cierresSnap = await getDocs(collection(db, `${this._getBasePath()}/config/cierreCaja`));
+            for (const cierreDoc of cierresSnap.docs) {
+                await deleteDoc(cierreDoc.ref);
+            }
+            // Limpiar también el doc legacy por si quedó alguno de migraciones
             await deleteDoc(doc(db, `${this._getBasePath()}/config`, "cierreCaja"));
             return { exito: true };
         } catch (error) {

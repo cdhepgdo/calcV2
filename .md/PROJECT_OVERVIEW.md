@@ -80,7 +80,7 @@ Todos los HTMLs comparten estos servicios. Antes de entrar a cada pantalla, conv
 - **Path Firestore:** `sedes/{sedeId}/ventas` y `sedes/{sedeId}/movimientos` (aislamiento por sede).
 - Las escrituras son **fire-and-forget**: se persisten en IndexedDB al instante y suben al servidor en background.
 - Patrón pub/sub: `onCambio(fn)` se llama cada vez que el caché cambia (local o remoto). La UI se re-renderiza sola.
-- Métodos para caja inicial y cierre de caja (paths `sedes/{sedeId}/config/cajaInicial` y `cierreCaja`).
+- Métodos para caja inicial y cierre de caja (paths `sedes/{sedeId}/config/cajaInicial` y `sedes/{sedeId}/config/cierreCaja/{YYYY-MM-DD}` — sub-colección por fecha).
 - **Singleton** — misma instancia en toda la app.
 
 ### 2.3 `AdminService` (`js/services/AdminService.js`) ⭐
@@ -286,7 +286,8 @@ sedes/
     inventario/                # documentos EquipoInventario
     config/
       cajaInicial              # documento Caja
-      cierreCaja               # { monto, fecha }
+      cierreCaja/              # sub-colección: un doc por fecha de cierre
+        2026-06-16             # { monto, fecha, fechaISO }
 usuarios/                      # perfiles con { sedeId, rol }
 historial/inventario           # (legacy, en desuso)
 ```

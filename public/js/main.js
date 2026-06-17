@@ -92,11 +92,31 @@ class App {
             document.getElementById('cajaInicialMostrar').textContent = this.cajaActual.cajaInicial.toFixed(2);
             document.getElementById('cajaInicialConfirmacion').classList.remove('hidden');
         } else {
-            const cierreGuardado = await storageService.obtenerCierreCaja();
-            if (cierreGuardado) {
-                document.getElementById('cajaInicial').value = parseFloat(cierreGuardado.monto).toFixed(2);
-                // Borde amarillo para indicar que es un valor sugerido
-                document.getElementById('cajaInicial').style.borderColor = '#f59e0b';
+            // Pedimos el último cierre de un DÍA ANTERIOR (no de hoy)
+            const ultimoCierre = await storageService.obtenerUltimoCierreCaja();
+            if (ultimoCierre && ultimoCierre.monto !== undefined) {
+                // Solo sugerir si el cierre es de hace 2 días o menos.
+                // Si es más viejo, el operador debe ingresarla manualmente.
+                const fechaCierre = new Date(ultimoCierre.fechaISO + 'T00:00:00');
+                const hoyDate = new Date();
+                hoyDate.setHours(0, 0, 0, 0);
+                const dias = Math.round((hoyDate - fechaCierre) / 86400000);
+                if (dias >= 0 && dias <= 2) {
+                    document.getElementById('cajaInicial').value = parseFloat(ultimoCierre.monto).toFixed(2);
+                    // Borde amarillo para indicar que es un valor sugerido
+                    document.getElementById('cajaInicial').style.borderColor = '#f59e0b';
+                    // Banner informativo debajo del input
+                    const ayudaExistente = document.getElementById('cajaInicialSugerencia');
+                    if (ayudaExistente) ayudaExistente.remove();
+                    const ayuda = document.createElement('p');
+                    ayuda.id = 'cajaInicialSugerencia';
+                    ayuda.className = 'text-xs text-amber-700 mt-1';
+                    const etiquetaDia = dias === 0
+                        ? 'hoy'
+                        : (dias === 1 ? 'ayer' : `hace ${dias} días`);
+                    ayuda.textContent = `💡 Sugerencia del ${ultimoCierre.fecha} (${etiquetaDia}). Verifica antes de guardar.`;
+                    document.getElementById('cajaInicial').parentElement.appendChild(ayuda);
+                }
             }
         }
     }
@@ -3233,12 +3253,12 @@ class App {
         this.animarNumero('equiposVendidos', equiposVendidos, false);
         this.animarNumero('cajaFinal', desgloseCaja.cajaFinal);
 
-        // Guardar la caja final actual para el próximo día
-        /* localStorage.setItem('caja_cierre_iphone', JSON.stringify({
-            monto: desgloseCaja.cajaFinal,
-            fecha: new Date().toLocaleDateString('es-ES')
-        })); */
-        await storageService.guardarCierreCaja(desgloseCaja.cajaFinal);
+        // NOTA: el cierre de caja YA NO se guarda automáticamente aquí.
+        // Antes esto se ejecutaba en cada venta/movimiento, sobrescribiendo
+        // el doc único con valores a medias del día. Ahora se persiste
+        // únicamente cuando el operador pulsa el botón "🔒 Cerrar Caja del Día"
+        // (ver método `cerrarCajaDelDia`), evitando escrituras a medias y
+        // manteniendo un doc por fecha en /config/cierreCaja/{YYYY-MM-DD}.
     }
 
     /**
@@ -5370,6 +5390,48 @@ class App {
             document.getElementById('nuevoColor').value = '';
             document.getElementById('nuevoBateria').value = '';
             document.getElementById('nuevoImei').value = '';
+        }
+    }
+
+    /**
+     * Cierra la caja del día de forma EXPLÍCITA.
+     *
+     * A diferencia del comportamiento anterior (que escribía el cierre
+     * automáticamente en cada venta/movimiento), ahora se hace una sola
+     * vez al final del día, con la caja final ya consolidada. Esto:
+     *   1. Evita escrituras a medias durante el día.
+     *   2. Garantiza que el doc guardado refleja el cierre REAL.
+     *   3. Permite al día siguiente sugerir exactamente el cierre de ayer
+     *      (no de hace N días), gracias a la colección por fecha.
+     */
+    async cerrarCajaDelDia() {
+        const ok = confirmar(
+            '¿Confirmas el cierre de caja de HOY?\n\n' +
+            'La caja final se guardará y se sugerirá como inicial mañana.\n\n' +
+            '💡 Recomendado hacerlo al final de la jornada.'
+        );
+        if (!ok) return;
+
+        try {
+            const fechaHoy = new Date().toLocaleDateString('es-ES');
+            const ventas = ventaService.obtenerVentas().filter(v => v.fecha === fechaHoy);
+            const movimientos = movimientoService.obtenerMovimientos().filter(m => m.fecha === fechaHoy);
+            const desgloseCaja = this.cajaActual.obtenerDesglose(ventas, movimientos);
+
+            const result = await storageService.guardarCierreCajaDelDia(desgloseCaja.cajaFinal);
+
+            if (result.exito) {
+                mostrarAlerta(
+                    `✅ Caja cerrada: $${desgloseCaja.cajaFinal.toFixed(2)}\n` +
+                    `Se guardó como cierre del ${fechaHoy}.`,
+                    'success'
+                );
+            } else {
+                mostrarAlerta('❌ Error al cerrar caja: ' + (result.error || 'desconocido'), 'error');
+            }
+        } catch (error) {
+            console.error('❌ Error en cerrarCajaDelDia:', error);
+            mostrarAlerta('❌ Error al cerrar caja: ' + error.message, 'error');
         }
     }
 

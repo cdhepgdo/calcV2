@@ -793,7 +793,19 @@ class App {
      * Auto-selecciona el modelo del accesorio basándose en el iPhone seleccionado
      */
     autoSeleccionarModeloAccesorio(tipoAccesorio) {
-        const modeloIphone = document.getElementById('modelo').value;
+        let modeloIphone = null;
+
+        // Lógica actualizada: Si hay exactamente un equipo en la venta, tomar su modelo
+        if (this._equiposSeleccionadosVenta && this._equiposSeleccionadosVenta.length === 1) {
+            modeloIphone = this._equiposSeleccionadosVenta[0].modelo;
+        } else if (this._equiposSeleccionadosVenta && this._equiposSeleccionadosVenta.length > 1) {
+            // Si hay más de un equipo, la selección debe ser manual
+            return;
+        } else {
+            // Fallback por si la estructura antigua todavía estuviera viva en algún lugar
+            const modeloInput = document.getElementById('modelo');
+            if (modeloInput) modeloIphone = modeloInput.value;
+        }
 
         if (!modeloIphone) return; // Si no hay modelo seleccionado, no hacer nada
 

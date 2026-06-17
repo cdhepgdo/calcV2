@@ -1407,14 +1407,24 @@ class App {
 
         try {
             const datosVenta = this.recopilarDatosVenta();
-
+                
             // Auto-corregir montoTotal con la suma de precios - trade-ins (si hay precios cargados)
+            // Auto-corregir montoTotal con la suma de precios (si hay precios cargados)
             const totalEquipos = (datosVenta.equipos || []).reduce((s, e) => s + (parseFloat(e.precio) || 0), 0);
             if (totalEquipos > 0) {
-                const totalRecibidos = (datosVenta.equiposRecibidos || []).reduce((s, e) => s + (parseFloat(e.valor) || 0), 0);
+                /* const totalRecibidos = (datosVenta.equiposRecibidos || []).reduce((s, e) => s + (parseFloat(e.valor) || 0), 0);
                 datosVenta.montoTotal = Math.max(0, totalEquipos - totalRecibidos);
                 const montoInput = document.getElementById('montoTotal');
-                if (montoInput) montoInput.value = datosVenta.montoTotal.toFixed(2);
+                if (montoInput) montoInput.value = datosVenta.montoTotal.toFixed(2); */
+                
+                // El montoTotal es el monto BRUTO (incluye el trade-in).
+                // No debemos restar el totalRecibidos. Solo auto-corregimos si el monto ingresado
+                // es menor a la suma de los equipos vendidos (por si olvidaron actualizarlo).
+                if (datosVenta.montoTotal < totalEquipos) {
+                    datosVenta.montoTotal = totalEquipos;
+                    const montoInput = document.getElementById('montoTotal');
+                    if (montoInput) montoInput.value = datosVenta.montoTotal.toFixed(2);
+                }
             }
 
             // ════════════════════════════════════════════════════════════════

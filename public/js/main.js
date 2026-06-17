@@ -3042,6 +3042,13 @@ class App {
         this._renderListaEquiposVenta();
         this._recalcularTotalDesdePrecios();
         this._actualizarContadoresMulti();
+
+        // Autoseleccionar accesorios si es un solo equipo y los checkboxes están marcados
+        if (this._equiposSeleccionadosVenta.length === 1) {
+            if (document.getElementById('forro')?.checked) this.autoSeleccionarModeloAccesorio('forro');
+            if (document.getElementById('vidrio')?.checked) this.autoSeleccionarModeloAccesorio('vidrio');
+            if (document.getElementById('caja')?.checked) this.autoSeleccionarModeloAccesorio('caja');
+        }
     }
 
     /**

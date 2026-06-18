@@ -3057,6 +3057,23 @@ class App {
             if (document.getElementById('forro')?.checked) this.autoSeleccionarModeloAccesorio('forro');
             if (document.getElementById('vidrio')?.checked) this.autoSeleccionarModeloAccesorio('vidrio');
             if (document.getElementById('caja')?.checked) this.autoSeleccionarModeloAccesorio('caja');
+
+            // Auto-rellenar nota de venta con los detalles del equipo (igual que el flujo antiguo)
+            // Solo aplica cuando hay exactamente 1 equipo, para no mezclar notas de varios equipos
+            const detallesEquipo = (eq.detalles || '').trim();
+            if (detallesEquipo) {
+                const chkNota  = document.getElementById('notaVenta');
+                const campoNota = document.getElementById('notaVentaInfo');
+                const inputNota = document.getElementById('notaVentaDetalles');
+
+                // Solo marcar el checkbox y mostrar el campo si no estaba ya usado
+                if (chkNota && !chkNota.checked) {
+                    chkNota.checked = true;
+                    if (campoNota) campoNota.classList.remove('hidden');
+                }
+                // Siempre poner el texto (puede haber algo escrito, lo reemplazamos con el del equipo)
+                if (inputNota) inputNota.value = detallesEquipo;
+            }
         }
     }
 

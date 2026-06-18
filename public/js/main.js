@@ -821,18 +821,27 @@ class App {
         }
 
         if (selectAccesorio) {
-            // Buscar si existe una opción que coincida exactamente con el modelo del iPhone
             const opciones = Array.from(selectAccesorio.options);
-            const opcionCoincidente = opciones.find(option => option.value === modeloIphone);
+
+            // El inventario puede guardar el modelo como "15 Pro" o "iPhone 15 Pro".
+            // Los selects de accesorios tienen values como "iPhone 15 Pro".
+            // Normalizamos para buscar en ambos formatos.
+            const modeloConPrefijo = modeloIphone.startsWith('iPhone') ? modeloIphone : `iPhone ${modeloIphone}`;
+            const modeloSinPrefijo = modeloIphone.startsWith('iPhone') ? modeloIphone.replace('iPhone ', '') : modeloIphone;
+
+            const opcionCoincidente = opciones.find(option =>
+                option.value === modeloConPrefijo || option.value === modeloSinPrefijo
+            );
 
             if (opcionCoincidente) {
-                selectAccesorio.value = modeloIphone;
-                console.log(`✅ Auto-seleccionado ${tipoAccesorio}: ${modeloIphone}`);
+                selectAccesorio.value = opcionCoincidente.value;
+                console.log(`✅ Auto-seleccionado ${tipoAccesorio}: ${opcionCoincidente.value}`);
             } else {
-                console.log(`ℹ️ No se encontró coincidencia exacta para ${tipoAccesorio}`);
+                console.log(`ℹ️ No se encontró coincidencia para ${tipoAccesorio}: "${modeloIphone}" (buscado como "${modeloConPrefijo}" y "${modeloSinPrefijo}")`);
             }
         }
     }
+
 
     /**
      * Inicializa el menú de navegación

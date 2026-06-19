@@ -110,7 +110,7 @@ class App {
                     if (ayudaExistente) ayudaExistente.remove();
                     const ayuda = document.createElement('p');
                     ayuda.id = 'cajaInicialSugerencia';
-                    ayuda.className = 'text-xs text-amber-700 mt-1';
+                    ayuda.className = 'text-xs text-amber-700 dark:text-amber-400 mt-1';
                     const etiquetaDia = dias === 0
                         ? 'hoy'
                         : (dias === 1 ? 'ayer' : `hace ${dias} días`);
@@ -213,12 +213,12 @@ class App {
                 if (formaPago) {
                     montoTotalField.removeAttribute('readonly');
                     montoTotalField.classList.remove('bg-gray-100');
-                    montoTotalField.classList.add('bg-white');
+                    montoTotalField.classList.add('bg-white', 'dark:bg-slate-700');
                     console.log('i')
                 } else {
                     montoTotalField.setAttribute('readonly', true);
                     montoTotalField.classList.add('bg-gray-100');
-                    montoTotalField.classList.remove('bg-white');
+                    montoTotalField.classList.remove('bg-white', 'dark:bg-slate-700');
                     // Recalcular automáticamente
                     //this.calcularTotalMixto();
                     console.log('o')
@@ -586,35 +586,35 @@ class App {
 
         const idx = contenedor.querySelectorAll('.equipo-vendido-item').length + 2; // 2, 3, 4...
         const fila = document.createElement('div');
-        fila.className = 'equipo-vendido-item bg-white p-3 rounded-lg border-2 border-blue-200 relative';
+        fila.className = 'equipo-vendido-item bg-white dark:bg-slate-800 p-3 rounded-lg border-2 border-blue-200 dark:border-blue-700 relative';
         fila.innerHTML = `
             <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-semibold text-blue-700 flex items-center gap-2">
+                <span class="text-xs font-semibold text-blue-700 dark:text-blue-400 flex items-center gap-2">
                     📱 Equipo #${idx}
-                    <span class="inv-badge hidden text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium">
+                    <span class="inv-badge hidden text-[10px] bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full font-medium">
                         🎯 Del inventario
                     </span>
                 </span>
                 <div class="flex items-center gap-2">
-                    <button type="button" class="btn-buscar-inv-fila text-indigo-600 hover:text-indigo-800 text-xs font-medium underline">
+                    <button type="button" class="btn-buscar-inv-fila text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 text-xs font-medium underline">
                         🎯 Buscar en inventario
                     </button>
-                    <button type="button" class="btn-remove-equipo-vendido text-red-500 hover:text-red-700 text-xs font-medium">
+                    <button type="button" class="btn-remove-equipo-vendido text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-xs font-medium">
                         ✕ Quitar
                     </button>
                 </div>
             </div>
             <div class="grid md:grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Modelo</label>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Modelo</label>
                     <select class="eq-vendido-modelo w-full p-2 border rounded-lg text-sm"></select>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Color</label>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Color</label>
                     <select class="eq-vendido-color w-full p-2 border rounded-lg text-sm"></select>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Capacidad</label>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Capacidad</label>
                     <select class="eq-vendido-almacenamiento w-full p-2 border rounded-lg text-sm">
                         <option value="">—</option>
                         <option value="64GB">64GB</option>
@@ -625,15 +625,15 @@ class App {
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">% Batería</label>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">% Batería</label>
                     <input type="number" min="1" max="100" class="eq-vendido-bateria w-full p-2 border rounded-lg text-sm" placeholder="%">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">IMEI</label>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">IMEI</label>
                     <input type="text" class="eq-vendido-imei w-full p-2 border rounded-lg text-sm" placeholder="IMEI">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Precio ($)</label>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Precio ($)</label>
                     <input type="number" step="0.01" min="0" class="eq-vendido-precio w-full p-2 border rounded-lg text-sm" placeholder="0.00">
                 </div>
             </div>
@@ -706,21 +706,21 @@ class App {
 
         const idx = contenedor.querySelectorAll('.equipo-recibido-item').length + 2;
         const fila = document.createElement('div');
-        fila.className = 'equipo-recibido-item bg-white p-3 rounded-lg border-2 border-orange-200 relative';
+        fila.className = 'equipo-recibido-item bg-white dark:bg-slate-800 p-3 rounded-lg border-2 border-orange-200 dark:border-orange-700 relative';
         fila.innerHTML = `
             <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-semibold text-orange-700">📱 Equipo Recibido #${idx}</span>
-                <button type="button" class="btn-remove-equipo-recibido text-red-500 hover:text-red-700 text-xs font-medium">
+                <span class="text-xs font-semibold text-orange-700 dark:text-orange-400">📱 Equipo Recibido #${idx}</span>
+                <button type="button" class="btn-remove-equipo-recibido text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-xs font-medium">
                     ✕ Quitar
                 </button>
             </div>
             <div class="grid md:grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Modelo</label>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Modelo</label>
                     <select class="eq-recibido-modelo w-full p-2 border rounded-lg text-sm"></select>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Capacidad</label>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Capacidad</label>
                     <select class="eq-recibido-capacidad w-full p-2 border rounded-lg text-sm">
                         <option value="">—</option>
                         <option value="64GB">64GB</option>
@@ -731,19 +731,19 @@ class App {
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Color</label>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Color</label>
                     <select class="eq-recibido-color w-full p-2 border rounded-lg text-sm"></select>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">% Batería</label>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">% Batería</label>
                     <input type="number" min="1" max="100" class="eq-recibido-bateria w-full p-2 border rounded-lg text-sm" placeholder="%">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">IMEI</label>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">IMEI</label>
                     <input type="text" class="eq-recibido-imei w-full p-2 border rounded-lg text-sm" placeholder="IMEI">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Valor ($)</label>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Valor ($)</label>
                     <input type="number" step="0.01" min="0" class="eq-recibido-valor w-full p-2 border rounded-lg text-sm" placeholder="0.00">
                 </div>
             </div>
@@ -1884,7 +1884,7 @@ class App {
 
         if (validacion.tipo === 'advertencia' && validacion.equipoSugerido) {
             const equipo = validacion.equipoSugerido;
-            const batColor = equipo.bateria < 50 ? 'text-red-600' : equipo.bateria < 80 ? 'text-amber-600' : 'text-green-600';
+            const batColor = equipo.bateria < 50 ? 'text-red-600 dark:text-red-400' : equipo.bateria < 80 ? 'text-amber-600 dark:text-amber-400' : 'text-green-600 dark:text-green-400';
 
             const titulo = document.getElementById('imeiInventarioBannerTitulo');
             const detalle = document.getElementById('imeiInventarioBannerDetalle');
@@ -2039,16 +2039,16 @@ class App {
         let icono = '⚠️';
         let titulo = '';
         let detalle = '';
-        let colorClases = 'border-red-300 bg-red-50';           // rojo por defecto (bloqueado)
-        let tituloClases = 'text-red-800';
-        let detalleClases = 'text-red-700';
+        let colorClases = 'border-red-300 dark:border-red-700/50 bg-red-50 dark:bg-red-900/20';           // rojo por defecto (bloqueado)
+        let tituloClases = 'text-red-800 dark:text-red-300';
+        let detalleClases = 'text-red-700 dark:text-red-400';
         let mostrarBtn = false;
 
         const eq = conflicto.equipo;
 
         switch (conflicto.tipo) {
             case 'bloqueado-disponible': {
-                const batColor = eq.bateria < 50 ? 'text-red-600' : eq.bateria < 80 ? 'text-amber-600' : 'text-green-700';
+                const batColor = eq.bateria < 50 ? 'text-red-600 dark:text-red-400' : eq.bateria < 80 ? 'text-amber-600 dark:text-amber-400' : 'text-green-700 dark:text-green-400';
                 titulo = 'Este equipo está disponible en inventario';
                 detalle = `📱 iPhone ${eq.modelo} ${eq.gb}GB — ${eq.color} — ` +
                     `<span class="${batColor}">🔋 ${eq.bateria}%</span> (IMEI: ${eq.imei}). ` +
@@ -2072,9 +2072,9 @@ class App {
                 titulo = 'Este IMEI corresponde a un equipo vendido';
                 detalle = `📱 iPhone ${eq.modelo} ${eq.gb}GB — ${eq.color} (IMEI: ${eq.imei}). ` +
                     `Puedes autocompletar los datos del equipo.`;
-                colorClases = 'border-blue-300 bg-blue-50';
-                tituloClases = 'text-blue-800';
-                detalleClases = 'text-blue-700';
+                colorClases = 'border-blue-300 dark:border-blue-700/50 bg-blue-50 dark:bg-blue-900/20';
+                tituloClases = 'text-blue-800 dark:text-blue-300';
+                detalleClases = 'text-blue-700 dark:text-blue-400';
                 mostrarBtn = true;
                 break;
             }
@@ -2722,8 +2722,8 @@ class App {
             ? 'Sin stock'
             : `${n} equipo${n === 1 ? '' : 's'} disponible${n === 1 ? '' : 's'}`;
         badge.className = n === 0
-            ? 'text-xs font-bold bg-red-100 text-red-600 px-3 py-1 rounded-full'
-            : 'text-xs font-bold bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full';
+            ? 'text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-300 px-3 py-1 rounded-full'
+            : 'text-xs font-bold bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 px-3 py-1 rounded-full';
     }
 
     /**
@@ -2987,24 +2987,24 @@ class App {
 
         sugerencias.innerHTML = disponibles.slice(0, 15).map(eq => {
             const yaSel = this._equiposSeleccionadosVenta.some(e => e.id === eq.id);
-            const batColor = eq.bateria < 50 ? 'text-red-500' : eq.bateria < 80 ? 'text-orange-500' : 'text-green-600';
+            const batColor = eq.bateria < 50 ? 'text-red-500 dark:text-red-400' : eq.bateria < 80 ? 'text-orange-500 dark:text-orange-400' : 'text-green-600 dark:text-green-400';
             return `
-                <div class="equipo-sugerencia p-2 rounded-lg border ${yaSel ? 'opacity-40 bg-gray-50' : 'cursor-pointer hover:bg-indigo-50 bg-white border-gray-200'}"
+                <div class="equipo-sugerencia p-2 rounded-lg border ${yaSel ? 'opacity-40 bg-gray-50 dark:bg-slate-700' : 'cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/30 bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700'}"
                      data-equipo-id="${eq.id}">
                     <div class="flex items-center justify-between gap-2">
                         <div class="flex-1 min-w-0">
-                            <p class="font-semibold text-gray-800 text-sm truncate">📱 iPhone ${eq.modelo} ${eq.gb} — ${eq.color}</p>
+                            <p class="font-semibold text-gray-800 dark:text-slate-100 text-sm truncate">📱 iPhone ${eq.modelo} ${eq.gb} — ${eq.color}</p>
                             <div class="flex items-center gap-3 mt-0.5 flex-wrap">
                                 <span class="text-xs ${batColor}">🔋 ${eq.bateria}%</span>
-                                <span class="text-xs font-mono text-gray-400">${eq.imei}</span>
-                                ${eq.detalles ? `<span class="text-xs text-amber-600">⚠️ ${eq.detalles}</span>` : ''}
+                                <span class="text-xs font-mono text-gray-400 dark:text-slate-500">${eq.imei}</span>
+                                ${eq.detalles ? `<span class="text-xs text-amber-600 dark:text-amber-400">⚠️ ${eq.detalles}</span>` : ''}
                             </div>
                         </div>
                         <div class="shrink-0">
                             ${yaSel
-                    ? '<span class="text-yellow-600 text-xs font-medium">✓ Seleccionado</span>'
+                    ? '<span class="text-yellow-600 dark:text-yellow-400 text-xs font-medium">✓ Seleccionado</span>'
                     : `<button type="button" data-action="agregar" data-id="${eq.id}"
-                                     class="text-indigo-600 hover:text-indigo-800 text-xs font-semibold border border-indigo-300 rounded px-2 py-1 transition">
+                                     class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 text-xs font-semibold border border-indigo-300 dark:border-indigo-700 rounded px-2 py-1 transition">
                                      + Agregar
                                    </button>`}
                         </div>
@@ -3109,17 +3109,17 @@ class App {
 
         if (lista) {
             lista.innerHTML = this._equiposSeleccionadosVenta.map((eq, idx) => `
-                <div class="equipo-seleccionado bg-white p-3 rounded-lg border-2 border-blue-200" data-equipo-id="${eq.id}">
+                <div class="equipo-seleccionado bg-white dark:bg-slate-800 p-3 rounded-lg border-2 border-blue-200 dark:border-blue-700" data-equipo-id="${eq.id}">
                     <div class="flex items-start justify-between gap-2">
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 mb-1">
                                 <span class="text-slate-500 text-xs font-mono">${idx + 1}</span>
                                 <p class="font-bold text-sm truncate">📱 iPhone ${eq.modelo} ${eq.gb} — ${eq.color}</p>
                             </div>
-                            <p class="text-xs font-mono text-gray-500">IMEI: ${eq.imei}</p>
-                            <p class="text-xs text-gray-500 mt-1">🔋 ${eq.bateria}%${eq.detalles ? ' | ' + eq.detalles : ''}</p>
+                            <p class="text-xs font-mono text-gray-500 dark:text-slate-400">IMEI: ${eq.imei}</p>
+                            <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">🔋 ${eq.bateria}%${eq.detalles ? ' | ' + eq.detalles : ''}</p>
                             <div class="mt-2 flex items-center gap-2">
-                                <label class="text-xs font-medium text-gray-700 whitespace-nowrap">Precio ($):</label>
+                                <label class="text-xs font-medium text-gray-700 dark:text-slate-300 whitespace-nowrap">Precio ($):</label>
                                 <input type="number" step="0.01" min="0"
                                     class="eq-vendido-precio flex-1 p-1.5 border rounded text-sm"
                                     value="${eq.precio}"
@@ -3128,7 +3128,7 @@ class App {
                             </div>
                         </div>
                         <button type="button" data-action="quitar" data-id="${eq.id}"
-                                class="text-red-500 hover:text-red-700 text-lg leading-none shrink-0 transition"
+                                class="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-lg leading-none shrink-0 transition"
                                 title="Quitar de la venta">✕</button>
                     </div>
                 </div>
@@ -3239,9 +3239,9 @@ class App {
         if (ventas.length === 0) {
             resumenElement.innerHTML = `
                 <div class="text-center py-8">
-                    <p class="text-gray-400 text-lg">📭</p>
-                    <p class="text-gray-600">No hay ventas registradas hoy.</p>
-                    <p class="text-sm text-gray-500 mt-2">Las ventas aparecerán aquí automáticamente</p>
+                    <p class="text-gray-400 dark:text-slate-500 text-lg">📭</p>
+                    <p class="text-gray-600 dark:text-slate-300">No hay ventas registradas hoy.</p>
+                    <p class="text-sm text-gray-500 dark:text-slate-400 mt-2">Las ventas aparecerán aquí automáticamente</p>
                 </div>
             `;
         } else {
@@ -3255,8 +3255,8 @@ class App {
             if (ventasCompletas.length > 0) {
                 html += `
                     <div class="mb-4">
-                        <h3 class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded mr-2">📱 ${ventasCompletas.length}</span>
+                        <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2 flex items-center">
+                            <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-2 py-1 rounded mr-2">📱 ${ventasCompletas.length}</span>
                             Ventas Completas
                         </h3>
                         <div class="space-y-2">
@@ -3269,8 +3269,8 @@ class App {
             if (soloAccesorios.length > 0) {
                 html += `
                     <div class="mb-4">
-                        <h3 class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded mr-2">🛡️ ${soloAccesorios.length}</span>
+                        <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2 flex items-center">
+                            <span class="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-1 rounded mr-2">🛡️ ${soloAccesorios.length}</span>
                             Solo Accesorios
                         </h3>
                         <div class="space-y-2">
@@ -3283,8 +3283,8 @@ class App {
             if (abonos.length > 0) {
                 html += `
                     <div class="mb-4">
-                        <h3 class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                            <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded mr-2">💰 ${abonos.length}</span>
+                        <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2 flex items-center">
+                            <span class="bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 px-2 py-1 rounded mr-2">💰 ${abonos.length}</span>
                             Abonos
                         </h3>
                         <div class="space-y-2">
@@ -3438,8 +3438,8 @@ class App {
                 }).join('');
 
                 seccionEquipo = `
-                    <div class="bg-blue-50 p-3 rounded-lg">
-                        <h5 class="font-semibold text-blue-800 text-xs mb-2 flex items-center">
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                        <h5 class="font-semibold text-blue-800 dark:text-blue-300 text-xs mb-2 flex items-center">
                             <span class="mr-1">📱</span> Equipos Vendidos ${equiposVendidos.length > 1 ? `(${equiposVendidos.length})` : ''}
                         </h5>
                         <div class="text-xs space-y-1">
@@ -3453,8 +3453,8 @@ class App {
         // Sección Accesorios (solo si hay accesorios)
         if (accesorios.length > 0) {
             seccionAccesorios = `
-                <div class="bg-green-50 p-3 rounded-lg">
-                    <h5 class="font-semibold text-green-800 text-xs mb-2 flex items-center">
+                <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
+                    <h5 class="font-semibold text-green-800 dark:text-green-300 text-xs mb-2 flex items-center">
                         <span class="mr-1">🛡️</span> Accesorios
                     </h5>
                     <div class="text-xs space-y-1">
@@ -3477,8 +3477,8 @@ class App {
                         ? `📱⬅️ Equipo #${idx + 1} de ${recibidos.length}`
                         : '📱⬅️ Equipo Recibido';
                     return `
-                        <div class="bg-white bg-opacity-60 p-2 rounded mb-2 ${idx > 0 ? 'border-t border-orange-200 pt-2' : ''}">
-                            <h6 class="font-semibold text-orange-900 text-xs mb-1">${titulo}</h6>
+                        <div class="bg-white/60 dark:bg-slate-800/60 p-2 rounded mb-2 ${idx > 0 ? 'border-t border-orange-200 dark:border-orange-700/50 pt-2' : ''}">
+                            <h6 class="font-semibold text-orange-900 dark:text-orange-200 text-xs mb-1">${titulo}</h6>
                             <p><strong>Modelo:</strong> ${sanitizar(eq.modelo || '')}</p>
                             <p><strong>Capacidad:</strong> ${sanitizar(eq.capacidad || '')}</p>
                             <p><strong>Color:</strong> ${sanitizar(eq.color || '')}</p>
@@ -3490,8 +3490,8 @@ class App {
                 }).join('');
 
                 seccionEquipoRecibido = `
-                    <div class="bg-orange-50 p-3 rounded-lg">
-                        <h5 class="font-semibold text-orange-800 text-xs mb-2 flex items-center">
+                    <div class="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg">
+                        <h5 class="font-semibold text-orange-800 dark:text-orange-300 text-xs mb-2 flex items-center">
                             <span class="mr-1">📱⬅️</span> Equipos Recibidos ${recibidos.length > 1 ? `(${recibidos.length})` : ''}
                         </h5>
                         <div class="text-xs space-y-1">
@@ -3507,37 +3507,37 @@ class App {
 
         if (venta.formaPago === 'mixto' && venta.pagoMixto) {
             if (venta.pagoMixto.efectivo > 0) {
-                detallesPago.push(`<p class="bg-green-100 px-2 py-1 rounded">Efectivo: ${formatearMoneda(venta.pagoMixto.efectivo)}</p>`);
+                detallesPago.push(`<p class="bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded">Efectivo: ${formatearMoneda(venta.pagoMixto.efectivo)}</p>`);
             }
             if (venta.pagoMixto.zelle > 0) {
-                detallesPago.push(`<p class="bg-blue-100 px-2 py-1 rounded">Zelle: ${formatearMoneda(venta.pagoMixto.zelle)}</p>`);
+                detallesPago.push(`<p class="bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded">Zelle: ${formatearMoneda(venta.pagoMixto.zelle)}</p>`);
             }
             if (venta.pagoMixto.binance > 0) {
-                detallesPago.push(`<p class="bg-yellow-100 px-2 py-1 rounded">Binance: ${formatearMoneda(venta.pagoMixto.binance)}</p>`);
+                detallesPago.push(`<p class="bg-yellow-100 dark:bg-yellow-900/30 px-2 py-1 rounded">Binance: ${formatearMoneda(venta.pagoMixto.binance)}</p>`);
             }
             if (venta.pagoMixto.pagoMovil > 0) {
                 if (venta.pagoMixto.pagoMovilDetalles) {
-                    detallesPago.push(`<p class="bg-purple-100 px-2 py-1 rounded">Pago Móvil: ${formatearMoneda(venta.pagoMixto.pagoMovilDetalles.dolares)} = ${venta.pagoMixto.pagoMovilDetalles.bolivares}Bs (${venta.pagoMixto.pagoMovilDetalles.tasa})</p>`);
+                    detallesPago.push(`<p class="bg-purple-100 dark:bg-purple-900/30 px-2 py-1 rounded">Pago Móvil: ${formatearMoneda(venta.pagoMixto.pagoMovilDetalles.dolares)} = ${venta.pagoMixto.pagoMovilDetalles.bolivares}Bs (${venta.pagoMixto.pagoMovilDetalles.tasa})</p>`);
                 } else {
-                    detallesPago.push(`<p class="bg-purple-100 px-2 py-1 rounded">Pago Móvil: ${formatearMoneda(venta.pagoMixto.pagoMovil)}</p>`);
+                    detallesPago.push(`<p class="bg-purple-100 dark:bg-purple-900/30 px-2 py-1 rounded">Pago Móvil: ${formatearMoneda(venta.pagoMixto.pagoMovil)}</p>`);
                 }
             }
             if (venta.pagoMixto.transferencia > 0) {
                 if (venta.pagoMixto.transferenciaDetalles) {
-                    detallesPago.push(`<p class="bg-indigo-100 px-2 py-1 rounded">Transferencia: ${formatearMoneda(venta.pagoMixto.transferenciaDetalles.dolares)} = ${venta.pagoMixto.transferenciaDetalles.bolivares}Bs (${venta.pagoMixto.transferenciaDetalles.tasa})</p>`);
+                    detallesPago.push(`<p class="bg-indigo-100 dark:bg-indigo-900/30 px-2 py-1 rounded">Transferencia: ${formatearMoneda(venta.pagoMixto.transferenciaDetalles.dolares)} = ${venta.pagoMixto.transferenciaDetalles.bolivares}Bs (${venta.pagoMixto.transferenciaDetalles.tasa})</p>`);
                 } else {
-                    detallesPago.push(`<p class="bg-indigo-100 px-2 py-1 rounded">Transferencia: ${formatearMoneda(venta.pagoMixto.transferencia)}</p>`);
+                    detallesPago.push(`<p class="bg-indigo-100 dark:bg-indigo-900/30 px-2 py-1 rounded">Transferencia: ${formatearMoneda(venta.pagoMixto.transferencia)}</p>`);
                 }
             }
         } else if (venta.formaPago === 'pagomovil' && venta.pagoMovilDetalles) {
-            detallesPago.push(`<p class="bg-purple-100 px-2 py-1 rounded">Pago Móvil: ${formatearMoneda(venta.pagoMovilDetalles.dolares)} = ${venta.pagoMovilDetalles.bolivares}Bs (${venta.pagoMovilDetalles.tasa})</p>`);
+            detallesPago.push(`<p class="bg-purple-100 dark:bg-purple-900/30 px-2 py-1 rounded">Pago Móvil: ${formatearMoneda(venta.pagoMovilDetalles.dolares)} = ${venta.pagoMovilDetalles.bolivares}Bs (${venta.pagoMovilDetalles.tasa})</p>`);
         } else if (venta.formaPago === 'transferencia' && venta.transferenciaDetalles) {
-            detallesPago.push(`<p class="bg-indigo-100 px-2 py-1 rounded">Transferencia: ${formatearMoneda(venta.transferenciaDetalles.dolares)} = ${venta.transferenciaDetalles.bolivares}Bs (${venta.transferenciaDetalles.tasa})</p>`);
+            detallesPago.push(`<p class="bg-indigo-100 dark:bg-indigo-900/30 px-2 py-1 rounded">Transferencia: ${formatearMoneda(venta.transferenciaDetalles.dolares)} = ${venta.transferenciaDetalles.bolivares}Bs (${venta.transferenciaDetalles.tasa})</p>`);
         } else {
             const pagoReal = (venta.montoPago !== null && venta.montoPago !== undefined)
                 ? venta.montoPago
                 : (venta.montoTotal - (venta.equipoRecibido ? venta.equipoRecibido.valor : 0) - (venta.totalAbonosPrevios || 0));
-            detallesPago.push(`<p class="bg-blue-100 px-2 py-1 rounded">${venta.formaPago.toUpperCase()}: ${formatearMoneda(pagoReal)}</p>`);
+            detallesPago.push(`<p class="bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded">${venta.formaPago.toUpperCase()}: ${formatearMoneda(pagoReal)}</p>`);
         }
 
         if (venta.equipoRecibido) {
@@ -3557,8 +3557,8 @@ class App {
         }
 
         seccionPago = `
-            <div class="bg-purple-50 p-3 rounded-lg">
-                <h5 class="font-semibold text-purple-800 text-xs mb-2 flex items-center">
+            <div class="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
+                <h5 class="font-semibold text-purple-800 dark:text-purple-300 text-xs mb-2 flex items-center">
                     <span class="mr-1">💳</span> Pago
                 </h5>
                 <div class="text-xs space-y-1">
@@ -3569,17 +3569,17 @@ class App {
         `;
 
         return `
-            <div class="border-2 ${venta.tipoTransaccion === 'abono' ? 'border-orange-300 bg-orange-50' : 'border-gray-200 bg-white'} rounded-xl p-4 shadow-md mb-4 fade-in hover-lift">
+            <div class="border-2 ${venta.tipoTransaccion === 'abono' ? 'border-orange-300 dark:border-orange-600 bg-orange-50 dark:bg-orange-900/20' : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800'} rounded-xl p-4 shadow-md mb-4 fade-in hover-lift">
                 <!-- Header -->
                 <div class="flex justify-between items-start mb-3 pb-2 border-b">
                     <div>
-                        <h4 class="font-bold text-gray-800 text-sm">
+                        <h4 class="font-bold text-gray-800 dark:text-slate-100 text-sm">
                             ${venta.tipoTransaccion === 'abono' ? '💰 ABONO' : '💳 VENTA'}
                             ${weppaHtml}
                         </h4>
-                        ${venta.tipoVenta === 'completa' ? `<p class="text-xs text-gray-600 mt-1">${sanitizar(venta.cliente.nombre)} (${sanitizar(venta.cliente.cedula)})</p>` : '<p class="text-xs text-gray-600 mt-1">Solo Accesorios</p>'}
+                        ${venta.tipoVenta === 'completa' ? `<p class="text-xs text-gray-600 dark:text-slate-300 mt-1">${sanitizar(venta.cliente.nombre)} (${sanitizar(venta.cliente.cedula)})</p>` : '<p class="text-xs text-gray-600 dark:text-slate-300 mt-1">Solo Accesorios</p>'}
                     </div>
-                    <span class="text-xs text-gray-500">${venta.hora}</span>
+                    <span class="text-xs text-gray-500 dark:text-slate-400">${venta.hora}</span>
                 </div>
                 
                 <!-- Grid de secciones -->
@@ -3642,9 +3642,9 @@ class App {
         if (movimientos.length === 0) {
             resumenElement.innerHTML = `
                 <div class="text-center py-8">
-                    <p class="text-gray-400 text-lg">📦</p>
-                    <p class="text-gray-600">No hay movimientos registrados hoy.</p>
-                    <p class="text-sm text-gray-500 mt-2">Los movimientos de inventario aparecerán aquí</p>
+                    <p class="text-gray-400 dark:text-slate-500 text-lg">📦</p>
+                    <p class="text-gray-600 dark:text-slate-300">No hay movimientos registrados hoy.</p>
+                    <p class="text-sm text-gray-500 dark:text-slate-400 mt-2">Los movimientos de inventario aparecerán aquí</p>
                 </div>
             `;
         } else {
@@ -3667,8 +3667,8 @@ class App {
             if (ingresos.length > 0) {
                 html += `
                     <div class="mb-4">
-                        <h3 class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded mr-2">⬅️ ${ingresos.length}</span>
+                        <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2 flex items-center">
+                            <span class="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-1 rounded mr-2">⬅️ ${ingresos.length}</span>
                             Ingresos
                         </h3>
                         <div class="space-y-2">
@@ -3681,8 +3681,8 @@ class App {
             if (salidas.length > 0) {
                 html += `
                     <div class="mb-4">
-                        <h3 class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded mr-2">➡️ ${salidas.length}</span>
+                        <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2 flex items-center">
+                            <span class="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 px-2 py-1 rounded mr-2">➡️ ${salidas.length}</span>
                             Salidas
                         </h3>
                         <div class="space-y-2">
@@ -3694,8 +3694,8 @@ class App {
             if (cambiosGarantia.length > 0) {
                 html += `
                     <div class="mb-4">
-                        <h3 class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded mr-2">🔄 ${cambiosGarantia.length}</span>
+                        <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2 flex items-center">
+                            <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-2 py-1 rounded mr-2">🔄 ${cambiosGarantia.length}</span>
                             Cambios por Garantía
                         </h3>
                         <div class="space-y-2">
@@ -3719,15 +3719,15 @@ class App {
             : Movimiento.fromJSON(movimientoData);
 
         // Determinar color según tipo
-        let colorClass = 'bg-white border-gray-200';
+        let colorClass = 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700';
         const tipoLower = movimiento.tipo.toLowerCase();
 
         if (tipoLower.includes('cambio') && tipoLower.includes('garantía')) {
-            colorClass = 'bg-blue-50 border-blue-300';
+            colorClass = 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700/50';
         } else if (tipoLower.includes('ingreso') || tipoLower.includes('compra')) {
-            colorClass = 'bg-green-50 border-green-200';
+            colorClass = 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700/50';
         } else if (tipoLower.includes('salida')) {
-            colorClass = 'bg-red-50 border-red-200';
+            colorClass = 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700/50';
         }
 
         // Obtener título y detalles (ahora sí funcionan los métodos)
@@ -3747,9 +3747,9 @@ class App {
                 <div class="flex justify-between items-start">
                     <div class="flex-1">
                         <h5 class="font-semibold text-sm mb-1">${titulo}</h5>
-                        <p class="text-xs text-gray-600">${detalles}</p>
+                        <p class="text-xs text-gray-600 dark:text-slate-300">${detalles}</p>
                     </div>
-                    <span class="text-xs text-gray-500 ml-2">${movimiento.hora || ''}</span>
+                    <span class="text-xs text-gray-500 dark:text-slate-400 ml-2">${movimiento.hora || ''}</span>
                 </div>
             </div>
         `;
@@ -4393,13 +4393,13 @@ class App {
 
         // 2. Si tiene más de 15, no es válido
         if (imei.length > 15 || !/^\d{15}$/.test(imei)) {
-            banner.classList.remove('hidden', 'bg-blue-50', 'border-blue-200', 'bg-green-50', 'border-green-200');
-            banner.classList.add('bg-red-50', 'border-red-200');
+            banner.classList.remove('hidden', 'bg-blue-50', 'dark:bg-blue-900/30', 'border-blue-200', 'dark:border-blue-700/50', 'bg-green-50', 'dark:bg-green-900/30', 'border-green-200', 'dark:border-green-700/50');
+            banner.classList.add('bg-red-50', 'dark:bg-red-900/30', 'border-red-200', 'dark:border-red-700/50');
             icono.textContent = '❌';
             titulo.textContent = 'IMEI Inválido';
-            titulo.className = 'font-semibold text-xs text-red-800';
+            titulo.className = 'font-semibold text-xs text-red-800 dark:text-red-300';
             detalle.textContent = 'El IMEI debe tener exactamente 15 dígitos numéricos.';
-            detalle.className = 'text-[10px] mt-0.5 leading-tight text-red-600';
+            detalle.className = 'text-[10px] mt-0.5 leading-tight text-red-600 dark:text-red-400';
             return;
         }
 
@@ -4409,13 +4409,13 @@ class App {
         // 3. Lógica según tipo de formulario
         if (config.tipo === 'Salida Equipo') {
             if (!equipo) {
-                banner.classList.remove('hidden', 'bg-blue-50', 'border-blue-200', 'bg-green-50', 'border-green-200');
-                banner.classList.add('bg-red-50', 'border-red-200');
+                banner.classList.remove('hidden', 'bg-blue-50', 'dark:bg-blue-900/30', 'border-blue-200', 'dark:border-blue-700/50', 'bg-green-50', 'dark:bg-green-900/30', 'border-green-200', 'dark:border-green-700/50');
+                banner.classList.add('bg-red-50', 'dark:bg-red-900/30', 'border-red-200', 'dark:border-red-700/50');
                 icono.textContent = '❌';
                 titulo.textContent = 'IMEI No Encontrado';
-                titulo.className = 'font-semibold text-xs text-red-800';
+                titulo.className = 'font-semibold text-xs text-red-800 dark:text-red-300';
                 detalle.textContent = 'Este equipo no existe en el inventario actual de la sede.';
-                detalle.className = 'text-[10px] mt-0.5 leading-tight text-red-600';
+                detalle.className = 'text-[10px] mt-0.5 leading-tight text-red-600 dark:text-red-400';
             } else if (equipo.estado !== 'disponible') {
                 const estadosTexto = {
                     vendido: 'VENDIDO',
@@ -4423,22 +4423,22 @@ class App {
                     defectuoso: 'DEFECTUOSO',
                     eliminado: 'ELIMINADO'
                 };
-                banner.classList.remove('hidden', 'bg-blue-50', 'border-blue-200', 'bg-green-50', 'border-green-200');
-                banner.classList.add('bg-red-50', 'border-red-200');
+                banner.classList.remove('hidden', 'bg-blue-50', 'dark:bg-blue-900/30', 'border-blue-200', 'dark:border-blue-700/50', 'bg-green-50', 'dark:bg-green-900/30', 'border-green-200', 'dark:border-green-700/50');
+                banner.classList.add('bg-red-50', 'dark:bg-red-900/30', 'border-red-200', 'dark:border-red-700/50');
                 icono.textContent = '❌';
                 titulo.textContent = `Equipo ${estadosTexto[equipo.estado] || equipo.estado.toUpperCase()}`;
-                titulo.className = 'font-semibold text-xs text-red-800';
+                titulo.className = 'font-semibold text-xs text-red-800 dark:text-red-300';
                 detalle.textContent = 'Solo puedes dar salida a equipos que estén disponibles en inventario.';
-                detalle.className = 'text-[10px] mt-0.5 leading-tight text-red-600';
+                detalle.className = 'text-[10px] mt-0.5 leading-tight text-red-600 dark:text-red-400';
             } else {
                 // Éxito: autocompletar!
-                banner.classList.remove('hidden', 'bg-red-50', 'border-red-200', 'bg-green-50', 'border-green-200');
-                banner.classList.add('bg-blue-50', 'border-blue-200');
+                banner.classList.remove('hidden', 'bg-red-50', 'dark:bg-red-900/30', 'border-red-200', 'dark:border-red-700/50', 'bg-green-50', 'dark:bg-green-900/30', 'border-green-200', 'dark:border-green-700/50');
+                banner.classList.add('bg-blue-50', 'dark:bg-blue-900/30', 'border-blue-200', 'dark:border-blue-700/50');
                 icono.textContent = 'ℹ️';
                 titulo.textContent = 'Equipo Encontrado';
-                titulo.className = 'font-semibold text-xs text-blue-800';
+                titulo.className = 'font-semibold text-xs text-blue-800 dark:text-blue-300';
                 detalle.textContent = `📱 ${equipo.modelo} ${equipo.gb} ${equipo.color} - Autocompletando datos...`;
-                detalle.className = 'text-[10px] mt-0.5 leading-tight text-blue-600';
+                detalle.className = 'text-[10px] mt-0.5 leading-tight text-blue-600 dark:text-blue-400';
 
                 // Autocompletar form
                 const selectModelo = document.getElementById('salidaEquipoModelo');
@@ -4463,32 +4463,32 @@ class App {
 
         } else if (config.tipo === 'Ingreso Equipo' || config.tipo === 'Compra Equipo') {
             if (equipo && equipo.estado === 'disponible') {
-                banner.classList.remove('hidden', 'bg-blue-50', 'border-blue-200', 'bg-green-50', 'border-green-200');
-                banner.classList.add('bg-red-50', 'border-red-200');
+                banner.classList.remove('hidden', 'bg-blue-50', 'dark:bg-blue-900/30', 'border-blue-200', 'dark:border-blue-700/50', 'bg-green-50', 'dark:bg-green-900/30', 'border-green-200', 'dark:border-green-700/50');
+                banner.classList.add('bg-red-50', 'dark:bg-red-900/30', 'border-red-200', 'dark:border-red-700/50');
                 icono.textContent = '❌';
                 titulo.textContent = 'Equipo Ya Disponible';
-                titulo.className = 'font-semibold text-xs text-red-800';
+                titulo.className = 'font-semibold text-xs text-red-800 dark:text-red-300';
                 detalle.textContent = `Ya tienes un ${equipo.modelo} ${equipo.gb} ${equipo.color} DISPONIBLE con este IMEI.`;
-                detalle.className = 'text-[10px] mt-0.5 leading-tight text-red-600';
+                detalle.className = 'text-[10px] mt-0.5 leading-tight text-red-600 dark:text-red-400';
             } else if (equipo) {
                 // Existe pero no está disponible (vendido, transferido, eliminado, etc.)
                 // Lo informamos pero lo permitimos (el guardado ya lo permitía, creando uno nuevo o regrabando si se acepta, pero en realidad crea otro registro o lo sobreescribe).
-                banner.classList.remove('hidden', 'bg-red-50', 'border-red-200', 'bg-green-50', 'border-green-200');
-                banner.classList.add('bg-blue-50', 'border-blue-200');
+                banner.classList.remove('hidden', 'bg-red-50', 'dark:bg-red-900/30', 'border-red-200', 'dark:border-red-700/50', 'bg-green-50', 'dark:bg-green-900/30', 'border-green-200', 'dark:border-green-700/50');
+                banner.classList.add('bg-blue-50', 'dark:bg-blue-900/30', 'border-blue-200', 'dark:border-blue-700/50');
                 icono.textContent = 'ℹ️';
                 titulo.textContent = `Equipo ${equipo.estado.toUpperCase()}`;
-                titulo.className = 'font-semibold text-xs text-blue-800';
+                titulo.className = 'font-semibold text-xs text-blue-800 dark:text-blue-300';
                 detalle.textContent = `Este IMEI pertenece a un ${equipo.modelo} que fue ${equipo.estado}. Se registrará su reingreso.`;
-                detalle.className = 'text-[10px] mt-0.5 leading-tight text-blue-600';
+                detalle.className = 'text-[10px] mt-0.5 leading-tight text-blue-600 dark:text-blue-400';
             } else {
                 // Nuevo IMEI, perfecto para ingreso
-                banner.classList.remove('hidden', 'bg-red-50', 'border-red-200', 'bg-blue-50', 'border-blue-200');
-                banner.classList.add('bg-green-50', 'border-green-200');
+                banner.classList.remove('hidden', 'bg-red-50', 'dark:bg-red-900/30', 'border-red-200', 'dark:border-red-700/50', 'bg-blue-50', 'dark:bg-blue-900/30', 'border-blue-200', 'dark:border-blue-700/50');
+                banner.classList.add('bg-green-50', 'dark:bg-green-900/30', 'border-green-200', 'dark:border-green-700/50');
                 icono.textContent = '✅';
                 titulo.textContent = 'IMEI Libre';
-                titulo.className = 'font-semibold text-xs text-green-800';
+                titulo.className = 'font-semibold text-xs text-green-800 dark:text-green-300';
                 detalle.textContent = 'El equipo se registrará como nuevo ingreso en el inventario.';
-                detalle.className = 'text-[10px] mt-0.5 leading-tight text-green-600';
+                detalle.className = 'text-[10px] mt-0.5 leading-tight text-green-600 dark:text-green-400';
             }
         }
     }
@@ -5332,22 +5332,22 @@ class App {
 
     _renderizarResultadosBuscador(tipo, equipos, contenedor) {
         if (equipos.length === 0) {
-            contenedor.innerHTML = '<div class="p-3 text-sm text-gray-500 text-center">No se encontraron equipos disponibles con ese dato.</div>';
+            contenedor.innerHTML = '<div class="p-3 text-sm text-gray-500 dark:text-slate-400 text-center">No se encontraron equipos disponibles con ese dato.</div>';
             contenedor.classList.remove('hidden');
             return;
         }
 
         const html = equipos.slice(0, 10).map(eq => `
-            <div class="p-3 border-b hover:bg-blue-50 cursor-pointer flex items-center justify-between" data-imei="${eq.imei}">
+            <div class="p-3 border-b border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer flex items-center justify-between" data-imei="${eq.imei}">
                 <div>
-                    <p class="font-semibold text-gray-800 text-sm">📱 ${eq.modelo}</p>
-                    <p class="text-xs text-gray-500 mt-1">
+                    <p class="font-semibold text-gray-800 dark:text-slate-100 text-sm">📱 ${eq.modelo}</p>
+                    <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">
                         <span class="bg-gray-100 px-1 rounded">${eq.gb}</span> • 
                         <span class="bg-gray-100 px-1 rounded">${eq.color}</span> • 
                         <span class="bg-gray-100 px-1 rounded">Batería: ${eq.bateria}%</span>
                     </p>
                 </div>
-                <div class="text-xs text-gray-400 font-mono">${eq.imei}</div>
+                <div class="text-xs text-gray-400 dark:text-slate-500 font-mono">${eq.imei}</div>
             </div>
         `).join('');
 

@@ -410,7 +410,7 @@ class RegistroDiario {
         if (!contenedor) return;
 
         if (Object.keys(accesoriosTotales).length === 0) {
-            contenedor.innerHTML = '<p class="text-gray-500 text-center">No hay accesorios vendidos en este período</p>';
+            contenedor.innerHTML = '<p class="text-gray-500 dark:text-slate-400 text-center">No hay accesorios vendidos en este período</p>';
             return;
         }
 
@@ -450,7 +450,7 @@ class RegistroDiario {
         const sinSalidos = Object.keys(accesoriosTotales).length === 0;
         const sinIngresados = Object.keys(accesoriosIngresadosTotales).length === 0;
         if (sinSalidos && sinIngresados) {
-            contenedor.innerHTML = '<p class="text-gray-500 text-center">No hay accesorios en este período</p>';
+            contenedor.innerHTML = '<p class="text-gray-500 dark:text-slate-400 text-center">No hay accesorios en este período</p>';
             return;
         }
         let html = '';
@@ -554,7 +554,7 @@ class RegistroDiario {
                             ${dia.operaciones.map(op => this.crearFilaOperacion(op)).join('')}
                         </tbody>
                         <tfoot>
-                            <tr style="font-weight: bold; background: #f7fafc;">
+                            <tr class="totales-dia">
                                 <td colspan="3">TOTALES DEL DÍA</td>
                                 <td class="monto-positivo">$${dia.totalVentas.toFixed(2)}</td>
                                 <td class="${netoClase}">$${netoDia.toFixed(2)}</td>

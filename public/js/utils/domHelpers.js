@@ -87,10 +87,10 @@ export function obtenerValoresFormulario(formElement) {
  */
 export function mostrarAlerta(mensaje, tipo = 'info') {
     const colores = {
-        success: 'bg-green-500 text-white border-green-600 shadow-lg',
-        error: 'bg-red-500 text-white border-red-600 shadow-lg',
-        warning: 'bg-yellow-400 text-gray-900 border-yellow-500 shadow-lg',
-        info: 'bg-blue-500 text-white border-blue-600 shadow-lg'
+        success: 'bg-emerald-500 dark:bg-emerald-600 text-white border-emerald-600 dark:border-emerald-700 shadow-lg',
+        error: 'bg-rose-500 dark:bg-rose-600 text-white border-rose-600 dark:border-rose-700 shadow-lg',
+        warning: 'bg-amber-400 dark:bg-amber-500 text-slate-900 dark:text-slate-900 border-amber-500 dark:border-amber-600 shadow-lg',
+        info: 'bg-blue-500 dark:bg-blue-600 text-white border-blue-600 dark:border-blue-700 shadow-lg'
     };
 
     const alerta = document.createElement('div');

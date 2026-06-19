@@ -5,43 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro Diario - Sistema de Inventario</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="js/theme-init.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      window.tailwind = window.tailwind || {};
+      window.tailwind.config = {
+        darkMode: 'class',
+        theme: { extend: {
+          fontFamily: { sans: ['Inter','system-ui','sans-serif'] }
+        } }
+      };
+    </script>
+    <link rel="stylesheet" href="css/theme.css">
     <link rel="stylesheet" href="css/registro.css">
 </head>
 
-<body>
-    <!-- Menú de Navegación -->
-    <nav
-        class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white shadow-lg">
-        <div class="flex gap-2" id="menuOptions">
-            <a href="lista.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">LISTADO PRECIOS</a>
-            <a href="intercambio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cálculo Trading</a>
-            <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Principal</a>
-            <a href="cierree.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cierre</a>
-            <a href="inv-precio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Inv</a>
-            <a href="ingreso-mercancia.html" class="px-3 py-2 rounded hover:bg-blue-900 transition border border-indigo-400 bg-indigo-800">📦 Ingreso</a>
-            <a href="admin.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Admin</a>
-            <button id="btnLogout"
-                class="px-3 py-2 rounded bg-red-600 hover:bg-red-700 font-bold transition ml-2">Cerrar Sesión</button>
-        </div>
-        <button id="menuToggle" class="hidden text-2xl focus:outline-none relative z-50">☰</button>
-        <div id="floatingMenu"
-            class="hidden fixed bottom-20 right-6 bg-blue-700 text-white rounded-lg shadow-lg py-2 flex flex-col gap-1 z-40">
-            <a href="lista.html" class="px-4 py-2 hover:bg-blue-900 rounded">LISTADO PRECIOS</a>
-            <a href="intercambio.html" class="px-4 py-2 hover:bg-blue-900 rounded">Cálculo Trading</a>
-            <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Principal</a>
-            <a href="cierree.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cierre</a>
-            <a href="inv-precio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Inv</a>
-            <a href="ingreso-mercancia.html" class="px-4 py-2 hover:bg-blue-900 rounded border-y border-indigo-500 bg-indigo-800">📦 Ingreso</a>
-            <a href="admin.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Admin</a>
-            <button id="btnLogoutMobile"
-                class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white font-bold transition rounded mt-2">Cerrar
-                Sesión</button>
-        </div>
-    </nav>
-
-    <!-- Espaciador -->
-    <div class="h-14"></div>
+<body class="bg-slate-50 dark:bg-slate-900 transition-colors">
+    <!-- Nav (injected by mountNav) -->
+    <div id="appNav" data-active="registro"></div>
     <div class="container">
         <header>
             <h1>📊 Registro Diario de Operaciones</h1>
@@ -110,6 +94,10 @@
     </div>
 
     <script type="module" src="js/registro.js"></script>
+    <script type="module">
+        import { mountNav } from './js/components/nav.js';
+        mountNav('registro');
+    </script>
 </body>
 
 </html>

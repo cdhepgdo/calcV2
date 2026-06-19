@@ -5,8 +5,7 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #1d43bd 0%, #55546b 100%);
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     min-height: 100vh;
     padding: 20px;
 }
@@ -17,10 +16,11 @@ body {
 }
 
 header {
-    background: white;
+    background: rgb(var(--surface-elevated));
     padding: 20px 30px;
     border-radius: 15px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-card);
+    border: 1px solid rgb(var(--border-soft));
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -28,7 +28,7 @@ header {
 }
 
 header h1 {
-    color: #333;
+    color: rgb(var(--text-primary));
     font-size: 28px;
 }
 
@@ -37,7 +37,8 @@ header h1 {
     gap: 10px;
 }
 
-.btn-primary, .btn-secondary {
+.btn-primary,
+.btn-secondary {
     padding: 10px 20px;
     border: none;
     border-radius: 8px;
@@ -48,30 +49,32 @@ header h1 {
 }
 
 .btn-primary {
-    background: #667eea;
+    background: rgb(var(--accent));
     color: white;
 }
 
 .btn-primary:hover {
-    background: #5568d3;
+    background: rgb(var(--accent-hover));
     transform: translateY(-2px);
 }
 
 .btn-secondary {
-    background: #48bb78;
+    background: rgb(var(--success));
     color: white;
 }
 
 .btn-secondary:hover {
-    background: #38a169;
+    background: rgb(var(--success));
+    filter: brightness(0.9);
     transform: translateY(-2px);
 }
 
 .filtros {
-    background: white;
+    background: rgb(var(--surface-elevated));
     padding: 20px;
     border-radius: 15px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-card);
+    border: 1px solid rgb(var(--border-soft));
     margin-bottom: 20px;
     display: flex;
     gap: 20px;
@@ -86,23 +89,25 @@ header h1 {
 
 .filtro-grupo label {
     font-weight: 600;
-    color: #555;
+    color: rgb(var(--text-secondary));
     font-size: 14px;
 }
 
 .filtro-grupo select,
 .filtro-grupo input {
     padding: 8px 12px;
-    border: 2px solid #e2e8f0;
+    border: 2px solid rgb(var(--border));
     border-radius: 8px;
     font-size: 14px;
     min-width: 180px;
+    background: rgb(var(--surface-elevated));
+    color: rgb(var(--text-primary));
 }
 
 .filtro-grupo select:focus,
 .filtro-grupo input:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: rgb(var(--accent));
 }
 
 .resumen-general {
@@ -113,16 +118,17 @@ header h1 {
 }
 
 .stat-card {
-    background: white;
+    background: rgb(var(--surface-elevated));
     padding: 20px;
     border-radius: 15px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-card);
+    border: 1px solid rgb(var(--border-soft));
     text-align: center;
 }
 
 .stat-label {
     font-size: 14px;
-    color: #666;
+    color: rgb(var(--text-muted));
     margin-bottom: 8px;
     font-weight: 600;
 }
@@ -130,7 +136,7 @@ header h1 {
 .stat-value {
     font-size: 28px;
     font-weight: bold;
-    color: #667eea;
+    color: rgb(var(--accent));
 }
 
 .registro-container {
@@ -140,19 +146,42 @@ header h1 {
 }
 
 .dia-card {
-    background: white;
+    background: rgb(var(--surface-elevated));
     border-radius: 15px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-card);
+    border: 1px solid rgb(var(--border-soft));
     overflow: hidden;
 }
 
 .dia-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #9ea8d7 0%, #ffffff 280%);
     color: white;
     padding: 15px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.dark .dia-header {
+    /* En modo oscuro bajamos el brillo del gradiente para que combine mejor */
+    background: linear-gradient(135deg, #5160a7 0%, #000000 280%);
+}
+
+.totales-dia {
+    font-weight: bold;
+    background: rgb(var(--surface-muted));
+    color: rgb(var(--text-primary));
+}
+
+.dark .totales-dia {
+    /* Surface muted en dark = slate-700, suficiente para destacar sin ser blanco chillón */
+    background: rgb(var(--surface-muted));
+    color: rgb(var(--text-primary));
+}
+
+.totales-dia td {
+    color: rgb(var(--text-primary));
+    border-top: 2px solid rgb(var(--border-strong));
 }
 
 .dia-fecha {
@@ -167,7 +196,7 @@ header h1 {
 }
 
 .dia-stats span {
-    background: rgba(255, 255, 255, 0.2);
+    background: #0000008c;
     padding: 5px 12px;
     border-radius: 20px;
 }
@@ -184,25 +213,25 @@ table {
 }
 
 thead {
-    background: #f7fafc;
+    background: rgb(var(--surface-muted));
 }
 
 th {
     padding: 12px;
     text-align: left;
     font-weight: 600;
-    color: #4a5568;
-    border-bottom: 2px solid #e2e8f0;
+    color: rgb(var(--text-secondary));
+    border-bottom: 2px solid rgb(var(--border));
 }
 
 td {
     padding: 12px;
-    border-bottom: 1px solid #e2e8f0;
-    color: #2d3748;
+    border-bottom: 1px solid rgb(var(--border));
+    color: rgb(var(--text-primary));
 }
 
 tr:hover {
-    background: #f7fafc;
+    background: rgb(var(--surface-muted));
 }
 
 .tipo-badge {
@@ -214,52 +243,52 @@ tr:hover {
 }
 
 .tipo-venta {
-    background: #c6f6d5;
-    color: #22543d;
+    background: rgb(var(--success-soft));
+    color: rgb(var(--success-text));
 }
 
 .tipo-movimiento {
-    background: #bee3f8;
-    color: #2c5282;
+    background: rgb(var(--info-soft));
+    color: rgb(var(--info-text));
 }
 
 .tipo-garantia {
-    background: #feebc8;
-    color: #7c2d12;
+    background: rgb(var(--warning-soft));
+    color: rgb(var(--warning-text));
 }
 
 .monto-positivo {
-    color: #38a169;
+    color: rgb(var(--success));
     font-weight: 600;
 }
 
 .monto-negativo {
-    color: #e53e3e;
+    color: rgb(var(--danger));
     font-weight: 600;
 }
 
 .monto-neutral {
-    color: #718096;
+    color: rgb(var(--text-muted));
     font-weight: 600;
 }
 
 .sin-datos {
     text-align: center;
     padding: 40px;
-    color: #718096;
+    color: rgb(var(--text-muted));
     font-size: 16px;
 }
 
 .accesorios-section {
-    background: #f0f9ff;
+    background: rgb(var(--info-soft));
     padding: 20px;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid rgb(var(--border));
 }
 
 .accesorios-titulo {
     font-size: 16px;
     font-weight: 600;
-    color: #1e40af;
+    color: rgb(var(--accent-text));
     margin-bottom: 15px;
 }
 
@@ -270,20 +299,20 @@ tr:hover {
 }
 
 .accesorio-card {
-    background: white;
+    background: rgb(var(--surface-elevated));
     border-radius: 8px;
     padding: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    border: 1px solid #e2e8f0;
+    box-shadow: var(--shadow-card);
+    border: 1px solid rgb(var(--border));
 }
 
 .accesorio-header {
     font-weight: 600;
-    color: #2563eb;
+    color: rgb(var(--accent));
     font-size: 14px;
     margin-bottom: 8px;
     padding-bottom: 8px;
-    border-bottom: 2px solid #dbeafe;
+    border-bottom: 2px solid rgb(var(--accent-soft));
 }
 
 .accesorio-detalles {
@@ -301,13 +330,13 @@ tr:hover {
 }
 
 .accesorio-modelo {
-    color: #4b5563;
+    color: rgb(var(--text-secondary));
     flex: 1;
 }
 
 .accesorio-cantidad {
-    background: #dbeafe;
-    color: #1e40af;
+    background: rgb(var(--accent-soft));
+    color: rgb(var(--accent-text));
     padding: 2px 8px;
     border-radius: 12px;
     font-weight: 600;
@@ -315,9 +344,10 @@ tr:hover {
 }
 
 .accesorios-periodo {
-    background: white;
+    background: rgb(var(--surface-elevated));
     border-radius: 15px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-card);
+    border: 1px solid rgb(var(--border-soft));
     padding: 20px;
     margin-bottom: 20px;
 }
@@ -325,7 +355,7 @@ tr:hover {
 .accesorios-periodo-titulo {
     font-size: 20px;
     font-weight: 600;
-    color: #1e40af;
+    color: rgb(var(--accent-text));
     margin-bottom: 15px;
 }
 
@@ -358,7 +388,8 @@ tr:hover {
         font-size: 12px;
     }
 
-    th, td {
+    th,
+    td {
         padding: 8px;
     }
 }

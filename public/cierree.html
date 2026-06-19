@@ -5,82 +5,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Ventas iPhone - Refactorizado</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="js/theme-init.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Tailwind config — must run AFTER the CDN script loads.
+      // Using inline here (not external file) to guarantee it executes immediately.
+      window.tailwind = window.tailwind || {};
+      window.tailwind.config = {
+        darkMode: 'class',
+        theme: { extend: {
+          fontFamily: { sans: ['Inter','system-ui','sans-serif'] }
+        } }
+      };
+    </script>
+    <link rel="stylesheet" href="css/theme.css">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-4">
+<body class="bg-slate-50 dark:bg-slate-900 min-h-screen p-4 transition-colors">
 
-    <!-- Menú de Navegación -->
-    <nav
-        class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white shadow-lg">
-        <div class="flex gap-2" id="menuOptions">
-            <a href="lista.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">LISTADO PRECIOS</a>
-            <a href="intercambio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Cálculo Trading</a>
-            <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Principal</a>
-            <a href="registro.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">📊 Registro</a>
-            <a href="inv-precio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Inv</a>
-            <a href="ingreso-mercancia.html"
-                class="px-3 py-2 rounded hover:bg-blue-900 transition border border-indigo-400 bg-indigo-800">📦
-                Ingreso</a>
-            <a href="admin.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Admin</a>
-            <button id="btnLogout"
-                class="px-3 py-2 rounded bg-red-600 hover:bg-red-700 font-bold transition ml-2">Cerrar Sesión</button>
-        </div>
-        <button id="menuToggle" class="hidden text-2xl focus:outline-none relative z-50">☰</button>
-        <div id="floatingMenu"
-            class="hidden fixed bottom-20 right-6 bg-blue-700 text-white rounded-lg shadow-lg py-2 flex flex-col gap-1 z-40">
-            <a href="lista.html" class="px-4 py-2 hover:bg-blue-900 rounded">LISTADO PRECIOS</a>
-            <a href="intercambio.html" class="px-4 py-2 hover:bg-blue-900 rounded">Cálculo Trading</a>
-            <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Principal</a>
-            <a href="registro.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">📊 Registro</a>
-            <a href="inv-precio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Inv</a>
-            <a href="ingreso-mercancia.html"
-                class="px-4 py-2 hover:bg-blue-900 rounded border-y border-indigo-500 bg-indigo-800">📦 Ingreso</a>
-            <a href="admin.html" class="px-3 py-2 rounded hover:bg-blue-900 transition">Admin</a>
-            <button id="btnLogoutMobile"
-                class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white font-bold transition rounded mt-2">Cerrar
-                Sesión</button>
-        </div>
-    </nav>
-
-    <!-- Espaciador -->
-    <div class="h-14"></div>
+    <!-- Nav (injected by mountNav) -->
+    <div id="appNav" data-active="cierre"></div>
 
     <div class="max-w-6xl mx-auto">
         <!-- Header -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <h1 class="text-3xl font-bold text-gray-800 text-center mb-2">📱 Sistema de Ventas iPhone</h1>
-            <p class="text-gray-600 text-center">Versión Refactorizada - <span id="fecha-actual"></span></p>
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 mb-6 border border-slate-200 dark:border-slate-700">
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-slate-100 text-center mb-2">📱 Sistema de Ventas iPhone</h1>
+            <p class="text-gray-600 dark:text-slate-300 text-center">Versión Refactorizada - <span id="fecha-actual"></span></p>
             <p class="text-sm text-center text-blue-600 mt-2">✨ Arquitectura modular con ES6 Modules</p>
         </div>
 
         <!-- Caja Inicial -->
-        <div class="bg-green-50 border-2 border-green-200 rounded-xl shadow-lg p-6 mb-6">
-            <h2 class="text-xl font-semibold text-green-800 mb-4">💰 Caja Inicial del Día</h2>
+        <div class="bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-200 dark:border-emerald-700/50 rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-emerald-800 dark:text-emerald-300 mb-4">💰 Caja Inicial del Día</h2>
             <div class="flex items-center gap-4">
                 <div class="flex-1">
-                    <label class="block text-sm font-medium text-green-700 mb-2">Efectivo disponible ($)</label>
+                    <label class="block text-sm font-medium text-emerald-700 dark:text-emerald-400 mb-2">Efectivo disponible ($)</label>
                     <input type="number" id="cajaInicial" step="0.01"
-                        class="w-full p-3 border border-green-300 rounded-lg" placeholder="0.00">
+                        class="w-full p-3 border border-emerald-300 dark:border-emerald-700 dark:bg-slate-800 dark:text-slate-100 rounded-lg" placeholder="0.00">
                 </div>
                 <button id="guardarCajaInicial"
-                    class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition">
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-lg transition">
                     💾 Guardar
                 </button>
             </div>
-            <div id="cajaInicialConfirmacion" class="hidden mt-3 p-3 bg-green-100 rounded-lg">
-                <p class="text-green-800 font-medium">✅ Caja inicial: $<span id="cajaInicialMostrar">0.00</span></p>
+            <div id="cajaInicialConfirmacion" class="hidden mt-3 p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                <p class="text-emerald-800 dark:text-emerald-300 font-medium">✅ Caja inicial: $<span id="cajaInicialMostrar">0.00</span></p>
             </div>
         </div>
 
 
         <!-- Formulario de Venta -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 mb-6 border border-slate-200 dark:border-slate-700">
             <form id="ventaForm" class="space-y-6">
                 <!-- Tipo de Venta -->
                 <div class="border-b pb-6">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4">🛒 Tipo de Venta</h2>
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-slate-100 mb-4">🛒 Tipo de Venta</h2>
                     <div class="flex items-center space-x-6">
                         <label class="flex items-center">
                             <input type="radio" name="tipoVenta" value="completa" checked class="mr-2">
@@ -100,20 +83,20 @@
 
                 <!-- Datos del Cliente -->
                 <div id="datosClienteSection" class="border-b pb-6">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4">👤 Datos del Cliente</h2>
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-slate-100 mb-4">👤 Datos del Cliente</h2>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Nombre y Apellido *</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Nombre y Apellido *</label>
                             <input type="text" id="clienteNombre" class="w-full p-3 border rounded-lg"
                                 placeholder="Nombre completo">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Cédula</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Cédula</label>
                             <input type="text" id="clienteCedula" class="w-full p-3 border rounded-lg"
                                 placeholder="V-12345678">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Teléfono</label>
                             <input type="tel" id="clienteTelefono" class="w-full p-3 border rounded-lg"
                                 placeholder="0414-1234567">
                         </div>
@@ -122,24 +105,24 @@
 
 
                 <!-- ══ SELECTOR DE INVENTARIO — MULTI-EQUIPO (patrón ModoSalida) ══ -->
-                <div id="inventarioBuscadorSection" class="border-b pb-6 bg-indigo-50 rounded-xl p-5 mb-2">
+                <div id="inventarioBuscadorSection" class="border-b pb-6 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl p-5 mb-2">
                     <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
-                        <h2 class="text-lg font-semibold text-indigo-800 flex items-center gap-2">
-                            📦 Equipos a vender <span class="text-xs font-normal text-indigo-600">(selecciona del
+                        <h2 class="text-lg font-semibold text-indigo-800 dark:text-indigo-300 flex items-center gap-2">
+                            📦 Equipos a vender <span class="text-xs font-normal text-indigo-600 dark:text-indigo-400">(selecciona del
                                 inventario de tu sede)</span>
                         </h2>
                         <span id="invStockBadge"
-                            class="text-xs font-bold bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full"></span>
+                            class="text-xs font-bold bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 px-3 py-1 rounded-full"></span>
                     </div>
 
                     <!-- Banner de inventario vacío (se muestra/oculta desde main.js) -->
                     <div id="invVacioBanner"
-                        class="hidden mb-3 border-2 border-amber-300 bg-amber-50 rounded-lg px-4 py-3 flex items-start gap-2">
-                        <span class="text-amber-500 text-lg mt-0.5 shrink-0">⚠️</span>
+                        class="hidden mb-3 border-2 border-amber-300 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/30 rounded-lg px-4 py-3 flex items-start gap-2">
+                        <span class="text-amber-500 dark:text-amber-400 text-lg mt-0.5 shrink-0">⚠️</span>
                         <div class="flex-1 min-w-0">
-                            <p class="font-semibold text-amber-800 text-sm">No hay equipos disponibles en tu inventario
+                            <p class="font-semibold text-amber-800 dark:text-amber-300 text-sm">No hay equipos disponibles en tu inventario
                             </p>
-                            <p class="text-amber-700 text-xs mt-0.5">
+                            <p class="text-amber-700 dark:text-amber-400 text-xs mt-0.5">
                                 Para registrar ventas con equipos, primero ingresa la mercancía en
                                 <a href="ingreso-mercancia.html" class="underline font-medium">📦 Ingreso de
                                     Mercancía</a>.
@@ -150,15 +133,15 @@
                     <div class="grid md:grid-cols-2 gap-4">
                         <!-- Columna izquierda: buscador + sugerencias -->
                         <div>
-                            <label class="text-xs font-bold uppercase tracking-wider text-indigo-700 mb-2 block">
+                            <label class="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 mb-2 block">
                                 🔍 Buscar en inventario
                             </label>
                             <div class="relative">
                                 <input type="text" id="invBuscadorInput" placeholder="Modelo, color, gb o IMEI..."
                                     autocomplete="off"
-                                    class="w-full p-3 border-2 border-indigo-200 rounded-lg focus:border-indigo-500 focus:outline-none bg-white text-gray-800">
+                                    class="w-full p-3 border-2 border-indigo-200 dark:border-indigo-700 rounded-lg focus:border-indigo-500 focus:outline-none bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-100">
                                 <ul id="invDropdown"
-                                    class="hidden absolute z-50 w-full bg-white border border-indigo-200 rounded-lg shadow-xl mt-1 max-h-64 overflow-y-auto">
+                                    class="hidden absolute z-50 w-full bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-700 rounded-lg shadow-xl mt-1 max-h-64 overflow-y-auto">
                                 </ul>
                             </div>
                             <div id="invSugerencias" class="flex flex-col gap-1 mt-2 max-h-96 overflow-y-auto pr-1">
@@ -167,19 +150,19 @@
 
                         <!-- Columna derecha: lista apilada de seleccionados -->
                         <div>
-                            <label class="text-xs font-bold uppercase tracking-wider text-indigo-700 mb-2 block">
+                            <label class="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 mb-2 block">
                                 📋 Equipos seleccionados <span id="totalEquiposVentaResumenInline"
-                                    class="text-indigo-500">(0)</span>
+                                    class="text-indigo-500 dark:text-indigo-400">(0)</span>
                             </label>
                             <div id="listaEquiposVentaSeleccionados"
-                                class="flex flex-col gap-2 max-h-96 overflow-y-auto pr-1 bg-white/50 rounded-lg p-2 min-h-[80px]">
+                                class="flex flex-col gap-2 max-h-96 overflow-y-auto pr-1 bg-white/50 dark:bg-slate-700/50 rounded-lg p-2 min-h-[80px]">
                                 <p class="text-slate-500 text-xs text-center italic py-4">Busca y selecciona los equipos
                                     a vender arriba ↑</p>
                             </div>
                         </div>
                     </div>
 
-                    <p class="text-xs text-indigo-500 mt-3">
+                    <p class="text-xs text-indigo-500 dark:text-indigo-400 mt-3">
                         <strong>Regla:</strong> solo se pueden vender equipos registrados en el inventario. Si el equipo
                         no aparece, ingrésalo primero en
                         <a href="ingreso-mercancia.html" class="underline">📦 Ingreso de Mercancía</a>.
@@ -189,14 +172,14 @@
                 <!-- ══ BANNER ADVERTENCIA IMEI EN INVENTARIO ══ -->
                 <!-- Se muestra/oculta dinámicamente desde main.js cuando el usuario escribe un IMEI disponible -->
                 <div id="imeiInventarioBanner"
-                    class="hidden border border-amber-300 bg-amber-50 rounded-xl px-5 py-4 mb-2">
+                    class="hidden border border-amber-300 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded-xl px-5 py-4 mb-2">
                     <div class="flex items-start gap-3">
-                        <span class="text-amber-500 text-lg mt-0.5 shrink-0">⚠️</span>
+                        <span class="text-amber-500 dark:text-amber-400 text-lg mt-0.5 shrink-0">⚠️</span>
                         <div class="flex-1 min-w-0">
-                            <p class="font-semibold text-amber-800 text-sm" id="imeiInventarioBannerTitulo">
+                            <p class="font-semibold text-amber-800 dark:text-amber-300 text-sm" id="imeiInventarioBannerTitulo">
                                 Este IMEI corresponde a un equipo disponible en inventario
                             </p>
-                            <p class="text-amber-700 text-xs mt-0.5" id="imeiInventarioBannerDetalle">—</p>
+                            <p class="text-amber-700 dark:text-amber-400 text-xs mt-0.5" id="imeiInventarioBannerDetalle">—</p>
                         </div>
                     </div>
                     <div class="mt-3">
@@ -208,12 +191,12 @@
                 </div>
 
                 <!-- Detalles de Venta (Garantía y campos ocultos) -->
-                <div id="infoIphone" class="border-b pb-6 bg-blue-50 rounded-xl p-6">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4">🛡️ Garantía del Equipo a Vender</h2>
+                <div id="infoIphone" class="border-b pb-6 bg-blue-50 dark:bg-blue-900/30 rounded-xl p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-slate-100 mb-4">🛡️ Garantía del Equipo a Vender</h2>
 
                     <div class="grid md:grid-cols-1 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Tiempo de Garantía</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Tiempo de Garantía</label>
                             <select id="equipoGarantia"
                                 class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></select>
                         </div>
@@ -237,7 +220,7 @@
                          ════════════════════════════════════════════════════════════════ -->
                     <div id="equiposVendidosAdicionalesWrapper" class="mt-4 hidden">
                         <div class="flex items-center justify-between mb-3">
-                            <h3 class="text-sm font-semibold text-gray-700">📱 Equipos adicionales vendidos
+                            <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300">📱 Equipos adicionales vendidos
                                 <span id="equiposAdicionalesCount" class="ml-2 text-xs text-blue-600">(0)</span>
                             </h3>
                             <button type="button" id="btnAddEquipoVendido"
@@ -258,11 +241,11 @@
                 </div>
 
                 <!-- Accesorios -->
-                <div class="border-b pb-6 bg-blue-50 rounded-xl p-6" id="accesoriosSection">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4">🛡️ Accesorios</h2>
+                <div class="border-b pb-6 bg-blue-50 dark:bg-blue-900/30 rounded-xl p-6" id="accesoriosSection">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-slate-100 mb-4">🛡️ Accesorios</h2>
                     <div class="grid md:grid-cols-4 gap-2">
                         <!-- Forro -->
-                        <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
                             <label class="flex items-center mb-3">
                                 <input type="checkbox" id="forro" class="mr-3">
                                 <span class="font-medium">Forro</span>
@@ -282,7 +265,7 @@
                         </div>
 
                         <!-- Cargador -->
-                        <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
                             <label class="flex items-center mb-3">
                                 <input type="checkbox" id="cargador" class="mr-3">
                                 <span class="font-medium">Cargador</span>
@@ -294,7 +277,7 @@
                         </div>
 
                         <!-- Vidrio -->
-                        <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
                             <label class="flex items-center mb-3">
                                 <input type="checkbox" id="vidrio" class="mr-3">
                                 <span class="font-medium">Vidrio</span>
@@ -314,7 +297,7 @@
                         </div>
 
                         <!-- Protector Cámara -->
-                        <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
                             <label class="flex items-center mb-3">
                                 <input type="checkbox" id="protectorCamara" class="mr-3">
                                 <span class="font-medium">Protector Cámara</span>
@@ -326,7 +309,7 @@
                         </div>
 
                         <!-- Cubo -->
-                        <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
                             <label class="flex items-center mb-3">
                                 <input type="checkbox" id="cubo" class="mr-3">
                                 <span class="font-medium">Cubo</span>
@@ -338,7 +321,7 @@
                         </div>
 
                         <!-- Cable Lightning -->
-                        <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
                             <label class="flex items-center mb-3">
                                 <input type="checkbox" id="cableLightning" class="mr-3">
                                 <span class="font-medium">Cable Lightning</span>
@@ -350,7 +333,7 @@
                         </div>
 
                         <!-- Cable C+C -->
-                        <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
                             <label class="flex items-center mb-3">
                                 <input type="checkbox" id="cableCC" class="mr-3">
                                 <span class="font-medium">Cable C+C</span>
@@ -362,7 +345,7 @@
                         </div>
 
                         <!-- Caja -->
-                        <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
                             <label class="flex items-center mb-3">
                                 <input type="checkbox" id="caja" class="mr-3">
                                 <span class="font-medium">Caja</span>
@@ -376,7 +359,7 @@
                         </div>
 
                         <!-- Otro Accesorio -->
-                        <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
                             <label class="flex items-center mb-3">
                                 <input type="checkbox" id="otroAccesorio" class="mr-3">
                                 <span class="font-medium">Otro Accesorio</span>
@@ -399,16 +382,16 @@
 
 
                 <!-- Forma de Pago -->
-                <div class="border-b pb-6 bg-blue-50 rounded-xl p-6" id="formaPagoSection">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4">💳 Forma de Pago</h2>
+                <div class="border-b pb-6 bg-blue-50 dark:bg-blue-900/30 rounded-xl p-6" id="formaPagoSection">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-slate-100 mb-4">💳 Forma de Pago</h2>
                     <!-- ESTO PONES: -->
                     <div id="formaPagoRadios" class="grid md:grid-cols-3 gap-3">
                         <!-- Los radios se generan automáticamente desde FORMAS_PAGO en constants.js -->
                     </div>
 
                     <!-- Formulario EFECTIVO -->
-                    <div id="efectivo-form" class="hidden mt-4 p-4 bg-green-50 rounded-lg border-2 border-green-200">
-                        <h3 class="font-semibold mb-3 text-green-800">💵 Pago en Efectivo</h3>
+                    <div id="efectivo-form" class="hidden mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border-2 border-green-200 dark:border-green-700/50">
+                        <h3 class="font-semibold mb-3 text-gray-800 dark:text-slate-100">💵 Pago en Efectivo</h3>
                         <div>
                             <label class="block text-sm font-medium mb-2">Monto en Efectivo ($)</label>
                             <input type="number" id="efectivoMonto" step="0.01"
@@ -417,8 +400,8 @@
                     </div>
 
                     <!-- Formulario ZELLE -->
-                    <div id="zelle-form" class="hidden mt-4 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
-                        <h3 class="font-semibold mb-3 text-blue-800">💰 Pago por Zelle</h3>
+                    <div id="zelle-form" class="hidden mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border-2 border-blue-200 dark:border-blue-700">
+                        <h3 class="font-semibold mb-3 text-gray-800 dark:text-slate-100">💰 Pago por Zelle</h3>
                         <div>
                             <label class="block text-sm font-medium mb-2">Monto en Dólares ($)</label>
                             <input type="number" id="zelleMonto" step="0.01"
@@ -427,8 +410,8 @@
                     </div>
 
                     <!-- Formulario BINANCE -->
-                    <div id="binance-form" class="hidden mt-4 p-4 bg-yellow-50 rounded-lg border-2 border-yellow-200">
-                        <h3 class="font-semibold mb-3 text-yellow-800">🪙 Pago por Binance</h3>
+                    <div id="binance-form" class="hidden mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border-2 border-yellow-200 dark:border-yellow-700/50">
+                        <h3 class="font-semibold mb-3 text-gray-800 dark:text-slate-100">🪙 Pago por Binance</h3>
                         <div>
                             <label class="block text-sm font-medium mb-2">Monto en Dólares ($)</label>
                             <input type="number" id="binanceMonto" step="0.01"
@@ -437,8 +420,8 @@
                     </div>
 
                     <!-- Pago Mixto -->
-                    <div id="pagoMixto" class="hidden mt-4 bg-blue-100 p-4 rounded-lg">
-                        <h3 class="font-medium mb-3">Detalles del Pago Mixto</h3>
+                    <div id="pagoMixto" class="hidden mt-4 bg-blue-100 dark:bg-blue-900/30 p-4 rounded-lg">
+                        <h3 class="font-medium mb-3 text-gray-800 dark:text-slate-100">Detalles del Pago Mixto</h3>
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm mb-1">Efectivo ($)</label>
@@ -457,7 +440,7 @@
                             </div>
 
                             <!-- Pago Móvil con detalles -->
-                            <div class="md:col-span-2 bg-purple-50 p-3 rounded-lg">
+                            <div class="md:col-span-2 bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
                                 <label class="block text-sm font-medium mb-2">💳 Pago Móvil</label>
                                 <div class="grid md:grid-cols-3 gap-3">
                                     <div>
@@ -480,7 +463,7 @@
                             </div>
 
                             <!-- Transferencia con detalles -->
-                            <div class="md:col-span-2 bg-indigo-50 p-3 rounded-lg">
+                            <div class="md:col-span-2 bg-indigo-50 dark:bg-indigo-900/30 p-3 rounded-lg">
                                 <label class="block text-sm font-medium mb-2">🏦 Transferencia</label>
                                 <div class="grid md:grid-cols-3 gap-3">
                                     <div>
@@ -502,14 +485,14 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="mt-3 p-3 bg-white rounded border">
+                        <div class="mt-3 p-3 bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700">
                             <p class="text-sm font-medium">Total: $<span id="totalMixto">0.00</span></p>
                         </div>
                     </div>
 
                     <!-- Pago Móvil Detalles -->
-                    <div id="pagomovil-detalles" class="hidden mt-4 bg-green-50 p-4 rounded-lg">
-                        <h3 class="font-medium mb-3">Detalles Pago Móvil</h3>
+                    <div id="pagomovil-detalles" class="hidden mt-4 bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                        <h3 class="font-medium mb-3 text-gray-800 dark:text-slate-100">Detalles Pago Móvil</h3>
                         <div class="grid md:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-sm mb-1">Dólares ($)</label>
@@ -530,8 +513,8 @@
                     </div>
 
                     <!-- Transferencia Detalles -->
-                    <div id="transferencia-detalles" class="hidden mt-4 bg-purple-50 p-4 rounded-lg">
-                        <h3 class="font-medium mb-3">Detalles Transferencia</h3>
+                    <div id="transferencia-detalles" class="hidden mt-4 bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                        <h3 class="font-medium mb-3 text-gray-800 dark:text-slate-100">Detalles Transferencia</h3>
                         <div class="grid md:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-sm mb-1">Dólares ($)</label>
@@ -552,8 +535,8 @@
                     </div>
 
                     <!-- Formulario PAYPAL -->
-                    <div id="paypal-form" class="hidden mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <h3 class="font-semibold mb-3 text-blue-800">🅿️ Pago por PayPal</h3>
+                    <div id="paypal-form" class="hidden mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700">
+                        <h3 class="font-semibold mb-3 text-gray-800 dark:text-slate-100">🅿️ Pago por PayPal</h3>
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium mb-2">Monto en Dólares ($)</label>
@@ -571,12 +554,12 @@
 
 
                 <!-- Equipo Recibido -->
-                <div class="border-b pb-6 bg-orange-50 rounded-xl p-6" id="equipoRecibidoForm">
+                <div class="border-b pb-6 bg-orange-50 dark:bg-orange-900/20 rounded-xl p-6" id="equipoRecibidoForm">
                     <label class="flex items-center mb-4">
                         <input type="checkbox" id="recibirEquipo" class="mr-3">
                         <span class="text-xl font-semibold">📱➡️ Recibir Equipo como Parte de Pago</span>
                     </label>
-                    <div id="equipoRecibidoDetalles" class="hidden bg-white p-4 rounded-lg">
+                    <div id="equipoRecibidoDetalles" class="hidden bg-white dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm mb-2">Modelo</label>
@@ -641,7 +624,7 @@
                              ════════════════════════════════════════════════════════════════ -->
                         <div id="equiposRecibidosAdicionalesWrapper" class="mt-4 hidden border-t pt-4">
                             <div class="flex items-center justify-between mb-3">
-                                <h3 class="text-sm font-semibold text-gray-700">📱 Equipos adicionales recibidos
+                                <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300">📱 Equipos adicionales recibidos
                                     <span id="equiposRecibidosAdicionalesCount"
                                         class="ml-2 text-xs text-orange-600">(0)</span>
                                 </h3>
@@ -664,21 +647,21 @@
                 </div>
 
                 <!-- Después de la sección de Equipo Recibido -->
-                <div id="cambioGarantiaForm" class="hidden bg-green-50 p-6 rounded-lg border-2 border-green-200">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">🔄 Cambio por Garantía</h3>
+                <div id="cambioGarantiaForm" class="hidden bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-lg border-2 border-emerald-200 dark:border-emerald-700/50">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-slate-100 mb-4">🔄 Cambio por Garantía</h3>
 
                     <!-- Equipo Defectuoso (Recibido) -->
-                    <div class="bg-red-50 p-4 rounded-lg mb-4 border border-red-200">
-                        <h4 class="font-semibold text-red-800 mb-3">📱❌ Equipo Defectuoso (Recibido)</h4>
+                    <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg mb-4 border border-red-200 dark:border-red-700/50">
+                        <h4 class="font-semibold text-red-800 dark:text-red-300 mb-3">📱❌ Equipo Defectuoso (Recibido)</h4>
                         <div class="grid md:grid-cols-3 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Modelo</label>
                                 <select id="defectuosoModelo" class="w-full p-2 border rounded-lg">
                                     <option value="">Seleccionar</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Capacidad</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Capacidad</label>
                                 <select id="defectuosoCapacidad" class="w-full p-2 border rounded-lg">
                                     <option value="">Seleccionar</option>
                                     <option value="64GB">64GB</option>
@@ -689,22 +672,22 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Color</label>
                                 <select id="defectuosoColor" class="w-full p-2 border rounded-lg">
                                     <option value="">Seleccionar</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">% Batería</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">% Batería</label>
                                 <input type="number" id="defectuosoBateria" min="0" max="100"
                                     class="w-full p-2 border rounded-lg">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">IMEI</label>
                                 <input type="text" id="defectuosoImei" class="w-full p-2 border rounded-lg">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Problema Reportado</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Problema Reportado</label>
                                 <textarea id="defectuosoProblema" rows="2" class="w-full p-2 border rounded-lg"
                                     placeholder="Ej: No enciende, pantalla rota, etc."></textarea>
                             </div>
@@ -712,39 +695,39 @@
                     </div>
 
                     <!-- Equipo Nuevo (Entregado) -->
-                    <div class="bg-green-100 p-4 rounded-lg border border-green-300">
+                    <div class="bg-green-100 dark:bg-green-900/20 p-4 rounded-lg border border-green-300 dark:border-green-700/50">
                         <div class="flex justify-between items-center mb-3">
-                            <h4 class="font-semibold text-green-800">📱✅ Equipo Nuevo (Entregado)</h4>
+                            <h4 class="font-semibold text-green-800 dark:text-green-300">📱✅ Equipo Nuevo (Entregado)</h4>
                             <button type="button" id="btnQuitarEquipoGarantia"
-                                class="hidden text-xs text-red-600 hover:text-red-800 font-semibold px-2 py-1 rounded bg-red-100 border border-red-300">❌
+                                class="hidden text-xs text-red-600 dark:text-red-300 hover:text-red-800 dark:hover:text-red-200 font-semibold px-2 py-1 rounded bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-700/50">❌
                                 Quitar Equipo</button>
                         </div>
 
                         <!-- Buscador de Inventario -->
                         <div id="buscadorGarantiaContainer" class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Buscar en Inventario (IMEI o
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Buscar en Inventario (IMEI o
                                 Modelo)</label>
                             <div class="relative">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">🔍</span>
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 dark:text-slate-400">🔍</span>
                                 <input type="text" id="inputBuscadorGarantia"
-                                    class="w-full p-2 pl-10 border border-green-400 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 outline-none bg-white"
+                                    class="w-full p-2 pl-10 border border-green-400 dark:border-green-500 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 outline-none bg-white dark:bg-slate-800"
                                     placeholder="Escanea o escribe IMEI o modelo...">
                             </div>
                             <div id="resultadosBuscadorGarantia"
-                                class="hidden absolute z-50 w-full max-w-md mt-1 bg-white border rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                                class="hidden absolute z-50 w-full max-w-md mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl max-h-60 overflow-y-auto">
                             </div>
                         </div>
 
                         <!-- Tarjeta de Equipo Seleccionado -->
                         <div id="tarjetaEquipoGarantia"
-                            class="hidden bg-white p-3 rounded-xl border-2 border-green-500 shadow-sm relative mb-2">
+                            class="hidden bg-white dark:bg-slate-800 p-3 rounded-xl border-2 border-green-500 dark:border-green-400 shadow-sm relative mb-2">
                             <div
                                 class="absolute top-0 right-0 bg-green-500 text-white px-2 py-1 rounded-bl-xl rounded-tr-lg text-[10px] font-bold">
                                 SELECCIONADO</div>
-                            <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2">
+                            <h3 class="font-bold text-gray-800 dark:text-slate-100 text-sm flex items-center gap-2">
                                 <span id="tarjetaGarantiaModelo">iPhone</span>
                             </h3>
-                            <p class="text-xs text-gray-600 mt-1 flex gap-1 flex-wrap">
+                            <p class="text-xs text-gray-600 dark:text-slate-300 mt-1 flex gap-1 flex-wrap">
                                 <span id="tarjetaGarantiaCapacidad"
                                     class="bg-gray-100 px-1.5 py-0.5 rounded text-[10px] font-semibold border">256GB</span>
                                 <span id="tarjetaGarantiaColor"
@@ -753,18 +736,18 @@
                                     class="bg-gray-100 px-1.5 py-0.5 rounded text-[10px] font-semibold border">🔋
                                     100%</span>
                             </p>
-                            <p class="text-[10px] text-gray-500 mt-2 font-mono bg-gray-50 p-1 rounded border"
+                            <p class="text-[10px] text-gray-500 dark:text-slate-400 mt-2 font-mono bg-gray-50 p-1 rounded border"
                                 id="tarjetaGarantiaImei">IMEI: 123456789012345</p>
                         </div>
 
                         <!-- Campos Ocultos (se mantienen para no romper la lógica existente) -->
                         <div id="camposManualesGarantia" class="hidden grid md:grid-cols-3 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Modelo</label>
                                 <select id="nuevoModelo" class="w-full p-2 border rounded-lg"></select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Capacidad</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Capacidad</label>
                                 <select id="nuevoCapacidad" class="w-full p-2 border rounded-lg">
                                     <option value="">Seleccionar</option>
                                     <option value="64GB">64GB</option>
@@ -775,27 +758,27 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Color</label>
                                 <select id="nuevoColor" class="w-full p-2 border rounded-lg"></select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">% Batería</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">% Batería</label>
                                 <input type="number" id="nuevoBateria" min="0" max="100"
                                     class="w-full p-2 border rounded-lg">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">IMEI</label>
                                 <input type="text" id="nuevoImei" class="w-full p-2 border rounded-lg">
                             </div>
                         </div>
                     </div>
 
                     <!-- Diferencia de Dinero -->
-                    <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-300 mt-4">
-                        <h4 class="font-semibold text-yellow-800 mb-3">💵 Diferencia de Precio (Opcional)</h4>
+                    <div class="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-300 dark:border-yellow-700/50 mt-4">
+                        <h4 class="font-semibold text-yellow-800 dark:text-yellow-300 mb-3">💵 Diferencia de Precio (Opcional)</h4>
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Diferencia</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Tipo de Diferencia</label>
                                 <select id="tipoDiferencia" class="w-full p-2 border rounded-lg">
                                     <option value="ninguna">Sin diferencia</option>
                                     <option value="favor-cliente">A favor del cliente (devolver dinero)</option>
@@ -803,12 +786,12 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Monto ($)</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Monto ($)</label>
                                 <input type="number" id="montoDiferencia" step="0.01" min="0" value="0"
                                     class="w-full p-2 border rounded-lg" disabled>
                             </div>
                         </div>
-                        <p class="text-xs text-gray-600 mt-2">
+                        <p class="text-xs text-gray-600 dark:text-slate-300 mt-2">
                             <strong>A favor del cliente:</strong> Se resta de la caja (equipo nuevo es más barato)<br>
                             <strong>A favor de la tienda:</strong> Se suma a la caja (equipo nuevo es más caro)
                         </p>
@@ -816,8 +799,8 @@
                 </div>
 
                 <!-- Tipo de Transacción -->
-                <div class="border-b pb-6 bg-blue-50 rounded-xl p-6">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4">📋 Tipo de Transacción</h2>
+                <div class="border-b pb-6 bg-blue-50 dark:bg-blue-900/30 rounded-xl p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-slate-100 mb-4">📋 Tipo de Transacción</h2>
                     <div class="flex items-center space-x-6">
                         <label class="flex items-center">
                             <input type="radio" name="tipoTransaccion" value="venta" checked class="mr-2">
@@ -828,7 +811,7 @@
                             <span>Abono</span>
                         </label>
                         <!-- NUEVO: Cambio por Garantía -->
-                        <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-green-50">
+                        <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-green-50 dark:hover:bg-green-900/20">
                             <input type="radio" name="tipoTransaccion" value="cambio-garantia" class="mr-3">
                             <span class="font-medium">🔄 Cambio Garantía</span>
                         </label>
@@ -841,8 +824,8 @@
                             <span>Nota de Venta</span>
                         </label>
                     </div>
-                    <div id="abonoInfo" class="hidden mt-3 p-3 bg-orange-50 rounded-lg">
-                        <p class="text-sm text-orange-800">⚠️ <strong>Abono:</strong> No se incluirá en el total de
+                    <div id="abonoInfo" class="hidden mt-3 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                        <p class="text-sm text-orange-800 dark:text-orange-300">⚠️ <strong>Abono:</strong> No se incluirá en el total de
                             ventas del día</p>
                     </div>
                     <div id="notaVentaInfo" class="hidden mt-3">
@@ -852,14 +835,14 @@
                 </div>
 
                 <!-- Cierre de Abonos Previos -->
-                <div class="border-b pb-6 bg-purple-50 rounded-xl p-6 mb-6" id="abonosPreviosForm">
+                <div class="border-b pb-6 bg-purple-50 dark:bg-purple-900/20 rounded-xl p-6 mb-6" id="abonosPreviosForm">
                     <label class="flex items-center mb-4">
                         <input type="checkbox" id="tieneAbonosPrevios" class="mr-3">
                         <span class="text-xl font-semibold">📅 Venta con Abonos Previos (Cierre)</span>
                     </label>
 
-                    <div id="abonosPreviosDetalles" class="hidden bg-white p-4 rounded-lg">
-                        <p class="text-sm text-purple-800 mb-3">Registra los pagos anteriores. Su total se sumará al de
+                    <div id="abonosPreviosDetalles" class="hidden bg-white dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <p class="text-sm text-purple-800 dark:text-purple-300 mb-3">Registra los pagos anteriores. Su total se sumará al de
                             hoy en Ventas, pero en la Caja de hoy sólo ingresará lo que el cliente dé físico/hoy.</p>
                         <div id="listaAbonosPrevios" class="flex flex-col gap-2">
                             <div class="abono-previo-item grid grid-cols-[1fr,1fr,auto] gap-2 items-center">
@@ -881,10 +864,10 @@
 
                 <!-- Monto Total (Calculado Automáticamente) -->
                 <div id="montoTotalSection"
-                    class="bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-xl p-6 shadow-lg">
+                    class="bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-200 dark:border-emerald-700/50 rounded-xl shadow-lg p-6 mb-6 text-emerald-900 dark:text-emerald-100">
                     <h2 class="text-2xl font-bold mb-4">💰 Monto Total de la Venta</h2>
 
-                    <div class="bg-white bg-opacity-20 rounded-lg p-4 mb-3">
+                    <div class="bg-white/60 dark:bg-emerald-950/30 rounded-lg p-4 mb-3">
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-sm">Pago en efectivo/digital:</span>
                             <span class="text-xl font-bold" id="subtotalPago">$0.00</span>
@@ -899,7 +882,7 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-between items-center border-t-2 border-white pt-3"
+                    <div class="flex justify-between items-center border-t-2 border-emerald-300 dark:border-emerald-700 pt-3"
                         id="totalCalculadoDisplay">
                         <span class="text-lg font-semibold">TOTAL:</span>
                         <span class="text-3xl font-bold" id="montoTotalDisplay">$0.00</span>
@@ -912,15 +895,15 @@
                     </div>
 
                     <!-- Campo editable para WEPPA (ventas a crédito) -->
-                    <div id="weppaMontoEditable" class="hidden border-t-2 border-white pt-3 mt-3">
-                        <div class="bg-yellow-400 bg-opacity-30 rounded-lg p-3 mb-3">
+                    <div id="weppaMontoEditable" class="hidden border-t-2 border-emerald-300 dark:border-emerald-700 pt-3 mt-3">
+                        <div class="bg-yellow-100 dark:bg-yellow-900/30 rounded-lg p-3 mb-3">
                             <p class="text-sm">⚠️ <strong>WEPPA Activo (Venta a Crédito):</strong></p>
                             <p class="text-xs mt-1">• <strong>Inicial:</strong> Lo que el cliente paga HOY
                                 (efectivo/digital + equipo recibido)</p>
                             <p class="text-xs">• <strong>Total Final:</strong> El precio real del equipo (lo que debe en
                                 total)</p>
                         </div>
-                        <div class="bg-white bg-opacity-20 rounded-lg p-3 mb-3">
+                        <div class="bg-white/60 dark:bg-emerald-950/30 rounded-lg p-3 mb-3">
                             <div class="flex justify-between items-center">
                                 <span class="text-sm font-semibold">WEPPA (Inicial $<span
                                         id="weppaInicial">0.00</span>)</span>
@@ -930,7 +913,7 @@
                         <div class="flex items-center gap-3">
                             <label class="text-sm font-semibold">Monto Total Final:</label>
                             <input type="number" id="montoTotalManual" step="0.01"
-                                class="flex-1 p-3 text-2xl font-bold text-gray-800 border-2 border-white rounded-lg"
+                                class="flex-1 p-3 text-2xl font-bold text-gray-800 dark:text-slate-100 bg-white dark:bg-slate-800 border-2 border-emerald-300 dark:border-emerald-700 rounded-lg"
                                 placeholder="0.00">
                         </div>
                     </div>
@@ -955,39 +938,39 @@
 
 
         <!-- Movimientos de Inventario -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">📦 Movimientos de Inventario</h2>
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 mb-6 border border-slate-200 dark:border-slate-700">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-slate-100 mb-4">📦 Movimientos de Inventario</h2>
 
             <!-- Selector de Tipo de Movimiento -->
             <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-3">Tipo de Movimiento</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Tipo de Movimiento</label>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <button type="button" id="btnSalidaEfectivo"
-                        class="movimiento-btn bg-red-100 hover:bg-red-200 text-red-800 p-3 rounded-lg border-2 border-transparent transition-all">
+                        class="movimiento-btn bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-800 dark:text-red-300 p-3 rounded-lg border-2 border-transparent transition-all">
                         💸 Salida Efectivo
                     </button>
                     <button type="button" id="btnIngresoEfectivo"
-                        class="movimiento-btn bg-green-100 hover:bg-green-200 text-green-800 p-3 rounded-lg border-2 border-transparent transition-all">
+                        class="movimiento-btn bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 text-green-800 dark:text-green-300 p-3 rounded-lg border-2 border-transparent transition-all">
                         💵 Ingreso Efectivo
                     </button>
                     <button type="button" id="btnSalidaEquipo"
-                        class="movimiento-btn bg-orange-100 hover:bg-orange-200 text-orange-800 p-3 rounded-lg border-2 border-transparent transition-all">
+                        class="movimiento-btn bg-orange-100 dark:bg-orange-900/30 hover:bg-orange-200 dark:hover:bg-orange-900/50 text-orange-800 dark:text-orange-300 p-3 rounded-lg border-2 border-transparent transition-all">
                         📱➡️ Salida Equipo
                     </button>
                     <button type="button" id="btnIngresoEquipo"
-                        class="movimiento-btn bg-teal-100 hover:bg-teal-200 text-teal-800 p-3 rounded-lg border-2 border-transparent transition-all">
+                        class="movimiento-btn bg-teal-100 dark:bg-teal-900/30 hover:bg-teal-200 dark:hover:bg-teal-900/50 text-teal-800 dark:text-teal-300 p-3 rounded-lg border-2 border-transparent transition-all">
                         📱⬅️ Ingreso Equipo
                     </button>
                     <button type="button" id="btnSalidaAccesorio"
-                        class="movimiento-btn bg-yellow-100 hover:bg-yellow-200 text-yellow-800 p-3 rounded-lg border-2 border-transparent transition-all">
+                        class="movimiento-btn bg-yellow-100 dark:bg-yellow-900/30 hover:bg-yellow-200 dark:hover:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300 p-3 rounded-lg border-2 border-transparent transition-all">
                         🛡️➡️ Salida Accesorio
                     </button>
                     <button type="button" id="btnIngresoAccesorio"
-                        class="movimiento-btn bg-purple-100 hover:bg-purple-200 text-purple-800 p-3 rounded-lg border-2 border-transparent transition-all">
+                        class="movimiento-btn bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 dark:hover:bg-purple-900/50 text-purple-800 dark:text-purple-300 p-3 rounded-lg border-2 border-transparent transition-all">
                         🛡️⬅️ Ingreso Accesorio
                     </button>
                     <button type="button" id="btnCompraEquipo"
-                        class="movimiento-btn bg-green-100 hover:bg-green-200 text-green-800 p-3 rounded-lg border-2 border-transparent transition-all">
+                        class="movimiento-btn bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 text-green-800 dark:text-green-300 p-3 rounded-lg border-2 border-transparent transition-all">
                         📱⬅️ Compra Equipo
                     </button>
                 </div>
@@ -996,21 +979,21 @@
             <!-- Formularios de Movimientos -->
             <div id="movimientoForms" class="hidden">
                 <!-- Salida de Efectivo -->
-                <div id="formSalidaEfectivo" class="movimiento-form hidden bg-red-50 p-4 rounded-lg">
-                    <h3 class="font-semibold text-red-800 mb-3">💸 Salida de Efectivo</h3>
+                <div id="formSalidaEfectivo" class="movimiento-form hidden bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+                    <h3 class="font-semibold text-red-800 dark:text-red-300 mb-3">💸 Salida de Efectivo</h3>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Monto ($)</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Monto ($)</label>
                             <input type="number" id="salidaEfectivoMonto" step="0.01"
                                 class="w-full p-2 border rounded-lg" placeholder="0.00">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Persona que retira</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Persona que retira</label>
                             <input type="text" id="salidaEfectivoPersona" class="w-full p-2 border rounded-lg"
                                 placeholder="Nombre completo">
                         </div>
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Motivo/Nota</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Motivo/Nota</label>
                             <textarea id="salidaEfectivoNota" rows="2" class="w-full p-2 border rounded-lg"
                                 placeholder="Descripción del motivo"></textarea>
                         </div>
@@ -1018,16 +1001,16 @@
                 </div>
 
                 <!-- Ingreso de Efectivo -->
-                <div id="formIngresoEfectivo" class="movimiento-form hidden bg-green-50 p-4 rounded-lg">
-                    <h3 class="font-semibold text-green-800 mb-3">💵 Ingreso de Efectivo</h3>
+                <div id="formIngresoEfectivo" class="movimiento-form hidden bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                    <h3 class="font-semibold text-green-800 dark:text-green-300 mb-3">💵 Ingreso de Efectivo</h3>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Monto ($)</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Monto ($)</label>
                             <input type="number" id="ingresoEfectivoMonto" step="0.01"
                                 class="w-full p-2 border rounded-lg" placeholder="0.00">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Motivo/Nota</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Motivo/Nota</label>
                             <textarea id="ingresoEfectivoNota" rows="2" class="w-full p-2 border rounded-lg"
                                 placeholder="Descripción del ingreso"></textarea>
                         </div>
@@ -1035,39 +1018,39 @@
                 </div>
 
                 <!-- Salida de Equipo -->
-                <div id="formSalidaEquipo" class="movimiento-form hidden bg-orange-50 p-4 rounded-lg">
+                <div id="formSalidaEquipo" class="movimiento-form hidden bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg">
                     <div class="flex justify-between items-center mb-3">
-                        <h3 class="font-semibold text-orange-800">📱➡️ Salida de Equipo</h3>
+                        <h3 class="font-semibold text-orange-800 dark:text-orange-300">📱➡️ Salida de Equipo</h3>
                         <button type="button" id="btnQuitarEquipoSalida"
-                            class="hidden text-xs text-red-600 hover:text-red-800 font-semibold px-2 py-1 rounded bg-red-100 border border-red-300 transition-colors">❌
+                            class="hidden text-xs text-red-600 dark:text-red-300 hover:text-red-800 dark:hover:text-red-200 font-semibold px-2 py-1 rounded bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-700/50 transition-colors">❌
                             Quitar Equipo</button>
                     </div>
 
                     <!-- Buscador de Inventario -->
                     <div id="buscadorSalidaContainer" class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Buscar en Inventario (IMEI o
+                        <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Buscar en Inventario (IMEI o
                             Modelo)</label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">🔍</span>
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 dark:text-slate-400">🔍</span>
                             <input type="text" id="inputBuscadorSalida"
                                 class="w-full p-2 pl-10 border rounded-lg shadow-sm focus:ring-2 focus:ring-orange-500 outline-none"
                                 placeholder="Escanea o escribe IMEI o modelo...">
                         </div>
                         <div id="resultadosBuscadorSalida"
-                            class="hidden absolute z-50 w-full max-w-md mt-1 bg-white border rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                            class="hidden absolute z-50 w-full max-w-md mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl max-h-60 overflow-y-auto">
                         </div>
                     </div>
 
                     <!-- Tarjeta de Equipo Seleccionado -->
                     <div id="tarjetaEquipoSalida"
-                        class="hidden bg-white p-3 rounded-xl border-2 border-orange-500 shadow-sm relative mb-4">
+                        class="hidden bg-white dark:bg-slate-800 p-3 rounded-xl border-2 border-orange-500 dark:border-orange-400 shadow-sm relative mb-4">
                         <div
                             class="absolute top-0 right-0 bg-orange-500 text-white px-2 py-1 rounded-bl-xl rounded-tr-lg text-[10px] font-bold">
                             SELECCIONADO</div>
-                        <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2">
+                        <h3 class="font-bold text-gray-800 dark:text-slate-100 text-sm flex items-center gap-2">
                             <span id="tarjetaSalidaModelo">iPhone</span>
                         </h3>
-                        <p class="text-xs text-gray-600 mt-1 flex gap-1 flex-wrap">
+                        <p class="text-xs text-gray-600 dark:text-slate-300 mt-1 flex gap-1 flex-wrap">
                             <span id="tarjetaSalidaCapacidad"
                                 class="bg-gray-100 px-1.5 py-0.5 rounded text-[10px] font-semibold border">256GB</span>
                             <span id="tarjetaSalidaColor"
@@ -1076,7 +1059,7 @@
                                 class="bg-gray-100 px-1.5 py-0.5 rounded text-[10px] font-semibold border">🔋
                                 100%</span>
                         </p>
-                        <p class="text-[10px] text-gray-500 mt-2 font-mono bg-gray-50 p-1 rounded border"
+                        <p class="text-[10px] text-gray-500 dark:text-slate-400 mt-2 font-mono bg-gray-50 p-1 rounded border"
                             id="tarjetaSalidaImei">IMEI: 123456789012345</p>
                     </div>
 
@@ -1084,11 +1067,11 @@
                         <!-- Campos Ocultos (se mantienen para no romper la lógica existente) -->
                         <div id="camposManualesSalida" class="hidden md:col-span-2 grid md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Modelo</label>
                                 <select id="salidaEquipoModelo" class="w-full p-2 border rounded-lg"></select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Capacidad</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Capacidad</label>
                                 <select id="salidaEquipoCapacidad" class="w-full p-2 border rounded-lg">
                                     <option value="">Seleccionar</option>
                                     <option value="64GB">64GB</option>
@@ -1099,23 +1082,23 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Color</label>
                                 <select id="salidaEquipoColor" class="w-full p-2 border rounded-lg"></select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">% Batería</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">% Batería</label>
                                 <input type="number" id="salidaEquipoBateria" min="1" max="100"
                                     class="w-full p-2 border rounded-lg" placeholder="85">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">IMEI</label>
                                 <input type="text" id="salidaEquipoImei" class="w-full p-2 border rounded-lg"
                                     placeholder="Número IMEI">
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Destino</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Destino</label>
                             <select id="salidaEquipoDestino" class="w-full p-2 border rounded-lg">
                                 <option value="">Seleccionar</option>
                                 <option value="Aviadores">Aviadores</option>
@@ -1125,17 +1108,17 @@
                             </select>
                         </div>
                         <div id="salidaEquipoDestinoPersonalizadoDiv" class="hidden">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Destino Personalizado</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Destino Personalizado</label>
                             <input type="text" id="salidaEquipoDestinoPersonalizado"
                                 class="w-full p-2 border rounded-lg" placeholder="Especificar destino">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Persona que retira</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Persona que retira</label>
                             <input type="text" id="salidaEquipoPersona" class="w-full p-2 border rounded-lg"
                                 placeholder="Nombre completo">
                         </div>
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Notas adicionales</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Notas adicionales</label>
                             <textarea id="salidaEquipoNota" rows="2" class="w-full p-2 border rounded-lg"
                                 placeholder="Detalles adicionales"></textarea>
                         </div>
@@ -1143,15 +1126,15 @@
                 </div>
 
                 <!-- Ingreso de Equipo -->
-                <div id="formIngresoEquipo" class="movimiento-form hidden bg-teal-50 p-4 rounded-lg">
-                    <h3 class="font-semibold text-teal-800 mb-3">📱⬅️ Ingreso de Equipo</h3>
+                <div id="formIngresoEquipo" class="movimiento-form hidden bg-teal-50 dark:bg-teal-900/20 p-4 rounded-lg">
+                    <h3 class="font-semibold text-teal-800 dark:text-teal-300 mb-3">📱⬅️ Ingreso de Equipo</h3>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Modelo</label>
                             <select id="ingresoEquipoModelo" class="w-full p-2 border rounded-lg"></select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Capacidad</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Capacidad</label>
                             <select id="ingresoEquipoCapacidad" class="w-full p-2 border rounded-lg">
                                 <option value="">Seleccionar</option>
                                 <option value="64GB">64GB</option>
@@ -1162,11 +1145,11 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Color</label>
                             <select id="ingresoEquipoColor" class="w-full p-2 border rounded-lg"></select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">IMEI</label>
                             <input type="text" id="ingresoEquipoImei" class="w-full p-2 border rounded-lg"
                                 placeholder="Número IMEI">
                             <!-- Banner de validación IMEI Ingreso -->
@@ -1181,12 +1164,12 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">% Batería</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">% Batería</label>
                             <input type="number" id="ingresoEquipoBateria" min="1" max="100"
                                 class="w-full p-2 border rounded-lg" placeholder="85">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Origen/Procedencia</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Origen/Procedencia</label>
                             <select id="ingresoEquipoOrigen" class="w-full p-2 border rounded-lg">
                                 <option value="">Seleccionar</option>
                                 <option value="Aviadores">Aviadores</option>
@@ -1198,12 +1181,12 @@
                             </select>
                         </div>
                         <div id="ingresoEquipoOrigenPersonalizadoDiv" class="hidden">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Origen Personalizado</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Origen Personalizado</label>
                             <input type="text" id="ingresoEquipoOrigenPersonalizado"
                                 class="w-full p-2 border rounded-lg" placeholder="Especificar origen">
                         </div>
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Notas adicionales</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Notas adicionales</label>
                             <textarea id="ingresoEquipoNota" rows="2" class="w-full p-2 border rounded-lg"
                                 placeholder="Detalles adicionales"></textarea>
                         </div>
@@ -1211,15 +1194,15 @@
                 </div>
 
                 <!-- Compra de Equipo -->
-                <div id="formCompraEquipo" class="movimiento-form hidden bg-green-50 p-4 rounded-lg">
-                    <h3 class="font-semibold text-green-800 mb-3">📱⬅️ Compra de Equipo</h3>
+                <div id="formCompraEquipo" class="movimiento-form hidden bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                    <h3 class="font-semibold text-green-800 dark:text-green-300 mb-3">📱⬅️ Compra de Equipo</h3>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Modelo</label>
                             <select id="compraEquipoModelo" class="w-full p-2 border rounded-lg"></select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Capacidad</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Capacidad</label>
                             <select id="compraEquipoCapacidad" class="w-full p-2 border rounded-lg">
                                 <option value="">Seleccionar</option>
                                 <option value="64GB">64GB</option>
@@ -1230,16 +1213,16 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Color</label>
                             <select id="compraEquipoColor" class="w-full p-2 border rounded-lg"></select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">% Batería</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">% Batería</label>
                             <input type="number" id="compraEquipoBateria" min="1" max="100"
                                 class="w-full p-2 border rounded-lg" placeholder="85">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">IMEI</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">IMEI</label>
                             <input type="text" id="compraEquipoImei" class="w-full p-2 border rounded-lg"
                                 placeholder="Número IMEI">
                             <!-- Banner de validación IMEI Compra -->
@@ -1254,17 +1237,17 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Precio de Compra ($)</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Precio de Compra ($)</label>
                             <input type="number" id="compraEquipoPrecio" step="0.01"
                                 class="w-full p-2 border rounded-lg" placeholder="0.00">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor/Vendedor</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Proveedor/Vendedor</label>
                             <input type="text" id="compraEquipoProveedor" class="w-full p-2 border rounded-lg"
                                 placeholder="Nombre del vendedor">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Estado del Equipo</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Estado del Equipo</label>
                             <select id="compraEquipoEstado" class="w-full p-2 border rounded-lg">
                                 <option value="">Seleccionar</option>
                                 <option value="Nuevo">Nuevo</option>
@@ -1275,7 +1258,7 @@
                             </select>
                         </div>
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Observaciones</label>
                             <textarea id="compraEquipoNota" rows="2" class="w-full p-2 border rounded-lg"
                                 placeholder="Detalles del estado, accesorios incluidos, etc."></textarea>
                         </div>
@@ -1283,12 +1266,12 @@
                 </div>
 
                 <!-- Salida de Accesorio -->
-                <div id="formSalidaAccesorio" class="movimiento-form hidden bg-yellow-50 p-4 rounded-lg">
-                    <h3 class="font-semibold text-yellow-800 mb-3">🛡️➡️ Salida de Accesorio</h3>
+                <div id="formSalidaAccesorio" class="movimiento-form hidden bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+                    <h3 class="font-semibold text-yellow-800 dark:text-yellow-300 mb-3">🛡️➡️ Salida de Accesorio</h3>
 
                     <!-- Destino -->
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Destino</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Destino</label>
                         <select id="salidaAccesorioDestino" class="w-full p-2 border rounded-lg">
                             <option value="">Seleccionar</option>
                             <option value="Aviadores">Aviadores</option>
@@ -1300,11 +1283,11 @@
 
                     <!-- Accesorios (Checkboxes) -->
                     <div class="border-t pt-4">
-                        <h4 class="font-semibold text-gray-700 mb-3">Seleccione los accesorios:</h4>
+                        <h4 class="font-semibold text-gray-700 dark:text-slate-300 mb-3">Seleccione los accesorios:</h4>
                         <div class="grid md:grid-cols-3 gap-3">
 
                             <!-- Forro -->
-                            <div class="bg-white p-3 rounded-lg border">
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="salidaForro" class="mr-2">
                                     <span class="font-medium">Forro</span>
@@ -1324,7 +1307,7 @@
                             </div>
 
                             <!-- Vidrio -->
-                            <div class="bg-white p-3 rounded-lg border">
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="salidaVidrio" class="mr-2">
                                     <span class="font-medium">Vidrio</span>
@@ -1344,7 +1327,7 @@
                             </div>
 
                             <!-- Caja -->
-                            <div class="bg-white p-3 rounded-lg border">
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="salidaCaja" class="mr-2">
                                     <span class="font-medium">Caja</span>
@@ -1367,7 +1350,7 @@
                             </div>
 
                             <!-- Cargador -->
-                            <div class="bg-white p-3 rounded-lg border">
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="salidaCargador" class="mr-2">
                                     <span class="font-medium">Cargador</span>
@@ -1379,7 +1362,7 @@
                             </div>
 
                             <!-- Protector Cámara -->
-                            <div class="bg-white p-3 rounded-lg border">
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="salidaProtectorCamara" class="mr-2">
                                     <span class="font-medium">Protector Cámara</span>
@@ -1391,7 +1374,7 @@
                             </div>
 
                             <!-- Cubo -->
-                            <div class="bg-white p-3 rounded-lg border">
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="salidaCubo" class="mr-2">
                                     <span class="font-medium">Cubo</span>
@@ -1403,7 +1386,7 @@
                             </div>
 
                             <!-- Cable Lightning -->
-                            <div class="bg-white p-3 rounded-lg border">
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="salidaCableLightning" class="mr-2">
                                     <span class="font-medium">Cable Lightning</span>
@@ -1415,7 +1398,7 @@
                             </div>
 
                             <!-- Cable C+C -->
-                            <div class="bg-white p-3 rounded-lg border">
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="salidaCableCC" class="mr-2">
                                     <span class="font-medium">Cable C+C</span>
@@ -1427,7 +1410,7 @@
                             </div>
 
                             <!-- Otro Accesorio -->
-                            <div class="bg-white p-3 rounded-lg border">
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="salidaOtroAccesorio" class="mr-2">
                                     <span class="font-medium">Otro Accesorio</span>
@@ -1452,23 +1435,23 @@
                 </div>
 
                 <!-- Ingreso de Accesorio -->
-                <div id="formIngresoAccesorio" class="movimiento-form hidden bg-purple-50 p-4 rounded-lg">
-                    <h3 class="font-semibold text-purple-800 mb-3">🛡️⬅️ Ingreso de Accesorio</h3>
+                <div id="formIngresoAccesorio" class="movimiento-form hidden bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                    <h3 class="font-semibold text-purple-800 dark:text-purple-300 mb-3">🛡️⬅️ Ingreso de Accesorio</h3>
 
                     <!-- Proveedor -->
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Proveedor</label>
                         <input type="text" id="ingresoAccesorioProveedor" class="w-full p-2 border rounded-lg"
                             placeholder="Nombre del proveedor">
                     </div>
 
                     <!-- Accesorios (Checkboxes) -->
                     <div class="border-t pt-4">
-                        <h4 class="font-semibold text-gray-700 mb-3">Seleccione los accesorios:</h4>
+                        <h4 class="font-semibold text-gray-700 dark:text-slate-300 mb-3">Seleccione los accesorios:</h4>
                         <div class="grid md:grid-cols-3 gap-3">
 
                             <!-- Forro -->
-                            <div class="bg-white p-3 rounded-lg border">
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="ingresoForro" class="mr-2">
                                     <span class="font-medium">Forro</span>
@@ -1488,7 +1471,7 @@
                             </div>
 
                             <!-- Vidrio -->
-                            <div class="bg-white p-3 rounded-lg border">
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="ingresoVidrio" class="mr-2">
                                     <span class="font-medium">Vidrio</span>
@@ -1508,7 +1491,7 @@
                             </div>
 
                             <!-- Caja -->
-                            <div class="bg-white p-3 rounded-lg border">
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="ingresoCaja" class="mr-2">
                                     <span class="font-medium">Caja</span>
@@ -1531,7 +1514,7 @@
                             </div>
 
                             <!-- Cargador -->
-                            <div class="bg-white p-3 rounded-lg border">
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="ingresoCargador" class="mr-2">
                                     <span class="font-medium">Cargador</span>
@@ -1543,7 +1526,7 @@
                             </div>
 
                             <!-- Protector Cámara -->
-                            <div class="bg-white p-3 rounded-lg border">
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="ingresoProtectorCamara" class="mr-2">
                                     <span class="font-medium">Protector Cámara</span>
@@ -1555,7 +1538,7 @@
                             </div>
 
                             <!-- Cubo -->
-                            <div class="bg-white p-3 rounded-lg border">
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="ingresoCubo" class="mr-2">
                                     <span class="font-medium">Cubo</span>
@@ -1567,7 +1550,7 @@
                             </div>
 
                             <!-- Cable Lightning -->
-                            <div class="bg-white p-3 rounded-lg border">
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="ingresoCableLightning" class="mr-2">
                                     <span class="font-medium">Cable Lightning</span>
@@ -1579,7 +1562,7 @@
                             </div>
 
                             <!-- Cable C+C -->
-                            <div class="bg-white p-3 rounded-lg border">
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="ingresoCableCC" class="mr-2">
                                     <span class="font-medium">Cable C+C</span>
@@ -1591,7 +1574,7 @@
                             </div>
 
                             <!-- Otro Accesorio -->
-                            <div class="bg-white p-3 rounded-lg border">
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="ingresoOtroAccesorio" class="mr-2">
                                     <span class="font-medium">Otro Accesorio</span>
@@ -1630,20 +1613,20 @@
         </div>
 
         <!-- Resumen de Ventas -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">📊 Resumen del Día</h2>
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 mb-6 border border-slate-200 dark:border-slate-700">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-slate-100 mb-4">📊 Resumen del Día</h2>
             <div id="resumenVentas" class="space-y-3 mb-4">
-                <p class="text-gray-600">No hay ventas registradas hoy.</p>
+                <p class="text-gray-600 dark:text-slate-300">No hay ventas registradas hoy.</p>
             </div>
             <div class="grid md:grid-cols-3 gap-4 mb-4">
-                <div class="p-4 bg-green-50 rounded-lg">
-                    <p class="text-lg font-semibold text-green-800">💰 Total: $<span id="totalDia">0.00</span></p>
+                <div class="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700/50">
+                    <p class="text-lg font-semibold text-green-800 dark:text-green-300">💰 Total: $<span id="totalDia">0.00</span></p>
                 </div>
-                <div class="p-4 bg-blue-50 rounded-lg">
-                    <p class="text-lg font-semibold text-blue-800">📱 Equipos: <span id="equiposVendidos">0</span></p>
+                <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/50">
+                    <p class="text-lg font-semibold text-blue-800 dark:text-blue-300">📱 Equipos: <span id="equiposVendidos">0</span></p>
                 </div>
-                <div class="p-4 bg-purple-50 rounded-lg">
-                    <p class="text-lg font-semibold text-purple-800">🏦 Caja Final: $<span id="cajaFinal">0.00</span>
+                <div class="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700/50">
+                    <p class="text-lg font-semibold text-purple-800 dark:text-purple-300">🏦 Caja Final: $<span id="cajaFinal">0.00</span>
                     </p>
                 </div>
             </div>
@@ -1660,16 +1643,20 @@
         </div>
 
         <!-- Resumen de Movimientos -->
-        <div class="bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">📦 Movimientos del Día</h2>
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border border-slate-200 dark:border-slate-700">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-slate-100 mb-4">📦 Movimientos del Día</h2>
             <div id="resumenMovimientos" class="space-y-3">
-                <p class="text-gray-600">No hay movimientos registrados hoy.</p>
+                <p class="text-gray-600 dark:text-slate-300">No hay movimientos registrados hoy.</p>
             </div>
         </div>
     </div>
 
     <!-- Cargar módulos JavaScript -->
     <script type="module" src="js/main.js"></script>
+    <script type="module">
+        import { mountNav } from './js/components/nav.js';
+        mountNav('cierre');
+    </script>
 </body>
 
 </html>

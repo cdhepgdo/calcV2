@@ -346,7 +346,7 @@ export const PRECIOS_VENTA = [
 // ─────────────────────────────────────────────────────────────
 //  PRECIOS DE COMPRA / RECIBIDOS  (intercambio.html → "recibidos")
 // ─────────────────────────────────────────────────────────────
-export const const PRECIOS_RECIBIDOS = [
+export const PRECIOS_RECIBIDOS = [
   {
     "nombre": "iPhone 11 (64)gb",
     "usd": 70

@@ -3407,8 +3407,8 @@ class App {
                         ? `📱 Equipo #${idx + 1} de ${equiposVendidos.length}`
                         : '📱 Equipo';
                     return `
-                        <div class="bg-white bg-opacity-60 p-2 rounded mb-2 ${idx > 0 ? 'border-t border-blue-200 pt-2' : ''}">
-                            <h6 class="font-semibold text-blue-900 text-xs mb-1">${titulo}</h6>
+                        <div class="bg-white/60 dark:bg-slate-700/60 p-2 rounded mb-2 ${idx > 0 ? 'border-t border-blue-200 dark:border-blue-700/50 pt-2' : ''}">
+                            <h6 class="font-semibold text-blue-900 dark:text-blue-200 text-xs mb-1">${titulo}</h6>
                             <p><strong>Modelo:</strong> ${sanitizar(eq.modelo || '')}</p>
                             <p><strong>Capacidad:</strong> ${sanitizar(eq.almacenamiento || '')}</p>
                             <p><strong>Color:</strong> ${sanitizar(eq.color || '')}</p>

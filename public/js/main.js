@@ -5445,12 +5445,12 @@ class App {
      *      (no de hace N días), gracias a la colección por fecha.
      */
     async cerrarCajaDelDia() {
-        const ok = confirmar(
+        /* const ok = confirmar(
             '¿Confirmas el cierre de caja de HOY?\n\n' +
             'La caja final se guardará y se sugerirá como inicial mañana.\n\n' +
             '💡 Recomendado hacerlo al final de la jornada.'
         );
-        if (!ok) return;
+        if (!ok) return; */
 
         try {
             const fechaHoy = new Date().toLocaleDateString('es-ES');

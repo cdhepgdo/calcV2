@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es"> 
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📦 Ingreso de Mercancía — Inventario</title>
+    <title>ðŸ“¦ Ingreso de MercancÃ­a â€” Inventario</title>
     <meta name="description"
-        content="Registra el ingreso masivo de equipos al inventario de tu sede de forma rápida y eficiente.">
+        content="Registra el ingreso masivo de equipos al inventario de tu sede de forma rÃ¡pida y eficiente.">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -25,7 +25,7 @@
     <div id="toast"></div>
     <div id="autocompletePanel" class="autocomplete-panel"></div>
 
-    <!-- Indicador de conexión -->
+    <!-- Indicador de conexiÃ³n -->
     <div id="connectionBadge" class="fixed top-16 right-4 z-50 hidden">
         <div class="glass rounded-lg px-3 py-2 flex items-center gap-2 shadow-lg">
             <span class="connection-dot w-2 h-2 rounded-full"></span>
@@ -36,30 +36,30 @@
     <nav
         class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white shadow-lg">
         <div class="flex gap-2 flex-wrap" id="menuOptions">
-            <a href="cierree.html" class="px-3 py-2 rounded hover:bg-blue-900 transition text-sm">🏠 Ventas</a>
+            <a href="cierree.html" class="px-3 py-2 rounded hover:bg-blue-900 transition text-sm">ðŸ  Ventas</a>
             <a href="lista.html" class="px-3 py-2 rounded hover:bg-blue-900 transition text-sm">LISTADO PRECIOS</a>
-            <a href="intercambio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition text-sm">Cálculo
+            <a href="intercambio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition text-sm">CÃ¡lculo
                 Trading</a>
             <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition text-sm">Principal</a>
-            <a href="registro.html" class="px-3 py-2 rounded hover:bg-blue-900 transition text-sm">📊 Registro</a>
-            <a href="ingreso-mercancia.html" class="px-3 py-2 rounded bg-indigo-600 font-bold text-sm">📦 Ingreso</a>
+            <a href="registro.html" class="px-3 py-2 rounded hover:bg-blue-900 transition text-sm">ðŸ“Š Registro</a>
+            <a href="ingreso-mercancia.html" class="px-3 py-2 rounded bg-indigo-600 font-bold text-sm">ðŸ“¦ Ingreso</a>
             <button id="btnLogout"
                 class="px-3 py-2 rounded bg-red-600 hover:bg-red-700 font-bold transition ml-2 text-sm">Cerrar
-                Sesión</button>
+                SesiÃ³n</button>
         </div>
-        <button id="menuToggle" class="hidden text-2xl focus:outline-none relative z-50">☰</button>
+        <button id="menuToggle" class="hidden text-2xl focus:outline-none relative z-50">â˜°</button>
         <div id="floatingMenu"
             class="hidden fixed bottom-20 right-6 bg-blue-700 text-white rounded-lg shadow-lg py-2 flex flex-col gap-1 z-40">
-            <a href="cierree.html" class="px-4 py-2 hover:bg-blue-900 rounded text-sm">🏠 Ventas</a>
+            <a href="cierree.html" class="px-4 py-2 hover:bg-blue-900 rounded text-sm">ðŸ  Ventas</a>
             <a href="lista.html" class="px-4 py-2 hover:bg-blue-900 rounded text-sm">LISTADO PRECIOS</a>
-            <a href="intercambio.html" class="px-4 py-2 hover:bg-blue-900 rounded text-sm">Cálculo Trading</a>
+            <a href="intercambio.html" class="px-4 py-2 hover:bg-blue-900 rounded text-sm">CÃ¡lculo Trading</a>
             <a href="index.html" class="px-4 py-2 hover:bg-blue-900 rounded text-sm">Principal</a>
-            <a href="registro.html" class="px-4 py-2 hover:bg-blue-900 rounded text-sm">📊 Registro</a>
-            <a href="ingreso-mercancia.html" class="px-4 py-2 hover:bg-blue-900 rounded font-bold text-sm">📦
+            <a href="registro.html" class="px-4 py-2 hover:bg-blue-900 rounded text-sm">ðŸ“Š Registro</a>
+            <a href="ingreso-mercancia.html" class="px-4 py-2 hover:bg-blue-900 rounded font-bold text-sm">ðŸ“¦
                 Ingreso</a>
             <button id="btnLogoutMobile"
                 class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white font-bold transition rounded mt-2 text-sm">Cerrar
-                Sesión</button>
+                SesiÃ³n</button>
         </div>
     </nav>
 
@@ -70,24 +70,24 @@
         <div class="glass rounded-2xl p-5 mb-5 flex flex-col sm:flex-row sm:items-center gap-4">
             <div class="flex-1">
                 <h1 class="text-2xl font-bold text-white flex items-center gap-2" id="tituloModo">
-                    📦 <span>Nota de Ingreso de Mercancía</span>
+                    ðŸ“¦ <span>Nota de Ingreso de MercancÃ­a</span>
                 </h1>
                 <p class="text-indigo-300 text-sm mt-1" id="subtituloModo">Ingresa los equipos fila por fila. Usa <kbd
                         class="bg-indigo-900 text-indigo-200 rounded px-1 py-0.5 text-xs">Tab</kbd> para avanzar y <kbd
                         class="bg-indigo-900 text-indigo-200 rounded px-1 py-0.5 text-xs">Enter</kbd> al final de fila
                     para agregar otra.</p>
                 <div class="flex items-center gap-2 mt-3 bg-white/5 p-1 rounded-lg w-max">
-                    <button id="btnModoIngreso" class="px-4 py-1.5 rounded-md text-sm font-bold bg-indigo-600 text-white shadow transition">📦 Ingreso</button>
-                    <button id="btnModoSalida" class="px-4 py-1.5 rounded-md text-sm font-bold text-white opacity-50 hover:bg-white/10 transition">📤 Salida</button>
+                    <button id="btnModoIngreso" class="px-4 py-1.5 rounded-md text-sm font-bold bg-indigo-600 text-white shadow transition">ðŸ“¦ Ingreso</button>
+                    <button id="btnModoSalida" class="px-4 py-1.5 rounded-md text-sm font-bold text-white opacity-50 hover:bg-white/10 transition">ðŸ“¤ Salida</button>
                 </div>
             </div>
             <div class="flex flex-col items-end gap-3">
                 <div class="flex gap-3 items-center flex-wrap">
-                    <span class="sede-badge" id="badgeSede">📍 Cargando sede...</span>
+                    <span class="sede-badge" id="badgeSede">ðŸ“ Cargando sede...</span>
                     <div class="text-indigo-300 text-sm font-medium" id="fechaHoy"></div>
                 </div>
                 <button id="btnImprimirLote" class="text-white bg-slate-700 hover:bg-slate-600 font-medium py-2 px-4 rounded-lg text-sm transition flex items-center gap-2">
-                    🖨️ Imprimir Nota
+                    ðŸ–¨ï¸ Imprimir Nota
                 </button>
             </div>
         </div>
@@ -97,19 +97,19 @@
         <!-- ========================================== -->
         <div id="seccionSalida" class="hidden">
             <div class="glass rounded-2xl p-5 mb-5">
-                <h2 class="text-indigo-300 text-xs font-bold uppercase tracking-wider mb-4">Información de Traslado</h2>
+                <h2 class="text-indigo-300 text-xs font-bold uppercase tracking-wider mb-4">InformaciÃ³n de Traslado</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="text-slate-400 text-xs font-medium block mb-1">Destino (Sede o Cliente)</label>
-                        <input type="text" id="salidaDestino" placeholder="Ej: Sede Cumbayá" class="cell-input rounded-lg py-2 px-3 text-sm w-full">
+                        <input type="text" id="salidaDestino" placeholder="Ej: Sede CumbayÃ¡" class="cell-input rounded-lg py-2 px-3 text-sm w-full">
                     </div>
                     <div>
                         <label class="text-slate-400 text-xs font-medium block mb-1">Persona Responsable</label>
-                        <input type="text" id="salidaResponsable" placeholder="Ej: Juan Pérez" class="cell-input rounded-lg py-2 px-3 text-sm w-full">
+                        <input type="text" id="salidaResponsable" placeholder="Ej: Juan PÃ©rez" class="cell-input rounded-lg py-2 px-3 text-sm w-full">
                     </div>
                     <div>
-                        <label class="text-slate-400 text-xs font-medium block mb-1">Notas / Detalles del Envío</label>
-                        <input type="text" id="salidaNotas" placeholder="Ej: Traslado para reparación" class="cell-input rounded-lg py-2 px-3 text-sm w-full">
+                        <label class="text-slate-400 text-xs font-medium block mb-1">Notas / Detalles del EnvÃ­o</label>
+                        <input type="text" id="salidaNotas" placeholder="Ej: Traslado para reparaciÃ³n" class="cell-input rounded-lg py-2 px-3 text-sm w-full">
                     </div>
                 </div>
             </div>
@@ -128,14 +128,14 @@
                                     <div class="flex gap-2 mb-2">
                                         <select id="salidaFiltroFecha" class="cell-input rounded-lg py-2 px-3 text-sm flex-1">
                                             <option value="todos">Todos los disponibles</option>
-                                            <option value="ultimos7">Últimos 7 días</option>
-                                            <option value="ultimos30">Últimos 30 días</option>
-                                            <option value="ultimos90">Últimos 90 días</option>
-                                            <option value="personalizado">Días específicos...</option>
+                                            <option value="ultimos7">Ãšltimos 7 dÃ­as</option>
+                                            <option value="ultimos30">Ãšltimos 30 dÃ­as</option>
+                                            <option value="ultimos90">Ãšltimos 90 dÃ­as</option>
+                                            <option value="personalizado">DÃ­as especÃ­ficos...</option>
                                         </select>
                                     </div>
                                     <div id="diasPersonalizadosContainer" class="hidden">
-                                        <label class="text-slate-400 text-xs font-medium block mb-1">Cantidad de días atrás:</label>
+                                        <label class="text-slate-400 text-xs font-medium block mb-1">Cantidad de dÃ­as atrÃ¡s:</label>
                                         <input type="number" id="diasPersonalizados" 
                                             class="cell-input rounded-lg py-2 px-3 text-sm w-full" 
                                             placeholder="Ej: 15" 
@@ -144,7 +144,7 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Búsqueda general (funciona con IMEI también) -->
+                                <!-- BÃºsqueda general (funciona con IMEI tambiÃ©n) -->
                                 <label class="text-slate-400 text-xs font-medium block mb-2">Buscar por modelo, color o IMEI:</label>
                                 <input type="text" id="salidaBuscadorInput" placeholder="Buscar por modelo, color o IMEI..." 
                                     class="cell-input rounded-lg py-3 px-4 text-sm w-full border border-indigo-500/30 bg-indigo-900/20 mb-3" autocomplete="off">
@@ -164,11 +164,11 @@
                                 <div class="flex flex-col gap-3 mt-auto pt-4 border-t border-white/10">
                                     <label class="flex items-center gap-2 cursor-pointer text-slate-300 text-sm">
                                         <input type="checkbox" id="chkRegistrarMovimientoSalida" class="rounded accent-indigo-500 w-4 h-4" checked>
-                                        Registrar movimiento en la caja del día (Salida Equipo)
+                                        Registrar movimiento en la caja del dÃ­a (Salida Equipo)
                                     </label>
                                     
                                     <button id="btnConfirmarSalida" class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold py-3.5 px-6 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg transition">
-                                        📤 Confirmar Salida y Dar de Baja
+                                        ðŸ“¤ Confirmar Salida y Dar de Baja
                                     </button>
                                 </div>
                             </div>
@@ -197,16 +197,16 @@
         <!-- ========================================== -->
         <div id="seccionIngreso" class="space-y-4">
             <div class="glass rounded-2xl p-5">
-            <h2 class="text-indigo-300 text-xs font-bold uppercase tracking-wider mb-3">Información del Lote</h2>
+            <h2 class="text-indigo-300 text-xs font-bold uppercase tracking-wider mb-3">InformaciÃ³n del Lote</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="text-slate-400 text-xs font-medium block mb-1">Origen / Proveedor</label>
-                    <input type="text" id="origenLote" placeholder="Ej: USA Import, Panamá, Trade-in..."
+                    <input type="text" id="origenLote" placeholder="Ej: USA Import, PanamÃ¡, Trade-in..."
                         class="cell-input rounded-lg py-2 px-3 text-sm w-full">
                 </div>
                 <div>
                     <label class="text-slate-400 text-xs font-medium block mb-1">Notas del lote (opcional)</label>
-                    <input type="text" id="notasLote" placeholder="Ej: Lote de nov, mercancía revisada..."
+                    <input type="text" id="notasLote" placeholder="Ej: Lote de nov, mercancÃ­a revisada..."
                         class="cell-input rounded-lg py-2 px-3 text-sm w-full">
                 </div>
             </div>
@@ -244,7 +244,7 @@
                             <span class="text-lg leading-none">+</span> Agregar equipo
                         </button>
                         <span class="text-slate-400 text-xs">
-                            <span id="contadorFilas" class="text-indigo-300 font-bold">0</span> equipos válidos
+                            <span id="contadorFilas" class="text-indigo-300 font-bold">0</span> equipos vÃ¡lidos
                         </span>
                     </div>
                 </div>
@@ -253,17 +253,17 @@
                     <div class="flex items-center">
                         <label class="flex items-center gap-2 cursor-pointer text-slate-300 text-sm ml-1">
                             <input type="checkbox" id="chkRegistrarMovimiento" class="rounded accent-indigo-500 w-4 h-4" checked>
-                            Registrar movimiento en la caja del día (Ingreso Equipo)
+                            Registrar movimiento en la caja del dÃ­a (Ingreso Equipo)
                         </label>
                     </div>
                     <div class="flex flex-col sm:flex-row gap-3">
                     <button id="btnGuardarLote"
                         class="btn-success flex-1 text-white font-bold py-3.5 px-6 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg">
-                        💾 Guardar Todo al Inventario
+                        ðŸ’¾ Guardar Todo al Inventario
                     </button>
                     <button id="btnLimpiarTodo"
                         class="text-slate-400 hover:text-white border border-slate-600 hover:border-slate-400 font-medium py-3.5 px-6 rounded-xl text-sm transition">
-                        🗑️ Limpiar todo
+                        ðŸ—‘ï¸ Limpiar todo
                     </button>
                 </div>
             </div>
@@ -277,7 +277,7 @@
                         <p class="text-slate-400 text-xs" id="subtituloResumen">equipos en este lote</p>
                     </div>
                     <div class="border-t border-white/10 pt-3 space-y-1.5" id="listaResumen">
-                        <p class="text-slate-500 text-xs text-center italic">Sin equipos aún...</p>
+                        <p class="text-slate-500 text-xs text-center italic">Sin equipos aÃºn...</p>
                     </div>
                 </div>
             </div>
@@ -303,7 +303,7 @@
             </td>
             <td class="py-2 px-2">
                 <select class="cell-input campo-color" data-campo="color">
-                    <option value="">— Color —</option>
+                    <option value="">â€” Color â€”</option>
                 </select>
             </td>
             <td class="py-2 px-2">
@@ -312,7 +312,7 @@
             </td>
             <td class="py-2 px-2">
                 <div class="flex items-center gap-1">
-                    <input type="text" class="cell-input campo-imei font-mono" placeholder="15 dígitos" maxlength="15"
+                    <input type="text" class="cell-input campo-imei font-mono" placeholder="15 dÃ­gitos" maxlength="15"
                         data-campo="imei" style="width:140px">
                     <span class="imei-status text-xs w-4 text-center"></span>
                 </div>
@@ -323,7 +323,7 @@
                         <label
                             class="flex items-center gap-1.5 cursor-pointer text-slate-400 text-xs whitespace-nowrap">
                             <input type="checkbox" class="campo-caja rounded accent-indigo-500" data-campo="caja">
-                            <span>📦 Caja</span>
+                            <span>ðŸ“¦ Caja</span>
                         </label>
                         <div class="caja-fields gap-1 flex-1">
                             <input type="text" class="cell-input campo-caja-modelo flex-1" placeholder="Modelo caja"
@@ -334,18 +334,18 @@
                         </div>
                     </div>
                     <input type="text" class="cell-input campo-detalles"
-                        placeholder="Detalles / falla (→ nota de venta)" data-campo="detalles">
+                        placeholder="Detalles / falla (â†’ nota de venta)" data-campo="detalles">
                 </div>
             </td>
             <td class="py-2 px-2">
                 <button class="btn-eliminar text-slate-600 hover:text-red-400 text-lg leading-none transition"
-                    title="Eliminar fila">✕</button>
+                    title="Eliminar fila">âœ•</button>
             </td>
         </tr>
     </template>
 
     <script type="module" src="./js/pages/ingreso-mercancia/index.js"></script>
-    <!-- �rea de impresi�n oculta -->
+    <!-- Área de impresión oculta -->
     <div id="printArea" style="display: none;"></div>
 </body>
 </html>

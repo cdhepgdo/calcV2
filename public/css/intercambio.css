@@ -1,0 +1,126 @@
+/* ============================================================
+   intercambio.css
+   Estilos para la página de Calculadora de Diferencia (Intercambio).
+   Todos los colores vienen de tokens en theme.css — nunca hardcoded.
+   ============================================================ */
+
+/* ── Tarjeta con acento superior (panel "Resultado") ── */
+.panel-info {
+  background: rgb(var(--accent-soft));
+  border-top: 4px solid rgb(var(--accent));
+  color: rgb(var(--accent-text));
+  border-radius: 8px;
+}
+
+/* ── Bloque "Monto recibido" en modo tabla (info) ── */
+.bloque-recibido {
+  background: rgb(var(--accent-soft));
+  border: 1px solid rgb(var(--accent));
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+/* ── Bloque "Solo venta" (éxito para monto recibido, acento para total) ── */
+.bloque-solo-venta {
+  background: rgb(var(--success-soft));
+  border: 1px solid rgb(var(--success));
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+/* ── Panel "Cargando tasas" (categoría mixto) ── */
+.panel-tasas {
+  background: rgb(var(--mixto-soft));
+  color: rgb(var(--mixto-text));
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 600;
+}
+
+/* ── Inputs y selects ── */
+.campo-select {
+  background: rgb(var(--surface-elevated));
+  border: 1px solid rgb(var(--border-strong));
+  color: rgb(var(--text-primary));
+  font-size: 0.875rem;
+  border-radius: 8px;
+  width: 100%;
+  padding: 0.625rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.campo-select:focus {
+  border-color: rgb(var(--accent));
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(var(--accent), 0.25);
+}
+
+.campo-checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: rgb(var(--accent));
+  border-radius: 4px;
+}
+
+/* ── Contenedor del icono del título (panel izquierdo/derecho) ── */
+.icono-titulo {
+  background: rgb(var(--surface-muted));
+  padding: 0.5rem;
+  border-radius: 8px;
+  color: rgb(var(--text-secondary));
+}
+
+/* ── Tabla comparativa ── */
+.tabla-comparativa {
+  width: 100%;
+  font-size: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .tabla-comparativa {
+    font-size: 0.875rem;
+  }
+}
+
+.tabla-comparativa thead {
+  background: rgb(var(--surface-sunken));
+}
+
+.tabla-comparativa th {
+  padding: 0.5rem;
+  font-weight: 700;
+  text-align: left;
+  color: rgb(var(--text-primary));
+}
+
+.tabla-comparativa th.derecha {
+  text-align: right;
+}
+
+.tabla-comparativa tbody tr {
+  border-top: 1px solid rgb(var(--border-soft));
+  transition: background-color 0.15s;
+}
+
+.tabla-comparativa tbody tr:hover {
+  background: var(--hover-bg);
+}
+
+.tabla-comparativa td {
+  padding: 0.25rem 0.5rem;
+  color: rgb(var(--text-primary));
+}
+
+.tabla-comparativa td.derecha {
+  text-align: right;
+}
+
+/* ── Separador horizontal dentro del panel "Solo venta" ── */
+.separador-sutil {
+  border: none;
+  border-top: 1px solid rgba(var(--text-primary), 0.12);
+  margin: 0.5rem 0;
+}

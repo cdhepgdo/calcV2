@@ -10,12 +10,12 @@ export function initModoSalida({
     function buscarEquiposSalida(query) {
         if (!onInventarioCargado()) return [];
         let disponibles = inventarioService.obtenerDisponibles();
-        
+
         const filtroFecha = document.getElementById('salidaFiltroFecha')?.value || 'todos';
         if (filtroFecha !== 'todos') {
             const ahora = new Date();
             let diasAtras;
-            
+
             if (filtroFecha === 'personalizado') {
                 diasAtras = parseInt(document.getElementById('diasPersonalizados')?.value || '0');
                 if (diasAtras <= 0) {
@@ -24,15 +24,15 @@ export function initModoSalida({
             } else {
                 diasAtras = filtroFecha === 'ultimos7' ? 7 : filtroFecha === 'ultimos30' ? 30 : 90;
             }
-            
+
             const fechaLimite = new Date(ahora.setDate(ahora.getDate() - diasAtras));
-            
+
             disponibles = disponibles.filter(eq => {
                 const fechaIngreso = eq.fechaIngreso ? new Date(eq.fechaIngreso) : null;
                 return fechaIngreso && fechaIngreso >= fechaLimite;
             });
         }
-        
+
         if (query) {
             const q = query.toLowerCase();
             disponibles = disponibles.filter(eq => {
@@ -42,7 +42,7 @@ export function initModoSalida({
                     eq.gb.toLowerCase().includes(q);
             });
         }
-        
+
         return disponibles.slice(0, 20);
     }
 
@@ -52,7 +52,7 @@ export function initModoSalida({
         const equipos = buscarEquiposSalida(query);
 
         if (equipos.length === 0) {
-            sugerencias.innerHTML = '<p class="text-slate-500 text-xs text-center italic py-4">No se encontraron equipos disponibles</p>';
+            sugerencias.innerHTML = '<p class="texto-vacio text-xs text-center italic py-4">No se encontraron equipos disponibles</p>';
             return;
         }
 
@@ -64,14 +64,14 @@ export function initModoSalida({
                      ${yaSeleccionado ? '' : `onclick="agregarEquipoSalida('${eq.id}')"`}>
                     <div class="flex items-start justify-between gap-2">
                         <div class="flex-1 min-w-0">
-                            <p class="text-white text-xs font-bold truncate">${eq.modelo} ${eq.gb} — ${eq.color}</p>
-                            <p class="text-slate-400 text-xs font-mono mt-0.5">${eq.imei}</p>
-                            <p class="text-slate-500 text-xs mt-0.5">Bat: ${eq.bateria}%</p>
+                            <p class="texto-inverso text-xs font-bold truncate">${eq.modelo} ${eq.gb} — ${eq.color}</p>
+                            <p class="texto-secundario text-xs font-mono mt-0.5">${eq.imei}</p>
+                            <p class="texto-vacio text-xs mt-0.5">Bat: ${eq.bateria}%</p>
                         </div>
-                        ${yaSeleccionado ? 
-                            '<span class="text-yellow-400 text-xs shrink-0">✓ Seleccionado</span>' : 
-                            '<span class="text-indigo-300 text-xs shrink-0">+ Agregar</span>'
-                        }
+                        ${yaSeleccionado ?
+                    '<span class="equipo-estado--seleccionado text-xs shrink-0">✓ Seleccionado</span>' :
+                    '<span class="equipo-estado--disponible text-xs shrink-0">+ Agregar</span>'
+                }
                     </div>
                 </div>
             `;
@@ -82,10 +82,10 @@ export function initModoSalida({
         const lista = document.getElementById('listaSalidaSeleccionados');
         const listaResumen = document.getElementById('listaResumenSalida');
         const totalResumen = document.getElementById('totalEquiposSalidaResumen');
-        
+
         if (equiposSeleccionadosSalida.length === 0) {
-            lista.innerHTML = '<p class="text-slate-500 text-xs text-center italic py-4">Sin equipos seleccionados</p>';
-            listaResumen.innerHTML = '<p class="text-slate-500 text-xs text-center italic">Sin equipos seleccionados...</p>';
+            lista.innerHTML = '<p class="texto-vacio text-xs text-center italic py-4">Sin equipos seleccionados</p>';
+            listaResumen.innerHTML = '<p class="texto-vacio text-xs text-center italic">Sin equipos seleccionados...</p>';
             totalResumen.textContent = '0';
             return;
         }
@@ -101,14 +101,14 @@ export function initModoSalida({
                 <div class="flex items-start justify-between gap-2">
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-1">
-                            <span class="text-slate-500 text-xs font-mono">${idx + 1}</span>
-                            <p class="text-white text-sm font-bold truncate">${eq.modelo} ${eq.gb} — ${eq.color}</p>
+                            <span class="texto-vacio text-xs font-mono">${idx + 1}</span>
+                            <p class="texto-inverso text-sm font-bold truncate">${eq.modelo} ${eq.gb} — ${eq.color}</p>
                         </div>
-                        <p class="text-slate-400 text-xs font-mono">IMEI: ${eq.imei}</p>
-                        <p class="text-slate-500 text-xs mt-1">Bat: ${eq.bateria}% ${eq.detalles ? `| ${eq.detalles}` : ''}</p>
+                        <p class="texto-secundario text-xs font-mono">IMEI: ${eq.imei}</p>
+                        <p class="texto-vacio text-xs mt-1">Bat: ${eq.bateria}% ${eq.detalles ? `| ${eq.detalles}` : ''}</p>
                     </div>
-                    <button onclick="quitarEquipoSalida('${eq.id}')" 
-                            class="text-red-400 hover:text-red-300 text-lg leading-none transition shrink-0" 
+                    <button onclick="quitarEquipoSalida('${eq.id}')"
+                            class="btn-eliminar-item text-lg leading-none transition shrink-0"
                             title="Quitar">✕</button>
                 </div>
             </div>
@@ -122,14 +122,14 @@ export function initModoSalida({
 
         listaResumen.innerHTML = Object.entries(modelos).sort((a, b) => b[1] - a[1]).map(([k, v]) =>
             `<div class="flex justify-between items-center text-xs">
-                <span class="text-slate-300 truncate">${k}</span>
-                <span class="text-red-300 font-bold ml-2 shrink-0">×${v}</span>
+                <span class="texto-inverso truncate">${k}</span>
+                <span class="resumen-titulo--lote font-bold ml-2 shrink-0">×${v}</span>
             </div>`
         ).join('');
     }
 
     // Exponer globalmente
-    window.agregarEquipoSalida = function(equipoId) {
+    window.agregarEquipoSalida = function (equipoId) {
         if (equiposSeleccionadosSalida.includes(equipoId)) return;
         const equipo = inventarioService.obtenerDisponibles().find(e => e.id === equipoId);
         if (!equipo) return;
@@ -139,7 +139,7 @@ export function initModoSalida({
         actualizarListaSugerenciasSalida();
     };
 
-    window.quitarEquipoSalida = function(equipoId) {
+    window.quitarEquipoSalida = function (equipoId) {
         equiposSeleccionadosSalida = equiposSeleccionadosSalida.filter(id => id !== equipoId);
         actualizarListaSeleccionadosSalida();
         actualizarListaSugerenciasSalida();
@@ -187,7 +187,7 @@ export function initModoSalida({
         const registrarMovimiento = document.getElementById('chkRegistrarMovimientoSalida').checked;
 
         try {
-            const equipos = equiposSeleccionadosSalida.map(id => 
+            const equipos = equiposSeleccionadosSalida.map(id =>
                 inventarioService.obtenerDisponibles().find(e => e.id === id)
             ).filter(Boolean);
 
@@ -219,14 +219,14 @@ export function initModoSalida({
             }
 
             showToast(`✅ ${equiposSeleccionadosSalida.length} equipos marcados como salida`, 'success');
-            
+
             equiposSeleccionadosSalida = [];
             actualizarListaSeleccionadosSalida();
             document.getElementById('salidaDestino').value = '';
             document.getElementById('salidaResponsable').value = '';
             document.getElementById('salidaNotas').value = '';
             document.getElementById('salidaBuscadorInput').value = '';
-            
+
             actualizarListaSugerenciasSalida();
         } catch (error) {
             console.error('Error en salida:', error);

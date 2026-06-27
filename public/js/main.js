@@ -350,9 +350,6 @@ class App {
             document.getElementById('notaVentaInfo').classList.toggle('hidden', !e.target.checked);
         });
 
-        // Menú
-        this.inicializarMenu();
-
         // Movimientos de Inventario
         this.inicializarEventosMovimientos();
 
@@ -842,20 +839,6 @@ class App {
         }
     }
 
-
-    /**
-     * Inicializa el menú de navegación
-     */
-    inicializarMenu() {
-        const menuToggle = document.getElementById('menuToggle');
-        const floatingMenu = document.getElementById('floatingMenu');
-
-        if (menuToggle && floatingMenu) {
-            menuToggle.addEventListener('click', () => {
-                floatingMenu.classList.toggle('hidden');
-            });
-        }
-    }
 
     /**
      * Actualiza la fecha actual

@@ -64,12 +64,12 @@ export function initModoIngreso({
 
         const lista = document.getElementById('listaResumen');
         if (!Object.keys(modelos).length) {
-            lista.innerHTML = '<p class="text-slate-500 text-xs text-center italic">Sin equipos válidos aún...</p>';
+            lista.innerHTML = '<p class="texto-vacio text-xs text-center italic">Sin equipos válidos aún...</p>';
         } else {
             lista.innerHTML = Object.entries(modelos).sort((a, b) => b[1] - a[1]).map(([k, v]) =>
                 `<div class="flex justify-between items-center text-xs">
-                    <span class="text-slate-300 truncate">${k}</span>
-                    <span class="text-indigo-300 font-bold ml-2 shrink-0">×${v}</span>
+                    <span class="texto-inverso truncate">${k}</span>
+                    <span class="resumen-titulo--lote font-bold ml-2 shrink-0">×${v}</span>
                 </div>`
             ).join('');
         }

@@ -501,35 +501,13 @@ menuToggle.addEventListener('click', () => {
   menuOptions.classList.toggle('hidden');
 }); */
 
-const nav = document.getElementById('globalMenu');
-const menuOptions = document.getElementById('menuOptions');
-const menuToggle = document.getElementById('menuToggle');
-const floatingMenu = document.getElementById('floatingMenu');
-const configSection = document.querySelector('.card-shadow');
-console.log(configSection)
-
-window.addEventListener('scroll', () => {
-  //console.log(configSection)
-  const configTop = configSection.getBoundingClientRect().top + window.scrollY;
-  if (window.scrollY >= configTop - nav.offsetHeight) {
-    nav.classList.remove('top-0');
-    nav.classList.add('bottom-6', 'right-6', 'left-auto', 'rounded-full', 'p-0', 'w-14', 'h-14', 'justify-center', 'items-center');
-    menuOptions.classList.add('hidden');
-    menuToggle.classList.remove('hidden');
-    floatingMenu.classList.add('hidden'); // Esconder menú flotante inicialmente
-  } else {
-    nav.classList.add('top-0');
-    nav.classList.remove('bottom-6', 'right-6', 'left-auto', 'rounded-full', 'p-0', 'w-14', 'h-14', 'justify-center', 'items-center');
-    menuOptions.classList.remove('hidden');
-    menuToggle.classList.add('hidden');
-    floatingMenu.classList.add('hidden'); // Asegurar que el menú flotante esté oculto
-  }
-});
-
-menuToggle.addEventListener('click', () => {
-  floatingMenu.classList.toggle('hidden');
-});
-
+// ─── Nav legacy removida ─────────────────────────────────────
+// Las referencias a #globalMenu, #menuOptions, #menuToggle y #floatingMenu
+// quedaron obsoletas al migrar a js/components/nav.js (mountNav).
+// La lógica responsive (top fijo → botón flotante al hacer scroll) ahora vive
+// en nav.js → syncToggleVisibility(). Se borró también el listener de scroll
+// que dependía de `.card-shadow`, porque ese selector será reemplazado por
+// `.surface-card` (theme.css) en esta misma página.
 
 async function fetchBinanceP2PAverage() {
   try {
@@ -686,11 +664,22 @@ async function fetchExchangeRate() {
 async function updateApiValue() {
   const rate = await fetchExchangeRate();
   const binanceRate = await fetchBinanceP2PAverage();
-  if (rate !== null) {
+  /* if (rate !== null) {
     apiValueInput.value = rate.toFixed(2);
     transferRate.value = binanceRate.toFixed(2) | 0;
     calculateRealTime(); // recalcula con el nuevo valor
+  } */
+  // Guard clause: si CUALQUIER fuente falla, no seguimos
+  // (antes solo se validaba `rate`, lo que hacía null.toFixed en binanceRate)
+  if (rate === null || binanceRate === null) {
+    console.warn('[updateApiValue] No se pudo actualizar: rate o binanceRate son null');
+    return;
   }
+
+  // Todo ok: aplicar valores y recalcular
+  apiValueInput.value = rate.toFixed(2);
+  transferRate.value = binanceRate.toFixed(2) | 0;
+  calculateRealTime();
 }
 updateApiValue();                      // al cargar
 setInterval(updateApiValue, 30_000);   // cada 30 segundos
@@ -701,7 +690,7 @@ setInterval(updateApiValue, 30_000);   // cada 30 segundos
 // Limpia el área de resultados
 function clearResults() {
   resultsDiv.innerHTML = `
-    <div class="text-center text-gray-500 py-8">
+    <div class="text-center py-8" style="color: rgb(var(--text-muted));">
       <div class="text-6xl mb-4">🧮</div>
       <p>Configura los parámetros para ver los resultados en tiempo real</p>
     </div>`;
@@ -798,48 +787,48 @@ function displayResults(res, method) {
   //––– Directo: sin recargos
   if (['cash', 'zelle', 'binance'].includes(method)) {
     html = `
-      <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-        <h3 class="font-semibold text-green-800 mb-2">✅ Pago Directo</h3>
-        <div class="text-2xl font-bold text-green-600">
+      <div class="tarjeta tarjeta--exito">
+        <h3 class="tarjeta-titulo">✅ Pago Directo</h3>
+        <div class="tarjeta-valor">
           ${sym}${res.finalPrice.toFixed(2)}
         </div>
-        <p class="text-green-700 text-sm mt-1">Sin recargos adicionales</p>
+        <p class="tarjeta-subtitulo mt-1">Sin recargos adicionales</p>
       </div>`
   }
 
   //––– Transferencia completa
   else if (method === 'transfer') {
     html = `
-      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-        <h3 class="font-semibold text-blue-800 mb-3">🏦 Transferencia Completa</h3>
+      <div class="tarjeta tarjeta--info mb-4">
+        <h3 class="tarjeta-titulo">🏦 Transferencia Completa</h3>
         <div class="space-y-2">
           <div class="flex justify-between">
-            <span class="text-gray-600">Precio descuento en (USD):</span>
+            <span class="texto-label">Precio descuento en (USD):</span>
             <span class="font-semibold">${sym}${res.originalPrice.toFixed(2)}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-gray-600">BNCUSDT95:</span>
+            <span class="texto-label">BNCUSDT95:</span>
             <span class="font-semibold">${res.rate}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-gray-600">
+            <span class="texto-label">
               Costo base del equipo en Bs:
             </span>
-            <span class="font-bold text-blue-600 text-lg">
+            <span class="font-bold texto-valor-acento text-lg">
               Bs ${res.finalPrice.toLocaleString()}
             </span>
           </div>
           <div class="flex justify-between border-t pt-2">
-            <span class="text-gray-600">
+            <span class="texto-label">
               Equivalente BCV:
             </span>
-            <span class="font-bold text-purple-600 text-lg">
+            <span class="font-bold texto-valor-mixto text-lg">
               ${sym}${res.convertedAmount.toFixed(2)}
             </span>
           </div>
-          <div class="flex justify-between bg-yellow-50 border border-yellow-200 rounded p-2 mt-2">
-            <span class="text-yellow-700 font-medium">Diferencia vs precio base:</span>
-            <span class="font-bold text-yellow-600">
+          <div class="flex justify-between tarjeta tarjeta--advertencia mt-2" style="padding: 0.5rem;">
+            <span class="font-medium">Diferencia vs precio base:</span>
+            <span class="font-bold texto-valor-advertencia">
               +${sym}${(res.convertedAmount - res.originalPrice).toFixed(3)}
             </span>
           </div>
@@ -850,44 +839,44 @@ function displayResults(res, method) {
   //––– Pago mixto
   else if (method === 'mixed') {
     html = `
-      <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-4">
-        <h3 class="font-semibold text-purple-800 mb-3">🔄 Pago Mixto</h3>
+      <div class="tarjeta tarjeta--mixto mb-4">
+        <h3 class="tarjeta-titulo">🔄 Pago Mixto</h3>
         <div class="space-y-3">
-          <div class="bg-white rounded p-3">
-            <h4 class="font-medium text-gray-700 mb-2">
+          <div class="tarjeta tarjeta--exito" style="padding: 0.75rem;">
+            <h4 class="font-medium mb-2">
               💵 Parte en Efectivo/Divisas/Zelle/Binance
             </h4>
-            <div class="text-lg font-bold text-green-600">
+            <div class="text-lg font-bold texto-valor-exito">
               ${sym}${res.cashAmount.toFixed(2)}
             </div>
-            
+
           </div>
-          <div class="bg-white rounded p-3">
-            <h4 class="font-medium text-gray-700 mb-2">🏦 Parte en Transferencia</h4>
-            <div class="text-sm text-gray-600 mb-1">
+          <div class="tarjeta tarjeta--info" style="padding: 0.75rem;">
+            <h4 class="font-medium mb-2">🏦 Parte en Transferencia</h4>
+            <div class="text-sm texto-label mb-1">
                ${res.transferAmount.toFixed(2)}RT×TR${res.rate}
             </div>
-            <div class="text-lg font-bold text-blue-600">
+            <div class="text-lg font-bold texto-valor-acento">
               Bs ${res.transferWithRate.toLocaleString()}
             </div>
-            <div class="text-sm text-purple-600">
-              Equivalente bcv(${res.apiValue}): 
+            <div class="text-sm texto-valor-mixto">
+              Equivalente bcv(${res.apiValue}):
               ${sym}${res.convertedTransfer.toFixed(2)}
             </div>
           </div>
-          <div class="bg-gradient-to-r from-purple-100 to-blue-100 rounded p-3 border-t-2 border-purple-300">
+          <div class="gradiente-mixto rounded p-3">
             <div class="flex justify-between items-center">
-              <span class="font-semibold text-gray-700">Total Final:</span>
-              <span class="font-bold text-purple-700 text-xl">
+              <span class="font-semibold">Total Final:</span>
+              <span class="font-bold texto-valor-mixto text-xl">
                 ${sym}${res.totalConverted.toFixed(3)}
               </span>
             </div>
-            <div class="text-xs text-gray-600 mt-1">Efectivo + Transferencia convertida</div>
-            <div class="flex justify-between bg-yellow-50 border border-yellow-200 rounded p-2 mt-2">
-              <span class="text-yellow-700 font-medium text-sm">
+            <div class="text-xs texto-label mt-1">Efectivo + Transferencia convertida</div>
+            <div class="flex justify-between tarjeta tarjeta--advertencia mt-2" style="padding: 0.5rem;">
+              <span class="font-medium text-sm">
                 Diferencia vs precio base:
               </span>
-              <span class="font-bold text-yellow-600 text-sm">
+              <span class="font-bold texto-valor-advertencia text-sm">
                 +${sym}${(res.totalConverted - res.originalPrice).toFixed(3)}
               </span>
             </div>
@@ -915,17 +904,16 @@ function showComparison(rate, api) {
     const diff = m.price - currentPrice;
     const isBest = i === 0;
     return `
-      <div class="flex justify-between items-center p-3 rounded-lg ${isBest ? 'bg-green-50 border border-green-200' : 'bg-gray-50'
-      }">
+      <div class="fila-comparativa ${isBest ? 'fila-comparativa--ganadora' : 'fila-comparativa--normal'}">
         <div class="flex items-center gap-2">
           <span>${m.icon}</span>
           <span class="font-medium">${m.name}</span>
-          ${isBest ? '<span class="text-xs bg-green-500 text-white px-2 py-1 rounded-full ml-2">MEJOR</span>' : ''}
+          ${isBest ? '<span class="badge-mejor">MEJOR</span>' : ''}
         </div>
         <div class="text-right">
-          <div class="font-bold ${isBest ? 'text-green-600' : 'text-gray-700'
-      }">${sym}${m.price.toFixed(2)} ${currentCurrency}</div>
-          ${diff > 0 ? `<div class="text-xs text-red-500">+${sym}${diff.toFixed(2)}</div>` : ''}
+          <div class="font-bold ${isBest ? 'texto-valor-exito' : 'texto-label'
+    }">${sym}${m.price.toFixed(2)} ${currentCurrency}</div>
+          ${diff > 0 ? `<div class="text-xs texto-peligro">+${sym}${diff.toFixed(2)}</div>` : ''}
         </div>
       </div>`;
   }).join('');

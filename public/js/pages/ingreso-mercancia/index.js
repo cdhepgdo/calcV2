@@ -81,20 +81,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modo === 'ingreso') {
             seccionIngreso.classList.remove('hidden');
             seccionSalida.classList.add('hidden');
-            btnIngreso.classList.add('bg-indigo-600', 'shadow');
+            btnIngreso.classList.add('btn-modo-activo', 'shadow');
             btnIngreso.classList.remove('opacity-50');
-            btnSalida.classList.remove('bg-indigo-600', 'shadow');
+            btnSalida.classList.remove('btn-modo-activo', 'shadow');
             btnSalida.classList.add('opacity-50');
             titulo.innerHTML = '📦 <span>Nota de Ingreso de Mercancía</span>';
-            subtitulo.innerHTML = 'Ingresa los equipos fila por fila. Usa <kbd class="bg-indigo-900 text-indigo-200 rounded px-1 py-0.5 text-xs">Tab</kbd> para avanzar y <kbd class="bg-indigo-900 text-indigo-200 rounded px-1 py-0.5 text-xs">Enter</kbd> al final de fila para agregar otra.';
+            subtitulo.innerHTML = 'Ingresa los equipos fila por fila. Usa <kbd class="kbd-atajo">Tab</kbd> para avanzar y <kbd class="kbd-atajo">Enter</kbd> al final de fila para agregar otra.';
             
             if (panelResumen) panelResumen.classList.remove('hidden');
         } else {
             seccionIngreso.classList.add('hidden');
             seccionSalida.classList.remove('hidden');
-            btnSalida.classList.add('bg-indigo-600', 'shadow');
+            btnSalida.classList.add('btn-modo-activo', 'shadow');
             btnSalida.classList.remove('opacity-50');
-            btnIngreso.classList.remove('bg-indigo-600', 'shadow');
+            btnIngreso.classList.remove('btn-modo-activo', 'shadow');
             btnIngreso.classList.add('opacity-50');
             titulo.innerHTML = '📤 <span>Nota de Salida de Equipos</span>';
             subtitulo.textContent = 'Selecciona equipos disponibles para dar de baja o trasladar.';

@@ -8,16 +8,16 @@
 }
 
 body {
-    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+    background: rgb(var(--surface));
     min-height: 100vh;
 }
 
 /* ── Glass morphism ── */
 .glass {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--glass-bg);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border);
 }
 
 .glass-dark {
@@ -26,13 +26,18 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
+.dark .glass-dark {
+    background: rgba(0, 0, 0, 0.35);
+    border-color: rgba(255, 255, 255, 0.10);
+}
+
 /* ── Tabla de ingreso ── */
 #tablaBody tr {
     transition: background 0.15s;
 }
 
 #tablaBody tr:hover {
-    background: rgba(99, 102, 241, 0.08);
+    background: var(--hover-bg);
 }
 
 #tablaBody tr.fila-nueva {
@@ -44,6 +49,7 @@ body {
         opacity: 0;
         transform: translateY(-6px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -52,10 +58,10 @@ body {
 
 /* ── Inputs de celda ── */
 .cell-input {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
     border-radius: 6px;
-    color: #e2e8f0;
+    color: rgb(var(--text-primary));
     padding: 5px 8px;
     font-size: 13px;
     width: 100%;
@@ -64,12 +70,12 @@ body {
 }
 
 .cell-input:focus {
-    border-color: #6366f1;
-    background: rgba(99, 102, 241, 0.12);
+    border-color: rgb(var(--accent));
+    background: var(--hover-bg);
 }
 
 .cell-input::placeholder {
-    color: rgba(255, 255, 255, 0.25);
+    color: var(--input-placeholder);
 }
 
 /* ── Estados IMEI ── */
@@ -104,23 +110,23 @@ body {
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #94a3b8;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: rgb(var(--text-muted));
     transition: all 0.15s;
     white-space: nowrap;
     user-select: none;
 }
 
 .gb-chip:hover {
-    background: rgba(99, 102, 241, 0.25);
-    color: #c7d2fe;
+    background: var(--hover-bg);
+    color: rgb(var(--accent-text));
 }
 
 .gb-chip.active {
-    background: #4f46e5;
-    border-color: #6366f1;
-    color: #fff;
+    background: rgb(var(--accent));
+    border-color: rgb(var(--accent-hover));
+    color: rgb(var(--text-inverse));
 }
 
 /* ── Panel de autocompletado ── */
@@ -128,10 +134,10 @@ body {
     position: fixed;
     display: none;
     z-index: 99999;
-    background: #1e1b4b;
+    background: rgb(var(--surface-elevated));
     border: 1px solid rgba(99, 102, 241, 0.4);
     border-radius: 8px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--shadow-elevated);
     min-width: 160px;
     max-width: 320px;
     max-height: 240px;
@@ -151,7 +157,7 @@ body {
 .autocomplete-panel li {
     padding: 8px 12px;
     font-size: 13px;
-    color: #c7d2fe;
+    color: rgb(var(--accent-text));
     cursor: pointer;
     transition: background 0.1s;
     white-space: nowrap;
@@ -160,7 +166,7 @@ body {
 .autocomplete-panel li:hover,
 .autocomplete-panel li.selected {
     background: rgba(99, 102, 241, 0.35);
-    color: #fff;
+    color: rgb(var(--text-inverse));
 }
 
 /* ── Caja fields ── */
@@ -174,9 +180,9 @@ body {
 
 /* ── Badges y botones ── */
 .sede-badge {
-    background: rgba(99, 102, 241, 0.2);
+    background: rgb(var(--accent-soft));
     border: 1px solid rgba(99, 102, 241, 0.4);
-    color: #a5b4fc;
+    color: rgb(var(--accent-text));
     font-size: 12px;
     font-weight: 600;
     padding: 4px 12px;
@@ -248,6 +254,18 @@ body {
     color: #fff;
 }
 
+/* ── Botón "Confirmar Salida" — color distinto por modo (semáforo) ── */
+#btnConfirmarSalida {
+    background: linear-gradient(135deg,
+            rgb(var(--salida-btn)) 0%,
+            rgb(var(--salida-btn-hover)) 100%);
+    transition: filter 0.2s, transform 0.1s;
+}
+
+#btnConfirmarSalida:hover {
+    filter: brightness(1.1);
+}
+
 /* ── Loading overlay ── */
 #loadingOverlay {
     display: none;
@@ -302,9 +320,12 @@ body {
 }
 
 @keyframes pulse {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 1;
     }
+
     50% {
         opacity: 0.5;
     }
@@ -323,8 +344,8 @@ body {
 
 /* ── Cards modo salida ── */
 .equipo-sugerencia {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
     border-radius: 8px;
     padding: 8px;
     cursor: pointer;
@@ -332,13 +353,13 @@ body {
 }
 
 .equipo-sugerencia:hover {
-    background: rgba(99, 102, 241, 0.15);
+    background: var(--hover-bg);
     border-color: rgba(99, 102, 241, 0.3);
     transform: translateX(4px);
 }
 
 .equipo-seleccionado {
-    background: rgba(239, 68, 68, 0.1);
+    background: rgb(var(--danger-soft));
     border: 1px solid rgba(239, 68, 68, 0.3);
     border-radius: 8px;
     padding: 10px;
@@ -350,16 +371,81 @@ body {
     body * {
         visibility: hidden;
     }
-    #printArea, #printArea * {
+
+    #printArea,
+    #printArea * {
         visibility: visible;
     }
+
     #printArea {
         position: absolute;
         left: 0;
         top: 0;
         width: 100%;
     }
-    nav, #toast, #loadingOverlay {
+
+    nav,
+    #toast,
+    #loadingOverlay {
         display: none !important;
     }
+}
+
+/* ── Títulos de los paneles de resumen ── */
+.resumen-titulo {
+    color: rgb(var(--danger-text));
+    transition: color 200ms ease;
+}
+
+.resumen-titulo--lote {
+    color: rgb(var(--accent-text));
+}
+
+/* ── Botón eliminar (X) — usado en tabla de ingreso y lista de salida ── */
+.btn-eliminar,
+.btn-eliminar-item {
+    color: rgb(var(--text-muted));
+    transition: color 0.15s;
+}
+
+.btn-eliminar:hover,
+.btn-eliminar-item:hover {
+    color: rgb(var(--danger));
+}
+
+/* ── Estados textuales de equipos en la lista de salida ── */
+.equipo-estado--seleccionado {
+    color: rgb(var(--success));
+}
+
+.equipo-estado--disponible {
+    color: rgb(var(--accent-text));
+}
+
+/* ── Bloque de ayuda (kbd) ── */
+.kbd-atajo {
+    background: rgb(var(--accent-soft));
+    color: rgb(var(--accent-text));
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 0.75rem;
+}
+
+/* ── Botón de modo (Ingreso / Salida) activo ── */
+.btn-modo-activo {
+    background: rgb(var(--accent));
+    color: rgb(var(--text-inverse));
+}
+
+/* ── Utilidades semánticas de texto (para JS que genera HTML dinámico) ── */
+.texto-vacio {
+    color: rgb(var(--text-muted));
+}
+
+.texto-secundario {
+    color: rgb(var(--text-secondary));
+}
+
+.texto-inverso {
+    color: rgb(var(--text-inverse));
 }

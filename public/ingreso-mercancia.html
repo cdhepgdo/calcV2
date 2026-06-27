@@ -7,10 +7,34 @@
     <title>📦 Ingreso de Mercancía — Inventario</title>
     <meta name="description"
         content="Registra el ingreso masivo de equipos al inventario de tu sede de forma rápida y eficiente.">
+
+    <!-- 1. Anti-FOUC: aplica .dark antes de que Tailwind parsee -->
+    <script src="js/theme-init.js"></script>
+
+    <!-- 2. Tailwind (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- 3. Config inline: darkMode por clase — DEBE ir después del CDN -->
+    <script>
+        window.tailwind = window.tailwind || {};
+        window.tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+                }
+            }
+        };
+    </script>
+
+    <!-- 4. Tokens y overrides de tema (ganan especificidad sobre Tailwind) -->
+    <link rel="stylesheet" href="css/theme.css">
+
+    <!-- 5. Estilos específicos de esta página (al final) -->
+    <link rel="stylesheet" href="./css/ingreso-mercancia.css">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./css/ingreso-mercancia.css">
 </head>
 
 <body>
@@ -18,7 +42,7 @@
     <div id="loadingOverlay">
         <div class="text-center">
             <div class="spinner mx-auto mb-3"></div>
-            <p class="text-indigo-300 font-medium text-sm">Guardando lote...</p>
+            <p class="text-themed-secondary font-medium text-sm">Guardando lote...</p>
         </div>
     </div>
 
@@ -33,60 +57,36 @@
         </div>
     </div>
 
-    <nav
-        class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-700 text-white shadow-lg">
-        <div class="flex gap-2 flex-wrap" id="menuOptions">
-            <a href="cierree.html" class="px-3 py-2 rounded hover:bg-blue-900 transition text-sm">🏠 Ventas</a>
-            <a href="lista.html" class="px-3 py-2 rounded hover:bg-blue-900 transition text-sm">LISTADO PRECIOS</a>
-            <a href="intercambio.html" class="px-3 py-2 rounded hover:bg-blue-900 transition text-sm">Cálculo
-                Trading</a>
-            <a href="index.html" class="px-3 py-2 rounded hover:bg-blue-900 transition text-sm">Principal</a>
-            <a href="registro.html" class="px-3 py-2 rounded hover:bg-blue-900 transition text-sm">📊 Registro</a>
-            <a href="ingreso-mercancia.html" class="px-3 py-2 rounded bg-indigo-600 font-bold text-sm">📦 Ingreso</a>
-            <button id="btnLogout"
-                class="px-3 py-2 rounded bg-red-600 hover:bg-red-700 font-bold transition ml-2 text-sm">Cerrar
-                Sesión</button>
-        </div>
-        <button id="menuToggle" class="hidden text-2xl focus:outline-none relative z-50">☰</button>
-        <div id="floatingMenu"
-            class="hidden fixed bottom-20 right-6 bg-blue-700 text-white rounded-lg shadow-lg py-2 flex flex-col gap-1 z-40">
-            <a href="cierree.html" class="px-4 py-2 hover:bg-blue-900 rounded text-sm">🏠 Ventas</a>
-            <a href="lista.html" class="px-4 py-2 hover:bg-blue-900 rounded text-sm">LISTADO PRECIOS</a>
-            <a href="intercambio.html" class="px-4 py-2 hover:bg-blue-900 rounded text-sm">Cálculo Trading</a>
-            <a href="index.html" class="px-4 py-2 hover:bg-blue-900 rounded text-sm">Principal</a>
-            <a href="registro.html" class="px-4 py-2 hover:bg-blue-900 rounded text-sm">📊 Registro</a>
-            <a href="ingreso-mercancia.html" class="px-4 py-2 hover:bg-blue-900 rounded font-bold text-sm">📦
-                Ingreso</a>
-            <button id="btnLogoutMobile"
-                class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white font-bold transition rounded mt-2 text-sm">Cerrar
-                Sesión</button>
-        </div>
-    </nav>
-
-    <div class="h-14"></div>
+    <!-- Nav montada por js/components/nav.js (compartida con el resto de páginas) -->
+    <div id="appNav" data-active="ingreso"></div>
 
     <div id="appContent" class="max-w-screen-2xl mx-auto px-3 pb-10 pt-4">
         <!-- HEADER Y TOGGLE DE MODOS -->
         <div class="glass rounded-2xl p-5 mb-5 flex flex-col sm:flex-row sm:items-center gap-4">
             <div class="flex-1">
-                <h1 class="text-2xl font-bold text-white flex items-center gap-2" id="tituloModo">
+                <h1 class="text-2xl font-bold text-themed flex items-center gap-2" id="tituloModo">
                     📦 <span>Nota de Ingreso de Mercancía</span>
                 </h1>
-                <p class="text-indigo-300 text-sm mt-1" id="subtituloModo">Ingresa los equipos fila por fila. Usa <kbd
-                        class="bg-indigo-900 text-indigo-200 rounded px-1 py-0.5 text-xs">Tab</kbd> para avanzar y <kbd
-                        class="bg-indigo-900 text-indigo-200 rounded px-1 py-0.5 text-xs">Enter</kbd> al final de fila
+                <p class="text-themed-secondary text-sm mt-1" id="subtituloModo">Ingresa los equipos fila por fila. Usa <kbd
+                        class="kbd-atajo">Tab</kbd> para avanzar y <kbd
+                        class="kbd-atajo">Enter</kbd> al final de fila
                     para agregar otra.</p>
                 <div class="flex items-center gap-2 mt-3 bg-white/5 p-1 rounded-lg w-max">
-                    <button id="btnModoIngreso" class="px-4 py-1.5 rounded-md text-sm font-bold bg-indigo-600 text-white shadow transition">📦 Ingreso</button>
-                    <button id="btnModoSalida" class="px-4 py-1.5 rounded-md text-sm font-bold text-white opacity-50 hover:bg-white/10 transition">📤 Salida</button>
+                    <button id="btnModoIngreso"
+                        class="px-4 py-1.5 rounded-md text-sm font-bold bg-indigo-600 text-white shadow transition">📦
+                        Ingreso</button>
+                    <button id="btnModoSalida"
+                        class="px-4 py-1.5 rounded-md text-sm font-bold text-white opacity-50 hover:bg-white/10 transition">📤
+                        Salida</button>
                 </div>
             </div>
             <div class="flex flex-col items-end gap-3">
                 <div class="flex gap-3 items-center flex-wrap">
                     <span class="sede-badge" id="badgeSede">📍 Cargando sede...</span>
-                    <div class="text-indigo-300 text-sm font-medium" id="fechaHoy"></div>
+                    <div class="text-themed-secondary text-sm font-medium" id="fechaHoy"></div>
                 </div>
-                <button id="btnImprimirLote" class="text-white bg-slate-700 hover:bg-slate-600 font-medium py-2 px-4 rounded-lg text-sm transition flex items-center gap-2">
+                <button id="btnImprimirLote"
+                    class="btn-accion btn-accion--neutro text-sm flex items-center gap-2">
                     🖨️ Imprimir Nota
                 </button>
             </div>
@@ -97,19 +97,22 @@
         <!-- ========================================== -->
         <div id="seccionSalida" class="hidden">
             <div class="glass rounded-2xl p-5 mb-5">
-                <h2 class="text-indigo-300 text-xs font-bold uppercase tracking-wider mb-4">Información de Traslado</h2>
+                <h2 class="text-themed-secondary text-xs font-bold uppercase tracking-wider mb-4">Información de Traslado</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label class="text-slate-400 text-xs font-medium block mb-1">Destino (Sede o Cliente)</label>
-                        <input type="text" id="salidaDestino" placeholder="Ej: Sede Cumbayá" class="cell-input rounded-lg py-2 px-3 text-sm w-full">
+                        <label class="text-themed-muted text-xs font-medium block mb-1">Destino (Sede o Cliente)</label>
+                        <input type="text" id="salidaDestino" placeholder="Ej: Sede Cumbayá"
+                            class="cell-input rounded-lg py-2 px-3 text-sm w-full">
                     </div>
                     <div>
-                        <label class="text-slate-400 text-xs font-medium block mb-1">Persona Responsable</label>
-                        <input type="text" id="salidaResponsable" placeholder="Ej: Juan Pérez" class="cell-input rounded-lg py-2 px-3 text-sm w-full">
+                        <label class="text-themed-muted text-xs font-medium block mb-1">Persona Responsable</label>
+                        <input type="text" id="salidaResponsable" placeholder="Ej: Juan Pérez"
+                            class="cell-input rounded-lg py-2 px-3 text-sm w-full">
                     </div>
                     <div>
-                        <label class="text-slate-400 text-xs font-medium block mb-1">Notas / Detalles del Envío</label>
-                        <input type="text" id="salidaNotas" placeholder="Ej: Traslado para reparación" class="cell-input rounded-lg py-2 px-3 text-sm w-full">
+                        <label class="text-themed-muted text-xs font-medium block mb-1">Notas / Detalles del Envío</label>
+                        <input type="text" id="salidaNotas" placeholder="Ej: Traslado para reparación"
+                            class="cell-input rounded-lg py-2 px-3 text-sm w-full">
                     </div>
                 </div>
             </div>
@@ -120,13 +123,17 @@
                     <div class="flex gap-4 flex-col lg:flex-row">
                         <div class="lg:w-2/5 flex flex-col gap-4">
                             <div class="glass rounded-2xl p-5">
-                                <label class="text-indigo-300 text-xs font-bold uppercase tracking-wider mb-3 block">Buscar Equipo en Stock</label>
-                                
+                                <label
+                                    class="text-themed-secondary text-xs font-bold uppercase tracking-wider mb-3 block">Buscar
+                                    Equipo en Stock</label>
+
                                 <!-- Filtros de fecha mejorados -->
                                 <div class="mb-3">
-                                    <label class="text-slate-400 text-xs font-medium block mb-2">Mostrar equipos ingresados:</label>
+                                    <label class="text-themed-muted text-xs font-medium block mb-2">Mostrar equipos
+                                        ingresados:</label>
                                     <div class="flex gap-2 mb-2">
-                                        <select id="salidaFiltroFecha" class="cell-input rounded-lg py-2 px-3 text-sm flex-1">
+                                        <select id="salidaFiltroFecha"
+                                            class="cell-input rounded-lg py-2 px-3 text-sm flex-1">
                                             <option value="todos">Todos los disponibles</option>
                                             <option value="ultimos7">Últimos 7 días</option>
                                             <option value="ultimos30">Últimos 30 días</option>
@@ -135,39 +142,47 @@
                                         </select>
                                     </div>
                                     <div id="diasPersonalizadosContainer" class="hidden">
-                                        <label class="text-slate-400 text-xs font-medium block mb-1">Cantidad de días atrás:</label>
-                                        <input type="number" id="diasPersonalizados" 
-                                            class="cell-input rounded-lg py-2 px-3 text-sm w-full" 
-                                            placeholder="Ej: 15" 
-                                            min="1" 
-                                            max="365">
+                                        <label class="text-themed-muted text-xs font-medium block mb-1">Cantidad de días
+                                            atrás:</label>
+                                        <input type="number" id="diasPersonalizados"
+                                            class="cell-input rounded-lg py-2 px-3 text-sm w-full" placeholder="Ej: 15"
+                                            min="1" max="365">
                                     </div>
                                 </div>
-                                
+
                                 <!-- Búsqueda general (funciona con IMEI también) -->
-                                <label class="text-slate-400 text-xs font-medium block mb-2">Buscar por modelo, color o IMEI:</label>
-                                <input type="text" id="salidaBuscadorInput" placeholder="Buscar por modelo, color o IMEI..." 
-                                    class="cell-input rounded-lg py-3 px-4 text-sm w-full border border-indigo-500/30 bg-indigo-900/20 mb-3" autocomplete="off">
-                                <div id="salidaSugerencias" class="flex flex-col gap-1 max-h-96 overflow-y-auto pr-2"></div>
+                                <label class="text-themed-muted text-xs font-medium block mb-2">Buscar por modelo, color o
+                                    IMEI:</label>
+                                <input type="text" id="salidaBuscadorInput"
+                                    placeholder="Buscar por modelo, color o IMEI..."
+                                    class="cell-input rounded-lg py-3 px-4 text-sm w-full mb-3"
+                                    autocomplete="off">
+                                <div id="salidaSugerencias" class="flex flex-col gap-1 max-h-96 overflow-y-auto pr-2">
+                                </div>
                             </div>
                         </div>
 
                         <!-- Lista de seleccionados -->
                         <div class="flex-1">
                             <div class="glass rounded-2xl p-5 h-full flex flex-col">
-                                <h2 class="text-indigo-300 text-xs font-bold uppercase tracking-wider mb-4">Equipos Seleccionados para Salida</h2>
-                                
-                                <div id="listaSalidaSeleccionados" class="flex flex-col gap-2 flex-1 mb-6 max-h-96 overflow-y-auto pr-2">
-                                    <p class="text-slate-500 text-xs text-center italic py-4">Sin equipos seleccionados</p>
+                                <h2 class="text-themed-secondary text-xs font-bold uppercase tracking-wider mb-4">Equipos
+                                    Seleccionados para Salida</h2>
+
+                                <div id="listaSalidaSeleccionados"
+                                    class="flex flex-col gap-2 flex-1 mb-6 max-h-96 overflow-y-auto pr-2">
+                                    <p class="text-themed-muted text-xs text-center italic py-4">Sin equipos seleccionados
+                                    </p>
                                 </div>
 
                                 <div class="flex flex-col gap-3 mt-auto pt-4 border-t border-white/10">
-                                    <label class="flex items-center gap-2 cursor-pointer text-slate-300 text-sm">
-                                        <input type="checkbox" id="chkRegistrarMovimientoSalida" class="rounded accent-indigo-500 w-4 h-4" checked>
+                                    <label class="flex items-center gap-2 cursor-pointer text-themed-secondary text-sm">
+                                        <input type="checkbox" id="chkRegistrarMovimientoSalida"
+                                            class="rounded accent-indigo-500 w-4 h-4" checked>
                                         Registrar movimiento en la caja del día (Salida Equipo)
                                     </label>
-                                    
-                                    <button id="btnConfirmarSalida" class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold py-3.5 px-6 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg transition">
+
+                                    <button id="btnConfirmarSalida"
+                                        class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold py-3.5 px-6 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg transition">
                                         📤 Confirmar Salida y Dar de Baja
                                     </button>
                                 </div>
@@ -179,13 +194,14 @@
                 <!-- Panel Resumen para Salida -->
                 <div class="lg:w-64 shrink-0">
                     <div class="glass-dark rounded-2xl p-4">
-                        <h3 class="text-red-300 text-xs font-bold uppercase tracking-wider mb-3">Resumen de Salida</h3>
+                        <h3 class="resumen-titulo text-xs font-bold uppercase tracking-wider mb-3">Resumen de Salida
+                        </h3>
                         <div class="text-center mb-3">
-                            <p class="text-3xl font-bold text-white" id="totalEquiposSalidaResumen">0</p>
-                            <p class="text-slate-400 text-xs">equipos para salida</p>
+                            <p class="text-3xl font-bold text-themed" id="totalEquiposSalidaResumen">0</p>
+                            <p class="text-themed-muted text-xs">equipos para salida</p>
                         </div>
                         <div class="border-t border-white/10 pt-3 space-y-1.5" id="listaResumenSalida">
-                            <p class="text-slate-500 text-xs text-center italic">Sin equipos seleccionados...</p>
+                            <p class="text-themed-muted text-xs text-center italic">Sin equipos seleccionados...</p>
                         </div>
                     </div>
                 </div>
@@ -197,96 +213,99 @@
         <!-- ========================================== -->
         <div id="seccionIngreso" class="space-y-4">
             <div class="glass rounded-2xl p-5">
-            <h2 class="text-indigo-300 text-xs font-bold uppercase tracking-wider mb-3">Información del Lote</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="text-slate-400 text-xs font-medium block mb-1">Origen / Proveedor</label>
-                    <input type="text" id="origenLote" placeholder="Ej: USA Import, Panamá, Trade-in..."
-                        class="cell-input rounded-lg py-2 px-3 text-sm w-full">
-                </div>
-                <div>
-                    <label class="text-slate-400 text-xs font-medium block mb-1">Notas del lote (opcional)</label>
-                    <input type="text" id="notasLote" placeholder="Ej: Lote de nov, mercancía revisada..."
-                        class="cell-input rounded-lg py-2 px-3 text-sm w-full">
+                <h2 class="text-themed-secondary text-xs font-bold uppercase tracking-wider mb-3">Información del Lote</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-themed-muted text-xs font-medium block mb-1">Origen / Proveedor</label>
+                        <input type="text" id="origenLote" placeholder="Ej: USA Import, Panamá, Trade-in..."
+                            class="cell-input rounded-lg py-2 px-3 text-sm w-full">
+                    </div>
+                    <div>
+                        <label class="text-themed-muted text-xs font-medium block mb-1">Notas del lote (opcional)</label>
+                        <input type="text" id="notasLote" placeholder="Ej: Lote de nov, mercancía revisada..."
+                            class="cell-input rounded-lg py-2 px-3 text-sm w-full">
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="flex gap-4 flex-col xl:flex-row">
-            <div class="flex-1 min-w-0">
-                <div class="glass rounded-2xl overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm" style="min-width:900px">
-                            <thead>
-                                <tr class="border-b border-white/10">
-                                    <th class="text-left py-3 px-3 text-indigo-300 font-semibold text-xs w-8">#</th>
-                                    <th class="text-left py-3 px-2 text-indigo-300 font-semibold text-xs"
-                                        style="min-width:130px">Modelo</th>
-                                    <th class="text-left py-3 px-2 text-indigo-300 font-semibold text-xs"
-                                        style="min-width:180px">GB</th>
-                                    <th class="text-left py-3 px-2 text-indigo-300 font-semibold text-xs"
-                                        style="min-width:130px">Color</th>
-                                    <th class="text-left py-3 px-2 text-indigo-300 font-semibold text-xs w-16">Bat%</th>
-                                    <th class="text-left py-3 px-2 text-indigo-300 font-semibold text-xs"
-                                        style="min-width:165px">IMEI</th>
-                                    <th class="text-left py-3 px-2 text-indigo-300 font-semibold text-xs"
-                                        style="min-width:240px">Caja / Detalles</th>
-                                    <th class="py-3 px-2 w-8"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="tablaBody"></tbody>
-                        </table>
+            <div class="flex gap-4 flex-col xl:flex-row">
+                <div class="flex-1 min-w-0">
+                    <div class="glass rounded-2xl overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm" style="min-width:900px">
+                                <thead>
+                                    <tr class="border-b border-white/10">
+                                        <th class="text-left py-3 px-3 text-themed-secondary font-semibold text-xs w-8">#</th>
+                                        <th class="text-left py-3 px-2 text-themed-secondary font-semibold text-xs"
+                                            style="min-width:130px">Modelo</th>
+                                        <th class="text-left py-3 px-2 text-themed-secondary font-semibold text-xs"
+                                            style="min-width:180px">GB</th>
+                                        <th class="text-left py-3 px-2 text-themed-secondary font-semibold text-xs"
+                                            style="min-width:130px">Color</th>
+                                        <th class="text-left py-3 px-2 text-themed-secondary font-semibold text-xs w-16">Bat%
+                                        </th>
+                                        <th class="text-left py-3 px-2 text-themed-secondary font-semibold text-xs"
+                                            style="min-width:165px">IMEI</th>
+                                        <th class="text-left py-3 px-2 text-themed-secondary font-semibold text-xs"
+                                            style="min-width:240px">Caja / Detalles</th>
+                                        <th class="py-3 px-2 w-8"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaBody"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="p-3 border-t border-white/10 flex items-center justify-between gap-3 flex-wrap">
+                            <button id="btnAgregarFila"
+                                class="flex items-center gap-2 text-themed-secondary hover:text-themed text-sm font-medium transition px-3 py-1.5 rounded-lg hover:bg-input-bg">
+                                <span class="text-lg leading-none">+</span> Agregar equipo
+                            </button>
+                            <span class="text-themed-muted text-xs">
+                                <span id="contadorFilas" class="text-themed font-bold">0</span> equipos válidos
+                            </span>
+                        </div>
                     </div>
 
-                    <div class="p-3 border-t border-white/10 flex items-center justify-between gap-3 flex-wrap">
-                        <button id="btnAgregarFila"
-                            class="flex items-center gap-2 text-indigo-300 hover:text-white text-sm font-medium transition px-3 py-1.5 rounded-lg hover:bg-indigo-700/40">
-                            <span class="text-lg leading-none">+</span> Agregar equipo
-                        </button>
-                        <span class="text-slate-400 text-xs">
-                            <span id="contadorFilas" class="text-indigo-300 font-bold">0</span> equipos válidos
-                        </span>
+                    <div class="mt-4 flex flex-col gap-3">
+                        <div class="flex items-center">
+                            <label class="flex items-center gap-2 cursor-pointer text-themed-secondary text-sm ml-1">
+                                <input type="checkbox" id="chkRegistrarMovimiento"
+                                    class="rounded accent-indigo-500 w-4 h-4" checked>
+                                Registrar movimiento en la caja del día (Ingreso Equipo)
+                            </label>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button id="btnGuardarLote"
+                                class="btn-success flex-1 text-white font-bold py-3.5 px-6 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg">
+                                💾 Guardar Todo al Inventario
+                            </button>
+                            <button id="btnLimpiarTodo"
+                                class="text-themed-muted hover:text-themed border border-themed hover:border-themed font-medium py-3.5 px-6 rounded-xl text-sm transition">
+                                🗑️ Limpiar todo
+                            </button>
+                        </div>
                     </div>
-                </div>
-
-                <div class="mt-4 flex flex-col gap-3">
-                    <div class="flex items-center">
-                        <label class="flex items-center gap-2 cursor-pointer text-slate-300 text-sm ml-1">
-                            <input type="checkbox" id="chkRegistrarMovimiento" class="rounded accent-indigo-500 w-4 h-4" checked>
-                            Registrar movimiento en la caja del día (Ingreso Equipo)
-                        </label>
-                    </div>
-                    <div class="flex flex-col sm:flex-row gap-3">
-                    <button id="btnGuardarLote"
-                        class="btn-success flex-1 text-white font-bold py-3.5 px-6 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg">
-                        💾 Guardar Todo al Inventario
-                    </button>
-                    <button id="btnLimpiarTodo"
-                        class="text-slate-400 hover:text-white border border-slate-600 hover:border-slate-400 font-medium py-3.5 px-6 rounded-xl text-sm transition">
-                        🗑️ Limpiar todo
-                    </button>
                 </div>
             </div>
-        </div>
-        </div>
-        <!-- FIN MODO INGRESO -->
-                <div id="panelResumen" class="glass-dark rounded-2xl p-4">
-                    <h3 class="text-indigo-300 text-xs font-bold uppercase tracking-wider mb-3" id="tituloResumen">Resumen del Lote</h3>
-                    <div class="text-center mb-3">
-                        <p class="text-3xl font-bold text-white" id="totalEquiposResumen">0</p>
-                        <p class="text-slate-400 text-xs" id="subtituloResumen">equipos en este lote</p>
-                    </div>
-                    <div class="border-t border-white/10 pt-3 space-y-1.5" id="listaResumen">
-                        <p class="text-slate-500 text-xs text-center italic">Sin equipos aún...</p>
-                    </div>
+            <!-- FIN MODO INGRESO -->
+            <div id="panelResumen" class="glass-dark rounded-2xl p-4">
+                <h3 class="resumen-titulo resumen-titulo--lote text-xs font-bold uppercase tracking-wider mb-3"
+                    id="tituloResumen">Resumen del Lote</h3>
+                <div class="text-center mb-3">
+                    <p class="text-3xl font-bold text-themed" id="totalEquiposResumen">0</p>
+                    <p class="text-themed-muted text-xs" id="subtituloResumen">equipos en este lote</p>
+                </div>
+                <div class="border-t border-white/10 pt-3 space-y-1.5" id="listaResumen">
+                    <p class="text-themed-muted text-xs text-center italic">Sin equipos aún...</p>
                 </div>
             </div>
         </div>
     </div>
+    </div>
 
     <template id="filaTpl">
         <tr class="fila-nueva border-b border-white/5">
-            <td class="py-2 px-3 text-slate-500 text-xs font-mono num-col"></td>
+            <td class="py-2 px-3 text-themed-muted text-xs font-mono num-col"></td>
             <td class="py-2 px-2">
                 <input type="text" class="cell-input campo-modelo" placeholder="13 Pro" autocomplete="off"
                     data-campo="modelo">
@@ -321,7 +340,7 @@
                 <div class="space-y-1.5">
                     <div class="flex items-center gap-2">
                         <label
-                            class="flex items-center gap-1.5 cursor-pointer text-slate-400 text-xs whitespace-nowrap">
+                            class="flex items-center gap-1.5 cursor-pointer text-themed-muted text-xs whitespace-nowrap">
                             <input type="checkbox" class="campo-caja rounded accent-indigo-500" data-campo="caja">
                             <span>📦 Caja</span>
                         </label>
@@ -345,7 +364,26 @@
     </template>
 
     <script type="module" src="./js/pages/ingreso-mercancia/index.js"></script>
-    <!-- �rea de impresi�n oculta -->
+
+    <!-- Montar nav + tema. Import dinámico para mantener page-level assembly -->
+    <script type="module">
+        import { mountNav } from './js/components/nav.js';
+        import { initTheme, onThemeChange } from './js/theme.js';
+        import { mountThemeToggle } from './js/components/themeToggle.js';
+
+        initTheme();
+        mountNav('ingreso');
+        mountThemeToggle();
+
+        // Sincronizar estados sensibles al tema si los agregas después
+        onThemeChange((mode) => {
+            // hook opcional para debug; lo dejamos silencioso en producción
+            // console.debug('[ingreso] theme ->', mode);
+        });
+    </script>
+
+    <!-- Área de impresión oculta -->
     <div id="printArea" style="display: none;"></div>
 </body>
+
 </html>

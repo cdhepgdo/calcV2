@@ -1,0 +1,107 @@
+/* ============================================================
+   lista.css
+   Estilos para la página de Lista de Precios en Bs
+   Todos los colores usan tokens de theme.css — nunca hardcoded.
+   ============================================================ */
+
+body {
+  background: rgb(var(--surface));
+  font-family: 'Inter', system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+/* ── Botones de acción (Imprimir / Descargar / Volver) ── */
+.btn-Accion {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgb(var(--accent));
+  color: rgb(var(--text-inverse));
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-Accion:hover {
+  background: rgb(var(--accent-hover));
+  transform: translateY(-1px);
+}
+
+.btn-Accion:active {
+  transform: translateY(0);
+}
+
+/* ── Tabla de precios ── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 auto;
+}
+
+th,
+td {
+  border: 1px solid rgb(var(--border));
+  padding: 8px;
+  text-align: left;
+  color: rgb(var(--text-primary));
+}
+
+th {
+  background: rgb(var(--surface-muted));
+  color: rgb(var(--text-secondary));
+  font-weight: 600;
+}
+
+tbody tr:nth-child(even) {
+  background: rgb(var(--surface-muted));
+}
+
+tbody tr:hover {
+  background: var(--hover-bg);
+}
+
+/* ── Precio destacado en Bolívares (color semántico: dinero) ── */
+.precio-bs {
+  font-weight: 700;
+  color: rgb(var(--success-text));
+}
+
+/* ── Estilos de impresión (sin nav, sin botones) ── */
+@media print {
+  html, html.dark {
+    color-scheme: light !important;
+    background: white !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Esconder nav, botones y elementos no imprimibles */
+  #appNav,
+  #btnImprimir,
+  #btnDescargar,
+  .btn-Accion {
+    display: none !important;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+  }
+
+  th,
+  td {
+    border: 1px solid #000 !important;
+    padding: 6px;
+    color: black !important;
+    background: white !important;
+  }
+}

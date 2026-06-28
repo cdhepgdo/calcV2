@@ -9,32 +9,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="js/theme-init.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      // Tailwind config — must run AFTER the CDN script loads.
-      // Using inline here (not external file) to guarantee it executes immediately.
-      window.tailwind = window.tailwind || {};
-      window.tailwind.config = {
-        darkMode: 'class',
-        theme: { extend: {
-          fontFamily: { sans: ['Inter','system-ui','sans-serif'] }
-        } }
-      };
-    </script>
+    <link rel="stylesheet" href="css/tailwind-output.css">
     <link rel="stylesheet" href="css/theme.css">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
-<body class="bg-slate-50 dark:bg-slate-900 min-h-screen p-4 transition-colors">
+<body class="surface-base-bg min-h-screen p-4 transition-colors">
 
     <!-- Nav (injected by mountNav) -->
     <div id="appNav" data-active="cierre"></div>
 
     <div class="max-w-6xl mx-auto">
         <!-- Header -->
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 mb-6 border border-slate-200 dark:border-slate-700">
-            <h1 class="text-3xl font-bold text-gray-800 dark:text-slate-100 text-center mb-2">📱 Sistema de Ventas iPhone</h1>
-            <p class="text-gray-600 dark:text-slate-300 text-center">Versión Refactorizada - <span id="fecha-actual"></span></p>
+        <div class="rounded-xl shadow-lg p-6 mb-6 border surface-card border-themed">
+            <h1 class="text-3xl font-bold text-center mb-2 text-themed">📱 Sistema de Ventas iPhone</h1>
+            <p class="text-center text-themed-secondary">Versión Refactorizada - <span id="fecha-actual"></span></p>
             <p class="text-sm text-center text-blue-600 mt-2">✨ Arquitectura modular con ES6 Modules</p>
         </div>
 
@@ -59,11 +48,11 @@
 
 
         <!-- Formulario de Venta -->
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 mb-6 border border-slate-200 dark:border-slate-700">
+        <div class="rounded-xl shadow-lg p-6 mb-6 border surface-card border-themed">
             <form id="ventaForm" class="space-y-6">
                 <!-- Tipo de Venta -->
                 <div class="border-b pb-6">
-                    <h2 class="text-xl font-semibold text-gray-800 dark:text-slate-100 mb-4">🛒 Tipo de Venta</h2>
+                    <h2 class="text-xl font-semibold mb-4 text-themed">🛒 Tipo de Venta</h2>
                     <div class="flex items-center space-x-6">
                         <label class="flex items-center">
                             <input type="radio" name="tipoVenta" value="completa" checked class="mr-2">
@@ -83,20 +72,20 @@
 
                 <!-- Datos del Cliente -->
                 <div id="datosClienteSection" class="border-b pb-6">
-                    <h2 class="text-xl font-semibold text-gray-800 dark:text-slate-100 mb-4">👤 Datos del Cliente</h2>
+                    <h2 class="text-xl font-semibold mb-4 text-themed">👤 Datos del Cliente</h2>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Nombre y Apellido *</label>
+                            <label class="block text-sm font-medium mb-2 text-themed-secondary">Nombre y Apellido *</label>
                             <input type="text" id="clienteNombre" class="w-full p-3 border rounded-lg"
                                 placeholder="Nombre completo">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Cédula</label>
+                            <label class="block text-sm font-medium mb-2 text-themed-secondary">Cédula</label>
                             <input type="text" id="clienteCedula" class="w-full p-3 border rounded-lg"
                                 placeholder="V-12345678">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Teléfono</label>
+                            <label class="block text-sm font-medium mb-2 text-themed-secondary">Teléfono</label>
                             <input type="tel" id="clienteTelefono" class="w-full p-3 border rounded-lg"
                                 placeholder="0414-1234567">
                         </div>
@@ -139,9 +128,9 @@
                             <div class="relative">
                                 <input type="text" id="invBuscadorInput" placeholder="Modelo, color, gb o IMEI..."
                                     autocomplete="off"
-                                    class="w-full p-3 border-2 border-indigo-200 dark:border-indigo-700 rounded-lg focus:border-indigo-500 focus:outline-none bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-100">
+                                    class="w-full p-3 border-2 border-indigo-200 dark:border-indigo-700 rounded-lg focus:border-indigo-500 focus:outline-none surface-card text-themed">
                                 <ul id="invDropdown"
-                                    class="hidden absolute z-50 w-full bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-700 rounded-lg shadow-xl mt-1 max-h-64 overflow-y-auto">
+                                    class="hidden absolute z-50 w-full border border-indigo-200 dark:border-indigo-700 rounded-lg shadow-xl mt-1 max-h-64 overflow-y-auto surface-card">
                                 </ul>
                             </div>
                             <div id="invSugerencias" class="flex flex-col gap-1 mt-2 max-h-96 overflow-y-auto pr-1">
@@ -192,13 +181,13 @@
 
                 <!-- Detalles de Venta (Garantía y campos ocultos) -->
                 <div id="infoIphone" class="border-b pb-6 bg-blue-50 dark:bg-blue-900/30 rounded-xl p-6">
-                    <h2 class="text-xl font-semibold text-gray-800 dark:text-slate-100 mb-4">🛡️ Garantía del Equipo a Vender</h2>
+                    <h2 class="text-xl font-semibold mb-4 text-themed">🛡️ Garantía del Equipo a Vender</h2>
 
                     <div class="grid md:grid-cols-1 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Tiempo de Garantía</label>
+                            <label class="block text-sm font-medium mb-2 text-themed-secondary">Tiempo de Garantía</label>
                             <select id="equipoGarantia"
-                                class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></select>
+                                class="w-full p-3 border-themed rounded-lg focus:ring-2 focus:ring-blue-500 outline-none surface-card text-themed"></select>
                         </div>
                     </div>
 
@@ -220,7 +209,7 @@
                          ════════════════════════════════════════════════════════════════ -->
                     <div id="equiposVendidosAdicionalesWrapper" class="mt-4 hidden">
                         <div class="flex items-center justify-between mb-3">
-                            <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300">📱 Equipos adicionales vendidos
+                            <h3 class="text-sm font-semibold text-themed-secondary">📱 Equipos adicionales vendidos
                                 <span id="equiposAdicionalesCount" class="ml-2 text-xs text-blue-600">(0)</span>
                             </h3>
                             <button type="button" id="btnAddEquipoVendido"
@@ -242,10 +231,10 @@
 
                 <!-- Accesorios -->
                 <div class="border-b pb-6 bg-blue-50 dark:bg-blue-900/30 rounded-xl p-6" id="accesoriosSection">
-                    <h2 class="text-xl font-semibold text-gray-800 dark:text-slate-100 mb-4">🛡️ Accesorios</h2>
+                    <h2 class="text-xl font-semibold mb-4 text-themed">🛡️ Accesorios</h2>
                     <div class="grid md:grid-cols-4 gap-2">
                         <!-- Forro -->
-                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-themed">
                             <label class="flex items-center mb-3">
                                 <input type="checkbox" id="forro" class="mr-3">
                                 <span class="font-medium">Forro</span>
@@ -265,7 +254,7 @@
                         </div>
 
                         <!-- Cargador -->
-                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-themed">
                             <label class="flex items-center mb-3">
                                 <input type="checkbox" id="cargador" class="mr-3">
                                 <span class="font-medium">Cargador</span>
@@ -277,7 +266,7 @@
                         </div>
 
                         <!-- Vidrio -->
-                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-themed">
                             <label class="flex items-center mb-3">
                                 <input type="checkbox" id="vidrio" class="mr-3">
                                 <span class="font-medium">Vidrio</span>
@@ -297,7 +286,7 @@
                         </div>
 
                         <!-- Protector Cámara -->
-                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-themed">
                             <label class="flex items-center mb-3">
                                 <input type="checkbox" id="protectorCamara" class="mr-3">
                                 <span class="font-medium">Protector Cámara</span>
@@ -309,7 +298,7 @@
                         </div>
 
                         <!-- Cubo -->
-                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-themed">
                             <label class="flex items-center mb-3">
                                 <input type="checkbox" id="cubo" class="mr-3">
                                 <span class="font-medium">Cubo</span>
@@ -321,7 +310,7 @@
                         </div>
 
                         <!-- Cable Lightning -->
-                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-themed">
                             <label class="flex items-center mb-3">
                                 <input type="checkbox" id="cableLightning" class="mr-3">
                                 <span class="font-medium">Cable Lightning</span>
@@ -333,7 +322,7 @@
                         </div>
 
                         <!-- Cable C+C -->
-                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-themed">
                             <label class="flex items-center mb-3">
                                 <input type="checkbox" id="cableCC" class="mr-3">
                                 <span class="font-medium">Cable C+C</span>
@@ -345,7 +334,7 @@
                         </div>
 
                         <!-- Caja -->
-                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-themed">
                             <label class="flex items-center mb-3">
                                 <input type="checkbox" id="caja" class="mr-3">
                                 <span class="font-medium">Caja</span>
@@ -359,7 +348,7 @@
                         </div>
 
                         <!-- Otro Accesorio -->
-                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <div class="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg border border-themed">
                             <label class="flex items-center mb-3">
                                 <input type="checkbox" id="otroAccesorio" class="mr-3">
                                 <span class="font-medium">Otro Accesorio</span>
@@ -383,7 +372,7 @@
 
                 <!-- Forma de Pago -->
                 <div class="border-b pb-6 bg-blue-50 dark:bg-blue-900/30 rounded-xl p-6" id="formaPagoSection">
-                    <h2 class="text-xl font-semibold text-gray-800 dark:text-slate-100 mb-4">💳 Forma de Pago</h2>
+                    <h2 class="text-xl font-semibold mb-4 text-themed">💳 Forma de Pago</h2>
                     <!-- ESTO PONES: -->
                     <div id="formaPagoRadios" class="grid md:grid-cols-3 gap-3">
                         <!-- Los radios se generan automáticamente desde FORMAS_PAGO en constants.js -->
@@ -391,7 +380,7 @@
 
                     <!-- Formulario EFECTIVO -->
                     <div id="efectivo-form" class="hidden mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border-2 border-green-200 dark:border-green-700/50">
-                        <h3 class="font-semibold mb-3 text-gray-800 dark:text-slate-100">💵 Pago en Efectivo</h3>
+                        <h3 class="font-semibold mb-3 text-themed">💵 Pago en Efectivo</h3>
                         <div>
                             <label class="block text-sm font-medium mb-2">Monto en Efectivo ($)</label>
                             <input type="number" id="efectivoMonto" step="0.01"
@@ -401,7 +390,7 @@
 
                     <!-- Formulario ZELLE -->
                     <div id="zelle-form" class="hidden mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border-2 border-blue-200 dark:border-blue-700">
-                        <h3 class="font-semibold mb-3 text-gray-800 dark:text-slate-100">💰 Pago por Zelle</h3>
+                        <h3 class="font-semibold mb-3 text-themed">💰 Pago por Zelle</h3>
                         <div>
                             <label class="block text-sm font-medium mb-2">Monto en Dólares ($)</label>
                             <input type="number" id="zelleMonto" step="0.01"
@@ -411,7 +400,7 @@
 
                     <!-- Formulario BINANCE -->
                     <div id="binance-form" class="hidden mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border-2 border-yellow-200 dark:border-yellow-700/50">
-                        <h3 class="font-semibold mb-3 text-gray-800 dark:text-slate-100">🪙 Pago por Binance</h3>
+                        <h3 class="font-semibold mb-3 text-themed">🪙 Pago por Binance</h3>
                         <div>
                             <label class="block text-sm font-medium mb-2">Monto en Dólares ($)</label>
                             <input type="number" id="binanceMonto" step="0.01"
@@ -421,7 +410,7 @@
 
                     <!-- Pago Mixto -->
                     <div id="pagoMixto" class="hidden mt-4 bg-blue-100 dark:bg-blue-900/30 p-4 rounded-lg">
-                        <h3 class="font-medium mb-3 text-gray-800 dark:text-slate-100">Detalles del Pago Mixto</h3>
+                        <h3 class="font-medium mb-3 text-themed">Detalles del Pago Mixto</h3>
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm mb-1">Efectivo ($)</label>
@@ -485,14 +474,14 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="mt-3 p-3 bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700">
+                        <div class="mt-3 p-3 rounded border surface-card border-themed">
                             <p class="text-sm font-medium">Total: $<span id="totalMixto">0.00</span></p>
                         </div>
                     </div>
 
                     <!-- Pago Móvil Detalles -->
                     <div id="pagomovil-detalles" class="hidden mt-4 bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-                        <h3 class="font-medium mb-3 text-gray-800 dark:text-slate-100">Detalles Pago Móvil</h3>
+                        <h3 class="font-medium mb-3 text-themed">Detalles Pago Móvil</h3>
                         <div class="grid md:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-sm mb-1">Dólares ($)</label>
@@ -514,7 +503,7 @@
 
                     <!-- Transferencia Detalles -->
                     <div id="transferencia-detalles" class="hidden mt-4 bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
-                        <h3 class="font-medium mb-3 text-gray-800 dark:text-slate-100">Detalles Transferencia</h3>
+                        <h3 class="font-medium mb-3 text-themed">Detalles Transferencia</h3>
                         <div class="grid md:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-sm mb-1">Dólares ($)</label>
@@ -536,7 +525,7 @@
 
                     <!-- Formulario PAYPAL -->
                     <div id="paypal-form" class="hidden mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700">
-                        <h3 class="font-semibold mb-3 text-gray-800 dark:text-slate-100">🅿️ Pago por PayPal</h3>
+                        <h3 class="font-semibold mb-3 text-themed">🅿️ Pago por PayPal</h3>
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium mb-2">Monto en Dólares ($)</label>
@@ -559,7 +548,7 @@
                         <input type="checkbox" id="recibirEquipo" class="mr-3">
                         <span class="text-xl font-semibold">📱➡️ Recibir Equipo como Parte de Pago</span>
                     </label>
-                    <div id="equipoRecibidoDetalles" class="hidden bg-white dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <div id="equipoRecibidoDetalles" class="hidden p-4 rounded-lg border surface-card border-themed">
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm mb-2">Modelo</label>
@@ -624,7 +613,7 @@
                              ════════════════════════════════════════════════════════════════ -->
                         <div id="equiposRecibidosAdicionalesWrapper" class="mt-4 hidden border-t pt-4">
                             <div class="flex items-center justify-between mb-3">
-                                <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300">📱 Equipos adicionales recibidos
+                                <h3 class="text-sm font-semibold text-themed-secondary">📱 Equipos adicionales recibidos
                                     <span id="equiposRecibidosAdicionalesCount"
                                         class="ml-2 text-xs text-orange-600">(0)</span>
                                 </h3>
@@ -648,20 +637,20 @@
 
                 <!-- Después de la sección de Equipo Recibido -->
                 <div id="cambioGarantiaForm" class="hidden bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-lg border-2 border-emerald-200 dark:border-emerald-700/50">
-                    <h3 class="text-xl font-bold text-gray-800 dark:text-slate-100 mb-4">🔄 Cambio por Garantía</h3>
+                    <h3 class="text-xl font-bold mb-4 text-themed">🔄 Cambio por Garantía</h3>
 
                     <!-- Equipo Defectuoso (Recibido) -->
                     <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg mb-4 border border-red-200 dark:border-red-700/50">
                         <h4 class="font-semibold text-red-800 dark:text-red-300 mb-3">📱❌ Equipo Defectuoso (Recibido)</h4>
                         <div class="grid md:grid-cols-3 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Modelo</label>
+                                <label class="block text-sm font-medium mb-1 text-themed-secondary">Modelo</label>
                                 <select id="defectuosoModelo" class="w-full p-2 border rounded-lg">
                                     <option value="">Seleccionar</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Capacidad</label>
+                                <label class="block text-sm font-medium mb-1 text-themed-secondary">Capacidad</label>
                                 <select id="defectuosoCapacidad" class="w-full p-2 border rounded-lg">
                                     <option value="">Seleccionar</option>
                                     <option value="64GB">64GB</option>
@@ -672,22 +661,22 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Color</label>
+                                <label class="block text-sm font-medium mb-1 text-themed-secondary">Color</label>
                                 <select id="defectuosoColor" class="w-full p-2 border rounded-lg">
                                     <option value="">Seleccionar</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">% Batería</label>
+                                <label class="block text-sm font-medium mb-1 text-themed-secondary">% Batería</label>
                                 <input type="number" id="defectuosoBateria" min="0" max="100"
                                     class="w-full p-2 border rounded-lg">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">IMEI</label>
+                                <label class="block text-sm font-medium mb-1 text-themed-secondary">IMEI</label>
                                 <input type="text" id="defectuosoImei" class="w-full p-2 border rounded-lg">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Problema Reportado</label>
+                                <label class="block text-sm font-medium mb-1 text-themed-secondary">Problema Reportado</label>
                                 <textarea id="defectuosoProblema" rows="2" class="w-full p-2 border rounded-lg"
                                     placeholder="Ej: No enciende, pantalla rota, etc."></textarea>
                             </div>
@@ -705,29 +694,29 @@
 
                         <!-- Buscador de Inventario -->
                         <div id="buscadorGarantiaContainer" class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Buscar en Inventario (IMEI o
+                            <label class="block text-sm font-medium mb-2 text-themed-secondary">Buscar en Inventario (IMEI o
                                 Modelo)</label>
                             <div class="relative">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 dark:text-slate-400">🔍</span>
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-themed-muted">🔍</span>
                                 <input type="text" id="inputBuscadorGarantia"
-                                    class="w-full p-2 pl-10 border border-green-400 dark:border-green-500 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 outline-none bg-white dark:bg-slate-800"
+                                    class="w-full p-2 pl-10 border border-green-400 dark:border-green-500 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 outline-none surface-card"
                                     placeholder="Escanea o escribe IMEI o modelo...">
                             </div>
                             <div id="resultadosBuscadorGarantia"
-                                class="hidden absolute z-50 w-full max-w-md mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                                class="hidden absolute z-50 w-full max-w-md mt-1 border rounded-lg shadow-xl max-h-60 overflow-y-auto surface-card border-themed">
                             </div>
                         </div>
 
                         <!-- Tarjeta de Equipo Seleccionado -->
                         <div id="tarjetaEquipoGarantia"
-                            class="hidden bg-white dark:bg-slate-800 p-3 rounded-xl border-2 border-green-500 dark:border-green-400 shadow-sm relative mb-2">
+                            class="hidden p-3 rounded-xl border-2 border-green-500 dark:border-green-400 shadow-sm relative mb-2 surface-card">
                             <div
                                 class="absolute top-0 right-0 bg-green-500 text-white px-2 py-1 rounded-bl-xl rounded-tr-lg text-[10px] font-bold">
                                 SELECCIONADO</div>
-                            <h3 class="font-bold text-gray-800 dark:text-slate-100 text-sm flex items-center gap-2">
+                            <h3 class="font-bold text-sm flex items-center gap-2 text-themed">
                                 <span id="tarjetaGarantiaModelo">iPhone</span>
                             </h3>
-                            <p class="text-xs text-gray-600 dark:text-slate-300 mt-1 flex gap-1 flex-wrap">
+                            <p class="text-xs mt-1 flex gap-1 flex-wrap text-themed-secondary">
                                 <span id="tarjetaGarantiaCapacidad"
                                     class="bg-gray-100 px-1.5 py-0.5 rounded text-[10px] font-semibold border">256GB</span>
                                 <span id="tarjetaGarantiaColor"
@@ -736,18 +725,18 @@
                                     class="bg-gray-100 px-1.5 py-0.5 rounded text-[10px] font-semibold border">🔋
                                     100%</span>
                             </p>
-                            <p class="text-[10px] text-gray-500 dark:text-slate-400 mt-2 font-mono bg-gray-50 p-1 rounded border"
+                            <p class="text-[10px] mt-2 font-mono bg-gray-50 p-1 rounded border text-themed-muted"
                                 id="tarjetaGarantiaImei">IMEI: 123456789012345</p>
                         </div>
 
                         <!-- Campos Ocultos (se mantienen para no romper la lógica existente) -->
                         <div id="camposManualesGarantia" class="hidden grid md:grid-cols-3 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Modelo</label>
+                                <label class="block text-sm font-medium mb-1 text-themed-secondary">Modelo</label>
                                 <select id="nuevoModelo" class="w-full p-2 border rounded-lg"></select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Capacidad</label>
+                                <label class="block text-sm font-medium mb-1 text-themed-secondary">Capacidad</label>
                                 <select id="nuevoCapacidad" class="w-full p-2 border rounded-lg">
                                     <option value="">Seleccionar</option>
                                     <option value="64GB">64GB</option>
@@ -758,16 +747,16 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Color</label>
+                                <label class="block text-sm font-medium mb-1 text-themed-secondary">Color</label>
                                 <select id="nuevoColor" class="w-full p-2 border rounded-lg"></select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">% Batería</label>
+                                <label class="block text-sm font-medium mb-1 text-themed-secondary">% Batería</label>
                                 <input type="number" id="nuevoBateria" min="0" max="100"
                                     class="w-full p-2 border rounded-lg">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">IMEI</label>
+                                <label class="block text-sm font-medium mb-1 text-themed-secondary">IMEI</label>
                                 <input type="text" id="nuevoImei" class="w-full p-2 border rounded-lg">
                             </div>
                         </div>
@@ -778,7 +767,7 @@
                         <h4 class="font-semibold text-yellow-800 dark:text-yellow-300 mb-3">💵 Diferencia de Precio (Opcional)</h4>
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Tipo de Diferencia</label>
+                                <label class="block text-sm font-medium mb-1 text-themed-secondary">Tipo de Diferencia</label>
                                 <select id="tipoDiferencia" class="w-full p-2 border rounded-lg">
                                     <option value="ninguna">Sin diferencia</option>
                                     <option value="favor-cliente">A favor del cliente (devolver dinero)</option>
@@ -786,12 +775,12 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Monto ($)</label>
+                                <label class="block text-sm font-medium mb-1 text-themed-secondary">Monto ($)</label>
                                 <input type="number" id="montoDiferencia" step="0.01" min="0" value="0"
                                     class="w-full p-2 border rounded-lg" disabled>
                             </div>
                         </div>
-                        <p class="text-xs text-gray-600 dark:text-slate-300 mt-2">
+                        <p class="text-xs mt-2 text-themed-secondary">
                             <strong>A favor del cliente:</strong> Se resta de la caja (equipo nuevo es más barato)<br>
                             <strong>A favor de la tienda:</strong> Se suma a la caja (equipo nuevo es más caro)
                         </p>
@@ -800,7 +789,7 @@
 
                 <!-- Tipo de Transacción -->
                 <div class="border-b pb-6 bg-blue-50 dark:bg-blue-900/30 rounded-xl p-6">
-                    <h2 class="text-xl font-semibold text-gray-800 dark:text-slate-100 mb-4">📋 Tipo de Transacción</h2>
+                    <h2 class="text-xl font-semibold mb-4 text-themed">📋 Tipo de Transacción</h2>
                     <div class="flex items-center space-x-6">
                         <label class="flex items-center">
                             <input type="radio" name="tipoTransaccion" value="venta" checked class="mr-2">
@@ -841,7 +830,7 @@
                         <span class="text-xl font-semibold">📅 Venta con Abonos Previos (Cierre)</span>
                     </label>
 
-                    <div id="abonosPreviosDetalles" class="hidden bg-white dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <div id="abonosPreviosDetalles" class="hidden p-4 rounded-lg border surface-card border-themed">
                         <p class="text-sm text-purple-800 dark:text-purple-300 mb-3">Registra los pagos anteriores. Su total se sumará al de
                             hoy en Ventas, pero en la Caja de hoy sólo ingresará lo que el cliente dé físico/hoy.</p>
                         <div id="listaAbonosPrevios" class="flex flex-col gap-2">
@@ -913,7 +902,7 @@
                         <div class="flex items-center gap-3">
                             <label class="text-sm font-semibold">Monto Total Final:</label>
                             <input type="number" id="montoTotalManual" step="0.01"
-                                class="flex-1 p-3 text-2xl font-bold text-gray-800 dark:text-slate-100 bg-white dark:bg-slate-800 border-2 border-emerald-300 dark:border-emerald-700 rounded-lg"
+                                class="flex-1 p-3 text-2xl font-bold border-2 border-emerald-300 dark:border-emerald-700 rounded-lg surface-card text-themed"
                                 placeholder="0.00">
                         </div>
                     </div>
@@ -938,12 +927,12 @@
 
 
         <!-- Movimientos de Inventario -->
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 mb-6 border border-slate-200 dark:border-slate-700">
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-slate-100 mb-4">📦 Movimientos de Inventario</h2>
+        <div class="rounded-xl shadow-lg p-6 mb-6 border surface-card border-themed">
+            <h2 class="text-xl font-semibold mb-4 text-themed">📦 Movimientos de Inventario</h2>
 
             <!-- Selector de Tipo de Movimiento -->
             <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Tipo de Movimiento</label>
+                <label class="block text-sm font-medium mb-3 text-themed-secondary">Tipo de Movimiento</label>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <button type="button" id="btnSalidaEfectivo"
                         class="movimiento-btn bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-800 dark:text-red-300 p-3 rounded-lg border-2 border-transparent transition-all">
@@ -983,17 +972,17 @@
                     <h3 class="font-semibold text-red-800 dark:text-red-300 mb-3">💸 Salida de Efectivo</h3>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Monto ($)</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Monto ($)</label>
                             <input type="number" id="salidaEfectivoMonto" step="0.01"
                                 class="w-full p-2 border rounded-lg" placeholder="0.00">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Persona que retira</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Persona que retira</label>
                             <input type="text" id="salidaEfectivoPersona" class="w-full p-2 border rounded-lg"
                                 placeholder="Nombre completo">
                         </div>
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Motivo/Nota</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Motivo/Nota</label>
                             <textarea id="salidaEfectivoNota" rows="2" class="w-full p-2 border rounded-lg"
                                 placeholder="Descripción del motivo"></textarea>
                         </div>
@@ -1005,12 +994,12 @@
                     <h3 class="font-semibold text-green-800 dark:text-green-300 mb-3">💵 Ingreso de Efectivo</h3>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Monto ($)</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Monto ($)</label>
                             <input type="number" id="ingresoEfectivoMonto" step="0.01"
                                 class="w-full p-2 border rounded-lg" placeholder="0.00">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Motivo/Nota</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Motivo/Nota</label>
                             <textarea id="ingresoEfectivoNota" rows="2" class="w-full p-2 border rounded-lg"
                                 placeholder="Descripción del ingreso"></textarea>
                         </div>
@@ -1028,29 +1017,29 @@
 
                     <!-- Buscador de Inventario -->
                     <div id="buscadorSalidaContainer" class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Buscar en Inventario (IMEI o
+                        <label class="block text-sm font-medium mb-2 text-themed-secondary">Buscar en Inventario (IMEI o
                             Modelo)</label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 dark:text-slate-400">🔍</span>
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-themed-muted">🔍</span>
                             <input type="text" id="inputBuscadorSalida"
                                 class="w-full p-2 pl-10 border rounded-lg shadow-sm focus:ring-2 focus:ring-orange-500 outline-none"
                                 placeholder="Escanea o escribe IMEI o modelo...">
                         </div>
                         <div id="resultadosBuscadorSalida"
-                            class="hidden absolute z-50 w-full max-w-md mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                            class="hidden absolute z-50 w-full max-w-md mt-1 border rounded-lg shadow-xl max-h-60 overflow-y-auto surface-card border-themed">
                         </div>
                     </div>
 
                     <!-- Tarjeta de Equipo Seleccionado -->
                     <div id="tarjetaEquipoSalida"
-                        class="hidden bg-white dark:bg-slate-800 p-3 rounded-xl border-2 border-orange-500 dark:border-orange-400 shadow-sm relative mb-4">
+                        class="hidden p-3 rounded-xl border-2 border-orange-500 dark:border-orange-400 shadow-sm relative mb-4 surface-card">
                         <div
                             class="absolute top-0 right-0 bg-orange-500 text-white px-2 py-1 rounded-bl-xl rounded-tr-lg text-[10px] font-bold">
                             SELECCIONADO</div>
-                        <h3 class="font-bold text-gray-800 dark:text-slate-100 text-sm flex items-center gap-2">
+                        <h3 class="font-bold text-sm flex items-center gap-2 text-themed">
                             <span id="tarjetaSalidaModelo">iPhone</span>
                         </h3>
-                        <p class="text-xs text-gray-600 dark:text-slate-300 mt-1 flex gap-1 flex-wrap">
+                        <p class="text-xs mt-1 flex gap-1 flex-wrap text-themed-secondary">
                             <span id="tarjetaSalidaCapacidad"
                                 class="bg-gray-100 px-1.5 py-0.5 rounded text-[10px] font-semibold border">256GB</span>
                             <span id="tarjetaSalidaColor"
@@ -1059,7 +1048,7 @@
                                 class="bg-gray-100 px-1.5 py-0.5 rounded text-[10px] font-semibold border">🔋
                                 100%</span>
                         </p>
-                        <p class="text-[10px] text-gray-500 dark:text-slate-400 mt-2 font-mono bg-gray-50 p-1 rounded border"
+                        <p class="text-[10px] mt-2 font-mono bg-gray-50 p-1 rounded border text-themed-muted"
                             id="tarjetaSalidaImei">IMEI: 123456789012345</p>
                     </div>
 
@@ -1067,11 +1056,11 @@
                         <!-- Campos Ocultos (se mantienen para no romper la lógica existente) -->
                         <div id="camposManualesSalida" class="hidden md:col-span-2 grid md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Modelo</label>
+                                <label class="block text-sm font-medium mb-1 text-themed-secondary">Modelo</label>
                                 <select id="salidaEquipoModelo" class="w-full p-2 border rounded-lg"></select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Capacidad</label>
+                                <label class="block text-sm font-medium mb-1 text-themed-secondary">Capacidad</label>
                                 <select id="salidaEquipoCapacidad" class="w-full p-2 border rounded-lg">
                                     <option value="">Seleccionar</option>
                                     <option value="64GB">64GB</option>
@@ -1082,23 +1071,23 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Color</label>
+                                <label class="block text-sm font-medium mb-1 text-themed-secondary">Color</label>
                                 <select id="salidaEquipoColor" class="w-full p-2 border rounded-lg"></select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">% Batería</label>
+                                <label class="block text-sm font-medium mb-1 text-themed-secondary">% Batería</label>
                                 <input type="number" id="salidaEquipoBateria" min="1" max="100"
                                     class="w-full p-2 border rounded-lg" placeholder="85">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">IMEI</label>
+                                <label class="block text-sm font-medium mb-1 text-themed-secondary">IMEI</label>
                                 <input type="text" id="salidaEquipoImei" class="w-full p-2 border rounded-lg"
                                     placeholder="Número IMEI">
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Destino</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Destino</label>
                             <select id="salidaEquipoDestino" class="w-full p-2 border rounded-lg">
                                 <option value="">Seleccionar</option>
                                 <option value="Aviadores">Aviadores</option>
@@ -1108,17 +1097,17 @@
                             </select>
                         </div>
                         <div id="salidaEquipoDestinoPersonalizadoDiv" class="hidden">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Destino Personalizado</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Destino Personalizado</label>
                             <input type="text" id="salidaEquipoDestinoPersonalizado"
                                 class="w-full p-2 border rounded-lg" placeholder="Especificar destino">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Persona que retira</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Persona que retira</label>
                             <input type="text" id="salidaEquipoPersona" class="w-full p-2 border rounded-lg"
                                 placeholder="Nombre completo">
                         </div>
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Notas adicionales</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Notas adicionales</label>
                             <textarea id="salidaEquipoNota" rows="2" class="w-full p-2 border rounded-lg"
                                 placeholder="Detalles adicionales"></textarea>
                         </div>
@@ -1130,11 +1119,11 @@
                     <h3 class="font-semibold text-teal-800 dark:text-teal-300 mb-3">📱⬅️ Ingreso de Equipo</h3>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Modelo</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Modelo</label>
                             <select id="ingresoEquipoModelo" class="w-full p-2 border rounded-lg"></select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Capacidad</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Capacidad</label>
                             <select id="ingresoEquipoCapacidad" class="w-full p-2 border rounded-lg">
                                 <option value="">Seleccionar</option>
                                 <option value="64GB">64GB</option>
@@ -1145,11 +1134,11 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Color</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Color</label>
                             <select id="ingresoEquipoColor" class="w-full p-2 border rounded-lg"></select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">IMEI</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">IMEI</label>
                             <input type="text" id="ingresoEquipoImei" class="w-full p-2 border rounded-lg"
                                 placeholder="Número IMEI">
                             <!-- Banner de validación IMEI Ingreso -->
@@ -1164,12 +1153,12 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">% Batería</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">% Batería</label>
                             <input type="number" id="ingresoEquipoBateria" min="1" max="100"
                                 class="w-full p-2 border rounded-lg" placeholder="85">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Origen/Procedencia</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Origen/Procedencia</label>
                             <select id="ingresoEquipoOrigen" class="w-full p-2 border rounded-lg">
                                 <option value="">Seleccionar</option>
                                 <option value="Aviadores">Aviadores</option>
@@ -1181,12 +1170,12 @@
                             </select>
                         </div>
                         <div id="ingresoEquipoOrigenPersonalizadoDiv" class="hidden">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Origen Personalizado</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Origen Personalizado</label>
                             <input type="text" id="ingresoEquipoOrigenPersonalizado"
                                 class="w-full p-2 border rounded-lg" placeholder="Especificar origen">
                         </div>
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Notas adicionales</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Notas adicionales</label>
                             <textarea id="ingresoEquipoNota" rows="2" class="w-full p-2 border rounded-lg"
                                 placeholder="Detalles adicionales"></textarea>
                         </div>
@@ -1198,11 +1187,11 @@
                     <h3 class="font-semibold text-green-800 dark:text-green-300 mb-3">📱⬅️ Compra de Equipo</h3>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Modelo</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Modelo</label>
                             <select id="compraEquipoModelo" class="w-full p-2 border rounded-lg"></select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Capacidad</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Capacidad</label>
                             <select id="compraEquipoCapacidad" class="w-full p-2 border rounded-lg">
                                 <option value="">Seleccionar</option>
                                 <option value="64GB">64GB</option>
@@ -1213,16 +1202,16 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Color</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Color</label>
                             <select id="compraEquipoColor" class="w-full p-2 border rounded-lg"></select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">% Batería</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">% Batería</label>
                             <input type="number" id="compraEquipoBateria" min="1" max="100"
                                 class="w-full p-2 border rounded-lg" placeholder="85">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">IMEI</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">IMEI</label>
                             <input type="text" id="compraEquipoImei" class="w-full p-2 border rounded-lg"
                                 placeholder="Número IMEI">
                             <!-- Banner de validación IMEI Compra -->
@@ -1237,17 +1226,17 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Precio de Compra ($)</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Precio de Compra ($)</label>
                             <input type="number" id="compraEquipoPrecio" step="0.01"
                                 class="w-full p-2 border rounded-lg" placeholder="0.00">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Proveedor/Vendedor</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Proveedor/Vendedor</label>
                             <input type="text" id="compraEquipoProveedor" class="w-full p-2 border rounded-lg"
                                 placeholder="Nombre del vendedor">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Estado del Equipo</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Estado del Equipo</label>
                             <select id="compraEquipoEstado" class="w-full p-2 border rounded-lg">
                                 <option value="">Seleccionar</option>
                                 <option value="Nuevo">Nuevo</option>
@@ -1258,7 +1247,7 @@
                             </select>
                         </div>
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Observaciones</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Observaciones</label>
                             <textarea id="compraEquipoNota" rows="2" class="w-full p-2 border rounded-lg"
                                 placeholder="Detalles del estado, accesorios incluidos, etc."></textarea>
                         </div>
@@ -1271,7 +1260,7 @@
 
                     <!-- Destino -->
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Destino</label>
+                        <label class="block text-sm font-medium mb-1 text-themed-secondary">Destino</label>
                         <select id="salidaAccesorioDestino" class="w-full p-2 border rounded-lg">
                             <option value="">Seleccionar</option>
                             <option value="Aviadores">Aviadores</option>
@@ -1283,11 +1272,11 @@
 
                     <!-- Accesorios (Checkboxes) -->
                     <div class="border-t pt-4">
-                        <h4 class="font-semibold text-gray-700 dark:text-slate-300 mb-3">Seleccione los accesorios:</h4>
+                        <h4 class="font-semibold mb-3 text-themed-secondary">Seleccione los accesorios:</h4>
                         <div class="grid md:grid-cols-3 gap-3">
 
                             <!-- Forro -->
-                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="p-3 rounded-lg border surface-card border-themed">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="salidaForro" class="mr-2">
                                     <span class="font-medium">Forro</span>
@@ -1307,7 +1296,7 @@
                             </div>
 
                             <!-- Vidrio -->
-                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="p-3 rounded-lg border surface-card border-themed">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="salidaVidrio" class="mr-2">
                                     <span class="font-medium">Vidrio</span>
@@ -1327,7 +1316,7 @@
                             </div>
 
                             <!-- Caja -->
-                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="p-3 rounded-lg border surface-card border-themed">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="salidaCaja" class="mr-2">
                                     <span class="font-medium">Caja</span>
@@ -1350,7 +1339,7 @@
                             </div>
 
                             <!-- Cargador -->
-                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="p-3 rounded-lg border surface-card border-themed">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="salidaCargador" class="mr-2">
                                     <span class="font-medium">Cargador</span>
@@ -1362,7 +1351,7 @@
                             </div>
 
                             <!-- Protector Cámara -->
-                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="p-3 rounded-lg border surface-card border-themed">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="salidaProtectorCamara" class="mr-2">
                                     <span class="font-medium">Protector Cámara</span>
@@ -1374,7 +1363,7 @@
                             </div>
 
                             <!-- Cubo -->
-                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="p-3 rounded-lg border surface-card border-themed">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="salidaCubo" class="mr-2">
                                     <span class="font-medium">Cubo</span>
@@ -1386,7 +1375,7 @@
                             </div>
 
                             <!-- Cable Lightning -->
-                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="p-3 rounded-lg border surface-card border-themed">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="salidaCableLightning" class="mr-2">
                                     <span class="font-medium">Cable Lightning</span>
@@ -1398,7 +1387,7 @@
                             </div>
 
                             <!-- Cable C+C -->
-                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="p-3 rounded-lg border surface-card border-themed">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="salidaCableCC" class="mr-2">
                                     <span class="font-medium">Cable C+C</span>
@@ -1410,7 +1399,7 @@
                             </div>
 
                             <!-- Otro Accesorio -->
-                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="p-3 rounded-lg border surface-card border-themed">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="salidaOtroAccesorio" class="mr-2">
                                     <span class="font-medium">Otro Accesorio</span>
@@ -1440,18 +1429,18 @@
 
                     <!-- Proveedor -->
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Proveedor</label>
+                        <label class="block text-sm font-medium mb-1 text-themed-secondary">Proveedor</label>
                         <input type="text" id="ingresoAccesorioProveedor" class="w-full p-2 border rounded-lg"
                             placeholder="Nombre del proveedor">
                     </div>
 
                     <!-- Accesorios (Checkboxes) -->
                     <div class="border-t pt-4">
-                        <h4 class="font-semibold text-gray-700 dark:text-slate-300 mb-3">Seleccione los accesorios:</h4>
+                        <h4 class="font-semibold mb-3 text-themed-secondary">Seleccione los accesorios:</h4>
                         <div class="grid md:grid-cols-3 gap-3">
 
                             <!-- Forro -->
-                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="p-3 rounded-lg border surface-card border-themed">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="ingresoForro" class="mr-2">
                                     <span class="font-medium">Forro</span>
@@ -1471,7 +1460,7 @@
                             </div>
 
                             <!-- Vidrio -->
-                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="p-3 rounded-lg border surface-card border-themed">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="ingresoVidrio" class="mr-2">
                                     <span class="font-medium">Vidrio</span>
@@ -1491,7 +1480,7 @@
                             </div>
 
                             <!-- Caja -->
-                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="p-3 rounded-lg border surface-card border-themed">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="ingresoCaja" class="mr-2">
                                     <span class="font-medium">Caja</span>
@@ -1514,7 +1503,7 @@
                             </div>
 
                             <!-- Cargador -->
-                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="p-3 rounded-lg border surface-card border-themed">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="ingresoCargador" class="mr-2">
                                     <span class="font-medium">Cargador</span>
@@ -1526,7 +1515,7 @@
                             </div>
 
                             <!-- Protector Cámara -->
-                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="p-3 rounded-lg border surface-card border-themed">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="ingresoProtectorCamara" class="mr-2">
                                     <span class="font-medium">Protector Cámara</span>
@@ -1538,7 +1527,7 @@
                             </div>
 
                             <!-- Cubo -->
-                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="p-3 rounded-lg border surface-card border-themed">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="ingresoCubo" class="mr-2">
                                     <span class="font-medium">Cubo</span>
@@ -1550,7 +1539,7 @@
                             </div>
 
                             <!-- Cable Lightning -->
-                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="p-3 rounded-lg border surface-card border-themed">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="ingresoCableLightning" class="mr-2">
                                     <span class="font-medium">Cable Lightning</span>
@@ -1562,7 +1551,7 @@
                             </div>
 
                             <!-- Cable C+C -->
-                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="p-3 rounded-lg border surface-card border-themed">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="ingresoCableCC" class="mr-2">
                                     <span class="font-medium">Cable C+C</span>
@@ -1574,7 +1563,7 @@
                             </div>
 
                             <!-- Otro Accesorio -->
-                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="p-3 rounded-lg border surface-card border-themed">
                                 <label class="flex items-center mb-2">
                                     <input type="checkbox" id="ingresoOtroAccesorio" class="mr-2">
                                     <span class="font-medium">Otro Accesorio</span>
@@ -1613,10 +1602,10 @@
         </div>
 
         <!-- Resumen de Ventas -->
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 mb-6 border border-slate-200 dark:border-slate-700">
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-slate-100 mb-4">📊 Resumen del Día</h2>
+        <div class="rounded-xl shadow-lg p-6 mb-6 border surface-card border-themed">
+            <h2 class="text-xl font-semibold mb-4 text-themed">📊 Resumen del Día</h2>
             <div id="resumenVentas" class="space-y-3 mb-4">
-                <p class="text-gray-600 dark:text-slate-300">No hay ventas registradas hoy.</p>
+                <p class="text-themed-secondary">No hay ventas registradas hoy.</p>
             </div>
             <div class="grid md:grid-cols-3 gap-4 mb-4">
                 <div class="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700/50">
@@ -1643,10 +1632,10 @@
         </div>
 
         <!-- Resumen de Movimientos -->
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border border-slate-200 dark:border-slate-700">
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-slate-100 mb-4">📦 Movimientos del Día</h2>
+        <div class="rounded-xl shadow-lg p-6 border surface-card border-themed">
+            <h2 class="text-xl font-semibold mb-4 text-themed">📦 Movimientos del Día</h2>
             <div id="resumenMovimientos" class="space-y-3">
-                <p class="text-gray-600 dark:text-slate-300">No hay movimientos registrados hoy.</p>
+                <p class="text-themed-secondary">No hay movimientos registrados hoy.</p>
             </div>
         </div>
     </div>

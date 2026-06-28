@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     );
 
     // ====== INICIALIZACIÓN DE MODOS ======
-    
+
     // MODO INGRESO
     const { recolectarEquipos } = initModoIngreso({
         inventarioService,
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btnSalida.classList.add('opacity-50');
             titulo.innerHTML = '📦 <span>Nota de Ingreso de Mercancía</span>';
             subtitulo.innerHTML = 'Ingresa los equipos fila por fila. Usa <kbd class="kbd-atajo">Tab</kbd> para avanzar y <kbd class="kbd-atajo">Enter</kbd> al final de fila para agregar otra.';
-            
+
             if (panelResumen) panelResumen.classList.remove('hidden');
         } else {
             seccionIngreso.classList.add('hidden');
@@ -98,9 +98,9 @@ document.addEventListener('DOMContentLoaded', () => {
             btnIngreso.classList.add('opacity-50');
             titulo.innerHTML = '📤 <span>Nota de Salida de Equipos</span>';
             subtitulo.textContent = 'Selecciona equipos disponibles para dar de baja o trasladar.';
-            
+
             if (panelResumen) panelResumen.classList.add('hidden');
-            
+
             actualizarListaSugerenciasSalida();
         }
     }
@@ -118,13 +118,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const sedeId = localStorage.getItem('usuario_sede_id') || 'sede_1';
         document.getElementById('badgeSede').textContent = `📍 ${sedeId}`;
         document.getElementById('fechaHoy').textContent = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
-        
+
         const btnGuardar = document.getElementById('btnGuardarLote');
         if (btnGuardar) {
             btnGuardar.disabled = true;
             btnGuardar.textContent = '⏳ Cargando inventario...';
         }
-        
+
         try {
             await inventarioService.esperarListo();
             inventarioCargado = true;
@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnGuardar.innerHTML = '💾 Guardar Todo al Inventario';
             }
             console.log('✅ Inventario listo para validaciones en tiempo real');
-            
+
             if (modoActual === 'salida') {
                 actualizarListaSugerenciasSalida();
             }

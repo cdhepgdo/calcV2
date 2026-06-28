@@ -9,24 +9,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="js/theme-init.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      window.tailwind = window.tailwind || {};
-      window.tailwind.config = {
-        darkMode: 'class',
-        theme: { extend: {
-          fontFamily: { sans: ['Inter','system-ui','sans-serif'] }
-        } }
-      };
-    </script>
+    <link rel="stylesheet" href="css/tailwind-output.css">
     <link rel="stylesheet" href="css/theme.css">
     <link rel="stylesheet" href="css/registro.css">
 </head>
 
-<body class="bg-slate-50 dark:bg-slate-900 transition-colors">
+<body class="surface-base-bg transition-colors">
     <!-- Nav (injected by mountNav) -->
     <div id="appNav" data-active="registro"></div>
-    <div class="container">
+    <div class="page-container">
         <header>
             <h1>📊 Registro Diario de Operaciones</h1>
             <div class="header-actions">
@@ -84,7 +75,7 @@
         <div class="accesorios-periodo">
             <h2 class="accesorios-periodo-titulo">🛡️ Resumen de Accesorios del Período</h2>
             <div id="resumenAccesoriosPeriodo" class="accesorios-periodo-contenido">
-                <p class="text-gray-500 text-center">Cargando...</p>
+                <p class="text-themed-muted text-center">Cargando...</p>
             </div>
         </div>
 
@@ -93,11 +84,14 @@
         </div>
     </div>
 
-    <script type="module" src="js/registro.js"></script>
     <script type="module">
         import { mountNav } from './js/components/nav.js';
+        import { initTheme } from './js/theme.js';
+
+        initTheme();
         mountNav('registro');
     </script>
+    <script type="module" src="js/registro.js"></script>
 </body>
 
 </html>

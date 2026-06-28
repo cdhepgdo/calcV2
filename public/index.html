@@ -6,41 +6,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Calculadora Inteligente</title>
 
+  <!-- 1. Anti-FOUC: aplica .dark antes de que Tailwind parsee -->
+  <script src="js/theme-init.js"></script>
 
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Calculadora Inteligente</title>
+  <!-- 2. Tailwind Output (Compilado localmente) -->
+  <link rel="stylesheet" href="css/tailwind-output.css">
 
-    <!-- 1. Anti-FOUC: aplica .dark antes de que Tailwind parsee -->
-    <script src="js/theme-init.js"></script>
+  <!-- 3. Tokens y overrides de tema -->
+  <link rel="stylesheet" href="css/theme.css">
 
-    <!-- 2. Tailwind (CDN) -->
-    <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 4. Estilos específicos de esta página -->
+  <link rel="stylesheet" href="styles.css">
+</head>
 
-    <!-- 3. Config inline: darkMode por clase — DEBE ir después del CDN -->
-    <script>
-      window.tailwind = window.tailwind || {};
-      window.tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
-          }
-        }
-      };
-    </script>
-
-    <!-- 4. Tokens y overrides de tema (van antes que styles.css para ganar especificidad) -->
-    <link rel="stylesheet" href="css/theme.css">
-
-    <!-- 5. Estilos específicos de esta página (van último) -->
-    <link rel="stylesheet" href="styles.css">
-  </head>
-
-
-
-<body class="min-h-screen py-8">
+<body class="surface-base-bg min-h-screen py-8">
 
   <!-- Nav inyectada por mountNav -->
   <div id="appNav" data-active="index"></div>
@@ -439,7 +418,7 @@
 
       <!-- Valor API Dinámico EUR/VES -->
       <!-- <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+          <label class="block text-sm font-medium mb-2 text-themed-secondary">
             Tasa EUR/VES
           </label>
           <div class="bg-green-50 border border-green-200 rounded-lg p-3 mb-2">

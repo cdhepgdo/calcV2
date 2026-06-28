@@ -23,7 +23,7 @@
   /* slate-500 */
   --text-subtle: 148 163 184;
   /* slate-400 */
-  --text-inverse: 255 255 255;
+  --text-inverse: 87 84 84;
   /* white (always good for primary color backgrounds like blue/green) */
 
   /* Borders */
@@ -334,6 +334,36 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   border: 1px solid rgb(var(--border));
 }
 
+/* ── Inputs/Selects nativos — Dark Mode automático ──────────────────────
+   Los <select> y <input> del navegador ignoran las clases Tailwind en su
+   dropdown nativo. Esta regla los estiliza globalmente con los tokens para
+   que nunca aparezca el fondo blanco del sistema operativo.
+   ─────────────────────────────────────────────────────────────────────── */
+.dark select,
+.dark input[type="text"],
+.dark input[type="number"],
+.dark input[type="date"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark textarea {
+  background-color: rgb(var(--surface-elevated));
+  color: rgb(var(--text-primary));
+  border-color: rgb(var(--border));
+  color-scheme: dark;
+}
+
+.dark select option {
+  background-color: rgb(var(--surface-elevated));
+  color: rgb(var(--text-primary));
+}
+
+/* Clase helper para selects con token explícito */
+.select-themed {
+  background: rgb(var(--surface-elevated));
+  color: rgb(var(--text-primary));
+  border: 1px solid rgb(var(--border));
+}
+
 .bg-themed-section-blue {
   background: rgb(var(--accent-soft));
   color: rgb(var(--accent-text));
@@ -474,384 +504,6 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   border-top: 2px solid rgb(var(--mixto));
 }
 
-/* ============================================================
-   DARK MODE OVERRIDES — manual rules for common Tailwind classes
-   This ensures dark: variants work even if Tailwind JIT missed them.
-   Triggered by .dark class on <html>.
-   ============================================================ */
-
-.dark .bg-slate-50 {
-  background-color: rgb(15 23 42) !important;
-}
-
-/* body */
-.dark .bg-slate-100 {
-  background-color: rgb(30 41 59) !important;
-}
-
-/* muted */
-.dark .bg-slate-200 {
-  background-color: rgb(51 65 85) !important;
-}
-
-.dark .bg-slate-700 {
-  background-color: rgb(15 23 42) !important;
-}
-
-.dark .bg-slate-800 {
-  background-color: rgb(30 41 59) !important;
-}
-
-.dark .bg-slate-900 {
-  background-color: rgb(15 23 42) !important;
-}
-
-.dark .bg-slate-950 {
-  background-color: rgb(2 6 23) !important;
-}
-
-.dark .text-slate-100 {
-  color: rgb(248 250 252) !important;
-}
-
-.dark .text-slate-200 {
-  color: rgb(241 245 249) !important;
-}
-
-.dark .text-slate-300 {
-  color: rgb(203 213 225) !important;
-}
-
-.dark .text-slate-400 {
-  color: rgb(148 163 184) !important;
-}
-
-.dark .text-slate-500 {
-  color: rgb(100 116 139) !important;
-}
-
-.dark .text-slate-600 {
-  color: rgb(71 85 105) !important;
-}
-
-.dark .text-slate-700 {
-  color: rgb(51 65 85) !important;
-}
-
-.dark .text-slate-800 {
-  color: rgb(30 41 59) !important;
-}
-
-.dark .text-slate-900 {
-  color: rgb(15 23 42) !important;
-}
-
-/* Tailwind text-gray-* overrides — covers text inserted dynamically by
-   script.js (displayResults, showComparison, etc. use text-gray-600/700). */
-.dark .text-gray-400 {
-  color: rgb(148 163 184) !important;
-}
-
-.dark .text-gray-500 {
-  color: rgb(148 163 184) !important;
-}
-
-.dark .text-gray-600 {
-  color: rgb(203 213 225) !important;
-}
-
-.dark .text-gray-700 {
-  color: rgb(226 232 240) !important;
-}
-
-.dark .text-gray-800 {
-  color: rgb(241 245 249) !important;
-}
-
-.dark .text-gray-900 {
-  color: rgb(248 250 252) !important;
-}
-
-.dark .border-slate-100 {
-  border-color: rgb(30 41 59) !important;
-}
-
-.dark .border-slate-200 {
-  border-color: rgb(51 65 85) !important;
-}
-
-.dark .border-slate-300 {
-  border-color: rgb(71 85 105) !important;
-}
-
-.dark .border-slate-400 {
-  border-color: rgb(100 116 139) !important;
-}
-
-.dark .border-slate-500 {
-  border-color: rgb(100 116 139) !important;
-}
-
-.dark .border-slate-600 {
-  border-color: rgb(71 85 105) !important;
-}
-
-.dark .border-slate-700 {
-  border-color: rgb(51 65 85) !important;
-}
-
-.dark .border-slate-800 {
-  border-color: rgb(30 41 59) !important;
-}
-
-/* Tailwind border-gray-* overrides — needed for elements whose className is
-   overwritten by legacy JS (e.g. script.js line ~411 replaces the
-   <select id="productSelect"> className with `border-gray-300`). */
-.dark .border-gray-200 {
-  border-color: rgb(51 65 85) !important;
-}
-
-.dark .border-gray-300 {
-  border-color: rgb(71 85 105) !important;
-}
-
-.dark .border-gray-400 {
-  border-color: rgb(100 116 139) !important;
-}
-
-.dark .border-gray-500 {
-  border-color: rgb(100 116 139) !important;
-}
-
-.dark .border-gray-600 {
-  border-color: rgb(71 85 105) !important;
-}
-
-.dark .border-gray-700 {
-  border-color: rgb(51 65 85) !important;
-}
-
-.dark .border-gray-800 {
-  border-color: rgb(30 41 59) !important;
-}
-
-/* Tinted section backgrounds (the slate-50/100 family used by cierree) */
-.dark .bg-blue-50 {
-  background-color: rgba(59 130 246 / 0.20) !important;
-  color: rgb(219 234 254) !important;
-}
-
-.dark .bg-blue-100\/20 {
-  background-color: rgba(59 130 246 / 0.20) !important;
-}
-
-.dark .bg-blue-100\/30 {
-  background-color: rgba(59 130 246 / 0.25) !important;
-}
-
-.dark .bg-blue-900\/30 {
-  background-color: rgba(59 130 246 / 0.20) !important;
-}
-
-.dark .bg-indigo-50 {
-  background-color: rgba(99 102 241 / 0.10) !important;
-  color: rgb(165 180 252) !important;
-}
-
-.dark .bg-indigo-100 {
-  background-color: rgba(99 102 241 / 0.12) !important;
-}
-
-.dark .bg-indigo-900\/30 {
-  background-color: rgba(99 102 241 / 0.10) !important;
-}
-
-.dark .bg-purple-50 {
-  background-color: rgba(168 85 247 / 0.20) !important;
-  color: rgb(233 213 255) !important;
-}
-
-.dark .bg-purple-100 {
-  background-color: rgba(168 85 247 / 0.22) !important;
-}
-
-.dark .bg-purple-900\/20 {
-  background-color: rgba(168 85 247 / 0.18) !important;
-}
-
-.dark .bg-orange-50 {
-  background-color: rgba(249 115 22 / 0.10) !important;
-  color: rgb(253 186 116) !important;
-}
-
-.dark .bg-orange-100 {
-  background-color: rgba(249 115 22 / 0.12) !important;
-}
-
-.dark .bg-orange-900\/20 {
-  background-color: rgba(249 115 22 / 0.08) !important;
-}
-
-.dark .bg-amber-50 {
-  background-color: rgba(245 158 11 / 0.10) !important;
-  color: rgb(253 224 71) !important;
-}
-
-.dark .bg-amber-100 {
-  background-color: rgba(245 158 11 / 0.12) !important;
-}
-
-.dark .bg-amber-900\/20 {
-  background-color: rgba(245 158 11 / 0.08) !important;
-}
-
-.dark .bg-amber-900\/30 {
-  background-color: rgba(245 158 11 / 0.10) !important;
-}
-
-.dark .bg-emerald-50 {
-  background-color: transparent !important;
-}
-
-.dark .bg-emerald-900\/20 {
-  background-color: rgba(16 185 129 / 0.18) !important;
-}
-
-.dark .bg-green-50 {
-  background-color: transparent !important;
-}
-
-.dark .bg-rose-50 {
-  background-color: rgba(244 63 94 / 0.10) !important;
-  color: rgb(254 205 211) !important;
-}
-
-.dark .bg-rose-900\/20 {
-  background-color: rgba(244 63 94 / 0.08) !important;
-}
-
-.dark .bg-cyan-50 {
-  background-color: rgba(6 182 212 / 0.10) !important;
-  color: rgb(165 243 252) !important;
-}
-
-.dark .bg-gray-50 {
-  background-color: rgb(51 65 85) !important;
-  color: rgb(226 232 240) !important;
-}
-
-.dark .bg-gray-100 {
-  background-color: rgb(51 65 85) !important;
-}
-
-.dark .bg-gray-700 {
-  background-color: rgb(30 41 59) !important;
-}
-
-.dark .bg-gray-800\/50 {
-  background-color: rgba(30 41 59 / 0.5) !important;
-}
-
-.dark .bg-gray-700\/50 {
-  background-color: rgba(51 65 85 / 0.5) !important;
-}
-
-/* .dark .bg-white {
-  background-color: rgba(51 65 85 / 0.5) !important;
-} */
-
-/* Opacity tweaks for cards in dark mode */
-.dark .bg-white\/50 {
-  background-color: rgba(51 65 85 / 0.5) !important;
-}
-
-.dark .bg-white\/80 {
-  background-color: rgba(30 41 59 / 0.8) !important;
-}
-
-/* text-white stays white in dark — no override needed */
-
-/* ============================================================
-   LIGHT-MODE ADAPTIVE OVERRIDES
-   These are needed for pages (e.g. ingreso-mercancia.html) where the
-   HTML uses hardcoded `text-white`, `text-indigo-300`, `bg-indigo-900`
-   etc. that look fine in dark but unreadable in light.
-   The pattern is `html:not(.dark) .<class>` so we don't override the
-   class in dark mode (where it's already correct).
-   ============================================================ */
-
-html:not(.dark) .text-white {
-  /* color: rgb(var(--text-primary)) !important; */
-}
-
-html:not(.dark) .text-indigo-300 {
-  color: rgb(var(--accent-text)) !important;
-}
-
-html:not(.dark) .bg-indigo-900 {
-  background-color: rgb(var(--accent-soft)) !important;
-}
-
-html:not(.dark) .bg-blue-700 {
-  background-color: rgb(var(--accent)) !important;
-}
-
-html:not(.dark) .border-white\/10 {
-  border-color: rgb(var(--border)) !important;
-}
-
-html:not(.dark) .border-white\/5 {
-  border-color: rgb(var(--border-soft)) !important;
-}
-
-html:not(.dark) .bg-white\/5 {
-  background-color: rgba(15, 23, 42, 0.04) !important;
-}
-
-html:not(.dark) .bg-white\/10 {
-  background-color: rgba(15, 23, 42, 0.06) !important;
-}
-
-/* Specific borders for tinted sections */
-.dark .border-blue-200 {
-  border-color: rgba(59 130 246 / 0.4) !important;
-}
-
-.dark .border-blue-700 {
-  border-color: rgba(59 130 246 / 0.5) !important;
-}
-
-.dark .border-indigo-200 {
-  border-color: rgba(99 102 241 / 0.4) !important;
-}
-
-.dark .border-indigo-700 {
-  border-color: rgba(99 102 241 / 0.5) !important;
-}
-
-.dark .border-orange-500 {
-  border-color: rgba(249 115 22 / 0.5) !important;
-}
-
-.dark .border-orange-600 {
-  border-color: rgba(249 115 22 / 0.5) !important;
-}
-
-.dark .border-amber-300 {
-  border-color: rgba(245 158 11 / 0.5) !important;
-}
-
-.dark .border-amber-600 {
-  border-color: rgba(245 158 11 / 0.5) !important;
-}
-
-.dark .border-green-400 {
-  border-color: rgba(16 185 129 / 0.5) !important;
-}
-
-.dark .border-green-500 {
-  border-color: rgba(16 185 129 / 0.5) !important;
-}
 
 /* ============================================================
    GLASSMORPHISM (for modals/overlays that opt in)

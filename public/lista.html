@@ -9,24 +9,13 @@
   <!-- 1. Anti-FOUC: aplica .dark antes de que Tailwind parsee -->
   <script src="js/theme-init.js"></script>
 
-  <!-- 2. Tailwind (CDN) -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 2. Tailwind Output Local -->
+  <link rel="stylesheet" href="css/tailwind-output.css">
 
-  <!-- 3. Config inline: darkMode por clase — DEBE ir después del CDN -->
-  <script>
-    window.tailwind = window.tailwind || {};
-    window.tailwind.config = {
-      darkMode: 'class',
-      theme: { extend: {
-        fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
-      } }
-    };
-  </script>
-
-  <!-- 4. Tokens y overrides de tema (ganan especificidad sobre Tailwind) -->
+  <!-- 3. Tokens y overrides de tema -->
   <link rel="stylesheet" href="css/theme.css">
 
-  <!-- 5. Estilos específicos de esta página -->
+  <!-- 4. Estilos específicos de esta página -->
   <link rel="stylesheet" href="./css/lista.css">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,7 +23,7 @@
 
 </head>
 
-<body>
+<body class="surface-base-bg transition-colors">
   <!-- Nav montada por js/components/nav.js (compartida con el resto de páginas) -->
   <div id="appNav" data-active="lista"></div>
 

@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+/* 
+  Configura dark mode por CLASE en lugar de media query del sistema operativo.
+  Esto hace que dark:bg-*, dark:text-*, etc. respondan al toggle de tema
+  que añade/quita class="dark" en el elemento <html>.
+  Sin esto, Tailwind v4 usa prefers-color-scheme y los utilities dark: 
+  quedan inactivos cuando el usuario hace clic en el botón 🌙/☀️.
+*/
+@custom-variant dark (&:where(.dark, .dark *));
+
+@source "../**/*.html";
+@source "../js/**/*.js";

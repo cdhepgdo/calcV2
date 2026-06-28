@@ -11,33 +11,20 @@
     <!-- 1. Anti-FOUC: aplica .dark antes de que Tailwind parsee -->
     <script src="js/theme-init.js"></script>
 
-    <!-- 2. Tailwind (CDN) -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 2. Tailwind Output (Compilado localmente) -->
+    <link rel="stylesheet" href="css/tailwind-output.css">
 
-    <!-- 3. Config inline: darkMode por clase — DEBE ir después del CDN -->
-    <script>
-        window.tailwind = window.tailwind || {};
-        window.tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
-                }
-            }
-        };
-    </script>
-
-    <!-- 4. Tokens y overrides de tema (ganan especificidad sobre Tailwind) -->
+    <!-- 3. Tokens y overrides de tema -->
     <link rel="stylesheet" href="css/theme.css">
 
-    <!-- 5. Estilos específicos de esta página (al final) -->
+    <!-- 4. Estilos específicos de esta página -->
     <link rel="stylesheet" href="./css/ingreso-mercancia.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
-<body>
+<body class="surface-base-bg transition-colors">
 
     <div id="loadingOverlay">
         <div class="text-center">
@@ -67,16 +54,16 @@
                 <h1 class="text-2xl font-bold text-themed flex items-center gap-2" id="tituloModo">
                     📦 <span>Nota de Ingreso de Mercancía</span>
                 </h1>
-                <p class="text-themed-secondary text-sm mt-1" id="subtituloModo">Ingresa los equipos fila por fila. Usa <kbd
-                        class="kbd-atajo">Tab</kbd> para avanzar y <kbd
-                        class="kbd-atajo">Enter</kbd> al final de fila
-                    para agregar otra.</p>
+                <p class="text-themed-secondary text-sm mt-1" id="subtituloModo">Ingresa los equipos fila por fila. Usa
+                    <kbd class="kbd-atajo">Tab</kbd> para avanzar y <kbd class="kbd-atajo">Enter</kbd> al final de fila
+                    para agregar otra.
+                </p>
                 <div class="flex items-center gap-2 mt-3 bg-white/5 p-1 rounded-lg w-max">
                     <button id="btnModoIngreso"
                         class="px-4 py-1.5 rounded-md text-sm font-bold bg-indigo-600 text-white shadow transition">📦
                         Ingreso</button>
                     <button id="btnModoSalida"
-                        class="px-4 py-1.5 rounded-md text-sm font-bold text-white opacity-50 hover:bg-white/10 transition">📤
+                        class="px-4 py-1.5 rounded-md text-sm font-bold bg-indigo-600 text-white opacity-50 hover:bg-white/10 transition">📤
                         Salida</button>
                 </div>
             </div>
@@ -85,8 +72,7 @@
                     <span class="sede-badge" id="badgeSede">📍 Cargando sede...</span>
                     <div class="text-themed-secondary text-sm font-medium" id="fechaHoy"></div>
                 </div>
-                <button id="btnImprimirLote"
-                    class="btn-accion btn-accion--neutro text-sm flex items-center gap-2">
+                <button id="btnImprimirLote" class="btn-accion btn-accion--neutro text-sm flex items-center gap-2">
                     🖨️ Imprimir Nota
                 </button>
             </div>
@@ -97,7 +83,8 @@
         <!-- ========================================== -->
         <div id="seccionSalida" class="hidden">
             <div class="glass rounded-2xl p-5 mb-5">
-                <h2 class="text-themed-secondary text-xs font-bold uppercase tracking-wider mb-4">Información de Traslado</h2>
+                <h2 class="text-themed-secondary text-xs font-bold uppercase tracking-wider mb-4">Información de
+                    Traslado</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="text-themed-muted text-xs font-medium block mb-1">Destino (Sede o Cliente)</label>
@@ -110,7 +97,8 @@
                             class="cell-input rounded-lg py-2 px-3 text-sm w-full">
                     </div>
                     <div>
-                        <label class="text-themed-muted text-xs font-medium block mb-1">Notas / Detalles del Envío</label>
+                        <label class="text-themed-muted text-xs font-medium block mb-1">Notas / Detalles del
+                            Envío</label>
                         <input type="text" id="salidaNotas" placeholder="Ej: Traslado para reparación"
                             class="cell-input rounded-lg py-2 px-3 text-sm w-full">
                     </div>
@@ -151,12 +139,12 @@
                                 </div>
 
                                 <!-- Búsqueda general (funciona con IMEI también) -->
-                                <label class="text-themed-muted text-xs font-medium block mb-2">Buscar por modelo, color o
+                                <label class="text-themed-muted text-xs font-medium block mb-2">Buscar por modelo, color
+                                    o
                                     IMEI:</label>
                                 <input type="text" id="salidaBuscadorInput"
                                     placeholder="Buscar por modelo, color o IMEI..."
-                                    class="cell-input rounded-lg py-3 px-4 text-sm w-full mb-3"
-                                    autocomplete="off">
+                                    class="cell-input rounded-lg py-3 px-4 text-sm w-full mb-3" autocomplete="off">
                                 <div id="salidaSugerencias" class="flex flex-col gap-1 max-h-96 overflow-y-auto pr-2">
                                 </div>
                             </div>
@@ -165,12 +153,14 @@
                         <!-- Lista de seleccionados -->
                         <div class="flex-1">
                             <div class="glass rounded-2xl p-5 h-full flex flex-col">
-                                <h2 class="text-themed-secondary text-xs font-bold uppercase tracking-wider mb-4">Equipos
+                                <h2 class="text-themed-secondary text-xs font-bold uppercase tracking-wider mb-4">
+                                    Equipos
                                     Seleccionados para Salida</h2>
 
                                 <div id="listaSalidaSeleccionados"
                                     class="flex flex-col gap-2 flex-1 mb-6 max-h-96 overflow-y-auto pr-2">
-                                    <p class="text-themed-muted text-xs text-center italic py-4">Sin equipos seleccionados
+                                    <p class="text-themed-muted text-xs text-center italic py-4">Sin equipos
+                                        seleccionados
                                     </p>
                                 </div>
 
@@ -213,7 +203,8 @@
         <!-- ========================================== -->
         <div id="seccionIngreso" class="space-y-4">
             <div class="glass rounded-2xl p-5">
-                <h2 class="text-themed-secondary text-xs font-bold uppercase tracking-wider mb-3">Información del Lote</h2>
+                <h2 class="text-themed-secondary text-xs font-bold uppercase tracking-wider mb-3">Información del Lote
+                </h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="text-themed-muted text-xs font-medium block mb-1">Origen / Proveedor</label>
@@ -221,7 +212,8 @@
                             class="cell-input rounded-lg py-2 px-3 text-sm w-full">
                     </div>
                     <div>
-                        <label class="text-themed-muted text-xs font-medium block mb-1">Notas del lote (opcional)</label>
+                        <label class="text-themed-muted text-xs font-medium block mb-1">Notas del lote
+                            (opcional)</label>
                         <input type="text" id="notasLote" placeholder="Ej: Lote de nov, mercancía revisada..."
                             class="cell-input rounded-lg py-2 px-3 text-sm w-full">
                     </div>
@@ -235,14 +227,17 @@
                             <table class="w-full text-sm" style="min-width:900px">
                                 <thead>
                                     <tr class="border-b border-white/10">
-                                        <th class="text-left py-3 px-3 text-themed-secondary font-semibold text-xs w-8">#</th>
+                                        <th class="text-left py-3 px-3 text-themed-secondary font-semibold text-xs w-8">
+                                            #</th>
                                         <th class="text-left py-3 px-2 text-themed-secondary font-semibold text-xs"
                                             style="min-width:130px">Modelo</th>
                                         <th class="text-left py-3 px-2 text-themed-secondary font-semibold text-xs"
                                             style="min-width:180px">GB</th>
                                         <th class="text-left py-3 px-2 text-themed-secondary font-semibold text-xs"
                                             style="min-width:130px">Color</th>
-                                        <th class="text-left py-3 px-2 text-themed-secondary font-semibold text-xs w-16">Bat%
+                                        <th
+                                            class="text-left py-3 px-2 text-themed-secondary font-semibold text-xs w-16">
+                                            Bat%
                                         </th>
                                         <th class="text-left py-3 px-2 text-themed-secondary font-semibold text-xs"
                                             style="min-width:165px">IMEI</th>

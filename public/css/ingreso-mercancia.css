@@ -434,7 +434,9 @@ body {
 /* ── Botón de modo (Ingreso / Salida) activo ── */
 .btn-modo-activo {
     background: rgb(var(--accent));
-    color: rgb(var(--text-inverse));
+    color: var(--color-white);
+    /* siempre blanco sobre fondo accent, en ambos modos */
+    box-shadow: 0 2px 8px rgba(var(--accent), 0.4);
 }
 
 /* ── Utilidades semánticas de texto (para JS que genera HTML dinámico) ── */

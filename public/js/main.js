@@ -212,13 +212,12 @@ class App {
                 const montoTotalField = document.getElementById('montoTotal');
                 if (formaPago) {
                     montoTotalField.removeAttribute('readonly');
-                    montoTotalField.classList.remove('bg-gray-100');
-                    montoTotalField.classList.add('bg-white', 'dark:bg-slate-700');
-                    console.log('i')
+                    montoTotalField.classList.remove('surface-muted-bg');
+                    montoTotalField.classList.add('surface-card');
                 } else {
                     montoTotalField.setAttribute('readonly', true);
-                    montoTotalField.classList.add('bg-gray-100');
-                    montoTotalField.classList.remove('bg-white', 'dark:bg-slate-700');
+                    montoTotalField.classList.add('surface-muted-bg');
+                    montoTotalField.classList.remove('surface-card');
                     // Recalcular automáticamente
                     //this.calcularTotalMixto();
                     console.log('o')
@@ -583,7 +582,7 @@ class App {
 
         const idx = contenedor.querySelectorAll('.equipo-vendido-item').length + 2; // 2, 3, 4...
         const fila = document.createElement('div');
-        fila.className = 'equipo-vendido-item bg-white dark:bg-slate-800 p-3 rounded-lg border-2 border-blue-200 dark:border-blue-700 relative';
+        fila.className = 'equipo-vendido-item surface-card p-3 rounded-lg border-2 border-blue-200 dark:border-blue-700 relative';
         fila.innerHTML = `
             <div class="flex items-center justify-between mb-2">
                 <span class="text-xs font-semibold text-blue-700 dark:text-blue-400 flex items-center gap-2">
@@ -603,15 +602,15 @@ class App {
             </div>
             <div class="grid md:grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Modelo</label>
+                    <label class="block text-xs font-medium mb-1 text-themed-secondary">Modelo</label>
                     <select class="eq-vendido-modelo w-full p-2 border rounded-lg text-sm"></select>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Color</label>
+                    <label class="block text-xs font-medium mb-1 text-themed-secondary">Color</label>
                     <select class="eq-vendido-color w-full p-2 border rounded-lg text-sm"></select>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Capacidad</label>
+                    <label class="block text-xs font-medium mb-1 text-themed-secondary">Capacidad</label>
                     <select class="eq-vendido-almacenamiento w-full p-2 border rounded-lg text-sm">
                         <option value="">—</option>
                         <option value="64GB">64GB</option>
@@ -622,15 +621,15 @@ class App {
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">% Batería</label>
+                    <label class="block text-xs font-medium mb-1 text-themed-secondary">% Batería</label>
                     <input type="number" min="1" max="100" class="eq-vendido-bateria w-full p-2 border rounded-lg text-sm" placeholder="%">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">IMEI</label>
+                    <label class="block text-xs font-medium mb-1 text-themed-secondary">IMEI</label>
                     <input type="text" class="eq-vendido-imei w-full p-2 border rounded-lg text-sm" placeholder="IMEI">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Precio ($)</label>
+                    <label class="block text-xs font-medium mb-1 text-themed-secondary">Precio ($)</label>
                     <input type="number" step="0.01" min="0" class="eq-vendido-precio w-full p-2 border rounded-lg text-sm" placeholder="0.00">
                 </div>
             </div>
@@ -703,7 +702,7 @@ class App {
 
         const idx = contenedor.querySelectorAll('.equipo-recibido-item').length + 2;
         const fila = document.createElement('div');
-        fila.className = 'equipo-recibido-item bg-white dark:bg-slate-800 p-3 rounded-lg border-2 border-orange-200 dark:border-orange-700 relative';
+        fila.className = 'equipo-recibido-item surface-card p-3 rounded-lg border-2 border-orange-200 dark:border-orange-700 relative';
         fila.innerHTML = `
             <div class="flex items-center justify-between mb-2">
                 <span class="text-xs font-semibold text-orange-700 dark:text-orange-400">📱 Equipo Recibido #${idx}</span>
@@ -713,11 +712,11 @@ class App {
             </div>
             <div class="grid md:grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Modelo</label>
+                    <label class="block text-xs font-medium mb-1 text-themed-secondary">Modelo</label>
                     <select class="eq-recibido-modelo w-full p-2 border rounded-lg text-sm"></select>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Capacidad</label>
+                    <label class="block text-xs font-medium mb-1 text-themed-secondary">Capacidad</label>
                     <select class="eq-recibido-capacidad w-full p-2 border rounded-lg text-sm">
                         <option value="">—</option>
                         <option value="64GB">64GB</option>
@@ -728,19 +727,19 @@ class App {
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Color</label>
+                    <label class="block text-xs font-medium mb-1 text-themed-secondary">Color</label>
                     <select class="eq-recibido-color w-full p-2 border rounded-lg text-sm"></select>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">% Batería</label>
+                    <label class="block text-xs font-medium mb-1 text-themed-secondary">% Batería</label>
                     <input type="number" min="1" max="100" class="eq-recibido-bateria w-full p-2 border rounded-lg text-sm" placeholder="%">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">IMEI</label>
+                    <label class="block text-xs font-medium mb-1 text-themed-secondary">IMEI</label>
                     <input type="text" class="eq-recibido-imei w-full p-2 border rounded-lg text-sm" placeholder="IMEI">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Valor ($)</label>
+                    <label class="block text-xs font-medium mb-1 text-themed-secondary">Valor ($)</label>
                     <input type="number" step="0.01" min="0" class="eq-recibido-valor w-full p-2 border rounded-lg text-sm" placeholder="0.00">
                 </div>
             </div>
@@ -2972,11 +2971,11 @@ class App {
             const yaSel = this._equiposSeleccionadosVenta.some(e => e.id === eq.id);
             const batColor = eq.bateria < 50 ? 'text-red-500 dark:text-red-400' : eq.bateria < 80 ? 'text-orange-500 dark:text-orange-400' : 'text-green-600 dark:text-green-400';
             return `
-                <div class="equipo-sugerencia p-2 rounded-lg border ${yaSel ? 'opacity-40 bg-gray-50 dark:bg-slate-700' : 'cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/30 bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700'}"
+                <div class="equipo-sugerencia p-2 rounded-lg border ${yaSel ? 'opacity-40 bg-gray-50 dark:bg-slate-700' : 'cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/30 border-gray-200 dark:border-slate-700'} surface-card"
                      data-equipo-id="${eq.id}">
                     <div class="flex items-center justify-between gap-2">
                         <div class="flex-1 min-w-0">
-                            <p class="font-semibold text-gray-800 dark:text-slate-100 text-sm truncate">📱 iPhone ${eq.modelo} ${eq.gb} — ${eq.color}</p>
+                            <p class="font-semibold text-sm truncate text-themed">📱 iPhone ${eq.modelo} ${eq.gb} — ${eq.color}</p>
                             <div class="flex items-center gap-3 mt-0.5 flex-wrap">
                                 <span class="text-xs ${batColor}">🔋 ${eq.bateria}%</span>
                                 <span class="text-xs font-mono text-gray-400 dark:text-slate-500">${eq.imei}</span>
@@ -3092,17 +3091,17 @@ class App {
 
         if (lista) {
             lista.innerHTML = this._equiposSeleccionadosVenta.map((eq, idx) => `
-                <div class="equipo-seleccionado bg-white dark:bg-slate-800 p-3 rounded-lg border-2 border-blue-200 dark:border-blue-700" data-equipo-id="${eq.id}">
+                <div class="equipo-seleccionado p-3 rounded-lg border-2 border-blue-200 dark:border-blue-700 surface-card" data-equipo-id="${eq.id}">
                     <div class="flex items-start justify-between gap-2">
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 mb-1">
                                 <span class="text-slate-500 text-xs font-mono">${idx + 1}</span>
                                 <p class="font-bold text-sm truncate">📱 iPhone ${eq.modelo} ${eq.gb} — ${eq.color}</p>
                             </div>
-                            <p class="text-xs font-mono text-gray-500 dark:text-slate-400">IMEI: ${eq.imei}</p>
-                            <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">🔋 ${eq.bateria}%${eq.detalles ? ' | ' + eq.detalles : ''}</p>
+                            <p class="text-xs font-mono text-themed-muted">IMEI: ${eq.imei}</p>
+                            <p class="text-xs mt-1 text-themed-muted">🔋 ${eq.bateria}%${eq.detalles ? ' | ' + eq.detalles : ''}</p>
                             <div class="mt-2 flex items-center gap-2">
-                                <label class="text-xs font-medium text-gray-700 dark:text-slate-300 whitespace-nowrap">Precio ($):</label>
+                                <label class="text-xs font-medium whitespace-nowrap text-themed-secondary">Precio ($):</label>
                                 <input type="number" step="0.01" min="0"
                                     class="eq-vendido-precio flex-1 p-1.5 border rounded text-sm"
                                     value="${eq.precio}"
@@ -3223,8 +3222,8 @@ class App {
             resumenElement.innerHTML = `
                 <div class="text-center py-8">
                     <p class="text-gray-400 dark:text-slate-500 text-lg">📭</p>
-                    <p class="text-gray-600 dark:text-slate-300">No hay ventas registradas hoy.</p>
-                    <p class="text-sm text-gray-500 dark:text-slate-400 mt-2">Las ventas aparecerán aquí automáticamente</p>
+                    <p class="text-themed-secondary">No hay ventas registradas hoy.</p>
+                    <p class="text-sm mt-2 text-themed-muted">Las ventas aparecerán aquí automáticamente</p>
                 </div>
             `;
         } else {
@@ -3238,7 +3237,7 @@ class App {
             if (ventasCompletas.length > 0) {
                 html += `
                     <div class="mb-4">
-                        <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2 flex items-center">
+                        <h3 class="text-sm font-semibold mb-2 flex items-center text-themed-secondary">
                             <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-2 py-1 rounded mr-2">📱 ${ventasCompletas.length}</span>
                             Ventas Completas
                         </h3>
@@ -3252,7 +3251,7 @@ class App {
             if (soloAccesorios.length > 0) {
                 html += `
                     <div class="mb-4">
-                        <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2 flex items-center">
+                        <h3 class="text-sm font-semibold mb-2 flex items-center text-themed-secondary">
                             <span class="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-1 rounded mr-2">🛡️ ${soloAccesorios.length}</span>
                             Solo Accesorios
                         </h3>
@@ -3266,7 +3265,7 @@ class App {
             if (abonos.length > 0) {
                 html += `
                     <div class="mb-4">
-                        <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2 flex items-center">
+                        <h3 class="text-sm font-semibold mb-2 flex items-center text-themed-secondary">
                             <span class="bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 px-2 py-1 rounded mr-2">💰 ${abonos.length}</span>
                             Abonos
                         </h3>
@@ -3407,8 +3406,8 @@ class App {
                         ? `📱 Equipo #${idx + 1} de ${equiposVendidos.length}`
                         : '📱 Equipo';
                     return `
-                        <div class="bg-white bg-opacity-60 p-2 rounded mb-2 ${idx > 0 ? 'border-t border-blue-200 pt-2' : ''}">
-                            <h6 class="font-semibold text-blue-900 text-xs mb-1">${titulo}</h6>
+                        <div class="surface-card bg-opacity-80 p-2 rounded mb-2 ${idx > 0 ? 'border-t border-blue-200 dark:border-blue-700/50 pt-2' : ''}">
+                            <h6 class="font-semibold text-blue-800 dark:text-blue-300 text-xs mb-1">${titulo}</h6>
                             <p><strong>Modelo:</strong> ${sanitizar(eq.modelo || '')}</p>
                             <p><strong>Capacidad:</strong> ${sanitizar(eq.almacenamiento || '')}</p>
                             <p><strong>Color:</strong> ${sanitizar(eq.color || '')}</p>
@@ -3524,18 +3523,18 @@ class App {
         }
 
         if (venta.equipoRecibido) {
-            detallesPago.push(`<p class="bg-orange-100 px-2 py-1 rounded">Equipo recibido: ${venta.equipoRecibido.modelo} (${formatearMoneda(venta.equipoRecibido.valor)})</p>`);
+            detallesPago.push(`<p class="bg-orange-100 dark:bg-orange-900/30 text-orange-900 dark:text-orange-200 px-2 py-1 rounded">Equipo recibido: ${venta.equipoRecibido.modelo} (${formatearMoneda(venta.equipoRecibido.valor)})</p>`);
         } else if (venta.equiposRecibidos && venta.equiposRecibidos.length > 0) {
             // Multi-trade-in: mostrar un tag por cada uno
             venta.equiposRecibidos.forEach((eq, idx) => {
-                detallesPago.push(`<p class="bg-orange-100 px-2 py-1 rounded">Eq. recibido #${idx + 1}: ${eq.modelo} (${formatearMoneda(eq.valor || 0)})</p>`);
+                detallesPago.push(`<p class="bg-orange-100 dark:bg-orange-900/30 text-orange-900 dark:text-orange-200 px-2 py-1 rounded">Eq. recibido #${idx + 1}: ${eq.modelo} (${formatearMoneda(eq.valor || 0)})</p>`);
             });
         }
 
         if (venta.abonosPrevios && venta.abonosPrevios.length > 0) {
             venta.abonosPrevios.forEach(ab => {
                 const fechaText = ab.fecha ? ` (${ab.fecha})` : '';
-                detallesPago.push(`<p class="bg-green-100 px-2 py-1 rounded">Abono Precargado${fechaText}: ${formatearMoneda(ab.monto)}</p>`);
+                detallesPago.push(`<p class="bg-green-100 dark:bg-green-900/30 text-green-900 dark:text-green-200 px-2 py-1 rounded">Abono Precargado${fechaText}: ${formatearMoneda(ab.monto)}</p>`);
             });
         }
 
@@ -3552,17 +3551,17 @@ class App {
         `;
 
         return `
-            <div class="border-2 ${venta.tipoTransaccion === 'abono' ? 'border-orange-300 dark:border-orange-600 bg-orange-50 dark:bg-orange-900/20' : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800'} rounded-xl p-4 shadow-md mb-4 fade-in hover-lift">
+            <div class="border-2 ${venta.tipoTransaccion === 'abono' ? 'border-orange-300 dark:border-orange-600 bg-orange-50 dark:bg-orange-900/20' : 'border-themed surface-card'} rounded-xl p-4 shadow-md mb-4 fade-in hover-lift">
                 <!-- Header -->
                 <div class="flex justify-between items-start mb-3 pb-2 border-b">
                     <div>
-                        <h4 class="font-bold text-gray-800 dark:text-slate-100 text-sm">
+                        <h4 class="font-bold text-sm text-themed">
                             ${venta.tipoTransaccion === 'abono' ? '💰 ABONO' : '💳 VENTA'}
                             ${weppaHtml}
                         </h4>
-                        ${venta.tipoVenta === 'completa' ? `<p class="text-xs text-gray-600 dark:text-slate-300 mt-1">${sanitizar(venta.cliente.nombre)} (${sanitizar(venta.cliente.cedula)})</p>` : '<p class="text-xs text-gray-600 dark:text-slate-300 mt-1">Solo Accesorios</p>'}
+                        ${venta.tipoVenta === 'completa' ? `<p class="text-xs mt-1 text-themed-secondary">${sanitizar(venta.cliente.nombre)} (${sanitizar(venta.cliente.cedula)})</p>` : '<p class="text-xs mt-1 text-themed-secondary">Solo Accesorios</p>'}
                     </div>
-                    <span class="text-xs text-gray-500 dark:text-slate-400">${venta.hora}</span>
+                    <span class="text-xs text-themed-muted">${venta.hora}</span>
                 </div>
                 
                 <!-- Grid de secciones -->
@@ -3574,7 +3573,7 @@ class App {
                 </div>
                 
                 ${venta.notaVentaDetalles ? `
-                    <div class="bg-purple-100 p-2 rounded text-xs mb-3">
+                    <div class="bg-purple-100 dark:bg-purple-900/20 text-purple-900 dark:text-purple-200 p-2 rounded text-xs mb-3">
                         <strong>📝 Nota:</strong> ${sanitizar(venta.notaVentaDetalles)}
                     </div>
                 ` : ''}
@@ -3626,8 +3625,8 @@ class App {
             resumenElement.innerHTML = `
                 <div class="text-center py-8">
                     <p class="text-gray-400 dark:text-slate-500 text-lg">📦</p>
-                    <p class="text-gray-600 dark:text-slate-300">No hay movimientos registrados hoy.</p>
-                    <p class="text-sm text-gray-500 dark:text-slate-400 mt-2">Los movimientos de inventario aparecerán aquí</p>
+                    <p class="text-themed-secondary">No hay movimientos registrados hoy.</p>
+                    <p class="text-sm mt-2 text-themed-muted">Los movimientos de inventario aparecerán aquí</p>
                 </div>
             `;
         } else {
@@ -3650,7 +3649,7 @@ class App {
             if (ingresos.length > 0) {
                 html += `
                     <div class="mb-4">
-                        <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2 flex items-center">
+                        <h3 class="text-sm font-semibold mb-2 flex items-center text-themed-secondary">
                             <span class="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-1 rounded mr-2">⬅️ ${ingresos.length}</span>
                             Ingresos
                         </h3>
@@ -3664,7 +3663,7 @@ class App {
             if (salidas.length > 0) {
                 html += `
                     <div class="mb-4">
-                        <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2 flex items-center">
+                        <h3 class="text-sm font-semibold mb-2 flex items-center text-themed-secondary">
                             <span class="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 px-2 py-1 rounded mr-2">➡️ ${salidas.length}</span>
                             Salidas
                         </h3>
@@ -3677,7 +3676,7 @@ class App {
             if (cambiosGarantia.length > 0) {
                 html += `
                     <div class="mb-4">
-                        <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2 flex items-center">
+                        <h3 class="text-sm font-semibold mb-2 flex items-center text-themed-secondary">
                             <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-2 py-1 rounded mr-2">🔄 ${cambiosGarantia.length}</span>
                             Cambios por Garantía
                         </h3>
@@ -3702,7 +3701,7 @@ class App {
             : Movimiento.fromJSON(movimientoData);
 
         // Determinar color según tipo
-        let colorClass = 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700';
+        let colorClass = 'surface-card border-themed';
         const tipoLower = movimiento.tipo.toLowerCase();
 
         if (tipoLower.includes('cambio') && tipoLower.includes('garantía')) {
@@ -3730,9 +3729,9 @@ class App {
                 <div class="flex justify-between items-start">
                     <div class="flex-1">
                         <h5 class="font-semibold text-sm mb-1">${titulo}</h5>
-                        <p class="text-xs text-gray-600 dark:text-slate-300">${detalles}</p>
+                        <p class="text-xs text-themed-secondary">${detalles}</p>
                     </div>
-                    <span class="text-xs text-gray-500 dark:text-slate-400 ml-2">${movimiento.hora || ''}</span>
+                    <span class="text-xs ml-2 text-themed-muted">${movimiento.hora || ''}</span>
                 </div>
             </div>
         `;
@@ -5315,16 +5314,16 @@ class App {
 
     _renderizarResultadosBuscador(tipo, equipos, contenedor) {
         if (equipos.length === 0) {
-            contenedor.innerHTML = '<div class="p-3 text-sm text-gray-500 dark:text-slate-400 text-center">No se encontraron equipos disponibles con ese dato.</div>';
+            contenedor.innerHTML = '<div class="p-3 text-sm text-center text-themed-muted">No se encontraron equipos disponibles con ese dato.</div>';
             contenedor.classList.remove('hidden');
             return;
         }
 
         const html = equipos.slice(0, 10).map(eq => `
-            <div class="p-3 border-b border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer flex items-center justify-between" data-imei="${eq.imei}">
+            <div class="p-3 border-b hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer flex items-center justify-between border-themed" data-imei="${eq.imei}">
                 <div>
-                    <p class="font-semibold text-gray-800 dark:text-slate-100 text-sm">📱 ${eq.modelo}</p>
-                    <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                    <p class="font-semibold text-sm text-themed">📱 ${eq.modelo}</p>
+                    <p class="text-xs mt-1 text-themed-muted">
                         <span class="bg-gray-100 px-1 rounded">${eq.gb}</span> • 
                         <span class="bg-gray-100 px-1 rounded">${eq.color}</span> • 
                         <span class="bg-gray-100 px-1 rounded">Batería: ${eq.bateria}%</span>

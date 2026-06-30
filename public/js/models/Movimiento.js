@@ -152,19 +152,48 @@ export class Movimiento {
     }
 
     /**
-     * Calcula el impacto en efectivo de este movimiento
+     * Calcula el impacto en efectivo de este movimiento.
+     *
+     * ⚠️ IMPORTANTE: este método compara `this.tipo` contra el formato
+     * que el resto del proyecto usa al guardar movimientos: con espacio
+     * y mayúscula (ej: 'Salida Efectivo'). NO contra las constantes
+     * camelCase de TIPOS_MOVIMIENTO (ej: 'salidaEfectivo'), porque
+     * eso SIEMPRE cae al default y devuelve 0.
+     *
+     * Reglas:
+     *   - 'Salida Efectivo'    → -monto
+     *   - 'Ingreso Efectivo'   → +monto
+     *   - 'Compra Equipo'      → -precio
+     *   - 'Cambio Garantía'    → ±diferencia.monto (afecta caja)
+     *   - Todo lo demás        → 0
      */
     calcularImpactoEfectivo() {
-        switch (this.tipo) {
-            case TIPOS_MOVIMIENTO.SALIDA_EFECTIVO:
-                return -this.datos.monto;
-            case TIPOS_MOVIMIENTO.INGRESO_EFECTIVO:
-                return this.datos.monto;
-            case TIPOS_MOVIMIENTO.COMPRA_EQUIPO:
-                return -this.datos.precio;
-            default:
-                return 0;
+        const tipoLower = this.tipo.toLowerCase();
+
+        if (tipoLower.includes('salida') && tipoLower.includes('efectivo')) {
+            return -Number(this.datos.monto) || 0;
         }
+        if (tipoLower.includes('ingreso') && tipoLower.includes('efectivo')) {
+            return Number(this.datos.monto) || 0;
+        }
+        if (tipoLower.includes('compra')) {
+            return -Number(this.datos.precio) || 0;
+        }
+        if (tipoLower.includes('cambio') && tipoLower.includes('garantía')) {
+            // Cambio por garantía afecta caja según la diferencia:
+            //   - a favor del cliente → tienda paga (negativo)
+            //   - a favor de la tienda → cliente paga (positivo)
+            //   - ninguna             → no afecta
+            const diferencia = this.datos.diferencia || {};
+            if (diferencia.tipo === 'favor-cliente') {
+                return -Number(diferencia.monto) || 0;
+            }
+            if (diferencia.tipo === 'favor-tienda') {
+                return Number(diferencia.monto) || 0;
+            }
+            return 0;
+        }
+        return 0;
     }
 
     /**

@@ -3,3 +3,19 @@
 
 # Node dependencies
 node_modules/
+
+# Entorno local (contiene claves reales de Firebase, NUNCA commitear)
+.env
+.env.local
+.env.*.local
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build outputs
+dist/

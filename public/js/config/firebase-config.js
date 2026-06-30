@@ -2,16 +2,26 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebas
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
-// ✅ Ahora — activa IndexedDB para offline real
-//import { initializeFirestore, persistentLocalCache } from 'firebase/firestore';
-
+/**
+ * Configuración de Firebase.
+ *
+ * Las claves se leen de variables de entorno (Vite las inyecta en build
+ * desde `.env.local`). Esto evita versionar la apiKey en el repo.
+ *
+ * Para desarrollo:
+ *   1. Copia `.env.example` → `.env.local`
+ *   2. Pega los valores reales
+ *   3. Vite los expone como `import.meta.env.VITE_FIREBASE_*`
+ *
+ * En producción (Netlify/Vercel), configúralas en el dashboard.
+ */
 const firebaseConfig = {
-  apiKey: "AIzaSyDPdvDTvMIv-dgoLuiKRDb4_0jx1dtKL14",
-  authDomain: "usaimport1.firebaseapp.com",
-  projectId: "usaimport1",
-  storageBucket: "usaimport1.firebasestorage.app",
-  messagingSenderId: "1052948620010",
-  appId: "1:1052948620010:web:93d4b17a5a94ada239ed93"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 const app = initializeApp(firebaseConfig);

@@ -3,10 +3,24 @@
  */
 
 /**
- * Valida que un campo no esté vacío
+ * Valida que un campo no esté vacío.
+ *
+ * ⚠️ Importante: 0 se considera VÁLIDO (por ejemplo, caja inicial 0 al
+ * empezar el día). La función distingue entre "ausente" (null/undefined/
+ * string vacío/solo espacios) y "presente con valor 0".
+ *
+ * @param {*} valor
+ * @param {string} nombreCampo
+ * @returns {{valido: boolean, error?: string}}
  */
 export function validarRequerido(valor, nombreCampo) {
-    if (!valor || valor.toString().trim() === '') {
+    if (valor === undefined || valor === null) {
+        return {
+            valido: false,
+            error: `${nombreCampo} es requerido`
+        };
+    }
+    if (typeof valor === 'string' && valor.trim() === '') {
         return {
             valido: false,
             error: `${nombreCampo} es requerido`

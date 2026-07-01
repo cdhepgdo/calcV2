@@ -287,11 +287,11 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "iphone 17 256",
-    "usd": 940
+    "usd": 980
   },
   {
     "nombre": "iphone 17 512",
-    "usd": 1150
+    "usd": 1090
   },
   {
     "nombre": "IPhone 17 Air open 256",
@@ -299,31 +299,31 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "IPhone 17 pro 256 open",
-    "usd": 1080
+    "usd": 1090
   },
   {
     "nombre": "IPhone 17 pro max 256 open",
-    "usd": 1190
+    "usd": 1269
   },
   {
     "nombre": "Iphone 17 pro 256gb",
-    "usd": 1219
+    "usd": 1249
   },
   {
     "nombre": "Iphone 17 pro 512gb",
-    "usd": 1450
+    "usd": 1467
   },
   {
     "nombre": "Iphone 17 pro Max 256gb",
-    "usd": 1289
+    "usd": 1389
   },
   {
     "nombre": "Iphone 17 pro Max 512gb",
-    "usd": 1599
+    "usd": 1649
   },
   {
     "nombre": "IPhone 17 pro Max 1TB",
-    "usd": 1770
+    "usd": 1849
   },
   {
     "nombre": "IPhone 17 pro Max 2TB",

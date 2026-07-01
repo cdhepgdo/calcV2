@@ -1,109 +1,68 @@
+import { ACCESORIOS_SCHEMA, assertPrefijoValido } from '../config/accesoriosSchema.js';
+
 /**
- * Servicio de Validación de Accesorios para Movimientos de Inventario
- * Centraliza toda la lógica de validación de accesorios
- * 
- * Responsabilidad: Validar que cada checkbox marcado tenga sus datos completos y válidos
+ * Servicio de Validación de Accesorios para Movimientos de Inventario.
+ *
+ * Centraliza la lógica de validación. La lista de accesorios soportados
+ * viene de ACCESORIOS_SCHEMA (ver config/accesoriosSchema.js).
+ *
+ * Si agregas un accesorio nuevo, basta con:
+ *   1. Declararlo en ACCESORIOS_SCHEMA
+ *   2. Agregar el HTML correspondiente siguiendo la convención
+ *   3. Llamar AccesorioValidator.verificarContratoHTML() al iniciar
+ *      la página — el sistema te dirá si el HTML no coincide.
  */
- 
 class AccesorioValidator {
+
     /**
-     * Valida y recopila accesorios de un formulario de movimiento
+     * Valida y recopila accesorios del formulario.
      * @param {string} prefijo - 'salida' o 'ingreso'
-     * @returns {Object} { valido, errores, accesorios }
+     * @param {Object} [deps] - Dependencias inyectables (para tests)
+     * @param {Document} [deps.doc=document] - Documento del DOM
+     * @returns {{valido: boolean, errores: string[], accesorios: Object[]}}
      */
-    static validarYRecopilar(prefijo) {
+    static validarYRecopilar(prefijo, deps = {}) {
+        const doc = deps.doc ?? document;
+        assertPrefijoValido(prefijo);
+
         const errores = [];
         const accesorios = [];
-        
+
         // ══════════════════════════════════════════
-        // FORRO (multi-modelo)
+        // VALIDACIÓN DINÁMICA POR SCHEMA
         // ══════════════════════════════════════════
-        const forroCheckbox = document.getElementById(`${prefijo}Forro`);
-        if (forroCheckbox?.checked) {
-            const resultadoForro = this._validarForros(prefijo);
-            if (!resultadoForro.valido) {
-                errores.push(...resultadoForro.errores);
-            } else {
-                accesorios.push(...resultadoForro.accesorios);
+        for (const accesorio of Object.values(ACCESORIOS_SCHEMA)) {
+            const resultado = this._validarAccesorio(prefijo, accesorio, doc);
+            if (!resultado.valido) {
+                errores.push(...resultado.errores);
+            } else if (resultado.accesorios.length > 0) {
+                accesorios.push(...resultado.accesorios);
             }
         }
-        
+
         // ══════════════════════════════════════════
-        // VIDRIO (multi-modelo)
+        // OTRO ACCESORIO (multi-fila dinámico especial)
         // ══════════════════════════════════════════
-        const vidrioCheckbox = document.getElementById(`${prefijo}Vidrio`);
-        if (vidrioCheckbox?.checked) {
-            const resultadoVidrio = this._validarVidrios(prefijo);
-            if (!resultadoVidrio.valido) {
-                errores.push(...resultadoVidrio.errores);
-            } else {
-                accesorios.push(...resultadoVidrio.accesorios);
-            }
-        }
-        
-        // ══════════════════════════════════════════
-        // CAJA (modelo + color + cantidad)
-        // ══════════════════════════════════════════
-        const cajaCheckbox = document.getElementById(`${prefijo}Caja`);
-        if (cajaCheckbox?.checked) {
-            const resultadoCaja = this._validarCaja(prefijo);
-            if (!resultadoCaja.valido) {
-                errores.push(...resultadoCaja.errores);
-            } else {
-                accesorios.push(...resultadoCaja.accesorios);
-            }
-        }
-        
-        // ══════════════════════════════════════════
-        // ACCESORIOS SIMPLES (solo cantidad)
-        // ══════════════════════════════════════════
-        const accesoriosSimples = [
-            { id: 'Cargador', nombre: 'Cargador' },
-            { id: 'ProtectorCamara', nombre: 'Protector de Cámara' },
-            { id: 'Cubo', nombre: 'Cubo' },
-            { id: 'CableLightning', nombre: 'Cable Lightning' },
-            { id: 'CableCC', nombre: 'Cable C+C' }
-        ];
-        
-        accesoriosSimples.forEach(acc => {
-            const checkbox = document.getElementById(`${prefijo}${acc.id}`);
-            if (checkbox?.checked) {
-                const resultado = this._validarAccesorioSimple(prefijo, acc.id, acc.nombre);
-                if (!resultado.valido) {
-                    errores.push(resultado.error);
-                } else {
-                    accesorios.push(resultado.accesorio);
-                }
-            }
-        });
-        
-        // ══════════════════════════════════════════
-        // OTRO ACCESORIO (multi-fila: nombre + cantidad)
-        // ══════════════════════════════════════════
-        const otroCheckbox = document.getElementById(`${prefijo}OtroAccesorio`);
+        const otroCheckbox = doc.getElementById(`${prefijo}OtroAccesorio`);
         if (otroCheckbox?.checked) {
-            const resultadoOtro = this._validarOtros(prefijo);
+            const resultadoOtro = this._validarOtros(prefijo, doc);
             if (!resultadoOtro.valido) {
                 errores.push(...resultadoOtro.errores);
             } else {
                 accesorios.push(...resultadoOtro.accesorios);
             }
         }
-        
+
         // ══════════════════════════════════════════
         // VALIDACIÓN GENERAL
         // ══════════════════════════════════════════
         if (accesorios.length === 0) {
             errores.push('⚠️ Debe seleccionar y completar al menos un accesorio');
         }
-        
-        return {
-            valido: errores.length === 0,
-            errores,
-            accesorios
-        };
+
+        return { valido: errores.length === 0, errores, accesorios };
     }
-    
+
     /**
      * Valida campos comunes del movimiento (destino/proveedor)
      * @param {string} prefijo - 'salida' o 'ingreso'
@@ -130,145 +89,148 @@ class AccesorioValidator {
             errores
         };
     }
-    
-    // ══════════════════════════════════════════
-    // MÉTODOS PRIVADOS DE VALIDACIÓN
-    // ══════════════════════════════════════════
-    
+
+    // ── Métodos privados ─────────────────────────────────────────────
+
     /**
-     * Valida forros (multi-modelo con cantidad)
+     * Despacha la validación según el tipo de accesorio.
      * @private
      */
-    static _validarForros(prefijo) {
-        const forros = [];
-        const filas = document.querySelectorAll(`#${prefijo}ForroLista .forro-item`);
-        
-        filas.forEach(fila => {
-            const modelo = fila.querySelector('.accModelo')?.value || '';
-            const cantidad = parseInt(fila.querySelector('.forro-cant')?.value) || 0;
-            
-            if (modelo && cantidad > 0) {
-                forros.push({ modelo, cantidad });
-            }
-        });
-        
-        if (forros.length === 0) {
+    static _validarAccesorio(prefijo, accesorio, doc) {
+        const checkbox = doc.getElementById(`${prefijo}${accesorio.id}`);
+        if (!checkbox?.checked) {
+            return { valido: true, accesorios: [] };  // no marcado → no aplica
+        }
+
+        switch (accesorio.tipoForm) {
+            case 'simple':     return this._validarSimple(prefijo, accesorio, doc);
+            case 'multi-fila': return this._validarMultiFila(prefijo, accesorio, doc);
+            case 'con-color':  return this._validarConColor(prefijo, accesorio, doc);
+            default:
+                return {
+                    valido: false,
+                    errores: [`❌ ${accesorio.nombre}: tipoForm "${accesorio.tipoForm}" no soportado`],
+                };
+        }
+    }
+
+    /**
+     * Accesorio simple: solo cantidad.
+     * @private
+     */
+    static _validarSimple(prefijo, accesorio, doc) {
+        const input = doc.querySelector(`#${prefijo}${accesorio.id}Cantidad input`);
+        if (!input) {
             return {
                 valido: false,
-                errores: ['❌ Forro: Debe seleccionar al menos un modelo y cantidad válida']
+                errores: [
+                    `❌ ${accesorio.nombre}: no se encontró el input de cantidad ` +
+                    `(buscado: #${prefijo}${accesorio.id}Cantidad input). ` +
+                    `Revisa el HTML.`,
+                ],
             };
         }
-        
-        return {
-            valido: true,
-            accesorios: [{
-                tipo: 'Forro',
-                modelos: forros
-            }]
-        };
-    }
-    
-    /**
-     * Valida vidrios (multi-modelo con cantidad)
-     * @private
-     */
-    static _validarVidrios(prefijo) {
-        const vidrios = [];
-        const filas = document.querySelectorAll(`#${prefijo}VidrioLista .vidrio-item`);
-        
-        filas.forEach(fila => {
-            const modelo = fila.querySelector('.accModelo')?.value || '';
-            const cantidad = parseInt(fila.querySelector('.vidrio-cant')?.value) || 0;
-            
-            if (modelo && cantidad > 0) {
-                vidrios.push({ modelo, cantidad });
-            }
-        });
-        
-        if (vidrios.length === 0) {
-            return {
-                valido: false,
-                errores: ['❌ Vidrio: Debe seleccionar al menos un modelo y cantidad válida']
-            };
-        }
-        
-        return {
-            valido: true,
-            accesorios: [{
-                tipo: 'Vidrio Templado',
-                modelos: vidrios
-            }]
-        };
-    }
-    
-    /**
-     * Valida cajas (multi-fila: modelo + color + cantidad)
-     * @private
-     */
-    static _validarCaja(prefijo) {
-        const cajas = [];
-        const filas = document.querySelectorAll(`#${prefijo}CajaLista .caja-item`);
-        
-        filas.forEach(fila => {
-            const modelo = fila.querySelector('.accModelo')?.value || '';
-            const color = fila.querySelector('.caja-color')?.value || '';
-            const cantidad = parseInt(fila.querySelector('.caja-cant')?.value) || 0;
-            
-            if (modelo && color && cantidad > 0) {
-                cajas.push({ modelo, color, cantidad });
-            }
-        });
-        
-        if (cajas.length === 0) {
-            return {
-                valido: false,
-                errores: ['❌ Caja: Debe seleccionar al menos un modelo, color y cantidad válida']
-            };
-        }
-        
-        return {
-            valido: true,
-            accesorios: [{
-                tipo: 'Caja',
-                modelos: cajas
-            }]
-        };
-    }
-    
-    /**
-     * Valida accesorio simple (solo cantidad)
-     * @private
-     */
-    static _validarAccesorioSimple(prefijo, id, nombre) {
-        const cantidad = parseInt(document.querySelector(`#${prefijo}${id}Cantidad input`)?.value) || 0;
-        
+        const cantidad = parseInt(input.value, 10) || 0;
         if (cantidad <= 0) {
             return {
                 valido: false,
-                error: `❌ ${nombre}: La cantidad debe ser mayor a 0`
+                errores: [`❌ ${accesorio.nombre}: La cantidad debe ser mayor a 0`],
             };
         }
-        
         return {
             valido: true,
-            accesorio: {
-                tipo: nombre,
-                cantidad
-            }
+            accesorios: [{ tipo: accesorio.nombre, cantidad }],
         };
     }
-    
+
     /**
-     * Valida "otros" accesorios (multi-fila: nombre + cantidad)
+     * Accesorio multi-fila: array de {modelo, cantidad}.
      * @private
      */
-    static _validarOtros(prefijo) {
+    static _validarMultiFila(prefijo, accesorio, doc) {
+        const listaSelector = accesorio.listaSelector.replace('{prefijo}', prefijo);
+        const lista = doc.querySelector(listaSelector);
+        if (!lista) {
+            return {
+                valido: false,
+                errores: [`❌ ${accesorio.nombre}: no se encontró el contenedor "${listaSelector}"`],
+            };
+        }
+        const filas = lista.querySelectorAll(accesorio.itemSelector);
+        const modelos = [];
+
+        filas.forEach((fila, idx) => {
+            const modelo = fila.querySelector(accesorio.campoModelo)?.value || '';
+            const cantidad = parseInt(fila.querySelector(accesorio.campoCant)?.value, 10) || 0;
+            if (modelo && cantidad > 0) {
+                modelos.push({ modelo, cantidad });
+            }
+        });
+
+        if (modelos.length === 0) {
+            return {
+                valido: false,
+                errores: [`❌ ${accesorio.nombre}: Debe seleccionar al menos un modelo y cantidad válida`],
+            };
+        }
+
+        return {
+            valido: true,
+            accesorios: [{ tipo: accesorio.tipoSalida, modelos }],
+        };
+    }
+
+    /**
+     * Accesorio con color: array de {modelo, color, cantidad}.
+     * @private
+     */
+    static _validarConColor(prefijo, accesorio, doc) {
+        const listaSelector = accesorio.listaSelector.replace('{prefijo}', prefijo);
+        const lista = doc.querySelector(listaSelector);
+        if (!lista) {
+            return {
+                valido: false,
+                errores: [`❌ ${accesorio.nombre}: no se encontró el contenedor "${listaSelector}"`],
+            };
+        }
+        const filas = lista.querySelectorAll(accesorio.itemSelector);
+        const modelos = [];
+
+        filas.forEach(fila => {
+            const modelo = fila.querySelector(accesorio.campoModelo)?.value || '';
+            const color  = fila.querySelector(accesorio.campoColor)?.value || '';
+            const cantidad = parseInt(fila.querySelector(accesorio.campoCant)?.value, 10) || 0;
+            if (modelo && color && cantidad > 0) {
+                modelos.push({ modelo, color, cantidad });
+            }
+        });
+
+        if (modelos.length === 0) {
+            return {
+                valido: false,
+                errores: [`❌ ${accesorio.nombre}: Debe seleccionar al menos un modelo, color y cantidad válida`],
+            };
+        }
+
+        return {
+            valido: true,
+            accesorios: [{ tipo: accesorio.tipoSalida, modelos }],
+        };
+    }
+
+    /**
+     * Valida "otros" accesorios (multi-fila: nombre + cantidad)
+     * Nota: Este accesorio tiene una estructura dinámica diferente al schema estándar,
+     * por lo que se mantiene su validación específica.
+     * @private
+     */
+    static _validarOtros(prefijo, doc) {
         const otros = [];
-        const filas = document.querySelectorAll(`#${prefijo}OtroLista .otro-item`);
+        const filas = doc.querySelectorAll(`#${prefijo}OtroLista .otro-item`);
         
         filas.forEach(fila => {
             const nombre = fila.querySelector('.otro-nombre')?.value || '';
-            const cantidad = parseInt(fila.querySelector('.otro-cant')?.value) || 0;
+            const cantidad = parseInt(fila.querySelector('.otro-cant')?.value, 10) || 0;
             
             if (nombre && cantidad > 0) {
                 otros.push({ nombre, cantidad });
@@ -293,6 +255,62 @@ class AccesorioValidator {
             valido: true,
             accesorios
         };
+    }
+
+    // ── Verificación de contrato (debug en dev) ─────────────────────
+
+    /**
+     * Verifica que cada accesorio declarado en el schema tenga su HTML
+     * correspondiente. Útil para llamar al iniciar la página en dev.
+     *
+     * En producción, si todo está bien, esto es silencioso. Si falta algo,
+     * emite warnings a la consola con instrucciones claras de cómo arreglar.
+     *
+     * @param {Document} [doc=document]
+     * @param {string} [prefijo='salida'] - 'salida' o 'ingreso'
+     * @returns {string[]} Lista de advertencias (vacía si todo OK)
+     */
+    static verificarContratoHTML(doc = document, prefijo = 'salida') {
+        const warnings = [];
+
+        for (const accesorio of Object.values(ACCESORIOS_SCHEMA)) {
+            const checkboxId = `${prefijo}${accesorio.id}`;
+            const checkbox = doc.getElementById(checkboxId);
+            if (!checkbox) {
+                warnings.push(
+                    `[AccesorioValidator] Falta checkbox #${checkboxId} para "${accesorio.nombre}". ` +
+                    `Agregar: <input type="checkbox" id="${checkboxId}">`
+                );
+                continue;
+            }
+
+            if (accesorio.tipoForm === 'simple') {
+                const input = doc.querySelector(`#${prefijo}${accesorio.id}Cantidad input`);
+                if (!input) {
+                    warnings.push(
+                        `[AccesorioValidator] Falta input de cantidad para "${accesorio.nombre}". ` +
+                        `Agregar: <div id="${prefijo}${accesorio.id}Cantidad"><input type="number" ...></div>`
+                    );
+                }
+            } else {
+                const listaSelector = accesorio.listaSelector.replace('{prefijo}', prefijo);
+                const lista = doc.querySelector(listaSelector);
+                if (!lista) {
+                    warnings.push(
+                        `[AccesorioValidator] Falta contenedor "${listaSelector}" para "${accesorio.nombre}".`
+                    );
+                }
+            }
+        }
+
+        if (warnings.length > 0) {
+            console.warn(
+                `[AccesorioValidator] Se encontraron ${warnings.length} problema(s) en el HTML (Prefijo: ${prefijo}):\n` +
+                warnings.map(w => `  • ${w}`).join('\n')
+            );
+        }
+
+        return warnings;
     }
 }
 

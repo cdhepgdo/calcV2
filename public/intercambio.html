@@ -7,10 +7,10 @@
   <title>Calculadora de Diferencia (Reestructurada)</title>
 
   <!-- 1. Anti-FOUC: aplica .dark antes de que Tailwind parsee -->
-  <script src="js/theme-init.js"></script>
+  <script type="module" src="js/theme-init.js"></script>
 
   <!-- 2. Tailwind Output Local -->
-  <link rel="stylesheet" href="css/tailwind-output.css">
+  <link rel="stylesheet" href="css/input.css">
 
   <!-- 3. Tokens y overrides de tema -->
   <link rel="stylesheet" href="css/theme.css">
@@ -84,7 +84,7 @@
     </section>
   </main>
   <script type="module">
-    import { PRECIOS_VENTA, PRECIOS_RECIBIDOS } from './prices.js'; // Importar listas de precios
+    import { PRECIOS_VENTA, PRECIOS_RECIBIDOS } from './js/config/precios.js'; // Importar listas de precios
 
     document.addEventListener('DOMContentLoaded', async () => {
       // === DATOS (importados de prices.js) ===

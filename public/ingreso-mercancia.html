@@ -9,10 +9,10 @@
         content="Registra el ingreso masivo de equipos al inventario de tu sede de forma rápida y eficiente.">
 
     <!-- 1. Anti-FOUC: aplica .dark antes de que Tailwind parsee -->
-    <script src="js/theme-init.js"></script>
+    <script type="module" src="js/theme-init.js"></script>
 
     <!-- 2. Tailwind Output (Compilado localmente) -->
-    <link rel="stylesheet" href="css/tailwind-output.css">
+    <link rel="stylesheet" href="css/input.css">
 
     <!-- 3. Tokens y overrides de tema -->
     <link rel="stylesheet" href="css/theme.css">
@@ -365,6 +365,7 @@
         import { mountNav } from './js/components/nav.js';
         import { initTheme, onThemeChange } from './js/theme.js';
         import { mountThemeToggle } from './js/components/themeToggle.js';
+        import { AccesorioValidator } from './js/services/AccesorioValidator.js';
 
         initTheme();
         mountNav('ingreso');
@@ -375,6 +376,12 @@
             // hook opcional para debug; lo dejamos silencioso en producción
             // console.debug('[ingreso] theme ->', mode);
         });
+
+        // Solo en desarrollo/debug: detectar desincronización HTML ↔ schema
+        if (import.meta.env?.DEV || window.location.search.includes('debug')) {
+            AccesorioValidator.verificarContratoHTML(document, 'ingreso');
+            AccesorioValidator.verificarContratoHTML(document, 'salida');
+        }
     </script>
 
     <!-- Área de impresión oculta -->

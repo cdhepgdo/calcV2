@@ -8,8 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="js/theme-init.js"></script>
-    <link rel="stylesheet" href="css/tailwind-output.css">
+    <script type="module" src="js/theme-init.js"></script>
+    <link rel="stylesheet" href="css/input.css">
     <link rel="stylesheet" href="css/theme.css">
     <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -1644,7 +1644,15 @@
     <script type="module" src="js/main.js"></script>
     <script type="module">
         import { mountNav } from './js/components/nav.js';
+        import { AccesorioValidator } from './js/services/AccesorioValidator.js';
+        
         mountNav('cierre');
+        
+        // Solo en desarrollo/debug: detectar desincronización HTML ↔ schema
+        if (import.meta.env?.DEV || window.location.search.includes('debug')) {
+            AccesorioValidator.verificarContratoHTML(document, 'salida');
+            AccesorioValidator.verificarContratoHTML(document, 'ingreso');
+        }
     </script>
 </body>
 

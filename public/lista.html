@@ -7,10 +7,10 @@
   <title>Lista de Precios en Bs</title>
 
   <!-- 1. Anti-FOUC: aplica .dark antes de que Tailwind parsee -->
-  <script src="js/theme-init.js"></script>
+  <script type="module" src="js/theme-init.js"></script>
 
   <!-- 2. Tailwind Output Local -->
-  <link rel="stylesheet" href="css/tailwind-output.css">
+  <link rel="stylesheet" href="css/input.css">
 
   <!-- 3. Tokens y overrides de tema -->
   <link rel="stylesheet" href="css/theme.css">
@@ -61,7 +61,7 @@
 
   <!-- Lógica de la página: tabla + APIs externas -->
   <script type="module">
-    import { PRECIOS_VENTA } from './config/precios.js';
+    import { PRECIOS_VENTA } from './js/config/precios.js';
 
     // Estado
     const productos = PRECIOS_VENTA;

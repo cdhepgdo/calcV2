@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Analizador de Inventario</title>
 
     <!-- 1. Anti-FOUC: aplica .dark antes de que Tailwind parsee -->
-    <script src="js/theme-init.js"></script>
+    <script type="module" src="js/theme-init.js"></script>
 
     <!-- 2. Tailwind Output Local -->
-    <link rel="stylesheet" href="css/tailwind-output.css">
+    <link rel="stylesheet" href="css/input.css">
 
     <!-- 4. Tokens y overrides de tema (ganan especificidad sobre Tailwind) -->
     <link rel="stylesheet" href="css/theme.css">
@@ -16,9 +17,10 @@
     <!-- 5. Estilos específicos de esta página -->
     <link rel="stylesheet" href="./css/inv-precio.css">
 </head>
+
 <body class="min-h-screen font-sans surface-base-bg">
-  <!-- Nav montada por js/components/nav.js (compartida con el resto de páginas) -->
-  <div id="appNav" data-active="inv-precio"></div>
+    <!-- Nav montada por js/components/nav.js (compartida con el resto de páginas) -->
+    <div id="appNav" data-active="inv-precio"></div>
     <div class="container mx-auto px-4 py-8 max-w-6xl">
         <!-- Header -->
         <div class="text-center mb-8">
@@ -46,11 +48,8 @@
                     <h2 class="text-2xl font-semibold text-themed mb-4 flex items-center">
                         📝 Texto de Entrada
                     </h2>
-                    <textarea
-                        id="devicesInputText"
-                        placeholder="Pega aquí tu inventario de dispositivos..."
-                        class="campo-textarea"
-                    ></textarea>
+                    <textarea id="devicesInputText" placeholder="Pega aquí tu inventario de dispositivos..."
+                        class="campo-textarea"></textarea>
                     <div class="flex gap-3 mt-4">
                         <button id="devicesAnalyzeBtn" class="btn-accion btn-accion--primario">
                             🔍 Analizar
@@ -97,7 +96,8 @@
                     <!-- Empty State -->
                     <div id="devicesEmptyState" class="text-center py-12">
                         <div class="empty-state-icono">📱</div>
-                        <p class="empty-state-texto">Pega tu inventario y presiona "Analizar" para ver los resultados</p>
+                        <p class="empty-state-texto">Pega tu inventario y presiona "Analizar" para ver los resultados
+                        </p>
                     </div>
                 </div>
             </div>
@@ -111,11 +111,8 @@
                     <h2 class="text-2xl font-semibold text-themed mb-4 flex items-center">
                         📝 Lista de Productos
                     </h2>
-                    <textarea
-                        id="productsInputText"
-                        placeholder="Pega aquí tu lista de productos con precios..."
-                        class="campo-textarea"
-                    ></textarea>
+                    <textarea id="productsInputText" placeholder="Pega aquí tu lista de productos con precios..."
+                        class="campo-textarea"></textarea>
                     <div class="flex gap-3 mt-4">
                         <button id="productsAnalyzeBtn" class="btn-accion btn-accion--exito">
                             💰 Analizar Precios
@@ -152,7 +149,8 @@
                     <!-- Empty State -->
                     <div id="productsEmptyState" class="text-center py-12">
                         <div class="empty-state-icono">💰</div>
-                        <p class="empty-state-texto">Pega tu lista de productos y presiona "Analizar Precios" para ver los resultados</p>
+                        <p class="empty-state-texto">Pega tu lista de productos y presiona "Analizar Precios" para ver
+                            los resultados</p>
                     </div>
                 </div>
             </div>
@@ -223,48 +221,48 @@
 
         // Función original para parsear productos
         function parseProductosCompleto(texto) {
-          const productos = [];
-        
-          // Dividir líneas, eliminar vacías y la cabecera
-          const lineas = texto
-            .split(/\r?\n/)
-            .filter(l => l.trim() && !l.toLowerCase().includes("actualización de precios"));
-        
-          // Precio: número (cualquier longitud) + posibles miles/decimales + justo antes de $
-          // Ejemplos válidos: 1040$, 1.040$, 1,040$, 1.040,50$, 1040.50$
-          const regexPrecio = /(\d+(?:[.,]\d{3})*(?:[.,]\d+)?)(?=\s*\$)/;
-        
-          for (const linea of lineas) {
-            const precioMatch = linea.match(regexPrecio);
-        
-            if (!precioMatch) continue;
-        
-            // Normalizar a formato parseable por JS
-            // Regla: quitar separadores de miles y convertir coma decimal en punto
-            let precioStr = precioMatch[1].replace(/\./g, '').replace(',', '.');
-            let precio = parseFloat(precioStr);
-        
-            // Quitar del nombre el precio y el símbolo $
-            // Nota: removemos SOLO el primer precio encontrado + $ cercano, para evitar tocar números útiles del nombre
-            const nombreSinPrecio = linea
-              .replace(regexPrecio, '')      // quita el número
-              .replace(/\s*\$/,'')           // quita el $
-              .trim();
-        
-            // Limpieza del nombre:
-            // - Quitar emojis
-            // - Quitar palabras de promo/noise comunes sin eliminar especificaciones (GB, TB, mm)
-            let nombre = nombreSinPrecio
-              .replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{1F1E6}-\u{1F1FF}]/gu, '') // emojis + flags
-              .replace(/\s{2,}/g, ' ') // espacios múltiples
-              .replace(/\b(promo|oferta|clase\s?[a-z]|bater[ií]as?\s?bajas|100%\b)/gi, '') // noise típico
-              .replace(/\s{2,}/g, ' ')
-              .trim();
-        
-            productos.push({ nombre, usd: precio });
-          }
-        
-          return { productos };
+            const productos = [];
+
+            // Dividir líneas, eliminar vacías y la cabecera
+            const lineas = texto
+                .split(/\r?\n/)
+                .filter(l => l.trim() && !l.toLowerCase().includes("actualización de precios"));
+
+            // Precio: número (cualquier longitud) + posibles miles/decimales + justo antes de $
+            // Ejemplos válidos: 1040$, 1.040$, 1,040$, 1.040,50$, 1040.50$
+            const regexPrecio = /(\d+(?:[.,]\d{3})*(?:[.,]\d+)?)(?=\s*\$)/;
+
+            for (const linea of lineas) {
+                const precioMatch = linea.match(regexPrecio);
+
+                if (!precioMatch) continue;
+
+                // Normalizar a formato parseable por JS
+                // Regla: quitar separadores de miles y convertir coma decimal en punto
+                let precioStr = precioMatch[1].replace(/\./g, '').replace(',', '.');
+                let precio = parseFloat(precioStr);
+
+                // Quitar del nombre el precio y el símbolo $
+                // Nota: removemos SOLO el primer precio encontrado + $ cercano, para evitar tocar números útiles del nombre
+                const nombreSinPrecio = linea
+                    .replace(regexPrecio, '')      // quita el número
+                    .replace(/\s*\$/, '')           // quita el $
+                    .trim();
+
+                // Limpieza del nombre:
+                // - Quitar emojis
+                // - Quitar palabras de promo/noise comunes sin eliminar especificaciones (GB, TB, mm)
+                let nombre = nombreSinPrecio
+                    .replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{1F1E6}-\u{1F1FF}]/gu, '') // emojis + flags
+                    .replace(/\s{2,}/g, ' ') // espacios múltiples
+                    .replace(/\b(promo|oferta|clase\s?[a-z]|bater[ií]as?\s?bajas|100%\b)/gi, '') // noise típico
+                    .replace(/\s{2,}/g, ' ')
+                    .trim();
+
+                productos.push({ nombre, usd: precio });
+            }
+
+            return { productos };
         }
 
         // Textos de ejemplo
@@ -398,10 +396,10 @@ Samsung Galaxy Tab S8 800$`;
         // Funciones para mostrar resultados de productos
         function displayProductsResults(results) {
             productsEmptyState.classList.add('hidden');
-            
+
             // Generar código JavaScript
             const jsCode = `const productos = ${JSON.stringify(results.productos, null, 2)};`;
-            
+
             // Mostrar código
             productsCodeSection.classList.remove('hidden');
             jsCodeOutput.textContent = jsCode;
@@ -428,7 +426,7 @@ Samsung Galaxy Tab S8 800$`;
                 textArea.select();
                 document.execCommand('copy');
                 document.body.removeChild(textArea);
-                
+
                 copySuccess.classList.remove('hidden');
                 setTimeout(() => {
                     copySuccess.classList.add('hidden');
@@ -447,7 +445,7 @@ Samsung Galaxy Tab S8 800$`;
                 alert('Por favor, ingresa algún texto para analizar');
                 return;
             }
-            
+
             const results = countDevicesBetter(text);
             displayDevicesResults(results);
         });
@@ -468,7 +466,7 @@ Samsung Galaxy Tab S8 800$`;
                 alert('Por favor, ingresa algún texto para analizar');
                 return;
             }
-            
+
             const results = parseProductosCompleto(text);
             displayProductsResults(results);
         });
@@ -504,18 +502,18 @@ Samsung Galaxy Tab S8 800$`;
         });
     </script>
 
-  <!-- Montar nav + tema (igual que el resto de páginas) -->
-  <script type="module">
-    import { mountNav } from './js/components/nav.js';
-    import { initTheme, onThemeChange } from './js/theme.js';
-    import { mountThemeToggle } from './js/components/themeToggle.js';
+    <!-- Montar nav + tema (igual que el resto de páginas) -->
+    <script type="module">
+        import { mountNav } from './js/components/nav.js';
+        import { initTheme, onThemeChange } from './js/theme.js';
+        import { mountThemeToggle } from './js/components/themeToggle.js';
 
-    initTheme();
-    mountNav('inv-precio');
-    mountThemeToggle();
+        initTheme();
+        mountNav('inv-precio');
+        mountThemeToggle();
 
-    onThemeChange(() => { /* hook opcional */ });
-  </script>
+        onThemeChange(() => { /* hook opcional */ });
+    </script>
 </body>
 
 </html>

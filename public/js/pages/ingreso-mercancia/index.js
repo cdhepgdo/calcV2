@@ -151,17 +151,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('btnLogout')?.addEventListener('click', doLogout);
     document.getElementById('btnLogoutMobile')?.addEventListener('click', doLogout);
-
-    const menuToggle = document.getElementById('menuToggle');
-    const floatingMenu = document.getElementById('floatingMenu');
-    if (menuToggle && floatingMenu) {
-        menuToggle.addEventListener('click', () => {
-            floatingMenu.classList.toggle('hidden');
-        });
-        document.addEventListener('click', (e) => {
-            if (!menuToggle.contains(e.target) && !floatingMenu.contains(e.target)) {
-                floatingMenu.classList.add('hidden');
-            }
-        });
-    }
 });

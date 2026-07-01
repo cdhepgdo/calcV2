@@ -6,6 +6,8 @@ import { resolve } from 'path';
 export default defineConfig({
   // Indicamos que el código fuente de nuestra app está en la carpeta 'public'
   root: 'public',
+  // Especificar que los archivos .env están en la raíz del proyecto, no en 'public'
+  envDir: '../',
   plugins: [
     // Integramos Tailwind directamente en Vite
     tailwindcss(),

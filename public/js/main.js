@@ -527,7 +527,6 @@ class App {
         }
     }
 
-
     /**
      * Suma los valores de todos los equipos recibidos (singular + adicionales)
      */
@@ -1385,19 +1384,16 @@ class App {
         try {
             const datosVenta = this.recopilarDatosVenta();
 
-            // Validación estricta: El monto total (la suma de los pagos ingresados)
-            // NO puede ser menor a la suma de los precios de los equipos vendidos.
+            // Auto-corregir montoTotal con la suma de precios (si hay precios cargados)
             const totalEquipos = (datosVenta.equipos || []).reduce((s, e) => s + (parseFloat(e.precio) || 0), 0);
             if (totalEquipos > 0) {
+                // El montoTotal es el monto BRUTO (incluye el trade-in).
+                // No debemos restar el totalRecibidos. Solo auto-corregimos si el monto ingresado
+                // es menor a la suma de los equipos vendidos (por si olvidaron actualizarlo).
                 if (datosVenta.montoTotal < totalEquipos) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = textoOriginal;
-                    if (!datosVenta.weppa) {
-                        mostrarAlerta(`❌ Faltan pagos. El total de pagos ingresados ($${datosVenta.montoTotal.toFixed(2)}) no cubre el precio de los equipos a vender ($${totalEquipos.toFixed(2)}).`, 'error');
-                    } else {
-                        mostrarAlerta(`❌ El Monto Total Final de WEPPA ($${datosVenta.montoTotal.toFixed(2)}) no puede ser menor al precio de los equipos a vender ($${totalEquipos.toFixed(2)}).`, 'error');
-                    }
-                    return;
+                    datosVenta.montoTotal = totalEquipos;
+                    const montoInput = document.getElementById('montoTotal');
+                    if (montoInput) montoInput.value = datosVenta.montoTotal.toFixed(2);
                 }
             }
 
@@ -2646,6 +2642,9 @@ class App {
         document.querySelector('input[name="tipoTransaccion"][value="venta"]').checked = true;
         this.manejarCambioTipoTransaccion();
 
+        // Ocultar banner de diferencia de pagos
+        document.getElementById('diferenciaPago')?.classList.add('hidden');
+
         // ── INVENTARIO: limpiar el selector de equipo ───────────────────
         this._limpiarSelectorInventario();
         // ── Ocultar el banner de advertencia de IMEI ────────────────────
@@ -3141,12 +3140,11 @@ class App {
     }
 
     /**
-     * Actualiza el banner de diferencia para que el operador vea
-     * si cuadra lo que paga con lo que pidió.
-     * (Ya no sobrescribe montoTotal aquí para evitar conflictos con los inputs de pago)
+     * Actualiza el banner de diferencia (pago vs precio de equipos).
+     * NO sobreescribe montoTotal para evitar conflictos con los inputs de pago.
+     * El montoTotal es controlado exclusivamente por calcularYMostrarTotal().
      */
     _recalcularTotalDesdePrecios() {
-        // Refrescar el banner de diferencia con el montoTotal manejado por los inputs de pago
         this._actualizarBannerDiferencia();
     }
 

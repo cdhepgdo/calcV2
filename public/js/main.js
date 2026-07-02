@@ -527,37 +527,6 @@ class App {
         }
     }
 
-    /**
-     * Recalcula el montoTotal a partir de la suma de precios de equipos vendidos.
-     * Ya no se restan los trade-ins porque el montoTotal representa el valor bruto de la venta.
-     */
-    _recalcularTotalDesdePrecios() {
-        const totalEquipos = this._sumarPreciosEquiposVendidos();
-        
-        if (totalEquipos > 0) {
-            // Se asume el monto bruto como nuevo total
-            const nuevoTotal = totalEquipos;
-            
-            // Solo actualizamos si el monto actual es menor (por si hay accesorios incluidos en el manual)
-            const montoInput = document.getElementById('montoTotal');
-            if (montoInput && parseFloat(montoInput.value || 0) < nuevoTotal) {
-                montoInput.value = nuevoTotal.toFixed(2);
-            }
-        }
-    }
-
-    /**
-     * Suma los precios de todos los equipos vendidos (singular + adicionales)
-     */
-    _sumarPreciosEquiposVendidos() {
-        // Precio singular eliminado: la suma total viene ahora desde la lista apilada
-        // (#equiposSeleccionadosVenta) que se renderiza en #listaEquiposVentaSeleccionados.
-        let total = 0;
-        document.querySelectorAll('#equiposVendidosAdicionales .eq-vendido-precio').forEach(inp => {
-            total += parseFloat(inp.value) || 0;
-        });
-        return total;
-    }
 
     /**
      * Suma los valores de todos los equipos recibidos (singular + adicionales)
@@ -1416,16 +1385,19 @@ class App {
         try {
             const datosVenta = this.recopilarDatosVenta();
 
-            // Auto-corregir montoTotal con la suma de precios (si hay precios cargados)
+            // Validación estricta: El monto total (la suma de los pagos ingresados)
+            // NO puede ser menor a la suma de los precios de los equipos vendidos.
             const totalEquipos = (datosVenta.equipos || []).reduce((s, e) => s + (parseFloat(e.precio) || 0), 0);
             if (totalEquipos > 0) {
-                // El montoTotal es el monto BRUTO (incluye el trade-in).
-                // No debemos restar el totalRecibidos. Solo auto-corregimos si el monto ingresado
-                // es menor a la suma de los equipos vendidos (por si olvidaron actualizarlo).
                 if (datosVenta.montoTotal < totalEquipos) {
-                    datosVenta.montoTotal = totalEquipos;
-                    const montoInput = document.getElementById('montoTotal');
-                    if (montoInput) montoInput.value = datosVenta.montoTotal.toFixed(2);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = textoOriginal;
+                    if (!datosVenta.weppa) {
+                        mostrarAlerta(`❌ Faltan pagos. El total de pagos ingresados ($${datosVenta.montoTotal.toFixed(2)}) no cubre el precio de los equipos a vender ($${totalEquipos.toFixed(2)}).`, 'error');
+                    } else {
+                        mostrarAlerta(`❌ El Monto Total Final de WEPPA ($${datosVenta.montoTotal.toFixed(2)}) no puede ser menor al precio de los equipos a vender ($${totalEquipos.toFixed(2)}).`, 'error');
+                    }
+                    return;
                 }
             }
 
@@ -3044,7 +3016,7 @@ class App {
             // Solo aplica cuando hay exactamente 1 equipo, para no mezclar notas de varios equipos
             const detallesEquipo = (eq.detalles || '').trim();
             if (detallesEquipo) {
-                const chkNota  = document.getElementById('notaVenta');
+                const chkNota = document.getElementById('notaVenta');
                 const campoNota = document.getElementById('notaVentaInfo');
                 const inputNota = document.getElementById('notaVentaDetalles');
 
@@ -3169,19 +3141,12 @@ class App {
     }
 
     /**
-     * Recalcula el montoTotal = Σ precios - Σ trade-ins (si hay precios cargados).
-     * Luego actualiza el banner de diferencia para que el operador vea
+     * Actualiza el banner de diferencia para que el operador vea
      * si cuadra lo que paga con lo que pidió.
+     * (Ya no sobrescribe montoTotal aquí para evitar conflictos con los inputs de pago)
      */
     _recalcularTotalDesdePrecios() {
-        const totalEquipos = this._sumarPreciosEquiposVendidos();
-        const totalRecibidos = this._sumarValoresRecibidos();
-        if (totalEquipos > 0 || this._equiposSeleccionadosVenta.length > 0) {
-            const nuevoTotal = Math.max(0, totalEquipos - totalRecibidos);
-            const montoInput = document.getElementById('montoTotal');
-            if (montoInput) montoInput.value = nuevoTotal.toFixed(2);
-        }
-        // Refrescar el banner de diferencia con el nuevo montoTotal
+        // Refrescar el banner de diferencia con el montoTotal manejado por los inputs de pago
         this._actualizarBannerDiferencia();
     }
 
@@ -3584,19 +3549,19 @@ class App {
                         <span>✏️</span> Editar
                     </button>
                     ${venta.tipoVenta === 'completa' ? (() => {
-                        // MULTI-EQUIPO: 1 botón de garantía por equipo vendido.
-                        const equiposVendidos = (venta.equipos && venta.equipos.length > 0)
-                            ? venta.equipos
-                            : (venta.equipo ? [venta.equipo] : []);
-                        return equiposVendidos.map((eq, idx) => {
-                            const label = equiposVendidos.length > 1
-                                ? `Garantía #${idx + 1}`
-                                : 'Garantía';
-                            return `<button onclick="app.imprimirGarantia('${venta.id}', ${idx})" class="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded transition flex items-center gap-1" title="Imprimir garantía de ${sanitizar(eq.modelo || '')} ${sanitizar(eq.almacenamiento || '')} — IMEI ${sanitizar(eq.imei || 'N/A')}">
+                // MULTI-EQUIPO: 1 botón de garantía por equipo vendido.
+                const equiposVendidos = (venta.equipos && venta.equipos.length > 0)
+                    ? venta.equipos
+                    : (venta.equipo ? [venta.equipo] : []);
+                return equiposVendidos.map((eq, idx) => {
+                    const label = equiposVendidos.length > 1
+                        ? `Garantía #${idx + 1}`
+                        : 'Garantía';
+                    return `<button onclick="app.imprimirGarantia('${venta.id}', ${idx})" class="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded transition flex items-center gap-1" title="Imprimir garantía de ${sanitizar(eq.modelo || '')} ${sanitizar(eq.almacenamiento || '')} — IMEI ${sanitizar(eq.imei || 'N/A')}">
                                 <span>🖨️</span> ${label}
                             </button>`;
-                        }).join('');
-                    })() : ''}
+                }).join('');
+            })() : ''}
                     <button onclick="app.eliminarVenta('${venta.id}')" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded transition flex items-center gap-1">
                         <span>🗑️</span> Eliminar
                     </button>
@@ -3842,15 +3807,15 @@ class App {
 
         if (venta.tipoVenta === 'completa') {
             this._equiposSeleccionadosVenta = [];
-            
-            const equiposACargar = venta.equipos && venta.equipos.length > 0 
-                ? venta.equipos 
+
+            const equiposACargar = venta.equipos && venta.equipos.length > 0
+                ? venta.equipos
                 : (venta.equipo ? [venta.equipo] : []);
 
             equiposACargar.forEach(eq => {
                 if (!eq) return;
                 const eqInv = inventarioService.buscarPorImei(eq.imei);
-                
+
                 this._equiposSeleccionadosVenta.push({
                     id: eq.idInventario || (eqInv ? eqInv.id : `manual-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`),
                     modelo: eq.modelo || '',

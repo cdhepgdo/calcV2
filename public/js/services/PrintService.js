@@ -396,7 +396,7 @@ class PrintService {
 
                 <!-- Figura superior -->
                 <div class="figure" style="right: 79px;">
-                    <img src="${logoBase64 || './width_200.webp'}" alt="logo">
+                    <img src="${logoBase64 || '/img/width_200.webp'}" alt="logo">
                 </div>
             </div>
 

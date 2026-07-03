@@ -76,7 +76,7 @@ class PrintService {
      */
     async _cargarLogoBase64() {
         try {
-            const response = await fetch('./width_200.webp');
+            const response = await fetch('./img/width_200.webp');
             const blob = await response.blob();
             return await new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -396,7 +396,7 @@ class PrintService {
 
                 <!-- Figura superior -->
                 <div class="figure" style="right: 79px;">
-                    <img src="${logoBase64 || '/img/width_200.webp'}" alt="logo">
+                    <img src="${logoBase64 || './img/width_200.webp'}" alt="logo">
                 </div>
             </div>
 

@@ -5351,7 +5351,26 @@ class App {
             document.getElementById('salidaEquipoImei').value = equipo.imei;
 
         } else if (tipo === 'Garantia') {
-            document.getElementById('nuevoModelo').value = equipo.modelo;
+            /* document.getElementById('nuevoModelo').value = equipo.modelo;
+            document.getElementById('nuevoCapacidad').value = equipo.gb;
+            document.getElementById('nuevoColor').value = equipo.color;
+            document.getElementById('nuevoBateria').value = equipo.bateria;
+            document.getElementById('nuevoImei').value = equipo.imei; */
+            // FIX: EquipoInventario guarda modelo SIN prefijo "iPhone" (ej: "11"),
+            // pero las <option> de #nuevoModelo usan "iPhone 11". Si asignamos tal
+            // cual, el <select> no matchea y .value queda "" → validar() falla.
+            const modeloNorm = /^iPhone\s/i.test(equipo.modelo || '')
+                ? equipo.modelo
+                : (equipo.modelo ? iPhone ${equipo.modelo} : '');
+
+            const selModelo = document.getElementById('nuevoModelo');
+            if (modeloNorm && selModelo && !Array.from(selModelo.options).some(o => o.value === modeloNorm)) {
+                const opt = document.createElement('option');
+                opt.value = modeloNorm; opt.textContent = modeloNorm;
+                selModelo.appendChild(opt);
+            }
+
+            document.getElementById('nuevoModelo').value = modeloNorm;
             document.getElementById('nuevoCapacidad').value = equipo.gb;
             document.getElementById('nuevoColor').value = equipo.color;
             document.getElementById('nuevoBateria').value = equipo.bateria;

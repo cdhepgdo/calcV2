@@ -463,7 +463,7 @@ class PrintService {
                     </div>
                     
                     <div class="figure" style="right: 79px;">
-                        <img src="${logoBase64 || './width_200.webp'}" alt="logo">
+                        <img src="${logoUrl}" alt="logo">
                     </div>
                 </div>
                 

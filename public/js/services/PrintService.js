@@ -4,7 +4,7 @@
  */
 
 import { formatearMoneda, formatearFecha } from '../utils/formatters.js';
-
+import logoUrl from '/width_200.webp';
 class PrintService {
     /**
      * Calcula el total inicial de una venta (sin equipo recibido)

@@ -5374,7 +5374,7 @@ class App {
             document.getElementById('nuevoCapacidad').value = equipo.gb;
             document.getElementById('nuevoColor').value = equipo.color;
             document.getElementById('nuevoBateria').value = equipo.bateria;
-            document.getElementById('nuevoImei').value = equipo.imei;
+            document.getElementById('nuevoImei').value = equipo.imei; 
         }
     }
 

@@ -5312,7 +5312,7 @@ class App {
         });
     }
 
-    _seleccionarEquipoDesdeBuscador(tipo, equipo) {
+    /* _seleccionarEquipoDesdeBuscador(tipo, equipo) {
         // 1. Ocultar el contenedor del buscador
         document.getElementById(`buscador${tipo === 'Venta' ? 'Venta' : tipo}Container`).classList.add('hidden');
 
@@ -5351,11 +5351,11 @@ class App {
             document.getElementById('salidaEquipoImei').value = equipo.imei;
 
         } else if (tipo === 'Garantia') {
-            /* document.getElementById('nuevoModelo').value = equipo.modelo;
-            document.getElementById('nuevoCapacidad').value = equipo.gb;
-            document.getElementById('nuevoColor').value = equipo.color;
-            document.getElementById('nuevoBateria').value = equipo.bateria;
-            document.getElementById('nuevoImei').value = equipo.imei; */
+            // document.getElementById('nuevoModelo').value = equipo.modelo;
+            //document.getElementById('nuevoCapacidad').value = equipo.gb;
+            //document.getElementById('nuevoColor').value = equipo.color;
+            //document.getElementById('nuevoBateria').value = equipo.bateria;
+            //document.getElementById('nuevoImei').value = equipo.imei; 
             // FIX: EquipoInventario guarda modelo SIN prefijo "iPhone" (ej: "11"),
             // pero las <option> de #nuevoModelo usan "iPhone 11". Si asignamos tal
             // cual, el <select> no matchea y .value queda "" → validar() falla.
@@ -5376,6 +5376,77 @@ class App {
             document.getElementById('nuevoColor').value = equipo.color;
             document.getElementById('nuevoBateria').value = equipo.bateria;
             document.getElementById('nuevoImei').value = equipo.imei; 
+        }
+    } */
+    _seleccionarEquipoDesdeBuscador(tipo, equipo) {
+        // 1. Ocultar el contenedor del buscador
+        document.getElementById(`buscador${tipo === 'Venta' ? 'Venta' : tipo}Container`).classList.add('hidden');
+
+        // 2. Mostrar la tarjeta
+        document.getElementById(`tarjetaEquipo${tipo}`).classList.remove('hidden');
+        document.getElementById(`btnQuitarEquipo${tipo}`).classList.remove('hidden');
+
+        // 3. Llenar los datos visuales de la tarjeta
+        document.getElementById(`tarjeta${tipo}Modelo`).textContent = equipo.modelo;
+        document.getElementById(`tarjeta${tipo}Capacidad`).textContent = equipo.gb;
+        document.getElementById(`tarjeta${tipo}Color`).textContent = equipo.color;
+        document.getElementById(`tarjeta${tipo}Bateria`).textContent = `🔋 ${equipo.bateria}%`;
+        document.getElementById(`tarjeta${tipo}Imei`).textContent = `IMEI: ${equipo.imei}`;
+
+        // 4. Normalizar valores para que coincidan con las <option> de los <select>
+        //    EquipoInventario guarda modelo SIN "iPhone " (ej: "11"), capacidad/color
+        //    con posible casing o espacios. Sin normalizar, .value = X no matchea
+        //    y validar() se queja pidiendo re-seleccionar campos vacíos.
+        const modeloNorm = /^iPhone\s/i.test(equipo.modelo || '')
+            ? equipo.modelo
+            : (equipo.modelo ? 'iPhone ' + equipo.modelo : '');
+        const capNorm = (equipo.gb || '').toString().trim().replace(/\s+/g, '').toUpperCase();
+        const colorNorm = (equipo.color || '').toString().trim();
+        const batNorm = String(parseInt(equipo.bateria) || 0);
+
+        const setSelectConFallback = (id, valor) => {
+            if (!valor) return;
+            const sel = document.getElementById(id);
+            if (!sel) return;
+            if (!Array.from(sel.options).some(o => o.value === valor)) {
+                const opt = document.createElement('option');
+                opt.value = valor; opt.textContent = valor;
+                sel.appendChild(opt);
+            }
+            sel.value = valor;
+        };
+
+        if (tipo === 'Venta') {
+            setSelectConFallback('modelo', modeloNorm);
+            setSelectConFallback('color', colorNorm);
+            document.getElementById('almacenamiento').value = capNorm;
+            document.getElementById('bateria').value = batNorm;
+            document.getElementById('equipoImei').value = equipo.imei;
+            console.log(tipo);
+
+            // Disparar eventos change si es necesario (ej: accesorios o validación)
+            document.getElementById('modelo').dispatchEvent(new Event('change'));
+
+            // Si hay un banner de IMEI existente para la venta normal, lo ocultamos
+            if (this._ocultarBannerImei) {
+                this._ocultarBannerImei();
+            }
+
+        } else if (tipo === 'Salida') {
+            setSelectConFallback('salidaEquipoModelo', modeloNorm);
+            setSelectConFallback('salidaEquipoCapacidad', capNorm);
+            setSelectConFallback('salidaEquipoColor', colorNorm);
+            document.getElementById('salidaEquipoBateria').value = batNorm;
+            document.getElementById('salidaEquipoImei').value = equipo.imei;
+
+        } else if (tipo === 'Garantia') {
+            setSelectConFallback('nuevoModelo', modeloNorm);
+            setSelectConFallback('nuevoCapacidad', capNorm);
+            setSelectConFallback('nuevoColor', colorNorm);
+            document.getElementById('nuevoBateria').value = batNorm;
+            document.getElementById('nuevoImei').value = equipo.imei;
+            console.log(tipo, document.getElementById('nuevoCapacidad').value, equipo.modelo);
+            console.log(tipo, document.getElementById('nuevoModelo').value, equipo.modelo);
         }
     }
 

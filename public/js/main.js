@@ -5361,7 +5361,8 @@ class App {
             // cual, el <select> no matchea y .value queda "" → validar() falla.
             const modeloNorm = /^iPhone\s/i.test(equipo.modelo || '')
                 ? equipo.modelo
-                : (equipo.modelo ? iPhone ${equipo.modelo} : '');
+               // : (equipo.modelo ? 'iPhone' + ${equipo.modelo} : '');
+                : (equipo.modelo ? 'iPhone' + equipo.modelo : '');
 
             const selModelo = document.getElementById('nuevoModelo');
             if (modeloNorm && selModelo && !Array.from(selModelo.options).some(o => o.value === modeloNorm)) {

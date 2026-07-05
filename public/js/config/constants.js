@@ -22,10 +22,12 @@ export const MODELOS_IPHONE = [
     { valor: "iPhone 15 Plus", etiqueta: "iPhone 15 Plus" },
     { valor: "iPhone 15 Pro Max", etiqueta: "iPhone 15 Pro Max" },
     { valor: "iPhone 16", etiqueta: "iPhone 16" },
+    { valor: "iPhone 16e", etiqueta: "iPhone 16e" },
     { valor: "iPhone 16 Pro", etiqueta: "iPhone 16 Pro" },
     { valor: "iPhone 16 Plus", etiqueta: "iPhone 16 Plus" },
     { valor: "iPhone 16 Pro Max", etiqueta: "iPhone 16 Pro Max" },
     { valor: "iPhone 17", etiqueta: "iPhone 17" },
+    { valor: "iPhone 17e", etiqueta: "iPhone 17e" },
     { valor: "iPhone 17 Pro", etiqueta: "iPhone 17 Pro" },
     { valor: "iPhone 17 Air", etiqueta: "iPhone 17 Air" },
     { valor: "iPhone 17 Pro Max", etiqueta: "iPhone 17 Pro Max" }
@@ -37,8 +39,8 @@ export const MODELOS_CORTOS = [
     "13", "13 Pro", "13 Pro Max",
     "14", "14 Plus", "14 Pro", "14 Pro Max",
     "15", "15 Plus", "15 Pro", "15 Pro Max",
-    "16", "16E", "16 Plus", "16 Pro", "16 Pro Max",
-    "17", "17 Air", "17 Pro", "17 Pro Max"
+    "16", "16e", "16 Plus", "16 Pro", "16 Pro Max",
+    "17", "17e", "17 Air", "17 Pro", "17 Pro Max"
 ];
 
 export const COLORES_IPHONE = [
@@ -47,14 +49,13 @@ export const COLORES_IPHONE = [
     { valor: "Verde", etiqueta: "🟢 Verde" },
     { valor: "Morado", etiqueta: "🟣 Morado" },
     { valor: "Amarillo", etiqueta: "🟡 Amarillo" },
-    { valor: "Rojo", etiqueta: "🔴 Rojo (PRODUCT)RED" },
+    { valor: "Rojo", etiqueta: "🔴 Rojo" },
     { valor: "Azul", etiqueta: "🔵 Azul" },
     { valor: "Grafito", etiqueta: "⚫ Grafito (Pro)" },
     { valor: "Oro", etiqueta: "🟡 Oro (Pro)" },
-    { valor: "Plata", etiqueta: "⚪ Plata (Pro)" },
+    { valor: "Plata", etiqueta: "⚪ Silver (Pro)" },
     { valor: "Azul Pacífico", etiqueta: "🔵 Azul Pacífico (Pro)" },
     { valor: "Rosa", etiqueta: "🟠 Rosa" },
-    { valor: "Verde (Alpine Green)", etiqueta: "🟢 Verde Alpine" },
     { valor: "Púrpura", etiqueta: "🟣 Púrpura" },
     { valor: "Titanio Azul", etiqueta: "🔵 Titanio Azul" },
     { valor: "Titanio Blanco", etiqueta: "⚪ Titanio Blanco" },
@@ -62,7 +63,7 @@ export const COLORES_IPHONE = [
     { valor: "Titanio Negro", etiqueta: "⚫ Titanio Negro" },
     { valor: "Negro Medianoche", etiqueta: "⚫ Negro Medianoche" },
     { valor: "Azul Ultramar", etiqueta: "🔵 Azul Ultramar" },
-    { valor: "Naranja Cósmico", etiqueta: "🟠 Naranja Cósmico" },
+    { valor: "Naranja Cósmico", etiqueta: "🟠 Naranja" },
     { valor: "Desert", etiqueta: "🟠 Desert" }
 ];
 

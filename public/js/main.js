@@ -2,7 +2,7 @@
 * Archivo principal de la aplicación
 * Orquesta la inicialización y coordinación de todos los módulos
 */
-import { authService } from './services/AuthService.js';
+import { authService } from './services/AuthService.js'; 
 import { CambioGarantia } from './models/CambioGarantia.js';
 import { Movimiento } from './models/Movimiento.js';
 import { Venta } from './models/Venta.js';

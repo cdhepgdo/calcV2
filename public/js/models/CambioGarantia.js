@@ -82,6 +82,8 @@ export class CambioGarantia {
         }
         if (!this.equipoDefectuoso.imei) {
             errores.push('Debe ingresar el IMEI del equipo defectuoso');
+        } else if (this.equipoDefectuoso.imei.length < 15) {
+            errores.push('El IMEI del equipo defectuoso debe tener al menos 15 caracteres');
         }
         if (!this.equipoDefectuoso.problema) {
             errores.push('Debe describir el problema del equipo');
@@ -99,6 +101,8 @@ export class CambioGarantia {
         }
         if (!this.equipoNuevo.imei) {
             errores.push('Debe ingresar el IMEI del equipo nuevo');
+        } else if (this.equipoNuevo.imei.length < 15) {
+            errores.push('El IMEI del equipo nuevo debe tener al menos 15 caracteres');
         }
         if (!this.equipoNuevo.bateria) {
             errores.push('Debe ingresar el porcentaje de batería del equipo nuevo');

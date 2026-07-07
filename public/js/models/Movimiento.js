@@ -145,6 +145,20 @@ export class Movimiento {
             }
         }
 
+        // TRASLADO (entre sedes). Usado por InventarioService.trasladarEquipo()
+        // para auditoría cross-sede. No impacta caja (calcularImpactoEfectivo=0).
+        else if (tipoLower === 'traslado' || tipoLower.includes('traslado')) {
+            if (!this.datos.equipoId || String(this.datos.equipoId).trim() === '') {
+                errores.push('Debe especificar el ID del equipo trasladado');
+            }
+            if (!this.datos.sedeOrigen || String(this.datos.sedeOrigen).trim() === '') {
+                errores.push('Debe especificar la sede de origen del traslado');
+            }
+            if (!this.datos.sedeDestino || String(this.datos.sedeDestino).trim() === '') {
+                errores.push('Debe especificar la sede de destino del traslado');
+            }
+        }
+
         return {
             valido: errores.length === 0,
             errores

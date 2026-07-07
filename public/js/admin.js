@@ -839,14 +839,11 @@ document.addEventListener('DOMContentLoaded', () => {
     authService.onAuthChange((user) => {
         if (!user) {
             window.location.replace('login.html');
+        } else if (!authService.esAdmin()) {
+            window.location.replace('index.html');
         } else {
-            const rol = localStorage.getItem('usuario_rol');
-            if (rol !== 'admin') {
-                window.location.replace('index.html');
-            } else {
-                if (!window.adminDashboardApp) {
-                    window.adminDashboardApp = new AdminDashboard();
-                }
+            if (!window.adminDashboardApp) {
+                window.adminDashboardApp = new AdminDashboard();
             }
         }
     });

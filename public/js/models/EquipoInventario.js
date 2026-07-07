@@ -59,7 +59,7 @@ export class EquipoInventario {
     }
 
     toJSON() {
-        return {
+        const json = {
             id: this.id,
             tipoItem: this.tipoItem,
             modelo: this.modelo,
@@ -77,9 +77,24 @@ export class EquipoInventario {
             loteId: this.loteId,
             creadoPor: this.creadoPor
         };
+        // FIX M1: persistir metadatos de sede cuando están presentes (no-enumerables
+        // en la instancia). ConsultaInventarioService los setea tras el snapshot;
+        // persistirlos en IDB permite que la edición admin funcione offline.
+        if (this._sedeId) json.__sedeId = this._sedeId;
+        if (this._sedeNombre) json.__sedeNombre = this._sedeNombre;
+        return json;
     }
 
     static fromJSON(json) {
-        return new EquipoInventario(json);
+        const inst = new EquipoInventario(json);
+        // FIX M1: restaurar metadatos de sede como propiedades no-enumerables
+        // para que la UI tenga data-sede tras un reload offline.
+        if (json && json.__sedeId) {
+            Object.defineProperty(inst, '_sedeId', { value: json.__sedeId, writable: true, enumerable: false });
+        }
+        if (json && json.__sedeNombre) {
+            Object.defineProperty(inst, '_sedeNombre', { value: json.__sedeNombre, writable: true, enumerable: false });
+        }
+        return inst;
     }
 }

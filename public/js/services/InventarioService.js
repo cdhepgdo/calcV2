@@ -5,6 +5,7 @@ import {
     setDoc,
     updateDoc,
     deleteDoc,
+    getDoc,
     writeBatch,
     onSnapshot,
     query,
@@ -232,6 +233,138 @@ class InventarioService {
             return { exito: true };
         } catch (error) {
             console.error(`❌ Error al actualizar equipo ${equipoId}:`, error);
+            return { exito: false, error: error.message };
+        }
+    }
+
+    /**
+     * Variante multi-sede de actualizarEquipo.
+     *
+     * Por qué existe: el método original usa _getBasePath() (la sede del
+     * usuario logueado). La pestaña Consulta puede mostrar equipos de
+     * OTRAS sedes; al editarlos necesitamos escribir en la sede dueña
+     * del documento, no en la del operador.
+     *
+     * Diferencias vs actualizarEquipo():
+     *   - Recibe sedeId explícito
+     *   - Sella fechaActualizacion y actualizadoPor automáticamente
+     *   - El método original se mantiene por retrocompat con Ingreso/Salida
+     *
+     * Concurrencia: last-write-wins (Firestore no hace check de versión).
+     * Documentado en plan §6 pregunta 3.
+     */
+    async actualizarEquipoEnSede(sedeId, equipoId, cambios) {
+        if (!sedeId || !equipoId) {
+            return { exito: false, error: 'sedeId y equipoId son obligatorios' };
+        }
+        try {
+            const docRef = doc(db, `sedes/${sedeId}/inventario`, equipoId);
+            await updateDoc(docRef, {
+                ...cambios,
+                fechaActualizacion: new Date().toISOString(),
+                actualizadoPor: localStorage.getItem('usuario_sede_id') || 'sistema'
+            });
+            return { exito: true };
+        } catch (error) {
+            console.error(`❌ Error al actualizar ${equipoId} en ${sedeId}:`, error);
+            return { exito: false, error: error.message };
+        }
+    }
+
+    /**
+     * Mueve un equipo de una sede a otra de forma atómica.
+     *
+     * Por qué existe: hoy no hay forma de "trasladar" un equipo entre
+     * sedes. El estado 'transferido' (vía procesarSalidaLote) es un
+     * soft-delete dentro de la misma sede, no un movimiento real.
+     *
+     * Operación (todo en un writeBatch → o se aplica todo o nada):
+     *   1. delete   sedes/<sedeOrigen>/inventario/<id>
+     *   2. set      sedes/<sedeDestino>/inventario/<id>     (mismo id, nuevos metadatos)
+     *   3. set      sedes/<sedeDestino>/movimientos/<newId> (auditoría)
+     *
+     * Restricciones:
+     *   - El equipo no puede estar 'vendido' (rompería la trazabilidad
+     *     de la venta) ni 'eliminado' (ya está soft-deleted).
+     *   - El doc destino mantiene el mismo `id` para que los FKs
+     *     (ventaAsociadaId, loteId) sigan siendo válidos.
+     *
+     * @returns {Promise<{exito: boolean, error?: string}>}
+     */
+    async trasladarEquipo(equipoId, sedeOrigen, sedeDestino, motivo = '', usuario = null) {
+        if (!equipoId || !sedeOrigen || !sedeDestino) {
+            return { exito: false, error: 'equipoId, sedeOrigen y sedeDestino son obligatorios' };
+        }
+        if (sedeOrigen === sedeDestino) {
+            return { exito: false, error: 'La sede de origen y destino son la misma' };
+        }
+
+        try {
+            const origenRef = doc(db, `sedes/${sedeOrigen}/inventario`, equipoId);
+            const origenSnap = await getDoc(origenRef);
+
+            if (!origenSnap.exists()) {
+                return { exito: false, error: `El equipo ${equipoId} no existe en ${sedeOrigen}` };
+            }
+
+            const data = origenSnap.data();
+            if (data.estado === 'vendido') {
+                return { exito: false, error: 'No se puede trasladar un equipo vendido. Libérelo primero de la venta.' };
+            }
+            if (data.estado === 'eliminado') {
+                return { exito: false, error: 'No se puede trasladar un equipo eliminado.' };
+            }
+
+            const ahora = new Date().toISOString();
+            const usuarioTraslado = usuario || localStorage.getItem('usuario_sede_id') || 'sistema';
+
+            // Doc de destino: mismo id, metadatos actualizados
+            const nuevoDoc = {
+                ...data,
+                creadoPor: sedeDestino,
+                sedeOrigenAnterior: sedeOrigen,
+                fechaTraslado: ahora,
+                motivoTraslado: motivo || '',
+                trasladadoPor: usuarioTraslado,
+                fechaActualizacion: ahora,
+                actualizadoPor: usuarioTraslado
+            };
+
+            const destinoRef = doc(db, `sedes/${sedeDestino}/inventario`, equipoId);
+
+            // Auditoría: doc de Movimiento en la sede destino
+            const movRef = doc(collection(db, `sedes/${sedeDestino}/movimientos`));
+            const fechaLocal = new Date().toLocaleDateString('es-ES');
+            const horaLocal = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            const movimiento = {
+                id: movRef.id,
+                tipo: 'Traslado',
+                fecha: fechaLocal,
+                hora: horaLocal,
+                datos: {
+                    equipoId,
+                    imei: data.imei || '',
+                    modelo: data.modelo || '',
+                    gb: data.gb || '',
+                    color: data.color || '',
+                    sedeOrigen,
+                    sedeDestino,
+                    motivo: motivo || 'Traslado entre sedes',
+                    trasladadoPor: usuarioTraslado
+                }
+            };
+
+            const batch = writeBatch(db);
+            batch.delete(origenRef);
+            batch.set(destinoRef, this._cleanForFirestore(nuevoDoc));
+            batch.set(movRef, this._cleanForFirestore(movimiento));
+
+            await batch.commit();
+
+            console.log(`✅ Traslado atómico: ${equipoId} ${sedeOrigen} → ${sedeDestino} (mov: ${movRef.id})`);
+            return { exito: true, movimientoId: movRef.id };
+        } catch (error) {
+            console.error(`❌ Error al trasladar ${equipoId}:`, error);
             return { exito: false, error: error.message };
         }
     }

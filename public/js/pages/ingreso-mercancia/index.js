@@ -1,12 +1,14 @@
 import { authService } from '../../services/AuthService.js';
 import { inventarioService } from '../../services/InventarioService.js';
 import { movimientoService } from '../../services/MovimientoService.js';
+import { consultaInventarioService } from '../../services/ConsultaInventarioService.js';
 import { EquipoInventario } from '../../models/EquipoInventario.js';
-import { MODELOS_CORTOS, COLORES_IPHONE, CAPACIDADES_IPHONE } from '../../config/constants.js';
+import { MODELOS_CORTOS, COLORES_IPHONE, CAPACIDADES_IPHONE, SEDES, SEDES_NOMBRES } from '../../config/constants.js';
 
 import { initConnectionMonitor } from '../../utils/connectionMonitor.js';
 import { initModoIngreso } from './ModoIngreso.js';
 import { initModoSalida } from './ModoSalida.js';
+import { initModoConsulta } from './ModoConsulta.js';
 import { initNotasImpresion } from './NotasImpresion.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -44,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         EquipoInventario,
         MODELOS_CORTOS,
         COLORES_IPHONE,
+        CAPACIDADES_IPHONE,
         showToast,
         setLoading,
         onInventarioCargado: () => inventarioCargado
@@ -67,50 +70,104 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast
     });
 
+    // MODO CONSULTA — se inicializa aquí, no abre listeners hasta onAuthChange
+    const consultaApi = initModoConsulta({
+        consultaInventarioService,
+        inventarioService,
+        authService,
+        showToast,
+        setLoading,
+        SEDES,
+        SEDES_NOMBRES,
+        onInventarioCargado: () => inventarioCargado
+    });
+
     // ====== TOGGLE DE MODOS ======
+    // Configuración declarativa de cada modo. Agregar un modo nuevo es
+    // agregar una entrada a esta tabla y un botón en el HTML.
+    const MODOS = {
+        ingreso: {
+            seccionId: 'seccionIngreso',
+            btnId: 'btnModoIngreso',
+            titulo: '📦 <span>Nota de Ingreso de Mercancía</span>',
+            subtitulo: 'Ingresa los equipos fila por fila. Usa <kbd class="kbd-atajo">Tab</kbd> para avanzar y <kbd class="kbd-atajo">Enter</kbd> al final de fila para agregar otra.',
+            mostrarResumen: true,
+            onActivar: null
+        },
+        salida: {
+            seccionId: 'seccionSalida',
+            btnId: 'btnModoSalida',
+            titulo: '📤 <span>Nota de Salida de Equipos</span>',
+            subtitulo: 'Selecciona equipos disponibles para dar de baja o trasladar.',
+            mostrarResumen: false,
+            onActivar: () => actualizarListaSugerenciasSalida()
+        },
+        consulta: {
+            seccionId: 'seccionConsulta',
+            btnId: 'btnModoConsulta',
+            titulo: '📋 <span>Consulta de Inventario</span>',
+            subtitulo: 'Filtra, busca y edita el inventario consolidado de todas las sedes.',
+            mostrarResumen: false,
+            onActivar: () => consultaApi.recargar()
+        }
+    };
+
     function cambiarModo(modo) {
+        if (!MODOS[modo]) {
+            console.error(`[cambiarModo] Modo desconocido: ${modo}`);
+            return;
+        }
         modoActual = modo;
-        const seccionIngreso = document.getElementById('seccionIngreso');
-        const seccionSalida = document.getElementById('seccionSalida');
-        const btnIngreso = document.getElementById('btnModoIngreso');
-        const btnSalida = document.getElementById('btnModoSalida');
+        const cfg = MODOS[modo];
+
+        // Mostrar la sección del modo activo, ocultar las demás
+        Object.values(MODOS).forEach(m => {
+            const sec = document.getElementById(m.seccionId);
+            if (sec) sec.classList.toggle('hidden', m.seccionId !== cfg.seccionId);
+        });
+
+        // Activar el botón del modo (clase activa) y desactivar los otros
+        Object.values(MODOS).forEach(m => {
+            const btn = document.getElementById(m.btnId);
+            if (!btn) return;
+            if (m.btnId === cfg.btnId) {
+                btn.classList.add('btn-modo-activo', 'shadow');
+                btn.classList.remove('opacity-50');
+            } else {
+                btn.classList.remove('btn-modo-activo', 'shadow');
+                btn.classList.add('opacity-50');
+            }
+        });
+
+        // Header
         const titulo = document.getElementById('tituloModo');
         const subtitulo = document.getElementById('subtituloModo');
+        if (titulo) titulo.innerHTML = cfg.titulo;
+        if (subtitulo) subtitulo.innerHTML = cfg.subtitulo;
+
+        // Panel resumen (solo visible en Ingreso)
         const panelResumen = document.getElementById('panelResumen');
+        if (panelResumen) panelResumen.classList.toggle('hidden', !cfg.mostrarResumen);
 
-        if (modo === 'ingreso') {
-            seccionIngreso.classList.remove('hidden');
-            seccionSalida.classList.add('hidden');
-            btnIngreso.classList.add('btn-modo-activo', 'shadow');
-            btnIngreso.classList.remove('opacity-50');
-            btnSalida.classList.remove('btn-modo-activo', 'shadow');
-            btnSalida.classList.add('opacity-50');
-            titulo.innerHTML = '📦 <span>Nota de Ingreso de Mercancía</span>';
-            subtitulo.innerHTML = 'Ingresa los equipos fila por fila. Usa <kbd class="kbd-atajo">Tab</kbd> para avanzar y <kbd class="kbd-atajo">Enter</kbd> al final de fila para agregar otra.';
-
-            if (panelResumen) panelResumen.classList.remove('hidden');
-        } else {
-            seccionIngreso.classList.add('hidden');
-            seccionSalida.classList.remove('hidden');
-            btnSalida.classList.add('btn-modo-activo', 'shadow');
-            btnSalida.classList.remove('opacity-50');
-            btnIngreso.classList.remove('btn-modo-activo', 'shadow');
-            btnIngreso.classList.add('opacity-50');
-            titulo.innerHTML = '📤 <span>Nota de Salida de Equipos</span>';
-            subtitulo.textContent = 'Selecciona equipos disponibles para dar de baja o trasladar.';
-
-            if (panelResumen) panelResumen.classList.add('hidden');
-
-            actualizarListaSugerenciasSalida();
+        // Hook específico del modo
+        if (cfg.onActivar) {
+            try { cfg.onActivar(); }
+            catch (e) { console.error(`[cambiarModo] Error en onActivar de ${modo}:`, e); }
         }
     }
 
     document.getElementById('btnModoIngreso')?.addEventListener('click', () => cambiarModo('ingreso'));
     document.getElementById('btnModoSalida')?.addEventListener('click', () => cambiarModo('salida'));
+    document.getElementById('btnModoConsulta')?.addEventListener('click', () => cambiarModo('consulta'));
 
     // ====== AUTENTICACIÓN Y CARGA INICIAL ======
     authService.onAuthChange(async (user) => {
         if (!user) {
+            // FIX A4: cerrar los listeners de Firestore antes de ir a login.
+            // Si el usuario re-loguea (logout + login con otro user, sin
+            // recargar), la guarda `length === 0` previene reinicialización
+            // pero los 6 listeners de la sesión anterior seguían activos.
+            consultaInventarioService.destruir();
             window.location.href = 'login.html';
             return;
         }
@@ -137,6 +194,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (modoActual === 'salida') {
                 actualizarListaSugerenciasSalida();
             }
+
+            // Abrir listeners multi-sede para la pestaña Consulta.
+            // No bloqueante: la pestaña Consulta abre con cache local de
+            // IndexedDB y se rellena progresivamente mientras los 6
+            // snapshots van llegando.
+            // FIX A4: defensa por si el chequeo de length === 0 no aplica
+            // (p.ej. si se llamó destruir() entre checks). destruir()
+            // resetea _unsubscribes a [], por lo que esta guarda es robusta.
+            if (consultaInventarioService._unsubscribes.length === 0) {
+                consultaInventarioService.inicializar();
+                console.log('📡 ConsultaInventarioService inicializado (6 sedes en paralelo)');
+            }
         } catch (error) {
             console.error('❌ Error al cargar inventario:', error);
             showToast('⚠️ Error al cargar inventario. Recarga la página.', 'error');
@@ -145,6 +214,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ====== MENÚ MOBILE Y LOGOUT ======
     const doLogout = async () => {
+        // FIX A4: cerrar listeners de Firestore ANTES de logout
+        consultaInventarioService.destruir();
         await authService.logout();
         window.location.href = 'login.html';
     };

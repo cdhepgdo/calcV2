@@ -62,22 +62,9 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-
-        // ===== CONFIGURACIÓN FIREBASE (misma que firebase-config.js) =====
-        const firebaseConfig = {
-            apiKey: "AIzaSyDPdvDTvMIv-dgoLuiKRDb4_0jx1dtKL14",
-            authDomain: "usaimport1.firebaseapp.com",
-            projectId: "usaimport1",
-            storageBucket: "usaimport1.firebasestorage.app",
-            messagingSenderId: "1052948620010",
-            appId: "1:1052948620010:web:93d4b17a5a94ada239ed93"
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+        import { db, auth } from './js/config/firebase-config.js';
+        import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+        import { onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
         // ===== LEER LOCALSTORAGE =====
         const KEYS = {

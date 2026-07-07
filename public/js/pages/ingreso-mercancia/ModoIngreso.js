@@ -1,13 +1,14 @@
 import { Autocomplete } from '../../utils/autocomplete.js';
 import { validarIMEI } from '../../utils/validators.js';
 
-export function initModoIngreso({ 
-    inventarioService, 
-    movimientoService, 
-    EquipoInventario, 
-    MODELOS_CORTOS, 
-    COLORES_IPHONE, 
-    showToast, 
+export function initModoIngreso({
+    inventarioService,
+    movimientoService,
+    EquipoInventario,
+    MODELOS_CORTOS,
+    COLORES_IPHONE,
+    CAPACIDADES_IPHONE,
+    showToast,
     setLoading,
     onInventarioCargado // Función que retorna si el inventario está cargado
 }) {
@@ -104,6 +105,21 @@ export function initModoIngreso({
 
         poblarColores(tr.querySelector('.campo-color'));
         poblarColores(tr.querySelector('.campo-caja-color'));
+
+        // Generar chips de capacidad dinámicamente desde CAPACIDADES_IPHONE
+        // (single source of truth: agregar 4TB/etc. es 1 línea en constants.js)
+        const gbContainer = tr.querySelector('.gb-chips-container');
+        if (gbContainer) {
+            const hiddenGb = gbContainer.querySelector('.campo-gb');
+            (CAPACIDADES_IPHONE || []).forEach(cap => {
+                const chip = document.createElement('span');
+                chip.className = 'gb-chip';
+                chip.dataset.gb = cap.valor;
+                // Para 1TB/2TB mostramos la etiqueta completa, para GB solo el número
+                chip.textContent = cap.valor.includes('TB') ? cap.valor : cap.valor.replace('GB', '');
+                gbContainer.insertBefore(chip, hiddenGb);
+            });
+        }
 
         tr.querySelectorAll('.gb-chip').forEach(chip => {
             chip.addEventListener('click', () => {

@@ -451,3 +451,397 @@ body {
 .texto-inverso {
     color: rgb(var(--text-inverse));
 }
+
+/* ============================================================
+   SECCIÓN CONSULTA — Tabla, filtros, paginación
+   Usada por ModoConsulta.js
+   ============================================================ */
+
+/* ── Línea de filtros ── */
+.consulta-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: end;
+    padding: 1rem;
+}
+
+.consulta-filtro-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 140px;
+}
+
+.consulta-filtro-grupo label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: rgb(var(--text-muted));
+    letter-spacing: 0.04em;
+}
+
+.consulta-filtro-grupo input,
+.consulta-filtro-grupo select {
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid rgb(var(--border));
+    background: rgb(var(--surface-elevated));
+    color: rgb(var(--text-primary));
+    font-size: 0.85rem;
+    min-height: 36px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.consulta-filtro-grupo input:focus,
+.consulta-filtro-grupo select:focus {
+    outline: none;
+    border-color: rgb(var(--accent));
+    box-shadow: 0 0 0 3px rgb(var(--accent-soft));
+}
+
+.consulta-filtro-grupo-checkbox {
+    flex-direction: row;
+    align-items: center;
+    min-width: auto;
+    padding-bottom: 0.5rem;
+}
+
+.consulta-filtro-grupo-checkbox label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    text-transform: none;
+    font-size: 0.85rem;
+    color: rgb(var(--text-secondary));
+    letter-spacing: 0;
+}
+
+/* ── Acciones de la línea de filtros (refrescar / csv) ── */
+.consulta-acciones {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+/* ── Contenedor de tabla con scroll horizontal ── */
+.consulta-tabla-wrap {
+    overflow-x: auto;
+    border-radius: 12px;
+}
+
+/* ── Tabla ── */
+.consulta-tabla {
+    width: 100%;
+    min-width: 1200px;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+}
+
+.consulta-tabla thead {
+    background: rgb(var(--surface-muted));
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.consulta-tabla th {
+    text-align: left;
+    padding: 0.6rem 0.75rem;
+    font-weight: 600;
+    color: rgb(var(--text-secondary));
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid rgb(var(--border));
+    white-space: nowrap;
+}
+
+.consulta-tabla td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid rgb(var(--border-soft));
+    color: rgb(var(--text-primary));
+    vertical-align: middle;
+}
+
+.consulta-fila {
+    transition: background 0.15s;
+}
+
+.consulta-fila:hover {
+    background: rgb(var(--surface-muted));
+}
+
+.consulta-fila-editando {
+    outline: 2px solid rgb(var(--accent));
+    outline-offset: -2px;
+    background: rgb(var(--accent-soft));
+}
+
+/* ── Celdas editables ── */
+.consulta-celda-editable {
+    cursor: text;
+    border-radius: 4px;
+    padding: 2px 4px;
+    transition: background 0.15s;
+    user-select: none;
+}
+
+.consulta-celda-editable:hover {
+    background: rgb(var(--accent-soft));
+}
+
+.consulta-celda-editable[title]:hover::after {
+    content: ' (doble click para editar)';
+    color: rgb(var(--text-muted));
+    font-size: 0.7rem;
+}
+
+.consulta-input-inline {
+    width: 100%;
+    padding: 4px 8px;
+    border: 1px solid rgb(var(--accent));
+    border-radius: 4px;
+    background: rgb(var(--surface-elevated));
+    color: rgb(var(--text-primary));
+    font-size: 0.8rem;
+    font-family: inherit;
+    outline: none;
+    box-shadow: 0 0 0 2px rgb(var(--accent-soft));
+}
+
+.consulta-input-inline--error {
+    border-color: rgb(var(--danger));
+    box-shadow: 0 0 0 2px rgb(var(--danger-soft));
+}
+
+/* ── Chips de estado ── */
+.consulta-chip-estado {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: opacity 0.15s, transform 0.1s;
+}
+
+.consulta-chip-estado:hover {
+    opacity: 0.85;
+    transform: translateY(-1px);
+}
+
+.consulta-chip-estado--disponible {
+    background: rgb(var(--success-soft));
+    color: rgb(var(--success-text));
+    border-color: rgb(var(--success));
+}
+
+.consulta-chip-estado--vendido {
+    background: rgb(var(--surface-muted));
+    color: rgb(var(--text-secondary));
+    border-color: rgb(var(--border-strong));
+}
+
+.consulta-chip-estado--transferido {
+    background: rgb(var(--info-soft));
+    color: rgb(var(--accent-text));
+    border-color: rgb(var(--info));
+}
+
+.consulta-chip-estado--defectuoso {
+    background: rgb(var(--warning-soft));
+    color: rgb(var(--warning-text));
+    border-color: rgb(var(--warning));
+}
+
+.consulta-chip-estado--eliminado {
+    background: rgb(var(--danger-soft));
+    color: rgb(var(--danger-text));
+    border-color: rgb(var(--danger));
+    opacity: 0.7;
+}
+
+/* ── Sede badge en celda ── */
+.consulta-sede-badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    background: rgb(var(--accent-soft));
+    color: rgb(var(--accent-text));
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.consulta-sede-badge--desconocida {
+    background: rgb(var(--surface-muted));
+    color: rgb(var(--text-muted));
+    font-style: italic;
+}
+
+/* ── Skeleton (fila de carga progresiva) ── */
+.consulta-skeleton {
+    background: linear-gradient(
+        90deg,
+        rgb(var(--surface-muted)) 0%,
+        rgb(var(--surface-sunken)) 50%,
+        rgb(var(--surface-muted)) 100%
+    );
+    background-size: 200% 100%;
+    animation: consulta-skeleton-pulse 1.4s ease-in-out infinite;
+    color: transparent !important;
+    border-radius: 4px;
+    user-select: none;
+}
+
+@keyframes consulta-skeleton-pulse {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ── Paginador ── */
+.consulta-paginador {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid rgb(var(--border-soft));
+}
+
+.consulta-paginador button {
+    padding: 0.4rem 0.7rem;
+    border-radius: 6px;
+    border: 1px solid rgb(var(--border));
+    background: rgb(var(--surface-elevated));
+    color: rgb(var(--text-primary));
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    min-width: 36px;
+}
+
+.consulta-paginador button:hover:not(:disabled) {
+    background: rgb(var(--accent-soft));
+    border-color: rgb(var(--accent));
+    color: rgb(var(--accent-text));
+}
+
+.consulta-paginador button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.consulta-paginador button.activo {
+    background: rgb(var(--accent));
+    color: white;
+    border-color: rgb(var(--accent));
+}
+
+.consulta-paginador-info {
+    margin-left: auto;
+    color: rgb(var(--text-muted));
+    font-size: 0.8rem;
+}
+
+/* ── Modal pequeño de traslado ── */
+.consulta-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.consulta-modal {
+    background: rgb(var(--surface-elevated));
+    border-radius: 12px;
+    padding: 1.5rem;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgb(var(--border));
+}
+
+.consulta-modal h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: rgb(var(--text-primary));
+}
+
+.consulta-modal-acciones {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    justify-content: flex-end;
+}
+
+/* ── Indicador de carga inicial (cuando ninguna sede ha sincronizado) ── */
+.consulta-cargando {
+    padding: 3rem 1rem;
+    text-align: center;
+    color: rgb(var(--text-muted));
+}
+
+.consulta-cargando-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgb(var(--surface-muted));
+    border-top-color: rgb(var(--accent));
+    border-radius: 50%;
+    animation: consulta-spin 0.8s linear infinite;
+    margin: 0 auto 0.75rem;
+}
+
+@keyframes consulta-spin {
+    to { transform: rotate(360deg); }
+}
+
+.consulta-progreso {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: rgb(var(--text-subtle));
+}
+
+/* ── Botón pequeño de acción en celda ── */
+.consulta-btn-accion {
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border: 1px solid rgb(var(--border));
+    background: rgb(var(--surface-elevated));
+    color: rgb(var(--text-primary));
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.consulta-btn-accion:hover {
+    background: rgb(var(--accent-soft));
+    border-color: rgb(var(--accent));
+    color: rgb(var(--accent-text));
+}
+
+.consulta-btn-accion--primario {
+    background: rgb(var(--accent));
+    color: white;
+    border-color: rgb(var(--accent));
+}
+
+.consulta-btn-accion--primario:hover {
+    background: rgb(var(--accent-hover));
+    color: white;
+}

@@ -22,10 +22,12 @@ export const MODELOS_IPHONE = [
     { valor: "iPhone 15 Plus", etiqueta: "iPhone 15 Plus" },
     { valor: "iPhone 15 Pro Max", etiqueta: "iPhone 15 Pro Max" },
     { valor: "iPhone 16", etiqueta: "iPhone 16" },
+    { valor: "iPhone 16e", etiqueta: "iPhone 16e" },
     { valor: "iPhone 16 Pro", etiqueta: "iPhone 16 Pro" },
     { valor: "iPhone 16 Plus", etiqueta: "iPhone 16 Plus" },
     { valor: "iPhone 16 Pro Max", etiqueta: "iPhone 16 Pro Max" },
     { valor: "iPhone 17", etiqueta: "iPhone 17" },
+    { valor: "iPhone 17e", etiqueta: "iPhone 17e" },
     { valor: "iPhone 17 Pro", etiqueta: "iPhone 17 Pro" },
     { valor: "iPhone 17 Air", etiqueta: "iPhone 17 Air" },
     { valor: "iPhone 17 Pro Max", etiqueta: "iPhone 17 Pro Max" }
@@ -37,8 +39,8 @@ export const MODELOS_CORTOS = [
     "13", "13 Pro", "13 Pro Max",
     "14", "14 Plus", "14 Pro", "14 Pro Max",
     "15", "15 Plus", "15 Pro", "15 Pro Max",
-    "16", "16E", "16 Plus", "16 Pro", "16 Pro Max",
-    "17", "17 Air", "17 Pro", "17 Pro Max"
+    "16", "16e", "16 Plus", "16 Pro", "16 Pro Max",
+    "17", "17e", "17 Air", "17 Pro", "17 Pro Max"
 ];
 
 export const COLORES_IPHONE = [
@@ -47,11 +49,11 @@ export const COLORES_IPHONE = [
     { valor: "Verde", etiqueta: "🟢 Verde" },
     { valor: "Morado", etiqueta: "🟣 Morado" },
     { valor: "Amarillo", etiqueta: "🟡 Amarillo" },
-    { valor: "Rojo", etiqueta: "🔴 Rojo (PRODUCT)RED" },
+    { valor: "Rojo", etiqueta: "🔴 Rojo" },
     { valor: "Azul", etiqueta: "🔵 Azul" },
     { valor: "Grafito", etiqueta: "⚫ Grafito (Pro)" },
     { valor: "Oro", etiqueta: "🟡 Oro (Pro)" },
-    { valor: "Plata", etiqueta: "⚪ Plata (Pro)" },
+    { valor: "Plata", etiqueta: "⚪ Silver (Pro)" },
     { valor: "Azul Pacífico", etiqueta: "🔵 Azul Pacífico (Pro)" },
     { valor: "Rosa", etiqueta: "🟠 Rosa" },
     { valor: "Verde (Alpine Green)", etiqueta: "🟢 Verde Alpine" },
@@ -151,3 +153,22 @@ export const TIPOS_TRANSACCION = [
     { valor: 'abono', etiqueta: 'Abono' },
     { valor: 'cambio-garantia', etiqueta: 'Cambio por Garantía' }
 ];
+
+// ──────────────────────────────────────────────────────────────────
+// Sedes (single source of truth — antes duplicado en AdminService)
+// ──────────────────────────────────────────────────────────────────
+export const SEDES = ['sede_1', 'sede_2', 'sede_3', 'sede_4', 'sede_5', 'sede_6'];
+
+export const SEDES_NOMBRES = {
+    'sede_1': 'Tienda Principal',
+    'sede_2': 'Sucursal Norte',
+    'sede_3': 'Sucursal Centro',
+    'sede_4': 'Sucursal Sur',
+    'sede_5': 'Sucursal Oeste',
+    'sede_6': 'Sucursal Este'
+};
+
+// Estados canónicos de un equipo en inventario.
+// Hoy dispersos en InventarioService.js:95, EquipoInventario.js:24, main.js:5050-5056.
+// Centralizar evita que un typo cree un estado fantasma que ningún filtro contempla.
+export const ESTADOS_EQUIPO = ['disponible', 'vendido', 'transferido', 'defectuoso', 'eliminado'];

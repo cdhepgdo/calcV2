@@ -112,6 +112,16 @@ class AuthService {
     getCurrentUser() {
         return auth.currentUser;
     }
+
+    /**
+     * Helper centralizado para guards de admin.
+     * Lee localStorage sincrónicamente (v1: no reactivo). Si en el futuro se
+     * necesita reactividad (cambio de rol sin recargar), migrar a un getter
+     * suscrito a onAuthStateChanged.
+     */
+    esAdmin() {
+        return localStorage.getItem('usuario_rol') === 'admin';
+    }
 }
 
 export const authService = new AuthService();

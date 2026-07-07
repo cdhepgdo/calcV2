@@ -234,10 +234,10 @@ export class Venta {
 
             if (this.formaPago === 'mixto' && this.pagoMixto) {
                 inicial += (this.pagoMixto.efectivo || 0)
-                         + (this.pagoMixto.zelle || 0)
-                         + (this.pagoMixto.binance || 0)
-                         + (this.pagoMixto.pagoMovil || 0)
-                         + (this.pagoMixto.transferencia || 0);
+                    + (this.pagoMixto.zelle || 0)
+                    + (this.pagoMixto.binance || 0)
+                    + (this.pagoMixto.pagoMovil || 0)
+                    + (this.pagoMixto.transferencia || 0);
             } else if (this.formaPago === 'pagomovil' && this.pagoMovilDetalles) {
                 inicial += this.pagoMovilDetalles.dolares || 0;
             } else if (this.formaPago === 'transferencia' && this.transferenciaDetalles) {
@@ -254,12 +254,12 @@ export class Venta {
         }
 
         // validar accesorios
-         // validar accesorios
+        // validar accesorios
         if (this.tipoVenta === 'accesorios') {
             const acc = this.accesorios;
-            const tieneAccesorios = acc.forro || acc.cargador || acc.vidrio || 
-                                  acc.otro || acc.protectorCamara || acc.cubo || 
-                                  acc.cableLightning || acc.cableCC || acc.caja;
+            const tieneAccesorios = acc.forro || acc.cargador || acc.vidrio ||
+                acc.otro || acc.protectorCamara || acc.cubo ||
+                acc.cableLightning || acc.cableCC || acc.caja;
             if (!tieneAccesorios) {
                 errores.push('Debe seleccionar al menos un accesorio para la venta.');
             }

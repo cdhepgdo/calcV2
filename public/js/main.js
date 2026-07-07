@@ -161,8 +161,10 @@ class App {
 
         // Selectores de cambio por garantía
         llenarSelect(document.getElementById('defectuosoModelo'), MODELOS_IPHONE, 'Seleccionar modelo');
+        llenarSelect(document.getElementById('defectuosoCapacidad'), CAPACIDADES_IPHONE, 'Seleccionar capacidad');
         llenarSelect(document.getElementById('defectuosoColor'), COLORES_IPHONE, 'Seleccionar color');
         llenarSelect(document.getElementById('nuevoModelo'), MODELOS_IPHONE, 'Seleccionar modelo');
+        llenarSelect(document.getElementById('nuevoCapacidad'), CAPACIDADES_IPHONE, 'Seleccionar capacidad');
         llenarSelect(document.getElementById('nuevoColor'), COLORES_IPHONE, 'Seleccionar color');
 
         const contenedorPago = document.getElementById('formaPagoRadios');
@@ -305,6 +307,14 @@ class App {
         if (imeiRecibidoInput) {
             imeiRecibidoInput.addEventListener('input', () => this._revalidarImeiRecibidoActual());
             imeiRecibidoInput.addEventListener('change', () => this._revalidarImeiRecibidoActual());
+        }
+
+        // Validación de IMEI del equipo DEFECTUOSO en cambio por garantía
+        // (FIX BUG IMEI-DUPLICADO: feedback en vivo para no esperar al submit)
+        const defectuosoImeiInput = document.getElementById('defectuosoImei');
+        if (defectuosoImeiInput) {
+            defectuosoImeiInput.addEventListener('input', () => this._revalidarImeiDefectuosoActual());
+            defectuosoImeiInput.addEventListener('change', () => this._revalidarImeiDefectuosoActual());
         }
 
         // Validación en tiempo real del IMEI del equipo a vender
@@ -533,11 +543,11 @@ class App {
      */
     _recalcularTotalDesdePrecios() {
         const totalEquipos = this._sumarPreciosEquiposVendidos();
-        
+
         if (totalEquipos > 0) {
             // Se asume el monto bruto como nuevo total
             const nuevoTotal = totalEquipos;
-            
+
             // Solo actualizamos si el monto actual es menor (por si hay accesorios incluidos en el manual)
             const montoInput = document.getElementById('montoTotal');
             if (montoInput && parseFloat(montoInput.value || 0) < nuevoTotal) {
@@ -1334,43 +1344,88 @@ class App {
     }
 
     /**
-     * Maneja el submit del formulario de cambio por garantía
+     * Maneja el submit del formulario de cambio por garantía.
+     *
+     * FIX BUG IMEI-DUPLICADO:
+     *   El flujo anterior guardaba el movimiento en Firestore ANTES de
+     *   intentar actualizar el inventario, y el await de `ingresarEquipo`
+     *   no chequeaba su retorno. Si el IMEI del equipo defectuoso ya
+     *   existía en el inventario, el sistema reportaba éxito al operador
+     *   y quedaba un "equipo fantasma" en movimientos sin contraparte en
+     *   inventario.
+     *
+     *   Corrección (defensa en profundidad):
+     *   1. Pre-chequear `buscarPorImei` ANTES de cualquier escritura,
+     *      para abortar el flujo si el IMEI defectuoso está duplicado.
+     *   2. Llamar `registrarCambioGarantia` DESPUÉS de confirmar que
+     *      el inventario acepta el ingreso, para no dejar movimientos
+     *      huérfanos si la validación falla.
+     *   3. Chequear el retorno de `ingresarEquipo` y `marcarVendido`.
      */
     async manejarSubmitCambioGarantia() {
         const datos = this.recopilarDatosCambioGarantia();
         const cambio = new CambioGarantia(datos);
 
+        // ── 1. PRE-CHECK INVENTARIO (antes de cualquier escritura) ───────
+        // Si el IMEI del equipo defectuoso ya existe en el inventario
+        // (cualquier estado), abortar sin crear el movimiento.
+        const imeiDefectuoso = (cambio.equipoDefectuoso.imei || '').trim();
+        if (imeiDefectuoso) {
+            const existente = inventarioService.buscarPorImei(imeiDefectuoso);
+            if (existente) {
+                mostrarAlerta(
+                    `❌ El IMEI ${imeiDefectuoso} del equipo defectuoso ya existe en el inventario ` +
+                    `como "${existente.estado}" (${existente.modelo || '?'} ${existente.gb || ''} — ${existente.color || '?'}). ` +
+                    `No se puede registrar un cambio por garantía con un IMEI duplicado. ` +
+                    `Verifica que el IMEI tipeado sea correcto o contacta al administrador.`,
+                    'error'
+                );
+                return; // NO guardar movimiento, NO limpiar formulario
+            }
+        }
+
+        // ── 2. INGRESO DE INVENTARIO (antes de registrar movimiento) ──────
+        // Si el ingreso falla, abortamos sin haber creado el movimiento
+        // huérfano.
+        const eqDefectuoso = new EquipoInventario({
+            tipoItem: 'equipo',
+            modelo: cambio.equipoDefectuoso.modelo,
+            gb: cambio.equipoDefectuoso.capacidad,
+            color: cambio.equipoDefectuoso.color,
+            bateria: parseInt(cambio.equipoDefectuoso.bateria) || 0,
+            imei: imeiDefectuoso,
+            detalles: `Garantía: ${cambio.equipoDefectuoso.problema}`,
+            origen: 'Cambio por Garantía',
+            estado: 'defectuoso'
+        });
+        const resIngreso = await inventarioService.ingresarEquipo(eqDefectuoso);
+        if (!resIngreso.exito) {
+            mostrarAlerta(
+                `❌ No se pudo registrar el equipo defectuoso en inventario: ${resIngreso.error}. ` +
+                `El cambio por garantía NO fue guardado. Contacta al administrador.`,
+                'error'
+            );
+            return;
+        }
+
+        // Marcar el equipo nuevo como vendido (si provenía del inventario).
+        // Si el equipo nuevo no estaba en inventario (caso común: el operador
+        // lo trae de otro lado), `buscarPorImei` retorna undefined y se omite.
+        if (cambio.equipoNuevo && cambio.equipoNuevo.imei) {
+            const equipoEnInv = inventarioService.buscarPorImei(cambio.equipoNuevo.imei);
+            if (equipoEnInv) {
+                const resVenta = await inventarioService.marcarVendido(equipoEnInv.id, `garantia-${cambio.id}`);
+                if (!resVenta.exito) {
+                    console.warn('⚠️ No se pudo marcar el equipo nuevo como vendido:', resVenta.error);
+                    // No bloqueamos: el cambio sigue válido; el flag vendido queda pendiente.
+                }
+            }
+        }
+
+        // ── 3. REGISTRAR MOVIMIENTO (solo si inventario aceptó) ──────────
         const resultado = await movimientoService.registrarCambioGarantia(cambio);
 
         if (resultado.exito) {
-            // ── INVENTARIO: Procesar Cambio por Garantía ──────────────────
-            try {
-                // 1. Ingresar el equipo defectuoso al inventario como 'defectuoso'
-                const eqDefectuoso = new EquipoInventario({
-                    tipoItem: 'equipo',
-                    modelo: cambio.equipoDefectuoso.modelo,
-                    gb: cambio.equipoDefectuoso.capacidad,
-                    color: cambio.equipoDefectuoso.color,
-                    bateria: parseInt(cambio.equipoDefectuoso.bateria) || 0,
-                    imei: cambio.equipoDefectuoso.imei,
-                    detalles: `Garantía: ${cambio.equipoDefectuoso.problema}`,
-                    origen: 'Cambio por Garantía',
-                    estado: 'defectuoso'
-                });
-                await inventarioService.ingresarEquipo(eqDefectuoso);
-
-                // 2. Marcar el equipo nuevo como vendido (si proviene del inventario)
-                if (cambio.equipoNuevo && cambio.equipoNuevo.imei) {
-                    const equipoEnInv = inventarioService.buscarPorImei(cambio.equipoNuevo.imei);
-                    if (equipoEnInv) {
-                        await inventarioService.marcarVendido(equipoEnInv.id, `garantia-${cambio.id}`);
-                    }
-                }
-            } catch (invError) {
-                console.error('⚠️ Error al actualizar inventario en garantía:', invError);
-            }
-            // ────────────────────────────────────────────────────────────
-
             mostrarAlerta(resultado.mensaje, 'success');
             this.limpiarFormularioVenta();
             // Actualizar UI en background (fire-and-forget)
@@ -2155,6 +2210,60 @@ class App {
     }
 
     /**
+     * Revisa el IMEI del equipo DEFECTUOSO en cambio por garantía mientras
+     * el usuario escribe. Reutiliza el sistema de banners de trade-in.
+     *
+     * FIX BUG IMEI-DUPLICADO:
+     *   El operador tipea el IMEI del equipo que devuelve el cliente.
+     *   En cambio por garantía NO hay autocompletar (el equipo del cliente
+     *   no está en nuestro inventario), entonces cualquier coincidencia
+     *   con inventario = BLOQUEAR.
+     *
+     * DIFERENCIA vs _revalidarImeiRecibidoActual:
+     *   - Re-categoriza 'autocompletar-vendido' a 'bloqueado-otro-estado'
+     *     porque en garantía ningún IMEI del inventario es aceptable.
+     *   - Solo muestra banner cuando el form de cambio por garantía es
+     *     visible (evita ruido cuando el usuario está en venta normal).
+     */
+    _revalidarImeiDefectuosoActual() {
+        const imeiInput = document.getElementById('defectuosoImei');
+        if (!imeiInput) return;
+
+        const imei = imeiInput.value.trim();
+        if (!imei || imei.length < 6) {
+            this._ocultarBannerImeiDefectuoso();
+            return;
+        }
+
+        // Gate: solo mostrar banner si el form de cambio por garantía está visible
+        const cambioGarantiaForm = document.getElementById('cambioGarantiaForm');
+        if (cambioGarantiaForm && cambioGarantiaForm.classList.contains('hidden')) {
+            this._ocultarBannerImeiDefectuoso();
+            return;
+        }
+
+        let conflicto = this._obtenerConflictoImeiRecibido(imei, null, null);
+
+        // Re-categorizar 'autocompletar-vendido' a 'bloqueado-otro-estado':
+        // en cambio por garantía, ningún IMEI del inventario es aceptable.
+        if (conflicto && conflicto.tipo === 'autocompletar-vendido') {
+            conflicto = {
+                tipo: 'bloqueado-otro-estado',
+                equipo: conflicto.equipo,
+            };
+        }
+
+        this._mostrarToastConflictoImeiRecibido(conflicto);
+    }
+
+    /**
+     * Oculta el banner de conflicto del IMEI defectuoso.
+     */
+    _ocultarBannerImeiDefectuoso() {
+        document.getElementById('imeiTradeInBanner')?.classList.add('hidden');
+    }
+
+    /**
      * Sincroniza el trade-in con el inventario (nuevo, editar, eliminar)
      */
     async _sincronizarTradeinInventario(equipoRecibido, ventaAnterior) {
@@ -2168,6 +2277,19 @@ class App {
 
         // Caso 2: Sin trade-in antes, pero sí hay ahora → Ingresar
         if (!imeiAnterior && imeiActual) {
+            // FIX BUG IMEI-DUPLICADO: pre-check + chequeo de retorno.
+            const existente = inventarioService.buscarPorImei(imeiActual);
+            if (existente) {
+                console.error(
+                    `❌ IMEI ${imeiActual} ya existe en inventario (estado: ${existente.estado}). ` +
+                    `No se puede ingresar como nuevo trade-in.`
+                );
+                return {
+                    exito: false,
+                    error: `El IMEI ${imeiActual} ya existe en el inventario como "${existente.estado}". ` +
+                           `No puede usarse como trade-in.`
+                };
+            }
             const eqRecibido = new EquipoInventario({
                 tipoItem: 'equipo',
                 modelo: equipoRecibido.modelo,
@@ -2179,8 +2301,11 @@ class App {
                 origen: `Trade-in (Venta: ${ventaAnterior?.id || 'Nueva'})`,
                 estado: 'disponible'
             });
-            await inventarioService.ingresarEquipo(eqRecibido);
-            return;
+            const resIngreso = await inventarioService.ingresarEquipo(eqRecibido);
+            if (!resIngreso.exito) {
+                return { exito: false, error: resIngreso.error };
+            }
+            return { exito: true };
         }
 
         // Caso 3: Trade-in antes y ahora, mismo IMEI → Actualizar otros campos por si cambiaron
@@ -2258,6 +2383,9 @@ class App {
         }
 
         // 2) IMEIs actuales: ingresar nuevos, actualizar existentes
+        // FIX BUG IMEI-DUPLICADO: acumular errores en vez de abortar al primero
+        // (un multi-trade-in no debe invalidar a los demás por un IMEI malo).
+        const erroresIngreso = [];
         for (const r of (recibidosActuales || [])) {
             const imei = (r.imei || '').trim();
             if (!imei) continue;
@@ -2265,7 +2393,7 @@ class App {
             const eqExistente = inventarioService.buscarPorImei(imei);
 
             if (!eqExistente) {
-                // No existe → ingresar
+                // No existe → intentar ingresar
                 const nuevo = new EquipoInventario({
                     tipoItem: 'equipo',
                     modelo: r.modelo,
@@ -2277,18 +2405,37 @@ class App {
                     origen: `Trade-in (Venta: ${ventaId || 'Nueva'})`,
                     estado: 'disponible'
                 });
-                await inventarioService.ingresarEquipo(nuevo);
+                const resIngreso = await inventarioService.ingresarEquipo(nuevo);
+                if (!resIngreso.exito) {
+                    console.error(
+                        `❌ No se pudo ingresar trade-in IMEI ${imei}:`,
+                        resIngreso.error
+                    );
+                    erroresIngreso.push({ imei, error: resIngreso.error });
+                }
             } else {
                 // Ya existe (caso de edición) → actualizar campos
-                await inventarioService.actualizarEquipo(eqExistente.id, {
+                const resUpdate = await inventarioService.actualizarEquipo(eqExistente.id, {
                     modelo: r.modelo,
                     gb: r.capacidad,
                     color: r.color,
                     bateria: parseInt(r.bateria) || 0,
                     detalles: r.comentarios || ''
                 });
+                if (!resUpdate.exito) {
+                    erroresIngreso.push({ imei, error: resUpdate.error });
+                }
             }
         }
+
+        if (erroresIngreso.length) {
+            return {
+                exito: false,
+                error: `${erroresIngreso.length} trade-in(s) no se pudieron sincronizar: ` +
+                       erroresIngreso.map(e => `IMEI ${e.imei}: ${e.error}`).join('; ')
+            };
+        }
+        return { exito: true };
     }
 
     /**
@@ -2623,6 +2770,7 @@ class App {
 
         // Limpiar banners de conflicto de IMEI
         this._mostrarToastConflictoImeiRecibido(null);
+        this._ocultarBannerImeiDefectuoso();
         document.getElementById('imeiTradeInBanner')?.classList.add('hidden');
         document.getElementById('totalAbonosPreviosDisplay').textContent = '0.00';
 
@@ -3014,6 +3162,15 @@ class App {
         const eq = inventarioService.obtenerDisponibles().find(e => e.id === equipoId);
         if (!eq) return;
 
+        // FIX: en modo cambio-garantia, la selección desde la lista principal
+        // debe llenar los inputs del equipo nuevo (nuevoModelo, nuevoColor, etc.)
+        // usando el mismo helper que ya usa el inputBuscadorGarantia dedicado.
+        const tipoTransaccion = document.querySelector('input[name="tipoTransaccion"]:checked')?.value;
+        if (tipoTransaccion === 'cambio-garantia') {
+            this._seleccionarEquipoDesdeBuscador('Garantia', eq);
+            return;
+        }
+
         this._equiposSeleccionadosVenta.push({
             id: eq.id,
             modelo: eq.modelo,
@@ -3044,7 +3201,7 @@ class App {
             // Solo aplica cuando hay exactamente 1 equipo, para no mezclar notas de varios equipos
             const detallesEquipo = (eq.detalles || '').trim();
             if (detallesEquipo) {
-                const chkNota  = document.getElementById('notaVenta');
+                const chkNota = document.getElementById('notaVenta');
                 const campoNota = document.getElementById('notaVentaInfo');
                 const inputNota = document.getElementById('notaVentaDetalles');
 
@@ -3584,19 +3741,19 @@ class App {
                         <span>✏️</span> Editar
                     </button>
                     ${venta.tipoVenta === 'completa' ? (() => {
-                        // MULTI-EQUIPO: 1 botón de garantía por equipo vendido.
-                        const equiposVendidos = (venta.equipos && venta.equipos.length > 0)
-                            ? venta.equipos
-                            : (venta.equipo ? [venta.equipo] : []);
-                        return equiposVendidos.map((eq, idx) => {
-                            const label = equiposVendidos.length > 1
-                                ? `Garantía #${idx + 1}`
-                                : 'Garantía';
-                            return `<button onclick="app.imprimirGarantia('${venta.id}', ${idx})" class="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded transition flex items-center gap-1" title="Imprimir garantía de ${sanitizar(eq.modelo || '')} ${sanitizar(eq.almacenamiento || '')} — IMEI ${sanitizar(eq.imei || 'N/A')}">
+                // MULTI-EQUIPO: 1 botón de garantía por equipo vendido.
+                const equiposVendidos = (venta.equipos && venta.equipos.length > 0)
+                    ? venta.equipos
+                    : (venta.equipo ? [venta.equipo] : []);
+                return equiposVendidos.map((eq, idx) => {
+                    const label = equiposVendidos.length > 1
+                        ? `Garantía #${idx + 1}`
+                        : 'Garantía';
+                    return `<button onclick="app.imprimirGarantia('${venta.id}', ${idx})" class="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded transition flex items-center gap-1" title="Imprimir garantía de ${sanitizar(eq.modelo || '')} ${sanitizar(eq.almacenamiento || '')} — IMEI ${sanitizar(eq.imei || 'N/A')}">
                                 <span>🖨️</span> ${label}
                             </button>`;
-                        }).join('');
-                    })() : ''}
+                }).join('');
+            })() : ''}
                     <button onclick="app.eliminarVenta('${venta.id}')" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded transition flex items-center gap-1">
                         <span>🗑️</span> Eliminar
                     </button>
@@ -3842,15 +3999,15 @@ class App {
 
         if (venta.tipoVenta === 'completa') {
             this._equiposSeleccionadosVenta = [];
-            
-            const equiposACargar = venta.equipos && venta.equipos.length > 0 
-                ? venta.equipos 
+
+            const equiposACargar = venta.equipos && venta.equipos.length > 0
+                ? venta.equipos
                 : (venta.equipo ? [venta.equipo] : []);
 
             equiposACargar.forEach(eq => {
                 if (!eq) return;
                 const eqInv = inventarioService.buscarPorImei(eq.imei);
-                
+
                 this._equiposSeleccionadosVenta.push({
                     id: eq.idInventario || (eqInv ? eqInv.id : `manual-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`),
                     modelo: eq.modelo || '',
@@ -5364,13 +5521,36 @@ class App {
         document.getElementById(`tarjeta${tipo}Bateria`).textContent = `🔋 ${equipo.bateria}%`;
         document.getElementById(`tarjeta${tipo}Imei`).textContent = `IMEI: ${equipo.imei}`;
 
-        // 4. Llenar los campos ocultos subyacentes para no romper main.js
+        // 4. Normalizar valores para que coincidan con las <option> de los <select>
+        //    EquipoInventario guarda modelo SIN "iPhone " (ej: "11"), capacidad/color
+        //    con posible casing o espacios. Sin normalizar, .value = X no matchea
+        //    y validar() se queja pidiendo re-seleccionar campos vacíos.
+        const modeloNorm = /^iPhone\s/i.test(equipo.modelo || '')
+            ? equipo.modelo
+            : (equipo.modelo ? 'iPhone ' + equipo.modelo : '');
+        const capNorm = (equipo.gb || '').toString().trim().replace(/\s+/g, '').toUpperCase();
+        const colorNorm = (equipo.color || '').toString().trim();
+        const batNorm = String(parseInt(equipo.bateria) || 0);
+
+        const setSelectConFallback = (id, valor) => {
+            if (!valor) return;
+            const sel = document.getElementById(id);
+            if (!sel) return;
+            if (!Array.from(sel.options).some(o => o.value === valor)) {
+                const opt = document.createElement('option');
+                opt.value = valor; opt.textContent = valor;
+                sel.appendChild(opt);
+            }
+            sel.value = valor;
+        };
+
         if (tipo === 'Venta') {
-            document.getElementById('modelo').value = equipo.modelo;
-            document.getElementById('color').value = equipo.color;
-            document.getElementById('almacenamiento').value = equipo.gb;
-            document.getElementById('bateria').value = equipo.bateria;
+            setSelectConFallback('modelo', modeloNorm);
+            setSelectConFallback('color', colorNorm);
+            document.getElementById('almacenamiento').value = capNorm;
+            document.getElementById('bateria').value = batNorm;
             document.getElementById('equipoImei').value = equipo.imei;
+            console.log(tipo);
 
             // Disparar eventos change si es necesario (ej: accesorios o validación)
             document.getElementById('modelo').dispatchEvent(new Event('change'));
@@ -5381,18 +5561,20 @@ class App {
             }
 
         } else if (tipo === 'Salida') {
-            document.getElementById('salidaEquipoModelo').value = equipo.modelo;
-            document.getElementById('salidaEquipoCapacidad').value = equipo.gb;
-            document.getElementById('salidaEquipoColor').value = equipo.color;
-            document.getElementById('salidaEquipoBateria').value = equipo.bateria;
+            setSelectConFallback('salidaEquipoModelo', modeloNorm);
+            setSelectConFallback('salidaEquipoCapacidad', capNorm);
+            setSelectConFallback('salidaEquipoColor', colorNorm);
+            document.getElementById('salidaEquipoBateria').value = batNorm;
             document.getElementById('salidaEquipoImei').value = equipo.imei;
 
         } else if (tipo === 'Garantia') {
-            document.getElementById('nuevoModelo').value = equipo.modelo;
-            document.getElementById('nuevoCapacidad').value = equipo.gb;
-            document.getElementById('nuevoColor').value = equipo.color;
-            document.getElementById('nuevoBateria').value = equipo.bateria;
+            setSelectConFallback('nuevoModelo', modeloNorm);
+            setSelectConFallback('nuevoCapacidad', capNorm);
+            setSelectConFallback('nuevoColor', colorNorm);
+            document.getElementById('nuevoBateria').value = batNorm;
             document.getElementById('nuevoImei').value = equipo.imei;
+            console.log(tipo, document.getElementById('nuevoCapacidad').value, equipo.modelo);
+            console.log(tipo, document.getElementById('nuevoModelo').value, equipo.modelo);
         }
     }
 

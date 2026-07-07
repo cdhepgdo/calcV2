@@ -6,18 +6,14 @@ import {
 
 import { Venta } from '../models/Venta.js';
 import { Movimiento } from '../models/Movimiento.js';
+import { SEDES, SEDES_NOMBRES } from '../config/constants.js';
 
 class AdminService {
     constructor() {
-        this.sedes = ['sede_1', 'sede_2', 'sede_3', 'sede_4', 'sede_5', 'sede_6'];
-        this.sedeNombres = {
-            'sede_1': 'Tienda Principal',
-            'sede_2': 'Sucursal Norte',
-            'sede_3': 'Sucursal Centro',
-            'sede_4': 'Sucursal Sur',
-            'sede_5': 'Sucursal Oeste',
-            'sede_6': 'Sucursal Este'
-        };
+        // Single source of truth: SEDES vive en config/constants.js
+        // Si se agregan/quitan sedes, solo se toca constants.
+        this.sedes = SEDES;
+        this.sedeNombres = SEDES_NOMBRES;
 
         this._cache = {};
         this.sedes.forEach(sedeId => {

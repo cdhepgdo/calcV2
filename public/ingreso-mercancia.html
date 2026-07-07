@@ -65,6 +65,9 @@
                     <button id="btnModoSalida"
                         class="px-4 py-1.5 rounded-md text-sm font-bold bg-indigo-600 text-white opacity-50 hover:bg-white/10 transition">📤
                         Salida</button>
+                    <button id="btnModoConsulta"
+                        class="px-4 py-1.5 rounded-md text-sm font-bold bg-indigo-600 text-white opacity-50 hover:bg-white/10 transition">📋
+                        Consultar</button>
                 </div>
             </div>
             <div class="flex flex-col items-end gap-3">
@@ -199,6 +202,102 @@
         </div>
 
         <!-- ========================================== -->
+        <!-- MODO CONSULTA — Inventario multi-sede      -->
+        <!-- ========================================== -->
+        <div id="seccionConsulta" class="hidden space-y-4">
+            <div class="glass rounded-2xl p-5">
+                <h2 class="text-themed-secondary text-xs font-bold uppercase tracking-wider mb-3">
+                    Filtros
+                </h2>
+                <div class="consulta-filtros">
+                    <div class="consulta-filtro-grupo">
+                        <label for="consultaFiltroSede">Sede</label>
+                        <select id="consultaFiltroSede">
+                            <option value="todos">🌍 Todas</option>
+                        </select>
+                    </div>
+                    <div class="consulta-filtro-grupo">
+                        <label for="consultaFiltroEstado">Estado</label>
+                        <select id="consultaFiltroEstado">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="consulta-filtro-grupo">
+                        <label for="consultaFiltroModelo">Modelo</label>
+                        <input type="text" id="consultaFiltroModelo" list="consultaListaModelos"
+                            placeholder="Ej: 14 Pro" autocomplete="off">
+                        <datalist id="consultaListaModelos"></datalist>
+                    </div>
+                    <div class="consulta-filtro-grupo">
+                        <label for="consultaFiltroGb">GB</label>
+                        <select id="consultaFiltroGb">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+                    <div class="consulta-filtro-grupo">
+                        <label for="consultaFiltroColor">Color</label>
+                        <select id="consultaFiltroColor">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="consulta-filtro-grupo">
+                        <label for="consultaFiltroImei">IMEI (prefijo)</label>
+                        <input type="text" id="consultaFiltroImei" placeholder="35…" autocomplete="off">
+                    </div>
+                    <div class="consulta-filtro-grupo">
+                        <label for="consultaFiltroFechaDesde">Desde</label>
+                        <input type="date" id="consultaFiltroFechaDesde">
+                    </div>
+                    <div class="consulta-filtro-grupo">
+                        <label for="consultaFiltroFechaHasta">Hasta</label>
+                        <input type="date" id="consultaFiltroFechaHasta">
+                    </div>
+                    <div class="consulta-filtro-grupo consulta-filtro-grupo-checkbox">
+                        <label>
+                            <input type="checkbox" id="consultaFiltroIncluirEliminados">
+                            Incluir eliminados
+                        </label>
+                    </div>
+                    <div class="consulta-acciones">
+                        <button id="consultaBtnRefrescar" class="btn-accion btn-accion--neutro text-sm">↻ Refrescar</button>
+                        <button id="consultaBtnExportar" class="btn-accion btn-accion--neutro text-sm">📥 Exportar CSV</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass rounded-2xl">
+                <div class="p-3 border-b border-white/10 flex items-center justify-between gap-3">
+                    <span class="text-themed-secondary text-sm font-medium">
+                        <span id="consultaTotalEquipos" class="text-themed font-bold text-lg">0</span>
+                        equipos
+                    </span>
+                    <span id="consultaProgresoCarga" class="text-themed-muted text-xs" style="display:none"></span>
+                </div>
+                <div class="consulta-tabla-wrap">
+                    <table class="consulta-tabla">
+                        <thead>
+                            <tr>
+                                <th style="width:50px">#</th>
+                                <th>Fecha</th>
+                                <th>Sede</th>
+                                <th>Modelo</th>
+                                <th>GB</th>
+                                <th>Color</th>
+                                <th>Bat%</th>
+                                <th>IMEI</th>
+                                <th>Estado</th>
+                                <th>Detalles</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="consultaTablaBody"></tbody>
+                    </table>
+                </div>
+                <div id="consultaPaginador" class="consulta-paginador"></div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
         <!-- MODO INGRESO                               -->
         <!-- ========================================== -->
         <div id="seccionIngreso" class="space-y-4">
@@ -306,12 +405,8 @@
                     data-campo="modelo">
             </td>
             <td class="py-2 px-2">
-                <div class="flex flex-wrap gap-1 items-center">
-                    <span class="gb-chip" data-gb="64GB">64</span>
-                    <span class="gb-chip" data-gb="128GB">128</span>
-                    <span class="gb-chip" data-gb="256GB">256</span>
-                    <span class="gb-chip" data-gb="512GB">512</span>
-                    <span class="gb-chip" data-gb="1TB">1TB</span>
+                <div class="flex flex-wrap gap-1 items-center gb-chips-container">
+                    <!-- Chips de capacidad se generan dinámicamente desde CAPACIDADES_IPHONE (constants.js) -->
                     <input type="hidden" class="campo-gb" value="">
                 </div>
             </td>

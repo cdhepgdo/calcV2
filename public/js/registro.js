@@ -131,7 +131,8 @@ class RegistroDiario {
             if (tipoLower.includes('accesorio')) {
                 const datos = movimiento.datos;
                 let tipoAcc = datos.tipo || 'Desconocido';
-                let detalle = datos.modelo || 'Sin especificar';
+                //let detalle = datos.modelo || 'Sin especificar';
+                let detalle = datos.modelo || datos.descripcion || 'Sin especificar';
 
 
                 // 1. ESTANDARIZAR LOS NOMBRES ANTES DE INICIALIZAR

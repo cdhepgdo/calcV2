@@ -4,7 +4,7 @@
  */
 
 import { formatearMoneda, formatearFecha } from '../utils/formatters.js';
-
+import logoUrl from '/width_200.webp';
 class PrintService {
     /**
      * Calcula el total inicial de una venta (sin equipo recibido)
@@ -55,9 +55,10 @@ class PrintService {
      * @param {number} [equipoIdx=0] - índice del equipo vendido. Default 0 (primero).
      *        Permite imprimir 1 garantía por equipo cuando la venta tiene N.
      */
-    imprimirGarantia(venta, equipoIdx = 0) {
+    async imprimirGarantia(venta, equipoIdx = 0) {
+        const logoBase64 = await this._cargarLogoBase64();
         const ventanaImpresion = window.open('', '_blank');
-        const html = this.generarHTMLGarantia(venta, equipoIdx);
+        const html = this.generarHTMLGarantia(venta, equipoIdx, logoBase64);
 
         ventanaImpresion.document.write(html);
         ventanaImpresion.document.close();
@@ -69,12 +70,34 @@ class PrintService {
     }
 
     /**
+     * Carga el logo como cadena Base64 para embeber en documentos de impresion.
+     * Necesario porque window.open('', '_blank') no tiene URL base y las rutas
+     * relativas no funcionan en esa ventana.
+     */
+    async _cargarLogoBase64() {
+        try {
+            const response = await fetch('/img/width_200.webp');
+            const blob = await response.blob();
+            return await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        } catch (e) {
+            console.warn('No se pudo cargar el logo para impresión:', e);
+            return '';
+        }
+    }
+
+    /**
      * Genera el HTML de la garantía de un equipo específico de la venta.
      * @param {object} venta
      * @param {number} [equipoIdx=0] - índice del equipo vendido dentro de venta.equipos.
      *        Si no se pasa, usa venta.equipos[0] o el singular venta.equipo (compat).
+     * @param {string} [logoBase64=''] - Logo en Base64 para embeber en el HTML.
      */
-    generarHTMLGarantia(venta, equipoIdx = 0) {
+    generarHTMLGarantia(venta, equipoIdx = 0, logoBase64 = '') {
         const accesoriosTexto = venta.obtenerResumenAccesorios();
 
         // Resolver el equipo específico para esta garantía.
@@ -373,7 +396,7 @@ class PrintService {
 
                 <!-- Figura superior -->
                 <div class="figure" style="right: 79px;">
-                    <img src="./width_200.webp" alt="logo">
+                    <img src="${logoUrl}" alt="logo">
                 </div>
             </div>
 
@@ -440,7 +463,7 @@ class PrintService {
                     </div>
                     
                     <div class="figure" style="right: 79px;">
-                        <img src="./width_200.webp" alt="logo">
+                        <img src="${logoUrl}" alt="logo">
                     </div>
                 </div>
                 
@@ -1219,4 +1242,3 @@ class PrintService {
 
 // Exportar una instancia única (Singleton)
 export const printService = new PrintService();
-

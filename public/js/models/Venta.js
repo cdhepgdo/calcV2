@@ -220,11 +220,17 @@ export class Venta {
 
         } else if (['efectivo', 'zelle', 'binance'].includes(this.formaPago)) {
             // VALIDACIÓN PAGOS SIMPLES (efectivo, zelle, binance)
-            // Para estos métodos, el montoTotal debe ser igual o menor al ingresado
-            // La validación principal ya se hace en el submit con calcularMontoTotal()
-            // Aquí solo validamos que sea positivo
             if (this.montoTotal <= 0) {
                 errores.push('El monto total debe ser mayor a cero.');
+            } else {
+                const totalEsperado = this.equipos.reduce((sum, e) => sum + (parseFloat(e.precio) || 0), 0);
+                // this.montoTotal ya incluye el equipo recibido. Solo sumamos abonos previos.
+                const pagoTotal = this.montoTotal + (this.totalAbonosPrevios || 0);
+                const diferencia = totalEsperado - pagoTotal;
+                
+                if (diferencia > 0.01 && !this.weppa) {
+                    errores.push(`El monto total ($${pagoTotal.toFixed(2)}) es menor a la suma de los equipos ($${totalEsperado.toFixed(2)}). Active WEPPA si es intencional.`);
+                }
             }
         }
 

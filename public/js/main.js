@@ -2505,11 +2505,9 @@ class App {
             // Alias singular = primer equipo (compat con ventas viejas y admin/registro)
             datos.equipo = datos.equipos[0] || null;
 
-            // Auto-llenar montoTotal con la suma de precios si está en 0
-            if (datos.montoTotal === 0 && datos.equipos.length > 0) {
-                const sumaPrecios = datos.equipos.reduce((s, e) => s + (e.precio || 0), 0);
-                if (sumaPrecios > 0) datos.montoTotal = sumaPrecios;
-            }
+            // Eliminado el auto-llenado de montoTotal cuando está en 0. 
+            // Si el cliente no ingresó pagos (montoTotal 0), debe arrojar error de "El monto total pagado debe ser mayor a cero",
+            // en vez de pretender que pagó la totalidad.
         }
 
         // Accesorios

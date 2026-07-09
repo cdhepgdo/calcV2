@@ -1485,19 +1485,7 @@ class App {
         try {
             const datosVenta = this.recopilarDatosVenta();
 
-            // Auto-corregir montoTotal con la suma de precios (si hay precios cargados)
-            const totalEquipos = (datosVenta.equipos || []).reduce((s, e) => s + (parseFloat(e.precio) || 0), 0);
-            if (totalEquipos > 0) {
-                // El montoTotal es el monto BRUTO (incluye el trade-in).
-                // No debemos restar el totalRecibidos. Solo auto-corregimos si el monto ingresado
-                // es menor a la suma de los equipos vendidos (por si olvidaron actualizarlo).
-                if (datosVenta.montoTotal < totalEquipos) {
-                    datosVenta.montoTotal = totalEquipos;
-                    const montoInput = document.getElementById('montoTotal');
-                    if (montoInput) montoInput.value = datosVenta.montoTotal.toFixed(2);
-                }
-            }
-
+            // Eliminada la auto-corrección de montoTotal para forzar validación estricta
             // ════════════════════════════════════════════════════════════════
             // VALIDACIÓN DE IMEIS DE EQUIPOS RECIBIDOS (TRADE-IN) — N equipos
             // Itera sobre TODOS los trade-ins, no solo el primero
@@ -2858,6 +2846,10 @@ class App {
         document.querySelector('input[name="tipoTransacción"][value="venta"]') &&
             (document.querySelector('input[name="tipoTransacción"][value="venta"]').checked = true);
         document.querySelector('input[name="tipoTransaccion"][value="venta"]').checked = true;
+
+        // Limpiar banner de diferencia de pago
+        const bannerDiferencia = document.getElementById('diferenciaPago');
+        if (bannerDiferencia) bannerDiferencia.classList.add('hidden');
         this.manejarCambioTipoTransaccion();
 
         // ── INVENTARIO: limpiar el selector de equipo ───────────────────
@@ -3371,11 +3363,9 @@ class App {
     _recalcularTotalDesdePrecios() {
         const totalEquipos = this._sumarPreciosEquiposVendidos();
         const totalRecibidos = this._sumarValoresRecibidos();
-        if (totalEquipos > 0 || this._equiposSeleccionadosVenta.length > 0) {
-            const nuevoTotal = Math.max(0, totalEquipos - totalRecibidos);
-            const montoInput = document.getElementById('montoTotal');
-            if (montoInput) montoInput.value = nuevoTotal.toFixed(2);
-        }
+        // Eliminado la sobreescritura de montoTotal aquí.
+        // El montoTotal (pago) SOLO debe ser controlado por calcularYMostrarTotal().
+        // De lo contrario, editar el precio del equipo auto-llenaba el pago y ocultaba el banner.
         // Refrescar el banner de diferencia con el nuevo montoTotal
         this._actualizarBannerDiferencia();
     }

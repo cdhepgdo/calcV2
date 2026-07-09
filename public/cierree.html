@@ -339,11 +339,19 @@
                                 <input type="checkbox" id="caja" class="mr-3">
                                 <span class="font-medium">Caja</span>
                             </label>
-                            <div id="cajaModelo" class="hidden grid grid-cols-3 gap-3">
-                                <select class="p-2 border rounded-lg accModelo flex-1"></select>
-                                <select id="cajaColorSelect" class="p-2 border rounded-lg flex-1"></select>
-                                <input type="number" min="1" value="1" class="p-2 border rounded-lg w-full"
-                                    placeholder="Cant.">
+                            <div id="cajaContenedor" class="hidden flex-col gap-2">
+                                <div id="cajaLista" class="flex flex-col gap-2">
+                                    <div class="caja-item flex flex-col gap-2">
+                                        <select class="p-2 border rounded-lg accModelo w-full"></select>
+                                        <div class="grid grid-cols-[1fr,auto,auto] gap-2">
+                                            <select class="p-2 border rounded-lg caja-color"></select>
+                                            <input type="number" min="1" value="1"
+                                                class="p-2 border rounded-lg w-16 caja-cant" placeholder="Cant.">
+                                            <button type="button"
+                                                class="btn-add-caja bg-green-500 text-white w-8 h-8 rounded font-bold hover:bg-green-600 transition">+</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

@@ -62,6 +62,7 @@ export class Venta {
             cableCC: false,
             cableCCCantidad: 0,
             caja: false,
+            cajas: [], // Array de {modelo, color, cantidad}
             cajaModelo: null,
             cajaColor: null,
             cajaCantidad: 0
@@ -346,7 +347,13 @@ export class Venta {
             accesorios.push(`Cable C+C (${this.accesorios.cableCCCantidad})`);
         }
         if (this.accesorios.caja) {
-            accesorios.push(`Caja ${this.accesorios.cajaModelo || 'N/A'} ${this.accesorios.cajaColor || 'N/A'} (${this.accesorios.cajaCantidad})`);
+            if (this.accesorios.cajas && this.accesorios.cajas.length > 0) {
+                this.accesorios.cajas.forEach(c => {
+                    accesorios.push(`Caja ${c.modelo || 'N/A'} ${c.color || 'N/A'} (${c.cantidad})`);
+                });
+            } else {
+                accesorios.push(`Caja ${this.accesorios.cajaModelo || 'N/A'} ${this.accesorios.cajaColor || 'N/A'} (${this.accesorios.cajaCantidad})`);
+            }
         }
 
         return accesorios;

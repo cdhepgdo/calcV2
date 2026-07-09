@@ -226,12 +226,22 @@ class AdminDashboard {
             this.agregarAccesorio(dia, 'Cable C+C', 'Estándar', acc.cableCCCantidad);
         }
 
-        // Caja
-        if (acc.caja && acc.cajaCantidad > 0) {
-            const modelo = acc.cajaModelo || 'Sin especificar';
-            const color = acc.cajaColor || '';
-            const descripcion = color ? `${modelo} ${color}` : modelo;
-            this.agregarAccesorio(dia, 'Caja', descripcion, acc.cajaCantidad);
+        // Caja — soportar multi-caja
+        if (acc.caja) {
+            if (acc.cajas && acc.cajas.length > 0) {
+                acc.cajas.forEach(c => {
+                    const modelo = c.modelo || 'Sin especificar';
+                    const color = c.color || '';
+                    const descripcion = color ? `${modelo} ${color}` : modelo;
+                    this.agregarAccesorio(dia, 'Caja', descripcion, c.cantidad);
+                });
+            } else if (acc.cajaCantidad > 0) {
+                // Backward compat: ventas antiguas con formato plano
+                const modelo = acc.cajaModelo || 'Sin especificar';
+                const color = acc.cajaColor || '';
+                const descripcion = color ? `${modelo} ${color}` : modelo;
+                this.agregarAccesorio(dia, 'Caja', descripcion, acc.cajaCantidad);
+            }
         }
     }
 

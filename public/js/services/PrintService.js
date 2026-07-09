@@ -4,7 +4,7 @@
  */
 
 import { formatearMoneda, formatearFecha } from '../utils/formatters.js';
-
+import logoUrl from '/width_200.webp';
 class PrintService {
     /**
      * Calcula el total inicial de una venta (sin equipo recibido)
@@ -68,13 +68,15 @@ class PrintService {
         }, 500);
     }
 
+
     /**
      * Genera el HTML de la garantía de un equipo específico de la venta.
      * @param {object} venta
      * @param {number} [equipoIdx=0] - índice del equipo vendido dentro de venta.equipos.
      *        Si no se pasa, usa venta.equipos[0] o el singular venta.equipo (compat).
+     * @param {string} [logoBase64=''] - Logo en Base64 para embeber en el HTML.
      */
-    generarHTMLGarantia(venta, equipoIdx = 0) {
+    generarHTMLGarantia(venta, equipoIdx = 0, logoBase64 = '') {
         const accesoriosTexto = venta.obtenerResumenAccesorios();
 
         // Resolver el equipo específico para esta garantía.
@@ -373,7 +375,7 @@ class PrintService {
 
                 <!-- Figura superior -->
                 <div class="figure" style="right: 79px;">
-                    <img src="./width_200.webp" alt="logo">
+                    <img src="${logoUrl}" alt="logo">
                 </div>
             </div>
 
@@ -440,7 +442,7 @@ class PrintService {
                     </div>
                     
                     <div class="figure" style="right: 79px;">
-                        <img src="./width_200.webp" alt="logo">
+                        <img src="${logoUrl}" alt="logo">
                     </div>
                 </div>
                 
@@ -818,9 +820,9 @@ class PrintService {
         `;
     }
 
-        /**
-     * Genera el HTML de un item de venta
-     */
+    /**
+ * Genera el HTML de un item de venta
+ */
     generarItemVenta(venta, numero) {
         const accesorios = venta.obtenerResumenAccesorios();
 
@@ -1219,4 +1221,3 @@ class PrintService {
 
 // Exportar una instancia única (Singleton)
 export const printService = new PrintService();
-

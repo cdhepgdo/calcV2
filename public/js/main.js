@@ -141,7 +141,9 @@ class App {
             llenarSelect(select, MODELOS_IPHONE, 'Seleccionar modelo');
         });
 
-        llenarSelect(document.getElementById('cajaColorSelect'), COLORES_IPHONE, 'Seleccionar color');
+        document.querySelectorAll('.caja-color').forEach(select => {
+            llenarSelect(select, COLORES_IPHONE, 'Seleccionar color');
+        });
 
         // Selectores de movimientos de inventario
         // Salida de equipo
@@ -412,11 +414,10 @@ class App {
             if (checkbox) {
                 checkbox.addEventListener('change', (e) => {
                     let suffix = 'Cantidad';
-                    if (['forro', 'vidrio'].includes(accesorio)) suffix = 'Contenedor';
-                    else if (accesorio === 'caja') suffix = 'Modelo';
+                    if (['forro', 'vidrio', 'caja'].includes(accesorio)) suffix = 'Contenedor';
                     else if (accesorio === 'otroAccesorio') suffix = 'Contenedor';
 
-                    const contenedorId = accesorio === 'otroAccesorio' ? 'otroContenedor' : `${accesorio}${suffix}`;
+                    const contenedorId = accesorio === 'otroAccesorio' ? 'otroContenedor' : accesorio === 'caja' ? 'cajaContenedor' : `${accesorio}${suffix}`;
                     const contenedor = document.getElementById(contenedorId);
 
                     if (contenedor) {
@@ -424,6 +425,11 @@ class App {
 
                         // Auto-seleccionar modelo si es forro, vidrio o caja
                         if (e.target.checked && (accesorio === 'forro' || accesorio === 'vidrio' || accesorio === 'caja')) {
+                            // Para caja también inicializamos los selects de modelo y color
+                            if (accesorio === 'caja') {
+                                this._inicializarModeloSelects('cajaLista');
+                                this._inicializarColorSelects('cajaLista');
+                            }
                             this.autoSeleccionarModeloAccesorio(accesorio);
                         }
                     }
@@ -435,6 +441,7 @@ class App {
         this.manejarFilasDinamicas('.btn-add-forro', 'forroLista', '.forro-item');
         this.manejarFilasDinamicas('.btn-add-vidrio', 'vidrioLista', '.vidrio-item');
         this.manejarFilasDinamicas('.btn-add-otro', 'otroLista', '.otro-item');
+        this.manejarFilasDinamicas('.btn-add-caja', 'cajaLista', '.caja-item');
 
         // ════════════════════════════════════════════════════════════════
         // MULTI-EQUIPO / MULTI-TRADE-IN (Fase 1 - enfoque conservador)
@@ -492,6 +499,13 @@ class App {
                 inputsNumber.forEach(i => i.value = 1);
 
                 contenedor.appendChild(nuevoItem);
+
+                // Si es una fila de caja, inicializar sus selects (modelo y color)
+                // porque los options se pierden al clonar desde un select vacío pre-inicializado
+                if (selectorItem === '.caja-item') {
+                    this._inicializarModeloSelects(contenedorPadreId);
+                    this._inicializarColorSelects(contenedorPadreId);
+                }
             }
         });
     }
@@ -823,7 +837,7 @@ class App {
         } else if (tipoAccesorio === 'vidrio') {
             selectAccesorio = document.querySelector('.vidrio-item:last-child select');
         } else if (tipoAccesorio === 'caja') {
-            selectAccesorio = document.querySelector('#cajaModelo select:first-child');
+            selectAccesorio = document.querySelector('.caja-item:last-child .accModelo');
         }
 
         if (selectAccesorio) {
@@ -2668,6 +2682,17 @@ class App {
             });
         }
 
+        // Analizar y recolectar las filas de caja
+        const cajasData = [];
+        if (document.getElementById('caja').checked) {
+            document.querySelectorAll('#cajaLista .caja-item').forEach(item => {
+                const mod = item.querySelector('.accModelo')?.value;
+                const col = item.querySelector('.caja-color')?.value || '';
+                const cant = parseInt(item.querySelector('.caja-cant')?.value) || 0;
+                if (mod && cant > 0) cajasData.push({ modelo: mod, color: col, cantidad: cant });
+            });
+        }
+
         return {
             forro: document.getElementById('forro').checked,
             forros: forrosData,
@@ -2699,12 +2724,11 @@ class App {
                 parseInt(document.querySelector('#cableCCCantidad input')?.value) || 0 : 0,
 
             caja: document.getElementById('caja').checked,
-            cajaModelo: document.getElementById('caja').checked ?
-                document.querySelector('#cajaModelo select:first-child')?.value : null,
-            cajaColor: document.getElementById('caja').checked ?
-                document.getElementById('cajaColorSelect')?.value : null,
-            cajaCantidad: document.getElementById('caja').checked ?
-                parseInt(document.querySelector('#cajaModelo input')?.value) || 0 : 0
+            cajas: cajasData,
+            // Backward compat: primer elemento y suma total para código existente
+            cajaModelo: cajasData[0]?.modelo || null,
+            cajaColor: cajasData[0]?.color || null,
+            cajaCantidad: cajasData.reduce((sum, c) => sum + c.cantidad, 0)
         };
     }
 
@@ -2779,7 +2803,21 @@ class App {
         document.getElementById('cuboCantidad').classList.add('hidden');
         document.getElementById('cableLightningCantidad').classList.add('hidden');
         document.getElementById('cableCCCantidad').classList.add('hidden');
-        document.getElementById('cajaModelo').classList.add('hidden');
+        document.getElementById('cajaContenedor')?.classList.add('hidden');
+        // Limpiar lista dinámica de caja: dejar solo la primera fila en blanco
+        const listContainerCaja = document.getElementById('cajaLista');
+        if (listContainerCaja) {
+            const cajaItems = listContainerCaja.querySelectorAll('.caja-item');
+            cajaItems.forEach((item, index) => { if (index > 0) item.remove(); });
+            if (cajaItems[0]) {
+                const sModelo = cajaItems[0].querySelector('.accModelo');
+                if (sModelo) sModelo.value = '';
+                const sColor = cajaItems[0].querySelector('.caja-color');
+                if (sColor) sColor.value = '';
+                const iCant = cajaItems[0].querySelector('.caja-cant');
+                if (iCant) iCant.value = 1;
+            }
+        }
         document.getElementById('pagoMixto').classList.add('hidden');
         document.getElementById('pagomovil-detalles').classList.add('hidden');
         document.getElementById('transferencia-detalles').classList.add('hidden');
@@ -4084,6 +4122,16 @@ class App {
                                 <input type="number" min="1" value="${item.cantidad}" class="p-2 border rounded-lg w-20 otro-cant" placeholder="Cant.">
                                 <button type="button" class="${btnClass} text-white w-8 h-8 rounded font-bold" ${btnAction}>${btnText}</button>
                             </div>`;
+                        } else if (tipo === 'caja') {
+                            htmlFila = `
+                            <div class="caja-item flex flex-col gap-2">
+                                <select class="p-2 border rounded-lg accModelo w-full"></select>
+                                <div class="grid grid-cols-[1fr,auto,auto] gap-2">
+                                    <select class="p-2 border rounded-lg caja-color"></select>
+                                    <input type="number" min="1" value="${item.cantidad}" class="p-2 border rounded-lg w-16 caja-cant" placeholder="Cant.">
+                                    <button type="button" class="${btnClass} text-white w-8 h-8 rounded font-bold" ${btnAction}>${btnText}</button>
+                                </div>
+                            </div>`;
                         } else {
                             htmlFila = `
                             <div class="${tipo}-item grid grid-cols-[52px,auto,auto] gap-2 items-center">
@@ -4095,7 +4143,7 @@ class App {
                         listaContenedor.insertAdjacentHTML('beforeend', htmlFila);
                     });
 
-                    // Poblar options en los select (si the type is forro/vidrio)
+                    // Poblar options en los select de modelo
                     if (tipo !== 'otro') {
                         const selects = listaContenedor.querySelectorAll('.accModelo');
                         selects.forEach((select, i) => {
@@ -4109,6 +4157,15 @@ class App {
                                 select.options[0].textContent = 'Seleccionar modelo';
                             }
                             select.value = arr[i].modelo || '';
+                        });
+                    }
+
+                    // Para caja: poblar también los selects de color
+                    if (tipo === 'caja') {
+                        this._inicializarColorSelects(contenedorPadreId);
+                        const colorSelects = listaContenedor.querySelectorAll('.caja-color');
+                        colorSelects.forEach((select, i) => {
+                            select.value = arr[i]?.color || '';
                         });
                     }
                 }
@@ -4178,16 +4235,11 @@ class App {
 
             // Caja
             if (venta.accesorios.caja) {
-                document.getElementById('caja').checked = true;
-                document.getElementById('caja').dispatchEvent(new Event('change'));
-                setTimeout(() => {
-                    const cajaModelo = document.querySelector('#cajaModelo select:first-child');
-                    const cajaColor = document.getElementById('cajaColorSelect');
-                    const cajaCantidad = document.querySelector('#cajaModelo input');
-                    if (cajaModelo) cajaModelo.value = venta.accesorios.cajaModelo || '';
-                    if (cajaColor) cajaColor.value = venta.accesorios.cajaColor || '';
-                    if (cajaCantidad) cajaCantidad.value = venta.accesorios.cajaCantidad || 1;
-                }, 50);
+                // Normalizar a array: nuevo formato cajas[] o backward compat con campos planos
+                const cajasArr = (venta.accesorios.cajas && venta.accesorios.cajas.length > 0)
+                    ? venta.accesorios.cajas
+                    : [{ modelo: venta.accesorios.cajaModelo, color: venta.accesorios.cajaColor, cantidad: venta.accesorios.cajaCantidad || 1 }];
+                renderizarListaDinamica(cajasArr, 'cajaLista', 'caja', 'caja');
             }
         }, 100);
 

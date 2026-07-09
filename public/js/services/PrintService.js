@@ -1,5 +1,5 @@
 /**
- * Servicio de Impresión
+ * Servicio de Impresión 
  * Maneja la generación de documentos imprimibles (garantías, resúmenes, etc.)
  */
 

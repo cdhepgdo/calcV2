@@ -71,7 +71,7 @@ export class Venta {
         // Pago
         this.formaPago = data.formaPago || '';
         this.montoTotal = data.montoTotal || 0;
-        this.montoPago = data.montoPago || null; // Monto del pago (para WEPPA con efectivo/zelle/binance)
+        this.montoPago = (data.montoPago !== undefined && data.montoPago !== null) ? data.montoPago : null; // Preserva 0 explícito
         this.pagoMixto = data.pagoMixto || null;
         this.pagoMovilDetalles = data.pagoMovilDetalles || null;
         this.transferenciaDetalles = data.transferenciaDetalles || null;
@@ -169,56 +169,52 @@ export class Venta {
         }
 
         // ==========================================
-        // VALIDACIÓN DE DEUDA VS PAGO
+        // VALIDACIÓN DE PAGO
         // ==========================================
         const deudaTotal = this.equipos.reduce((sum, e) => sum + (parseFloat(e.precio) || 0), 0);
-        
-        // 1. Sanity check: que el montoTotal coincida con las partes declaradas (según método)
         const equipoRecibidoValor = this.sumarValoresRecibidos();
-        let sumaPartesDeclaradas = 0;
 
-        if (this.formaPago === 'mixto' && this.pagoMixto) {
-            sumaPartesDeclaradas = (this.pagoMixto.efectivo || 0) +
-                (this.pagoMixto.zelle || 0) +
-                (this.pagoMixto.binance || 0) +
-                (this.pagoMixto.pagoMovil || 0) +
-                (this.pagoMixto.transferencia || 0) +
-                equipoRecibidoValor + (this.totalAbonosPrevios || 0);
-        } else if (this.formaPago === 'pagomovil' && this.pagoMovilDetalles) {
-            sumaPartesDeclaradas = this.pagoMovilDetalles.dolares + equipoRecibidoValor + (this.totalAbonosPrevios || 0);
-        } else if (this.formaPago === 'transferencia' && this.transferenciaDetalles) {
-            sumaPartesDeclaradas = this.transferenciaDetalles.dolares + equipoRecibidoValor + (this.totalAbonosPrevios || 0);
-        } else if (['efectivo', 'zelle', 'binance', 'paypal'].includes(this.formaPago)) {
-            // Para métodos simples, montoTotal ya es el total. Lo reconstruimos usando el monto base.
-            // Ojo: en la app vieja 'montoTotal' en la BD puede que no coincida con montoPago. 
-            // Para mantener compatibilidad asumimos que montoTotal es correcto, pero exigimos que sea > 0.
-            if (this.montoTotal <= 0) {
-                errores.push('El monto total pagado debe ser mayor a cero.');
+        // ── Validar tasa obligatoria para Pago Móvil y Transferencia ──
+        if (this.formaPago === 'pagomovil') {
+            if (!this.pagoMovilDetalles || !this.pagoMovilDetalles.tasa || this.pagoMovilDetalles.tasa <= 0) {
+                errores.push('Coloca la tasa del Pago Móvil.');
+            }
+        }
+        if (this.formaPago === 'transferencia') {
+            if (!this.transferenciaDetalles || !this.transferenciaDetalles.tasa || this.transferenciaDetalles.tasa <= 0) {
+                errores.push('Coloca la tasa de la Transferencia.');
             }
         }
 
-        if (sumaPartesDeclaradas > 0 && Math.abs(sumaPartesDeclaradas - this.montoTotal) > 0.01) {
-            errores.push(`Discrepancia interna: la suma de las partes del pago ($${sumaPartesDeclaradas.toFixed(2)}) no coincide con el total declarado ($${this.montoTotal.toFixed(2)}).`);
+        // ── Calcular el pago inicial (lo que el cliente entrega HOY) ──
+        let pagoHoy = equipoRecibidoValor + (this.totalAbonosPrevios || 0);
+        if (this.formaPago === 'mixto' && this.pagoMixto) {
+            pagoHoy += (this.pagoMixto.efectivo || 0) + (this.pagoMixto.zelle || 0) +
+                       (this.pagoMixto.binance || 0) + (this.pagoMixto.pagoMovil || 0) +
+                       (this.pagoMixto.transferencia || 0);
+        } else if (this.formaPago === 'pagomovil' && this.pagoMovilDetalles) {
+            pagoHoy += this.pagoMovilDetalles.dolares || 0;
+        } else if (this.formaPago === 'transferencia' && this.transferenciaDetalles) {
+            pagoHoy += this.transferenciaDetalles.dolares || 0;
+        } else if (['efectivo', 'zelle', 'binance', 'paypal'].includes(this.formaPago)) {
+            pagoHoy += this.montoPago !== null ? this.montoPago : this.montoTotal;
         }
 
-        // 2. Validación de Venta Incompleta (Obligar WEPPA)
-        // this.montoTotal ya contiene TODO el pago (efectivo/digital + trade-in + abonos previos)
-        if (deudaTotal > 0 && this.montoTotal < deudaTotal - 0.01 && !this.weppa) {
-            errores.push(`Faltan pagos: El total cancelado ($${this.montoTotal.toFixed(2)}) es menor al precio de los equipos ($${deudaTotal.toFixed(2)}). Active WEPPA si es intencional.`);
-        }
-
-        // WEPPA: la deuda total (montoTotal) debe ser >= a lo que el cliente paga HOY (inicial).
-        // Si montoTotal < inicial, no es un crédito real, es un error de captura.
-        if (this.weppa) {
-            if (this.montoTotal < deudaTotal - 0.01) {
-                 // Si es weppa pero el montoTotal (pago inicial) es MENOR a la deudaTotal (precio equipos),
-                 // entonces es válido (es un crédito).
-                 // La lógica original chequeaba if (this.montoTotal < inicial - 0.01), donde this.montoTotal era la deuda y inicial era el pago.
-                 // Como ahora this.montoTotal es el PAGO INICIAL, y deudaTotal es el PRECIO DE EQUIPOS,
-                 // el chequeo debe ser: si el pagoInicial > precioEquipos, es un error (no hay crédito).
-                 if (this.montoTotal > deudaTotal + 0.01) {
-                    errores.push(`WEPPA: el monto pagado ($${this.montoTotal.toFixed(2)}) no puede ser mayor al precio de los equipos ($${deudaTotal.toFixed(2)}). La deuda debe ser mayor al pago inicial.`);
-                 }
+        if (!this.weppa) {
+            // ── Venta Normal: el pago de hoy debe cubrir exactamente la deuda total ──
+            // montoTotal en venta normal = pagoHoy (lo establece calcularYMostrarTotal)
+            if (deudaTotal > 0 && this.montoTotal < deudaTotal - 0.01) {
+                errores.push(`Faltan pagos: El total cancelado ($${this.montoTotal.toFixed(2)}) es menor al precio de los equipos ($${deudaTotal.toFixed(2)}). Active WEPPA si es intencional.`);
+            }
+        } else {
+            // ── WEPPA: montoTotal es la DEUDA PACTADA (precio equipo). pagoHoy es el inicial ──
+            // El montoTotal (deuda) debe ser >= precio de los equipos
+            if (deudaTotal > 0 && this.montoTotal < deudaTotal - 0.01) {
+                errores.push(`WEPPA: el monto de crédito pactado ($${this.montoTotal.toFixed(2)}) es menor al precio de los equipos ($${deudaTotal.toFixed(2)}). Revisa el campo de crédito.`);
+            }
+            // El pago inicial no puede superar la deuda pactada
+            if (pagoHoy > this.montoTotal + 0.01) {
+                errores.push(`WEPPA: el pago inicial ($${pagoHoy.toFixed(2)}) no puede ser mayor al crédito pactado ($${this.montoTotal.toFixed(2)}).`);
             }
         }
 

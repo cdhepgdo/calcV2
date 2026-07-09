@@ -13,6 +13,10 @@ class AuthService {
     constructor() {
         this.user = null;
         this.isInitialized = false;
+        // NOTA: setPersistence fue eliminado del constructor.
+        // Firebase Auth ya usa localStorage por defecto (browserLocalPersistence).
+        // Llamarlo aquí causaba que onAuthStateChanged se re-disparara en cada
+        // pestaña abierta, produciendo el efecto de "login / logout fantasma".
     }
 
     /**
@@ -100,6 +104,16 @@ class AuthService {
      */
     getCurrentUser() {
         return auth.currentUser;
+    }
+
+    /**
+     * Helper centralizado para guards de admin.
+     * Lee localStorage sincrónicamente (v1: no reactivo). Si en el futuro se
+     * necesita reactividad (cambio de rol sin recargar), migrar a un getter
+     * suscrito a onAuthStateChanged.
+     */
+    esAdmin() {
+        return localStorage.getItem('usuario_rol') === 'admin';
     }
 }
 

@@ -377,10 +377,22 @@ class App {
                 campoEditable.classList.remove('hidden');
                 // Activar required solo cuando el campo es visible
                 document.getElementById('montoTotalManual').setAttribute('required', 'required');
-                // Copiar el inicial calculado al campo manual como sugerencia
-                const totalInicial = parseFloat(document.getElementById('montoTotal').value) || 0;
-                document.getElementById('montoTotalManual').value = totalInicial.toFixed(2);
-                // Actualizar el display del inicial
+                
+                // Copiar el PRECIO TOTAL DE LOS EQUIPOS al campo manual como sugerencia (lo lógico en un crédito)
+                const totalEquiposBase = this._sumarPreciosEquiposVendidos();
+                document.getElementById('montoTotalManual').value = totalEquiposBase.toFixed(2);
+                
+                // Actualizar el campo oculto inmediatamente para reflejar la deuda
+                document.getElementById('montoTotal').value = totalEquiposBase.toFixed(2);
+                
+                // Actualizar el display del inicial (lo que el cliente paga hoy)
+                let subtotalAbonos = 0;
+                if (document.getElementById('tieneAbonosPrevios')?.checked) {
+                    document.querySelectorAll('.abono-monto').forEach(input => {
+                        subtotalAbonos += parseFloat(input.value) || 0;
+                    });
+                }
+                const totalInicial = this.calcularMontoTotal() + this._sumarValoresRecibidos() + subtotalAbonos;
                 document.getElementById('weppaInicial').textContent = totalInicial.toFixed(2);
             } else {
                 // Ocultar campo editable y quitar required

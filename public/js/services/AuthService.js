@@ -2,9 +2,7 @@ import { auth, db } from '../config/firebase-config.js';
 import {
     signInWithEmailAndPassword,
     signOut,
-    onAuthStateChanged,
-    setPersistence,
-    browserLocalPersistence
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 import {
     doc,
@@ -15,15 +13,6 @@ class AuthService {
     constructor() {
         this.user = null;
         this.isInitialized = false;
-        this._initPersistence();
-    }
-
-    async _initPersistence() {
-        try {
-            await setPersistence(auth, browserLocalPersistence);
-        } catch (error) {
-            console.error("Error ajustando persistencia de sesión:", error);
-        }
     }
 
     /**

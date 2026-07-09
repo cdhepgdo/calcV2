@@ -2558,32 +2558,18 @@ class App {
             }
 
         } else if (formaPago === 'pagomovil') {
-            // PAGO MÓVIL SIMPLE
+            // PAGO MÓVIL SIMPLE - siempre guardar para que Venta.js valide la tasa
             const dolares = parseFloat(document.getElementById('pagomovilDolares').value) || 0;
             const bolivares = parseFloat(document.getElementById('pagomovilBolivares').value) || 0;
             const tasa = parseFloat(document.getElementById('pagomovilTasa').value) || 0;
-
-            if (dolares > 0 && bolivares > 0 && tasa > 0) {
-                datos.pagoMovilDetalles = {
-                    dolares: dolares,
-                    bolivares: bolivares,
-                    tasa: tasa
-                };
-            }
+            datos.pagoMovilDetalles = { dolares, bolivares, tasa };
 
         } else if (formaPago === 'transferencia') {
-            // TRANSFERENCIA SIMPLE
+            // TRANSFERENCIA SIMPLE - siempre guardar para que Venta.js valide la tasa
             const dolares = parseFloat(document.getElementById('transferenciaDolares').value) || 0;
             const bolivares = parseFloat(document.getElementById('transferenciaBolivares').value) || 0;
             const tasa = parseFloat(document.getElementById('transferenciaTasa').value) || 0;
-
-            if (dolares > 0 && bolivares > 0 && tasa > 0) {
-                datos.transferenciaDetalles = {
-                    dolares: dolares,
-                    bolivares: bolivares,
-                    tasa: tasa
-                };
-            }
+            datos.transferenciaDetalles = { dolares, bolivares, tasa };
         } else if (formaPago === 'efectivo') {
             // EFECTIVO SIMPLE - Guardar el monto del pago
             const montoPago = parseFloat(document.getElementById('efectivoMonto').value) || 0;

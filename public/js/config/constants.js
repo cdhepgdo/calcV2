@@ -171,4 +171,6 @@ export const SEDES_NOMBRES = {
 // Estados canónicos de un equipo en inventario.
 // Hoy dispersos en InventarioService.js:95, EquipoInventario.js:24, main.js:5050-5056.
 // Centralizar evita que un typo cree un estado fantasma que ningún filtro contempla.
-export const ESTADOS_EQUIPO = ['disponible', 'vendido', 'transferido', 'defectuoso', 'eliminado'];
+// 'abonado' se agregó para soportar ventas con anticipo parcial: el equipo
+// sigue separado del stock disponible y muestra su historial de abonos.
+export const ESTADOS_EQUIPO = ['disponible', 'abonado', 'vendido', 'transferido', 'defectuoso', 'eliminado'];

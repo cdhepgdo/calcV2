@@ -200,7 +200,13 @@ export class Venta {
             pagoHoy += this.montoPago !== null ? this.montoPago : this.montoTotal;
         }
 
-        if (!this.weppa) {
+        if (this.tipoTransaccion === 'abono') {
+            // ── Abono: el pago es por definición una parcialidad ──
+            // No se valida que cubra la deuda total (sería siempre falso).
+            // WEPPA no se marca: 'abono' (estado intermedio de inventario) y
+            // 'WEPPA' (crédito a pagar después) son conceptos distintos que no
+            // deben fusionarse — ver PrintService y reportes para más detalle.
+        } else if (!this.weppa) {
             // ── Venta Normal: el pago de hoy debe cubrir exactamente la deuda total ──
             // montoTotal en venta normal = pagoHoy (lo establece calcularYMostrarTotal)
             if (deudaTotal > 0 && this.montoTotal < deudaTotal - 0.01) {

@@ -93,3 +93,58 @@ describe('EquipoInventario.validar()', () => {
         expect(resultado.errores).toContain('El IMEI debe tener al menos 15 caracteres');
     });
 });
+
+describe('EquipoInventario — estado abonado e historial', () => {
+    it('✅ acepta estado "abonado"', () => {
+        const eq = equipoBase({ estado: 'abonado' });
+        expect(eq.estado).toBe('abonado');
+    });
+
+    it('✅ historialAbonos se inicializa como [] si no se pasa', () => {
+        const eq = equipoBase();
+        expect(eq.historialAbonos).toEqual([]);
+    });
+
+    it('✅ historialAbonos preserva las entradas del JSON', () => {
+        const entradas = [
+            { ventaId: 'v1', fecha: '15/06/2026', monto: 200, cliente: { nombre: 'Juan' } },
+            { ventaId: 'v2', fecha: '22/06/2026', monto: 150, cliente: { nombre: 'Juan' } }
+        ];
+        const eq = equipoBase({ historialAbonos: entradas });
+        expect(eq.historialAbonos).toHaveLength(2);
+        expect(eq.historialAbonos[0].monto).toBe(200);
+        expect(eq.historialAbonos[1].monto).toBe(150);
+    });
+
+    it('✅ toJSON persiste historialAbonos, abonoInicialId y fechaFinalizacion', () => {
+        const eq = equipoBase({
+            estado: 'abonado',
+            historialAbonos: [{ ventaId: 'v1', fecha: '15/06/2026', monto: 200, cliente: { nombre: 'Juan' } }],
+            abonoInicialId: 'v1',
+            fechaFinalizacion: null
+        });
+        const json = eq.toJSON();
+        expect(json.historialAbonos).toHaveLength(1);
+        expect(json.abonoInicialId).toBe('v1');
+        expect(json.fechaFinalizacion).toBeNull();
+    });
+
+    it('✅ fromJSON rehidrata correctamente los nuevos campos', () => {
+        const json = {
+            modelo: 'iPhone 14',
+            gb: '256GB',
+            color: 'Azul',
+            bateria: 90,
+            imei: '987654321012345',
+            estado: 'vendido',
+            historialAbonos: [{ ventaId: 'v1', monto: 100 }],
+            abonoInicialId: 'v1',
+            fechaFinalizacion: '2026-07-09T10:00:00.000Z'
+        };
+        const eq = EquipoInventario.fromJSON(json);
+        expect(eq.estado).toBe('vendido');
+        expect(eq.historialAbonos).toHaveLength(1);
+        expect(eq.abonoInicialId).toBe('v1');
+        expect(eq.fechaFinalizacion).toBe('2026-07-09T10:00:00.000Z');
+    });
+});

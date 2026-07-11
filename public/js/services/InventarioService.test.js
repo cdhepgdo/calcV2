@@ -56,7 +56,9 @@ vi.mock('https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js', () =>
         return vi.fn(); // unsubscribe
     }),
     query: vi.fn((c) => c),
-    where: vi.fn(() => ({}))
+    where: vi.fn(() => ({})),
+    arrayUnion: vi.fn((v) => ({ __arrayUnion: v })),
+    arrayRemove: vi.fn((v) => ({ __arrayRemove: v }))
 }));
 
 vi.mock('../config/firebase-config.js', () => ({ db: {} }));
@@ -189,5 +191,94 @@ describe('InventarioService.ingresarEquipo() — duplicados', () => {
         const resultado = await svcBase.ingresarEquipo(eq2);
         expect(resultado.exito).toBe(false);
         expect(resultado.error).toContain('recientemente');
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GRUPO 3: Estado "abonado" + historial multi-pago
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('InventarioService — estado abonado e historial', () => {
+    beforeEach(() => {
+        resetInventarioService();
+    });
+
+    it('✅ obtenerTodos(["disponible", "abonado"]) filtra por múltiples estados', () => {
+        svcBase._cacheInventario = [
+            new EquipoInventario({ id: 'a', estado: 'disponible' }),
+            new EquipoInventario({ id: 'b', estado: 'abonado' }),
+            new EquipoInventario({ id: 'c', estado: 'vendido' }),
+            new EquipoInventario({ id: 'd', estado: 'abonado' })
+        ];
+        const candidatos = svcBase.obtenerTodos(['disponible', 'abonado']);
+        expect(candidatos).toHaveLength(3);
+        expect(candidatos.every(e => ['disponible', 'abonado'].includes(e.estado))).toBe(true);
+    });
+
+    it('✅ obtenerAbonados() retorna solo los equipos en estado "abonado"', () => {
+        svcBase._cacheInventario = [
+            new EquipoInventario({ id: 'a', estado: 'disponible' }),
+            new EquipoInventario({ id: 'b', estado: 'abonado' }),
+            new EquipoInventario({ id: 'c', estado: 'vendido' })
+        ];
+        const abonados = svcBase.obtenerAbonados();
+        expect(abonados).toHaveLength(1);
+        expect(abonados[0].id).toBe('b');
+    });
+
+    it('✅ obtenerUltimoClienteAbono() retorna el cliente del último abono', () => {
+        const eq = new EquipoInventario({
+            id: 'eq-1',
+            estado: 'abonado',
+            historialAbonos: [
+                { ventaId: 'v1', fecha: '15/06/2026', monto: 200, cliente: { nombre: 'Juan' } },
+                { ventaId: 'v2', fecha: '22/06/2026', monto: 150, cliente: { nombre: 'Juan', telefono: '0414' } }
+            ]
+        });
+        const cliente = svcBase.obtenerUltimoClienteAbono(eq);
+        expect(cliente).toBeDefined();
+        expect(cliente.nombre).toBe('Juan');
+        expect(cliente.telefono).toBe('0414');
+    });
+
+    it('✅ obtenerUltimoClienteAbono() retorna null si no hay historial', () => {
+        const eq = new EquipoInventario({ id: 'eq-1', estado: 'abonado' });
+        expect(svcBase.obtenerUltimoClienteAbono(eq)).toBeNull();
+    });
+
+    it('✅ marcarAbonado() retorna exito:true con datos válidos', async () => {
+        const res = await svcBase.marcarAbonado('eq-1', {
+            ventaId: 'venta-abc',
+            fecha: '9/7/2026',
+            monto: 200,
+            cliente: { nombre: 'Juan', cedula: 'V-12345', telefono: '0414-1234567' }
+        });
+        expect(res.exito).toBe(true);
+    });
+
+    it('❌ marcarAbonado() rechaza si falta ventaId', async () => {
+        const res = await svcBase.marcarAbonado('eq-1', { monto: 100 });
+        expect(res.exito).toBe(false);
+        expect(res.error).toContain('ventaId');
+    });
+
+    it('❌ marcarAbonado() rechaza si no hay equipoId', async () => {
+        const res = await svcBase.marcarAbonado(null, { ventaId: 'v1' });
+        expect(res.exito).toBe(false);
+    });
+
+    it('✅ finalizarAbono() retorna exito:true con datos válidos', async () => {
+        const res = await svcBase.finalizarAbono('eq-1', 'venta-final');
+        expect(res.exito).toBe(true);
+    });
+
+    it('✅ agregarEntradaHistorialAbono() retorna exito:true', async () => {
+        const res = await svcBase.agregarEntradaHistorialAbono('eq-1', {
+            ventaId: 'v1',
+            fecha: '9/7/2026',
+            monto: 200,
+            cliente: { nombre: 'Juan' }
+        });
+        expect(res.exito).toBe(true);
     });
 });

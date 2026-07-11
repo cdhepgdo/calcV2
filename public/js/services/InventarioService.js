@@ -9,7 +9,9 @@ import {
     writeBatch,
     onSnapshot,
     query,
-    where
+    where,
+    arrayUnion,
+    arrayRemove
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 import { EquipoInventario } from '../models/EquipoInventario.js';
 
@@ -89,12 +91,42 @@ class InventarioService {
         this._listeners.forEach(fn => fn());
     }
 
-    obtenerTodos() {
-        return this._cacheInventario;
+    /**
+     * Devuelve el cache completo de equipos.
+     *
+     * @param {string[]} [estados]  Si se pasa, filtra por esos estados.
+     *   Ej: `obtenerTodos(['disponible', 'abonado'])` para que el buscador
+     *   de cierree muestre tanto stock libre como equipos con anticipo.
+     *   Si se omite (compat con llamadas viejas), devuelve TODOS los equipos.
+     */
+    obtenerTodos(estados = null) {
+        if (!Array.isArray(estados) || estados.length === 0) {
+            return this._cacheInventario;
+        }
+        return this._cacheInventario.filter(e => estados.includes(e.estado));
     }
 
     obtenerDisponibles() {
         return this._cacheInventario.filter(e => e.estado === 'disponible');
+    }
+
+    /**
+     * Devuelve los equipos en estado 'abonado'. Usado para badges morados
+     * y para la vista "Cierre de abonos" en cierree.
+     */
+    obtenerAbonados() {
+        return this._cacheInventario.filter(e => e.estado === 'abonado');
+    }
+
+    /**
+     * Devuelve el último cliente que abonó un equipo (o null si no hay).
+     * Helper de UI: el badge del buscador muestra el nombre del cliente.
+     */
+    obtenerUltimoClienteAbono(equipo) {
+        if (!equipo || !Array.isArray(equipo.historialAbonos) || equipo.historialAbonos.length === 0) {
+            return null;
+        }
+        return equipo.historialAbonos[equipo.historialAbonos.length - 1].cliente || null;
     }
 
     buscarPorImei(imei) {
@@ -409,7 +441,7 @@ class InventarioService {
     }
 
     async marcarVendido(equipoId, ventaId = "") {
-        return await this.cambiarEstado(equipoId, 'vendido', { 
+        return await this.cambiarEstado(equipoId, 'vendido', {
             ventaAsociadaId: ventaId,
             fechaVenta: new Date().toISOString()
         });
@@ -420,6 +452,110 @@ class InventarioService {
             ventaAsociadaId: null,
             fechaVenta: null
         });
+    }
+
+    /**
+     * Marca un equipo como 'abonado' y agrega una entrada a su historial.
+     *
+     * Por qué existe: necesitamos un estado intermedio entre 'disponible' y
+     * 'vendido' para ventas con anticipo parcial. El equipo NO se descuenta
+     * del stock "vendible" pero tampoco se muestra como libre.
+     *
+     * Atómicos críticos:
+     *   - estado = 'abonado'
+     *   - arrayUnion en historialAbonos (concurrencia-safe: dos ventas de
+     *     abono simultáneas sobre el mismo equipo no se pisan entre sí)
+     *   - Si el doc no tenía historialAbonos (equipo viejo), Firestore crea
+     *     el array con el primer elemento automáticamente.
+     *   - abonoInicialId se setea solo la primera vez (otro campo aparte,
+     *     no se sobreescribe si ya existía).
+     *
+     * @param {string} equipoId
+     * @param {Object} datosAbono
+     * @param {string} datosAbono.ventaId     ID de la venta tipo 'abono'
+     * @param {string} datosAbono.fecha       Fecha del pago (formato es-ES, ej '9/7/2026')
+     * @param {number} datosAbono.monto       Monto abonado en USD
+     * @param {Object} datosAbono.cliente     {nombre, cedula, telefono}
+     * @returns {Promise<{exito: boolean, error?: string}>}
+     */
+    async marcarAbonado(equipoId, datosAbono) {
+        if (!equipoId) return { exito: false, error: 'ID inválido' };
+        if (!datosAbono || !datosAbono.ventaId) {
+            return { exito: false, error: 'Falta ventaId en datosAbono' };
+        }
+        try {
+            const docRef = doc(db, `${this._getBasePath()}/inventario`, equipoId);
+            const entradaHistorial = {
+                ventaId: datosAbono.ventaId,
+                fecha: datosAbono.fecha || new Date().toLocaleDateString('es-ES'),
+                monto: Number(datosAbono.monto) || 0,
+                cliente: datosAbono.cliente || {},
+                fechaRegistro: new Date().toISOString(),
+                sedeId: localStorage.getItem('usuario_sede_id') || 'sede_1'
+            };
+
+            // 1) Set estado + append al historial en una sola escritura
+            await updateDoc(docRef, {
+                estado: 'abonado',
+                historialAbonos: arrayUnion(entradaHistorial),
+                fechaUltimoAbono: entradaHistorial.fechaRegistro
+            });
+
+            // 2) Si no tiene abonoInicialId todavía, lo seteamos en una 2da
+            // escritura (no se puede hacer en el mismo updateDoc porque solo
+            // aplicaría si el campo NO existe, y Firestore no tiene upsert
+            // condicional simple para eso). Es idempotente: el 2do updateDoc
+            // sobreescribe con el mismo valor si ya estaba seteado.
+            const snap = await getDoc(docRef);
+            if (snap.exists() && !snap.data().abonoInicialId) {
+                await updateDoc(docRef, { abonoInicialId: datosAbono.ventaId });
+            }
+
+            console.log(`✅ Equipo ${equipoId} marcado como ABONADO (venta ${datosAbono.ventaId}, $${entradaHistorial.monto})`);
+            return { exito: true };
+        } catch (error) {
+            console.error(`❌ Error al marcar abonado ${equipoId}:`, error);
+            return { exito: false, error: error.message };
+        }
+    }
+
+    /**
+     * Cierra el ciclo de abonos: un equipo que estaba 'abonado' pasa a 'vendido'.
+     *
+     * Por qué existe: cuando el cliente paga el resto, el operador registra
+     * una nueva venta tipo 'venta' sobre el mismo equipo. commitVentaConInventario
+     * detecta esta transición y llama a finalizarAbono.
+     *
+     * Garantías:
+     *   - estado: 'abonado' → 'vendido'
+     *   - historialAbonos se MANTIENE (auditoría: el operador puede ver
+     *     después cuánto se pagó en cada abono)
+     *   - fechaFinalizacion se sella con el momento del cierre
+     *   - abonoInicialId se limpia (el ciclo se cerró)
+     *
+     * @param {string} equipoId
+     * @param {string} ventaFinalId  ID de la venta tipo 'venta' que cierra el ciclo
+     */
+    async finalizarAbono(equipoId, ventaFinalId) {
+        if (!equipoId) return { exito: false, error: 'ID inválido' };
+        try {
+            const docRef = doc(db, `${this._getBasePath()}/inventario`, equipoId);
+            const ahora = new Date().toISOString();
+            await updateDoc(docRef, {
+                estado: 'vendido',
+                fechaFinalizacion: ahora,
+                ventaAsociadaId: ventaFinalId || null,
+                fechaVenta: ahora,
+                // NO tocamos historialAbonos — es histórico
+                // SÍ limpiamos abonoInicialId: el ciclo está cerrado
+                abonoInicialId: null
+            });
+            console.log(`✅ Abono de ${equipoId} finalizado → VENDIDO (venta ${ventaFinalId})`);
+            return { exito: true };
+        } catch (error) {
+            console.error(`❌ Error al finalizar abono ${equipoId}:`, error);
+            return { exito: false, error: error.message };
+        }
     }
 
     destruir() {
@@ -470,27 +606,72 @@ class InventarioService {
         tradeInsNuevos = [],
         tradeInsActualizar = [],
         equiposLiberar = [],
-        tradeInsEliminar = []
+        tradeInsEliminar = [],
+        abonadoAFinalizar = null
     }) {
         try {
             const batch = writeBatch(db);
             const sedePath = this._getBasePath();
             const ahora = new Date().toISOString();
+            const esAbono = venta && venta.tipoTransaccion === 'abono';
+            const datosAbono = esAbono ? {
+                ventaId: venta.id,
+                fecha: venta.fecha,
+                // Solo el pago NUEVO de esta transacción: montoTotal incluye los abonos
+                // previos precargados (totalAbonosPrevios), así que los restamos para
+                // obtener únicamente lo que el cliente pagó HOY en este abono.
+                monto: Math.max(0, (Number(venta.montoTotal) || 0) - (Number(venta.totalAbonosPrevios) || 0)),
+                cliente: venta.cliente || {}
+            } : null;
 
             // 1) Set venta
             const ventaJSON = typeof venta.toJSON === 'function' ? venta.toJSON() : venta;
             const ventaRef = doc(db, `${sedePath}/ventas`, venta.id);
             batch.set(ventaRef, this._cleanForFirestore(ventaJSON));
 
-            // 2) Marcar cada equipo vendido
+            // 2) Marcar cada equipo vendido (o abonado, según tipoTransaccion)
             equiposIds.forEach(id => {
                 if (!id) return;
                 const ref = doc(db, `${sedePath}/inventario`, id);
-                batch.update(ref, {
-                    estado: 'vendido',
-                    ventaAsociadaId: venta.id,
-                    fechaVenta: ahora
-                });
+                if (esAbono) {
+                    // Venta tipo 'abono' → estado 'abonado' + append historial
+                    // ⚠️ arrayUnion NO se puede usar en writeBatch (es server-only),
+                    // pero sí en updateDoc. Por eso la lógica pesada de append
+                    // histórico se hace FUERA del batch, en un paso posterior.
+                    // Acá solo seteamos estado + flags básicos.
+                    batch.update(ref, {
+                        estado: 'abonado',
+                        fechaActualizacion: ahora,
+                        fechaUltimoAbono: ahora
+                    });
+                } else {
+                    // Venta normal: detecta si es el CIERRE de un equipo abonado
+                    // usando la metadata `abonadoAFinalizar` que envía la UI cuando
+                    // el operador usó _cargarAbonadoParaFinalizar().
+                    const esCierreDeAbono = abonadoAFinalizar
+                        && abonadoAFinalizar.equipoId === id;
+
+                    if (esCierreDeAbono) {
+                        // CIERRE de abono → 'vendido' pero MANTENIENDO historialAbonos
+                        // y sellando fechaFinalizacion. NO resetea el historial.
+                        batch.update(ref, {
+                            estado: 'vendido',
+                            ventaAsociadaId: venta.id,
+                            fechaVenta: ahora,
+                            fechaFinalizacion: ahora,
+                            // historialAbonos NO se toca (auditoría)
+                            // abonoInicialId se limpia: el ciclo terminó
+                            abonoInicialId: null
+                        });
+                    } else {
+                        // Venta normal sobre equipo disponible
+                        batch.update(ref, {
+                            estado: 'vendido',
+                            ventaAsociadaId: venta.id,
+                            fechaVenta: ahora
+                        });
+                    }
+                }
             });
 
             // 3) Liberar equipos (edición: equipo que se quitó de la venta)
@@ -531,10 +712,73 @@ class InventarioService {
             });
 
             await batch.commit();
-            console.log(`✅ Batch venta+inventario commiteado: ${equiposIds.length} vendidos, ${tradeInsNuevos.length} trade-ins nuevos, ${equiposLiberar.length} liberados, ${tradeInsEliminar.length} eliminados`);
+
+            // ════════════════════════════════════════════════════════════════
+            // POST-BATCH: append al historial de abonos (FUERA del batch)
+            // ────────────────────────────────────────────────────────────────
+            // Por qué se hace aparte:
+            //   - writeBatch NO soporta arrayUnion (es operación server-only)
+            //   - Necesitamos append atómico, no overwrite (concurrencia)
+            //   - Si este paso falla, el batch ya commiteó estado='abonado'
+            //     pero el historial no creció. El operador lo verá en el
+            //     próximo render como un equipo abonado sin entradas (raro
+            //     pero recuperable manualmente). Loggeamos para auditoría.
+            // ════════════════════════════════════════════════════════════════
+            if (esAbono) {
+                for (const id of equiposIds) {
+                    if (!id) continue;
+                    const entrada = {
+                        ventaId: venta.id,
+                        fecha: datosAbono.fecha,
+                        monto: datosAbono.monto,
+                        cliente: datosAbono.cliente,
+                        fechaRegistro: ahora,
+                        sedeId: localStorage.getItem('usuario_sede_id') || 'sede_1'
+                    };
+                    const res = await this.agregarEntradaHistorialAbono(id, entrada);
+                    if (!res.exito) {
+                        console.warn(`⚠️ No se pudo append al historial de abonos para ${id}:`, res.error);
+                    }
+                }
+            }
+
+            console.log(`✅ Batch venta+inventario commiteado: ${equiposIds.length} ${esAbono ? 'abonados' : 'vendidos'}, ${tradeInsNuevos.length} trade-ins nuevos, ${equiposLiberar.length} liberados, ${tradeInsEliminar.length} eliminados`);
             return { exito: true };
         } catch (error) {
             console.error('❌ Error en batch venta+inventario:', error);
+            return { exito: false, error: error.message };
+        }
+    }
+
+    /**
+     * Append atómico a historialAbonos de un equipo.
+     *
+     * Helper interno usado por commitVentaConInventario cuando la venta es
+     * de tipo 'abono'. Por qué está fuera del batch: arrayUnion no se puede
+     * mezclar con writeBatch (es una operación de FieldValue, no un doc ref).
+     *
+     * Idempotencia: si dos operadores hacen abonos simultáneos sobre el mismo
+     * equipo, Firestore serializa las operaciones arrayUnion y ambas entradas
+     * se conservan (no se pisan).
+     *
+     * Si el doc no tiene el campo historialAbonos (equipo viejo), Firestore
+     * lo crea automáticamente con la primera entrada.
+     */
+    async agregarEntradaHistorialAbono(equipoId, entrada) {
+        if (!equipoId) return { exito: false, error: 'ID inválido' };
+        try {
+            const docRef = doc(db, `${this._getBasePath()}/inventario`, equipoId);
+            await updateDoc(docRef, {
+                historialAbonos: arrayUnion(entrada)
+            });
+            // Sellar abonoInicialId si todavía no existe
+            const snap = await getDoc(docRef);
+            if (snap.exists() && !snap.data().abonoInicialId) {
+                await updateDoc(docRef, { abonoInicialId: entrada.ventaId });
+            }
+            return { exito: true };
+        } catch (error) {
+            console.error(`❌ Error al agregar entrada de historial de abono:`, error);
             return { exito: false, error: error.message };
         }
     }
@@ -574,7 +818,7 @@ class InventarioService {
             const ventaRef = doc(db, `${sedePath}/ventas`, venta.id);
             batch.delete(ventaRef);
 
-            // 2) Restaurar equipos vendidos a "disponible"
+            // 2) Restaurar equipos vendidos/abonados a "disponible"
             // Soporta tanto singular (venta.equipo) como plural (venta.equipos[])
             const equipos = [];
             if (Array.isArray(venta.equipos) && venta.equipos.length > 0) {
@@ -583,16 +827,48 @@ class InventarioService {
                 equipos.push(venta.equipo);
             }
 
+            const esEliminacionDeAbono = venta.tipoTransaccion === 'abono';
+
             equipos.forEach(eq => {
                 if (!eq || !eq.imei) return;
                 const inv = this.buscarPorImei(eq.imei);
-                if (inv && inv.estado === 'vendido') {
+                if (!inv) return;
+
+                if (inv.estado === 'vendido') {
+                    // Caso legacy: venta normal → libera el equipo
                     const ref = doc(db, `${sedePath}/inventario`, inv.id);
                     batch.update(ref, {
                         estado: 'disponible',
                         ventaAsociadaId: null,
                         fechaVenta: null
                     });
+                } else if (inv.estado === 'abonado') {
+                    // Caso nuevo: eliminando una venta de tipo 'abono'
+                    // → el equipo vuelve a 'disponible' y removemos
+                    //   la entrada del historial correspondiente a esta venta.
+                    // ⚠️ arrayRemove tampoco se puede usar en writeBatch,
+                    //   así que lo hacemos post-batch abajo.
+                    const ref = doc(db, `${sedePath}/inventario`, inv.id);
+                    // Decidir si es el ÚLTIMO abono o no:
+                    //   - Si era el único → vuelve a 'disponible' y limpia
+                    //     historialAbonos completo
+                    //   - Si hay varios → queda en 'abonado' y quitamos
+                    //     solo esta entrada (post-batch)
+                    const esUltimoAbono = !Array.isArray(inv.historialAbonos)
+                        || inv.historialAbonos.length <= 1
+                        || (inv.historialAbonos.length === 1
+                            && inv.historialAbonos[0].ventaId === venta.id);
+
+                    if (esUltimoAbono) {
+                        batch.update(ref, {
+                            estado: 'disponible',
+                            historialAbonos: [],
+                            abonoInicialId: null,
+                            fechaUltimoAbono: null
+                        });
+                    }
+                    // Si no es el último, solo el estado se queda en 'abonado'
+                    // y el filtro del historial se hace post-batch.
                 }
             });
 
@@ -628,6 +904,38 @@ class InventarioService {
             });
 
             await batch.commit();
+
+            // ════════════════════════════════════════════════════════════════
+            // POST-BATCH: si era un abono NO-último, removemos la entrada
+            // específica del historialAbonos con arrayRemove.
+            // (arrayRemove no funciona dentro de writeBatch, por eso esto
+            //  se hace aquí, fuera del batch).
+            // ════════════════════════════════════════════════════════════════
+            if (esEliminacionDeAbono) {
+                for (const eq of equipos) {
+                    if (!eq || !eq.imei) continue;
+                    const inv = this.buscarPorImei(eq.imei);
+                    if (!inv || inv.estado !== 'abonado') continue;
+                    if (!Array.isArray(inv.historialAbonos) || inv.historialAbonos.length === 0) continue;
+
+                    // Buscar la entrada exacta de esta venta
+                    const entrada = inv.historialAbonos.find(h => h.ventaId === venta.id);
+                    if (entrada) {
+                        try {
+                            const ref = doc(db, `${sedePath}/inventario`, inv.id);
+                            await updateDoc(ref, {
+                                historialAbonos: arrayRemove(entrada)
+                            });
+                            // Si después de quitar ya no queda ninguna entrada, dejar el array []
+                            // (Firestore ya lo deja así con arrayRemove sobre el último elemento,
+                            //  pero por seguridad verificamos que el campo siga vacío)
+                        } catch (e) {
+                            console.warn(`⚠️ No se pudo remover entrada del historial de ${eq.imei}:`, e.message);
+                        }
+                    }
+                }
+            }
+
             console.log(`✅ Batch eliminar venta+inventario commiteado: ${equipos.length} equipos restaurados, ${recibidos.length} trade-ins procesados`);
             return { exito: true };
         } catch (error) {

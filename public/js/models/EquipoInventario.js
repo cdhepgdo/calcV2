@@ -21,10 +21,23 @@ export class EquipoInventario {
         cajaColor = '',
         detalles = '',
         origen = '',
-        estado = 'disponible', // disponible, vendido, defectuoso
+        estado = 'disponible', // disponible, abonado, vendido, defectuoso, transferido, eliminado
         fechaIngreso = new Date().toISOString(),
         loteId = '',
-        creadoPor = localStorage.getItem('usuario_sede_id') || 'sistema'
+        creadoPor = localStorage.getItem('usuario_sede_id') || 'sistema',
+        // ── Abonos ──────────────────────────────────────────────────────────
+        // historialAbonos acumula TODOS los pagos parciales que el cliente ha
+        // hecho sobre este equipo. Cada entrada es:
+        //   { ventaId, fecha, monto, cliente: {nombre, cedula, telefono}, fechaRegistro, sedeId }
+        // Se inicializa como [] para que `fromJSON` de docs viejos no rompa.
+        historialAbonos = [],
+        // ID de la primera venta que creó el abono. Útil para detectar
+        // "finalización" cuando una venta tipo 'venta' se aplica sobre un
+        // equipo que ya estaba 'abonado'.
+        abonoInicialId = null,
+        // Sello ISO de cuándo se cerró el ciclo (abonado → vendido).
+        // null mientras sigue en 'abonado' o 'disponible'.
+        fechaFinalizacion = null
     }) {
         this.id = id;
         this.tipoItem = tipoItem;
@@ -42,6 +55,9 @@ export class EquipoInventario {
         this.fechaIngreso = fechaIngreso;
         this.loteId = loteId;
         this.creadoPor = creadoPor;
+        this.historialAbonos = Array.isArray(historialAbonos) ? historialAbonos : [];
+        this.abonoInicialId = abonoInicialId || null;
+        this.fechaFinalizacion = fechaFinalizacion || null;
     }
 
     validar() {
@@ -75,7 +91,14 @@ export class EquipoInventario {
             estado: this.estado,
             fechaIngreso: this.fechaIngreso,
             loteId: this.loteId,
-            creadoPor: this.creadoPor
+            creadoPor: this.creadoPor,
+            // Persistir el historial completo de abonos. Almacenarlo junto al
+            // doc del equipo (en lugar de solo en la Venta) garantiza que la
+            // búsqueda y el autollenado funcionen offline (IndexedDB) sin
+            // tener que cruzar colecciones.
+            historialAbonos: this.historialAbonos || [],
+            abonoInicialId: this.abonoInicialId || null,
+            fechaFinalizacion: this.fechaFinalizacion || null
         };
         // FIX M1: persistir metadatos de sede cuando están presentes (no-enumerables
         // en la instancia). ConsultaInventarioService los setea tras el snapshot;

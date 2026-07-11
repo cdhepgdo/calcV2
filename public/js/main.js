@@ -966,7 +966,12 @@ class App {
 
         const tipoTransaccion = document.querySelector('input[name="tipoTransaccion"]:checked').value;
 
-        document.getElementById('abonosPreviosForm').style.display = (tipoTransaccion === 'venta') ? 'block' : 'none';
+        // Mostrar el formulario de abonos previos para 'venta' y 'abono'.
+        // Solo ocultarlo para 'cambio-garantia' donde no aplica.
+        // NOTA: No se oculta para 'abono' porque el panel puede tener datos
+        // precargados (ej. al seleccionar "Finalizar Abono" desde el buscador)
+        // y ocultar el panel borraría esos datos de la vista del usuario.
+        document.getElementById('abonosPreviosForm').style.display = (tipoTransaccion === 'cambio-garantia') ? 'none' : 'block';
 
         // Mostrar/ocultar sección de abono
         document.getElementById('abonoInfo').classList.toggle('hidden', tipoTransaccion !== 'abono');
@@ -1770,7 +1775,12 @@ class App {
                 equiposLiberar,
                 tradeInsNuevos,
                 tradeInsActualizar,
-                tradeInsEliminar
+                tradeInsEliminar,
+                // Metadata del cierre de abono: si los IDs actuales incluyen un
+                // equipo que estaba 'abonado' y la venta actual es tipo='venta',
+                // el servicio detecta automáticamente la transición y sella
+                // fechaFinalizacion en lugar de tratar al equipo como nuevo vendido.
+                abonadoAFinalizar: this._abonadoAFinalizar || null
             });
 
             submitBtn.disabled = false;
@@ -1797,6 +1807,7 @@ class App {
             this._equipoImeiOriginal = null;
             this._tradeInImeiOriginal = null;
             this._equiposInventarioIds = null;
+            this._abonadoAFinalizar = null;
 
             mostrarAlerta(esEdicion ? '✅ Venta editada exitosamente' : '✅ Venta registrada exitosamente', 'success');
             this.limpiarFormularioVenta();
@@ -2782,6 +2793,12 @@ class App {
         document.getElementById('imeiTradeInBanner')?.classList.add('hidden');
         document.getElementById('totalAbonosPreviosDisplay').textContent = '0.00';
 
+        // Limpiar metadata de cierre de abonos (cargarAbonadoParaFinalizar)
+        this._abonadoAFinalizar = null;
+        this._equiposSeleccionadosVenta = [];
+        this._renderBuscadorEquiposVenta();
+        this._renderListaEquiposVenta();
+
         document.getElementById('cargadorCantidad').classList.add('hidden');
         document.getElementById('protectorCantidad').classList.add('hidden');
         document.getElementById('cuboCantidad').classList.add('hidden');
@@ -3115,9 +3132,13 @@ class App {
 
     /**
      * Renderiza la lista de sugerencias del buscador.
-     - Filtra inventario disponible por el texto del input
-     - Excluye los IDs ya seleccionados (estos aparecen deshabilitados con "✓ Seleccionado")
-     - Muestra hasta 15 resultados
+     * Filtra inventario disponible Y abonado por el texto del input.
+     * Excluye los IDs ya seleccionados (estos aparecen deshabilitados con "✓ Seleccionado")
+     * Muestra hasta 15 resultados
+     *
+     * Equipos 'abonado' se muestran con badge morado y botón "📋 Finalizar Abono"
+     * en lugar de "+ Agregar". Al hacer clic, se carga el historial de abonos
+     * y los datos del cliente en el formulario (ver _agregarEquipoVenta).
      */
     _renderBuscadorEquiposVenta() {
         const input = document.getElementById('invBuscadorInput');
@@ -3125,10 +3146,12 @@ class App {
         if (!input || !sugerencias) return;
 
         const query = input.value.trim().toLowerCase();
-        let disponibles = inventarioService.obtenerDisponibles();
+        // Traemos disponibles + abonados para soportar el flujo de "finalizar
+        // un abono existente" desde el mismo buscador.
+        let candidatos = inventarioService.obtenerTodos(['disponible', 'abonado']);
 
         if (query) {
-            disponibles = disponibles.filter(eq =>
+            candidatos = candidatos.filter(eq =>
                 (eq.modelo || '').toLowerCase().includes(query) ||
                 (eq.color || '').toLowerCase().includes(query) ||
                 (eq.gb || '').toLowerCase().includes(query) ||
@@ -3136,17 +3159,67 @@ class App {
             );
         }
 
-        if (disponibles.length === 0) {
-            sugerencias.innerHTML = '<p class="text-slate-500 text-xs text-center italic py-3">No hay equipos disponibles que coincidan.</p>';
+        if (candidatos.length === 0) {
+            sugerencias.innerHTML = '<p class="text-slate-500 text-xs text-center italic py-3">No hay equipos disponibles o abonados que coincidan.</p>';
             return;
         }
 
-        sugerencias.innerHTML = disponibles.slice(0, 15).map(eq => {
+        // Orden: disponibles primero, luego abonados. Dentro de cada grupo, alfabético por modelo.
+        candidatos.sort((a, b) => {
+            if (a.estado !== b.estado) return a.estado === 'disponible' ? -1 : 1;
+            return (a.modelo || '').localeCompare(b.modelo || '');
+        });
+
+        sugerencias.innerHTML = candidatos.slice(0, 15).map(eq => {
             const yaSel = this._equiposSeleccionadosVenta.some(e => e.id === eq.id);
             const batColor = eq.bateria < 50 ? 'text-red-500 dark:text-red-400' : eq.bateria < 80 ? 'text-orange-500 dark:text-orange-400' : 'text-green-600 dark:text-green-400';
+            const esAbonado = eq.estado === 'abonado';
+
+            // Estilos diferenciados: abonados con borde morado y fondo sutil
+            const estilosContenedor = yaSel
+                ? 'opacity-40 bg-gray-50 dark:bg-slate-700'
+                : esAbonado
+                    ? 'border-purple-300 dark:border-purple-700 bg-purple-50/40 dark:bg-purple-900/20 cursor-pointer hover:bg-purple-100 dark:hover:bg-purple-900/40'
+                    : 'cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/30 border-gray-200 dark:border-slate-700';
+
+            // Badge morado con info del último cliente y conteo de abonos
+            let badgeAbonado = '';
+            if (esAbonado) {
+                const hist = Array.isArray(eq.historialAbonos) ? eq.historialAbonos : [];
+                const ultimoCliente = hist.length > 0 ? (hist[hist.length - 1].cliente || {}) : {};
+                const nombreCliente = (ultimoCliente.nombre || 'Cliente').toString().substring(0, 30);
+                const totalAbonado = hist.reduce((s, h) => s + (Number(h.monto) || 0), 0);
+                badgeAbonado = `
+                    <div class="mt-1 flex items-center gap-1 flex-wrap">
+                        <span class="inline-flex items-center gap-1 bg-purple-600 dark:bg-purple-500 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                            💰 ABONADO
+                        </span>
+                        <span class="text-[11px] text-purple-700 dark:text-purple-300 font-medium">
+                            ${this._escapeHtml(nombreCliente)}
+                        </span>
+                        <span class="text-[10px] text-purple-600 dark:text-purple-400">
+                            · ${hist.length} ${hist.length === 1 ? 'abono' : 'abonos'} · $${totalAbonado.toFixed(2)}
+                        </span>
+                    </div>
+                `;
+            }
+
+            // Botón: "Finalizar Abono" para abonados, "Agregar" para disponibles
+            const botonAccion = yaSel
+                ? '<span class="text-yellow-600 dark:text-yellow-400 text-xs font-medium">✓ Seleccionado</span>'
+                : esAbonado
+                    ? `<button type="button" data-action="finalizar-abono" data-id="${eq.id}"
+                                     class="text-purple-700 dark:text-purple-300 hover:text-purple-900 dark:hover:text-purple-100 text-xs font-bold border-2 border-purple-500 dark:border-purple-400 rounded px-2 py-1 transition bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 dark:hover:bg-purple-900/50">
+                                     📋 Finalizar Abono
+                                   </button>`
+                    : `<button type="button" data-action="agregar" data-id="${eq.id}"
+                                     class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 text-xs font-semibold border border-indigo-300 dark:border-indigo-700 rounded px-2 py-1 transition">
+                                     + Agregar
+                                   </button>`;
+
             return `
-                <div class="equipo-sugerencia p-2 rounded-lg border ${yaSel ? 'opacity-40 bg-gray-50 dark:bg-slate-700' : 'cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/30 border-gray-200 dark:border-slate-700'} surface-card"
-                     data-equipo-id="${eq.id}">
+                <div class="equipo-sugerencia p-2 rounded-lg border ${estilosContenedor} surface-card"
+                     data-equipo-id="${eq.id}" data-estado="${eq.estado}">
                     <div class="flex items-center justify-between gap-2">
                         <div class="flex-1 min-w-0">
                             <p class="font-semibold text-sm truncate text-themed">📱 iPhone ${eq.modelo} ${eq.gb} — ${eq.color}</p>
@@ -3155,21 +3228,17 @@ class App {
                                 <span class="text-xs font-mono text-gray-400 dark:text-slate-500">${eq.imei}</span>
                                 ${eq.detalles ? `<span class="text-xs text-amber-600 dark:text-amber-400">⚠️ ${eq.detalles}</span>` : ''}
                             </div>
+                            ${badgeAbonado}
                         </div>
                         <div class="shrink-0">
-                            ${yaSel
-                    ? '<span class="text-yellow-600 dark:text-yellow-400 text-xs font-medium">✓ Seleccionado</span>'
-                    : `<button type="button" data-action="agregar" data-id="${eq.id}"
-                                     class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 text-xs font-semibold border border-indigo-300 dark:border-indigo-700 rounded px-2 py-1 transition">
-                                     + Agregar
-                                   </button>`}
+                            ${botonAccion}
                         </div>
                     </div>
                 </div>
             `;
         }).join('');
 
-        // Listener delegado: un solo listener para todos los botones "+ Agregar"
+        // Listener delegado: cubre tanto "agregar" como "finalizar-abono"
         sugerencias.querySelectorAll('button[data-action="agregar"]').forEach(btn => {
             btn.addEventListener('click', e => {
                 e.preventDefault();
@@ -3177,6 +3246,26 @@ class App {
                 this._agregarEquipoVenta(id);
             });
         });
+        sugerencias.querySelectorAll('button[data-action="finalizar-abono"]').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.preventDefault();
+                const id = btn.getAttribute('data-id');
+                this._cargarAbonadoParaFinalizar(id);
+            });
+        });
+    }
+
+    /**
+     * Helper para escapar HTML y evitar XSS en strings del cliente.
+     */
+    _escapeHtml(str) {
+        if (str == null) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
     }
 
     /**
@@ -3251,6 +3340,135 @@ class App {
         this._renderListaEquiposVenta();
         this._recalcularTotalDesdePrecios();
         this._actualizarContadoresMulti();
+    }
+
+    /**
+     * Carga en el formulario los datos de un equipo que está 'abonado'
+     * para que el operador termine de pagarlo.
+     *
+     * Flujo:
+     *   1) Marcar tipoTransaccion='venta' (es un cierre, no un nuevo abono)
+     *   2) Autollenar cliente (nombre/cédula/teléfono) del último abonado
+     *   3) Marcar checkbox "Venta con Abonos Previos" y rellenar las filas
+     *      con cada {fecha, monto} del historial del equipo
+     *   4) Agregar el equipo a _equiposSeleccionadosVenta para que entre
+     *      en el batch de inventario (será finalizado → 'vendido')
+     *   5) Sellar _abonadoAFinalizar con la metadata para commitVentaConInventario
+     *
+     * Si el operador edita los datos del cliente o de los abonos, todo sigue
+     * funcionando — el autollenado es sugerencia, no bloqueo (ver plan §6).
+     */
+    _cargarAbonadoParaFinalizar(equipoId) {
+        const eq = inventarioService.obtenerTodos(['disponible', 'abonado']).find(e => e.id === equipoId);
+        if (!eq || eq.estado !== 'abonado') {
+            mostrarAlerta('❌ Este equipo ya no está abonado.', 'error');
+            return;
+        }
+
+        const historial = Array.isArray(eq.historialAbonos) ? eq.historialAbonos : [];
+        if (historial.length === 0) {
+            mostrarAlerta('⚠️ Este equipo está marcado como abonado pero no tiene historial. Contacta al administrador.', 'error');
+            return;
+        }
+
+        // 1) Forzar tipo de transacción a 'venta' (cierre de abono)
+        const radioVenta = document.querySelector('input[name="tipoTransaccion"][value="venta"]');
+        if (radioVenta) {
+            radioVenta.checked = true;
+            // Disparar change para que se oculte "abonoInfo" y se muestre "abonosPreviosForm"
+            radioVenta.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        // 2) Autollenar datos del cliente desde el ÚLTIMO abonado
+        const ultimoCliente = historial[historial.length - 1].cliente || {};
+        document.getElementById('clienteNombre').value = ultimoCliente.nombre || '';
+        document.getElementById('clienteCedula').value = ultimoCliente.cedula || '';
+        document.getElementById('clienteTelefono').value = ultimoCliente.telefono || '';
+
+        // 3) Marcar checkbox "Venta con Abonos Previos" y rellenar filas
+        const chkAbonosPrevios = document.getElementById('tieneAbonosPrevios');
+        if (chkAbonosPrevios && !chkAbonosPrevios.checked) {
+            chkAbonosPrevios.checked = true;
+            chkAbonosPrevios.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        // Limpiar filas existentes y crear una nueva por cada entrada del historial
+        setTimeout(() => {
+            const listaAbonosP = document.getElementById('listaAbonosPrevios');
+            if (!listaAbonosP) return;
+            listaAbonosP.innerHTML = '';
+            historial.forEach((abono, idx) => {
+                const isFirst = idx === 0;
+                const btnClass = isFirst
+                    ? 'btn-add-abono-previo bg-purple-500 hover:bg-purple-600'
+                    : 'btn-remove-fila bg-red-500 hover:bg-red-600';
+                const btnText = isFirst ? '+' : '-';
+                const btnAction = isFirst ? '' : 'onclick="this.parentElement.remove()"';
+
+                // Normalizar fecha: si viene en formato ISO, convertir a YYYY-MM-DD
+                // (los inputs type="date" requieren ese formato)
+                let fechaInput = '';
+                if (abono.fecha) {
+                    const d = new Date(abono.fecha);
+                    if (!isNaN(d.getTime())) {
+                        fechaInput = d.toISOString().slice(0, 10);
+                    } else if (typeof abono.fecha === 'string' && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(abono.fecha)) {
+                        // Formato es-ES (9/7/2026) → YYYY-MM-DD
+                        const [dPart, mPart, yPart] = abono.fecha.split('/');
+                        fechaInput = `${yPart}-${mPart.padStart(2, '0')}-${dPart.padStart(2, '0')}`;
+                    }
+                }
+
+                const htmlFila = `
+                    <div class="abono-previo-item grid grid-cols-[1fr,1fr,auto] gap-2 items-center">
+                        <input type="date" value="${fechaInput}" class="p-2 border rounded-lg abono-fecha bg-purple-50 dark:bg-purple-900/20" title="Fecha del Abono ${idx + 1}">
+                        <input type="number" min="0" step="0.01" value="${Number(abono.monto) || 0}" class="p-2 border rounded-lg abono-monto bg-purple-50 dark:bg-purple-900/20" placeholder="Monto ($)">
+                        <button type="button" class="${btnClass} text-white w-8 h-8 rounded font-bold transition" ${btnAction}>${btnText}</button>
+                    </div>
+                `;
+                listaAbonosP.insertAdjacentHTML('beforeend', htmlFila);
+            });
+            // Disparar input event para que se recalcule el total
+            const primerMonto = listaAbonosP.querySelector('.abono-monto');
+            if (primerMonto) primerMonto.dispatchEvent(new Event('input', { bubbles: true }));
+        }, 50);
+
+        // 4) Agregar el equipo a la lista de seleccionados (precio = 0, lo pone el operador)
+        // Limpiar selección previa (estamos haciendo un cierre fresco)
+        this._equiposSeleccionadosVenta = [{
+            id: eq.id,
+            modelo: eq.modelo,
+            gb: eq.gb,
+            color: eq.color,
+            imei: eq.imei,
+            bateria: eq.bateria,
+            detalles: eq.detalles || '',
+            precio: 0
+        }];
+
+        // 5) Sellar metadata para que commitVentaConInventario sepa finalizar
+        this._abonadoAFinalizar = {
+            equipoId: eq.id,
+            ventaIdInicial: eq.abonoInicialId || null,
+            totalAbonado: historial.reduce((s, h) => s + (Number(h.monto) || 0), 0),
+            historial
+        };
+
+        // Limpiar el input de búsqueda y refrescar UI
+        const input = document.getElementById('invBuscadorInput');
+        if (input) input.value = '';
+        this._renderBuscadorEquiposVenta();
+        this._renderListaEquiposVenta();
+        this._recalcularTotalDesdePrecios();
+        this._actualizarContadoresMulti();
+
+        // Notificar al operador lo que pasó
+        const totalAbonado = this._abonadoAFinalizar.totalAbonado;
+        const cantAbonos = historial.length;
+        mostrarAlerta(
+            `📋 Equipo abonado cargado: ${cantAbonos} ${cantAbonos === 1 ? 'abono' : 'abonos'} por $${totalAbonado.toFixed(2)} ya registrados. Carga el precio total del equipo y cobra el saldo restante.`,
+            'info'
+        );
     }
 
     /**

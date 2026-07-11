@@ -408,3 +408,72 @@ describe('Venta.validar() — solo accesorios', () => {
         expect(mencionAccesorio).toBe(true);
     });
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GRUPO 7: Abono (parcialidad — estado intermedio de inventario)
+// Regla: el pago es siempre < deuda total por definición; no se valida
+//        que cubra el precio. WEPPA NO se activa (conceptos distintos).
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('Venta.validar() — abono (parcialidad)', () => {
+    it('✅ debe aceptar abono con monto menor al precio del equipo', () => {
+        // Equipo $800, abono $200 — caso típico del bug que reportaste
+        const venta = ventaBase({
+            formaPago: 'efectivo',
+            montoTotal: 200,
+            tipoTransaccion: 'abono',
+        });
+        const resultado = venta.validar();
+
+        expect(resultado.valido).toBe(true);
+        expect(resultado.errores).toEqual([]);
+    });
+
+    it('✅ debe aceptar abono con cualquier monto (> 0) sin exigir WEPPA', () => {
+        // Equipo $800, abono $50 — incluso montos pequeños
+        const venta = ventaBase({
+            formaPago: 'zelle',
+            montoTotal: 50,
+            montoPago: 50,
+            tipoTransaccion: 'abono',
+        });
+        const resultado = venta.validar();
+
+        expect(resultado.valido).toBe(true);
+        // No debe haber exigido activar WEPPA
+        expect(venta.weppa).toBe(false);
+    });
+
+    it('✅ debe aceptar abono con pago mixto que sume menos que el total', () => {
+        // Equipo $1000, pago mixto: $300 zelle + $200 binance = $500 (abono parcial)
+        const venta = ventaBase({
+            formaPago: 'mixto',
+            montoTotal: 1000,
+            tipoTransaccion: 'abono',
+            pagoMixto: {
+                efectivo: 0,
+                zelle: 300,
+                binance: 200,
+                pagoMovil: 0,
+                transferencia: 0,
+            },
+        });
+        const resultado = venta.validar();
+
+        expect(resultado.valido).toBe(true);
+    });
+
+    it('❌ debe rechazar abono con monto 0', () => {
+        // Aunque el check de "pago < deuda" se omite, sigue aplicando
+        // la validación de "monto > 0" del grupo 1
+        const venta = ventaBase({
+            formaPago: 'efectivo',
+            montoTotal: 0,
+            tipoTransaccion: 'abono',
+        });
+        const resultado = venta.validar();
+
+        expect(resultado.valido).toBe(false);
+        expect(resultado.errores).toContain('El monto total debe ser mayor a $0.00');
+    });
+});

@@ -315,7 +315,11 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "Iphone 17 pro Max 256gb",
-    "usd": 1389
+    "usd": 1300
+  },
+  {
+    "nombre": "Iphone 17 pro Max Silver 256gb",
+    "usd": 1320
   },
   {
     "nombre": "Iphone 17 pro Max 512gb",

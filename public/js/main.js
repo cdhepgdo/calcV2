@@ -103,7 +103,7 @@ class App {
                 const dias = Math.round((hoyDate - fechaCierre) / 86400000);
                 if (dias >= 0 && dias <= 2) {
                     document.getElementById('cajaInicial').value = parseFloat(ultimoCierre.monto).toFixed(2);
-                    // Borde amarillo para indicar que es un valor sugerido
+                    // Borde amarillo para indicar que es un valor sugerido (o auto-guardado)
                     document.getElementById('cajaInicial').style.borderColor = '#f59e0b';
                     // Banner informativo debajo del input
                     const ayudaExistente = document.getElementById('cajaInicialSugerencia');
@@ -114,8 +114,11 @@ class App {
                     const etiquetaDia = dias === 0
                         ? 'hoy'
                         : (dias === 1 ? 'ayer' : `hace ${dias} días`);
-                    ayuda.textContent = `💡 Sugerencia del ${ultimoCierre.fecha} (${etiquetaDia}). Verifica antes de guardar.`;
+                    ayuda.textContent = `💡 Caja inicial guardada automáticamente con el cierre del ${ultimoCierre.fecha} (${etiquetaDia}). Puedes editarla si hay errores.`;
                     document.getElementById('cajaInicial').parentElement.appendChild(ayuda);
+                    
+                    // Guardar automáticamente de forma silenciosa
+                    this.guardarCajaInicial(true);
                 }
             }
         }
@@ -888,7 +891,7 @@ class App {
     /**
      * Guarda la caja inicial
      */
-    async guardarCajaInicial() {
+    async guardarCajaInicial(silencioso = false) {
         const valor = parseFloat(document.getElementById('cajaInicial').value) || 0;
         this.cajaActual = new Caja(valor);
 
@@ -897,7 +900,9 @@ class App {
         document.getElementById('cajaInicialConfirmacion').classList.remove('hidden');
         document.getElementById('cajaInicialMostrar').textContent = valor.toFixed(2);
 
-        mostrarAlerta('✅ Caja inicial guardada correctamente', 'success');
+        if (silencioso !== true) {
+            mostrarAlerta('✅ Caja inicial guardada correctamente', 'success');
+        }
         await this.actualizarResumenVentas();
     }
 
@@ -3691,12 +3696,11 @@ class App {
         this.animarNumero('equiposVendidos', equiposVendidos, false);
         this.animarNumero('cajaFinal', desgloseCaja.cajaFinal);
 
-        // NOTA: el cierre de caja YA NO se guarda automáticamente aquí.
-        // Antes esto se ejecutaba en cada venta/movimiento, sobrescribiendo
-        // el doc único con valores a medias del día. Ahora se persiste
-        // únicamente cuando el operador pulsa el botón "🔒 Cerrar Caja del Día"
-        // (ver método `cerrarCajaDelDia`), evitando escrituras a medias y
-        // manteniendo un doc por fecha en /config/cierreCaja/{YYYY-MM-DD}.
+        // Guardar automáticamente la caja final en cada movimiento
+        // de manera silenciosa para mantenerla actualizada sin acción del usuario
+        storageService.guardarCierreCajaDelDia(desgloseCaja.cajaFinal).catch(err => {
+            console.error('Error al autoguardar caja final:', err);
+        });
     }
 
     /**

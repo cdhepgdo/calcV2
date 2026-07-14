@@ -10,6 +10,9 @@ class RegistroDiario {
         this.ventas = [];
         this.movimientos = [];
         this.registroPorDia = new Map();
+        this.paginaActual = 1;
+        this.diasPorPagina = 7;
+        this.diasFiltradosCache = [];
         this.init();
     }
 
@@ -350,8 +353,11 @@ class RegistroDiario {
             return fechaB - fechaA;
         });
 
+        this.diasFiltradosCache = diasFiltrados;
+        this.paginaActual = 1; // Reiniciar a la primera página tras un filtro
+
         this.renderizarResumen(diasFiltrados);
-        this.renderizarDias(diasFiltrados);
+        this.renderizarDias(this.diasFiltradosCache);
     }
 
     renderizarResumen(dias) {
@@ -528,7 +534,67 @@ class RegistroDiario {
             return;
         }
 
-        contenedor.innerHTML = dias.map(dia => this.crearTablaDia(dia)).join('');
+        const totalPaginas = Math.ceil(dias.length / this.diasPorPagina);
+        if (this.paginaActual > totalPaginas) this.paginaActual = totalPaginas;
+        if (this.paginaActual < 1) this.paginaActual = 1;
+
+        const inicio = (this.paginaActual - 1) * this.diasPorPagina;
+        const fin = inicio + this.diasPorPagina;
+        const diasPaginados = dias.slice(inicio, fin);
+
+        let html = diasPaginados.map(dia => this.crearTablaDia(dia)).join('');
+
+        if (totalPaginas > 1) {
+            html += this.crearControlesPaginacion(totalPaginas);
+        }
+
+        contenedor.innerHTML = html;
+        this.asignarEventosPaginacion();
+    }
+
+    crearControlesPaginacion(totalPaginas) {
+        let controles = '<div class="paginacion-container" style="display: flex; justify-content: center; gap: 8px; margin-top: 30px; margin-bottom: 20px;">';
+        
+        const btnPrevDisabled = this.paginaActual === 1 ? 'opacity: 0.5; pointer-events: none;' : 'cursor: pointer;';
+        controles += `<button class="btn-paginacion prev" data-page="${this.paginaActual - 1}" style="padding: 8px 16px; border-radius: 8px; border: 1px solid rgb(var(--border-strong)); background: rgb(var(--surface-muted)); color: rgb(var(--text-primary)); font-weight: 600; ${btnPrevDisabled}">← Anterior</button>`;
+        
+        for (let i = 1; i <= totalPaginas; i++) {
+            // Mostrar siempre la primera, la última, y las cercanas a la actual para no saturar si hay muchas
+            if (i === 1 || i === totalPaginas || (i >= this.paginaActual - 1 && i <= this.paginaActual + 1)) {
+                const isCurrent = i === this.paginaActual;
+                const bgClass = isCurrent ? 'background: rgb(var(--accent)); color: white;' : 'background: rgb(var(--surface-muted)); color: rgb(var(--text-primary));';
+                controles += `<button class="btn-paginacion num" data-page="${i}" style="padding: 8px 16px; border-radius: 8px; border: 1px solid rgb(var(--border-strong)); font-weight: 600; cursor: pointer; ${bgClass}">${i}</button>`;
+            } else if (i === this.paginaActual - 2 || i === this.paginaActual + 2) {
+                controles += `<span style="padding: 8px 4px; color: rgb(var(--text-muted));">...</span>`;
+            }
+        }
+        
+        const btnNextDisabled = this.paginaActual === totalPaginas ? 'opacity: 0.5; pointer-events: none;' : 'cursor: pointer;';
+        controles += `<button class="btn-paginacion next" data-page="${this.paginaActual + 1}" style="padding: 8px 16px; border-radius: 8px; border: 1px solid rgb(var(--border-strong)); background: rgb(var(--surface-muted)); color: rgb(var(--text-primary)); font-weight: 600; ${btnNextDisabled}">Siguiente →</button>`;
+        
+        controles += '</div>';
+        return controles;
+    }
+
+    asignarEventosPaginacion() {
+        const botones = document.querySelectorAll('.btn-paginacion');
+        botones.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const nuevaPagina = parseInt(e.currentTarget.dataset.page);
+                if (!isNaN(nuevaPagina)) {
+                    this.paginaActual = nuevaPagina;
+                    this.renderizarDias(this.diasFiltradosCache);
+                    // Hacer scroll suave hacia el contenedor de registro para ver los nuevos resultados
+                    const headerOffset = 100;
+                    const elementPosition = document.getElementById('contenedorRegistro').getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: "smooth"
+                    });
+                }
+            });
+        });
     }
 
     crearTablaDia(dia) {

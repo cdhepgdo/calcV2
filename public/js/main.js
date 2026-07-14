@@ -103,7 +103,7 @@ class App {
                 const dias = Math.round((hoyDate - fechaCierre) / 86400000);
                 if (dias >= 0 && dias <= 2) {
                     document.getElementById('cajaInicial').value = parseFloat(ultimoCierre.monto).toFixed(2);
-                    // Borde amarillo para indicar que es un valor sugerido
+                    // Borde amarillo para indicar que es un valor sugerido (o auto-guardado)
                     document.getElementById('cajaInicial').style.borderColor = '#f59e0b';
                     // Banner informativo debajo del input
                     const ayudaExistente = document.getElementById('cajaInicialSugerencia');
@@ -114,8 +114,11 @@ class App {
                     const etiquetaDia = dias === 0
                         ? 'hoy'
                         : (dias === 1 ? 'ayer' : `hace ${dias} días`);
-                    ayuda.textContent = `💡 Sugerencia del ${ultimoCierre.fecha} (${etiquetaDia}). Verifica antes de guardar.`;
+                    ayuda.textContent = `💡 Caja inicial guardada automáticamente con el cierre del ${ultimoCierre.fecha} (${etiquetaDia}). Puedes editarla si hay errores.`;
                     document.getElementById('cajaInicial').parentElement.appendChild(ayuda);
+                    
+                    // Guardar automáticamente de forma silenciosa
+                    this.guardarCajaInicial(true);
                 }
             }
         }
@@ -888,7 +891,7 @@ class App {
     /**
      * Guarda la caja inicial
      */
-    async guardarCajaInicial() {
+    async guardarCajaInicial(silencioso = false) {
         const valor = parseFloat(document.getElementById('cajaInicial').value) || 0;
         this.cajaActual = new Caja(valor);
 
@@ -897,7 +900,9 @@ class App {
         document.getElementById('cajaInicialConfirmacion').classList.remove('hidden');
         document.getElementById('cajaInicialMostrar').textContent = valor.toFixed(2);
 
-        mostrarAlerta('✅ Caja inicial guardada correctamente', 'success');
+        if (silencioso !== true) {
+            mostrarAlerta('✅ Caja inicial guardada correctamente', 'success');
+        }
         await this.actualizarResumenVentas();
     }
 
@@ -1404,14 +1409,24 @@ class App {
         if (imeiDefectuoso) {
             const existente = inventarioService.buscarPorImei(imeiDefectuoso);
             if (existente) {
-                mostrarAlerta(
-                    `❌ El IMEI ${imeiDefectuoso} del equipo defectuoso ya existe en el inventario ` +
-                    `como "${existente.estado}" (${existente.modelo || '?'} ${existente.gb || ''} — ${existente.color || '?'}). ` +
-                    `No se puede registrar un cambio por garantía con un IMEI duplicado. ` +
-                    `Verifica que el IMEI tipeado sea correcto o contacta al administrador.`,
-                    'error'
-                );
-                return; // NO guardar movimiento, NO limpiar formulario
+                if (existente.estado === 'disponible') {
+                    mostrarAlerta(
+                        `❌ El IMEI ${imeiDefectuoso} del equipo defectuoso ya existe en el inventario ` +
+                        `como disponible. No se puede registrar como cambio por garantía.`,
+                        'error'
+                    );
+                    return;
+                }
+                
+                // Validar que no se hayan alterado los datos originales
+                const eqMod = (cambio.equipoDefectuoso.modelo || '').toLowerCase().replace('iphone ', '').trim();
+                const dbMod = (existente.modelo || '').toLowerCase().replace('iphone ', '').trim();
+                const eqCap = cambio.equipoDefectuoso.capacidad;
+                
+                if (eqMod !== dbMod || eqCap !== existente.gb || cambio.equipoDefectuoso.color !== existente.color || parseInt(cambio.equipoDefectuoso.bateria) !== parseInt(existente.bateria)) {
+                    mostrarAlerta(`❌ Los datos del equipo defectuoso no coinciden con los registrados originalmente para el IMEI ${imeiDefectuoso}. No modifique los campos autocompletados.`, 'error');
+                    return;
+                }
             }
         }
 
@@ -1429,7 +1444,7 @@ class App {
             origen: 'Cambio por Garantía',
             estado: 'defectuoso'
         });
-        const resIngreso = await inventarioService.ingresarEquipo(eqDefectuoso);
+        const resIngreso = await inventarioService.ingresarEquipo(eqDefectuoso, { permitirReingreso: true });
         if (!resIngreso.exito) {
             mostrarAlerta(
                 `❌ No se pudo registrar el equipo defectuoso en inventario: ${resIngreso.error}. ` +
@@ -1536,7 +1551,7 @@ class App {
                     }
 
                     const conflicto = this._obtenerConflictoImeiRecibido(imeiR, this.ventaEnEdicion, imeiTradeInOriginal);
-                    if (conflicto && conflicto.tipo !== 'autocompletar-vendido') {
+                    if (conflicto && conflicto.tipo !== 'autocompletar-reingreso') {
                         let msgError = '';
                         const eq = conflicto.equipo;
                         switch (conflicto.tipo) {
@@ -1559,6 +1574,23 @@ class App {
                         submitBtn.innerHTML = textoOriginal;
                         mostrarAlerta(msgError, 'error');
                         return;
+                    }
+
+                    // Validación de seguridad para reingresos (evitar alteración del DOM)
+                    if (conflicto && conflicto.tipo === 'autocompletar-reingreso') {
+                        const dbEq = conflicto.equipo;
+                        const eqMod = (eq.modelo || '').toLowerCase().replace('iphone ', '').trim();
+                        const dbMod = (dbEq.modelo || '').toLowerCase().replace('iphone ', '').trim();
+                        
+                        // En la vista de venta se usa 'capacidad' en lugar de 'gb', pero probemos ambos
+                        const eqCap = eq.capacidad || eq.gb;
+                        
+                        if (eqMod !== dbMod || eqCap !== dbEq.gb || eq.color !== dbEq.color || parseInt(eq.bateria) !== parseInt(dbEq.bateria)) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = textoOriginal;
+                            mostrarAlerta(`✕ Equipo recibido #${i + 1}: Los datos del IMEI ${imeiR} no coinciden con los del equipo original. No modifique los campos autocompletados.`, 'error');
+                            return;
+                        }
                     }
                 }
             }
@@ -2051,13 +2083,8 @@ class App {
             if (estado === 'disponible') {
                 return { tipo: 'bloqueado-disponible', equipo: equipoEnInventario };
             }
-            if (estado === 'defectuoso') {
-                return { tipo: 'bloqueado-defectuoso', equipo: equipoEnInventario };
-            }
-            if (estado === 'vendido' || estado === 'eliminado' || estado === 'transferido') {
-                // Ya no es stock activo → permitir como trade-in con autocompletar
-                return { tipo: 'autocompletar-vendido', equipo: equipoEnInventario };
-            }
+            // Cualquier otro estado permite reingreso
+            return { tipo: 'autocompletar-reingreso', equipo: equipoEnInventario };
             // Cualquier otro estado desconocido → bloquear por precaución
             return { tipo: 'bloqueado-otro-estado', equipo: equipoEnInventario };
         }
@@ -2128,10 +2155,9 @@ class App {
                 detalle = `📱 iPhone ${eq.modelo} ${eq.gb}GB — ${eq.color} (IMEI: ${eq.imei}).`;
                 break;
             }
-            case 'autocompletar-vendido': {
-                // Estado vendido → permitir + ofrecer autocompletar
+            case 'autocompletar-reingreso': {
                 icono = 'ℹ️';
-                titulo = 'Este IMEI corresponde a un equipo vendido';
+                titulo = `Este IMEI corresponde a un equipo ${eq.estado}`;
                 detalle = `📱 iPhone ${eq.modelo} ${eq.gb}GB — ${eq.color} (IMEI: ${eq.imei}). ` +
                     `Puedes autocompletar los datos del equipo.`;
                 colorClases = 'border-blue-300 dark:border-blue-700/50 bg-blue-50 dark:bg-blue-900/20';
@@ -2162,7 +2188,8 @@ class App {
             nuevoBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                this._autocompletarEquipoRecibido(eq.id);
+                const prefijo = conflicto.isDefectuoso ? 'defectuoso' : 'equipo';
+                this._autocompletarYBloquearFormulario(eq, prefijo);
             });
         }
 
@@ -2175,6 +2202,11 @@ class App {
     _revalidarImeiRecibidoActual() {
         const imeiInput = document.getElementById('equipoImeiR');
         if (!imeiInput) return;
+        if (imeiInput.dataset.autocompletado === "true" && imeiInput.value !== imeiInput.dataset.originalImei) {
+            this._desbloquearFormulario('equipo');
+            imeiInput.dataset.autocompletado = "false";
+        }
+        
         const conflicto = this._obtenerConflictoImeiRecibido(
             imeiInput.value,
             this.ventaEnEdicion,
@@ -2184,71 +2216,110 @@ class App {
     }
 
     /**
-     * Autocompleta el formulario de equipo recibido con los datos del inventario
+     * Autocompleta y bloquea un formulario con datos de inventario
      */
-    _autocompletarEquipoRecibido(equipoId) {
-        const equipo = inventarioService.obtenerTodos().find(e => e.id === equipoId);
-        if (!equipo) {
-            mostrarAlerta('❌ Equipo no encontrado en el inventario', 'error');
-            return;
-        }
+    _autocompletarYBloquearFormulario(equipo, prefijo) {
+        if (!equipo) return;
 
-        // Modelo: buscar la opción que coincida
-        const selectModelo = document.getElementById('equipoModelo');
+        const selectModelo = document.getElementById(`${prefijo}Modelo`);
         if (selectModelo) {
-            // Intentar asignar directo (si el valor coincide con alguna option)
             selectModelo.value = equipo.modelo || '';
-            // Si no encontró match, intentar buscar por texto
             if (selectModelo.value !== equipo.modelo) {
+                const eqModLower = (equipo.modelo || '').toLowerCase().replace('iphone ', '').trim();
                 const opciones = Array.from(selectModelo.options);
-                const match = opciones.find(opt =>
-                    opt.value.toLowerCase() === (equipo.modelo || '').toLowerCase() ||
-                    opt.text.toLowerCase() === (equipo.modelo || '').toLowerCase()
-                );
+                const match = opciones.find(opt => {
+                    const optVal = opt.value.toLowerCase().replace('iphone ', '').trim();
+                    const optText = opt.text.toLowerCase().replace('iphone ', '').trim();
+                    return optVal === eqModLower || optText === eqModLower;
+                });
                 if (match) selectModelo.value = match.value;
             }
+            const evt = new Event('change');
+            selectModelo.dispatchEvent(evt);
         }
 
-        // Capacidad
-        const selectCapacidad = document.getElementById('equipoCapacidad');
-        if (selectCapacidad) selectCapacidad.value = equipo.gb || '';
+        setTimeout(() => {
+            const selectCapacidad = document.getElementById(`${prefijo}Capacidad`);
+            if (selectCapacidad) selectCapacidad.value = equipo.gb || equipo.capacidad || '';
 
-        // Color
-        const selectColor = document.getElementById('equipoColor');
-        if (selectColor) selectColor.value = equipo.color || '';
+            const selectColor = document.getElementById(`${prefijo}Color`);
+            if (selectColor) selectColor.value = equipo.color || '';
 
-        // Batería
-        const inputBateria = document.getElementById('equipoBateria');
-        if (inputBateria) inputBateria.value = equipo.bateria || '';
+            const inputBateria = document.getElementById(`${prefijo}Bateria`);
+            if (inputBateria) inputBateria.value = parseInt(equipo.bateria) || '';
 
-        // IMEI ya está puesto, reconfirmar
-        const inputImei = document.getElementById('equipoImeiR');
-        if (inputImei) inputImei.value = equipo.imei || '';
+            const inputImeiId = prefijo === 'equipo' ? 'equipoImeiR' : `${prefijo}Imei`;
+            const inputImei = document.getElementById(inputImeiId);
+            if (inputImei) {
+                inputImei.value = equipo.imei || '';
+                inputImei.dataset.autocompletado = "true";
+                inputImei.dataset.originalImei = equipo.imei;
+                inputImei.dataset.equipoId = equipo.id;
+            }
 
-        // Ocultar el banner tras autocompletar
+            // Bloquear visualmente
+            if (selectModelo) {
+                selectModelo.disabled = true;
+                selectModelo.classList.add('bg-gray-100', 'dark:bg-gray-800', 'opacity-70');
+            }
+            if (selectCapacidad) {
+                selectCapacidad.disabled = true;
+                selectCapacidad.classList.add('bg-gray-100', 'dark:bg-gray-800', 'opacity-70');
+            }
+            if (selectColor) {
+                selectColor.disabled = true;
+                selectColor.classList.add('bg-gray-100', 'dark:bg-gray-800', 'opacity-70');
+            }
+            if (inputBateria) {
+                inputBateria.readOnly = true;
+                inputBateria.classList.add('bg-gray-100', 'dark:bg-gray-800', 'opacity-70');
+            }
+        }, 50);
+
         document.getElementById('imeiTradeInBanner')?.classList.add('hidden');
-        const toast = document.getElementById('imeiConflictoToastRecibido');
-        if (toast) toast.classList.add('hidden');
+        document.getElementById('imeiCompraBanner')?.classList.add('hidden');
+        
+        mostrarAlerta(`✅ Datos cargados desde inventario (${equipo.modelo} — Estado: ${equipo.estado})`, 'success');
+        if (prefijo === 'equipo') this.calcularYMostrarTotal();
+    }
 
-        mostrarAlerta(`✅ Datos del equipo cargados desde inventario (${equipo.modelo} — Estado: ${equipo.estado})`, 'success');
-        this.calcularYMostrarTotal();
+    _desbloquearFormulario(prefijo) {
+        const selectModelo = document.getElementById(`${prefijo}Modelo`);
+        if (selectModelo) {
+            selectModelo.disabled = false;
+            selectModelo.classList.remove('bg-gray-100', 'dark:bg-gray-800', 'opacity-70');
+        }
+        const selectCapacidad = document.getElementById(`${prefijo}Capacidad`);
+        if (selectCapacidad) {
+            selectCapacidad.disabled = false;
+            selectCapacidad.classList.remove('bg-gray-100', 'dark:bg-gray-800', 'opacity-70');
+        }
+        const selectColor = document.getElementById(`${prefijo}Color`);
+        if (selectColor) {
+            selectColor.disabled = false;
+            selectColor.classList.remove('bg-gray-100', 'dark:bg-gray-800', 'opacity-70');
+        }
+        const inputBateria = document.getElementById(`${prefijo}Bateria`);
+        if (inputBateria) {
+            inputBateria.readOnly = false;
+            inputBateria.classList.remove('bg-gray-100', 'dark:bg-gray-800', 'opacity-70');
+        }
     }
 
     /**
      * Revisa el IMEI del equipo DEFECTUOSO en cambio por garantía mientras
-     * el usuario escribe. Reutiliza el sistema de banners de trade-in.
+     * el usuario escribe.
      *
-     * FIX BUG IMEI-DUPLICADO:
-     *   El operador tipea el IMEI del equipo que devuelve el cliente.
-     *   En cambio por garantía NO hay autocompletar (el equipo del cliente
-     *   no está en nuestro inventario), entonces cualquier coincidencia
-     *   con inventario = BLOQUEAR.
+     * NUEVO COMPORTAMIENTO (reingreso):
+     *   Si el IMEI corresponde a un equipo ya registrado con estado != disponible
+     *   (ej. vendido, transferido, defectuoso), se ofrece autocompletar los
+     *   campos del equipo defectuoso con los datos del inventario.
+     *   Si el estado es 'disponible', se bloquea el ingreso.
      *
      * DIFERENCIA vs _revalidarImeiRecibidoActual:
-     *   - Re-categoriza 'autocompletar-vendido' a 'bloqueado-otro-estado'
-     *     porque en garantía ningún IMEI del inventario es aceptable.
-     *   - Solo muestra banner cuando el form de cambio por garantía es
-     *     visible (evita ruido cuando el usuario está en venta normal).
+     *   - Solo muestra banner cuando el form de cambio por garantía es visible.
+     *   - Marca conflicto.isDefectuoso=true para que el botón de autocompletar
+     *     use el prefijo 'defectuoso' en vez de 'equipo'.
      */
     _revalidarImeiDefectuosoActual() {
         const imeiInput = document.getElementById('defectuosoImei');
@@ -2260,6 +2331,11 @@ class App {
             return;
         }
 
+        if (imeiInput.dataset.autocompletado === "true" && imeiInput.value !== imeiInput.dataset.originalImei) {
+            this._desbloquearFormulario('defectuoso');
+            imeiInput.dataset.autocompletado = "false";
+        }
+
         // Gate: solo mostrar banner si el form de cambio por garantía está visible
         const cambioGarantiaForm = document.getElementById('cambioGarantiaForm');
         if (cambioGarantiaForm && cambioGarantiaForm.classList.contains('hidden')) {
@@ -2268,15 +2344,7 @@ class App {
         }
 
         let conflicto = this._obtenerConflictoImeiRecibido(imei, null, null);
-
-        // Re-categorizar 'autocompletar-vendido' a 'bloqueado-otro-estado':
-        // en cambio por garantía, ningún IMEI del inventario es aceptable.
-        if (conflicto && conflicto.tipo === 'autocompletar-vendido') {
-            conflicto = {
-                tipo: 'bloqueado-otro-estado',
-                equipo: conflicto.equipo,
-            };
-        }
+        if (conflicto) conflicto.isDefectuoso = true;
 
         this._mostrarToastConflictoImeiRecibido(conflicto);
     }
@@ -3691,12 +3759,11 @@ class App {
         this.animarNumero('equiposVendidos', equiposVendidos, false);
         this.animarNumero('cajaFinal', desgloseCaja.cajaFinal);
 
-        // NOTA: el cierre de caja YA NO se guarda automáticamente aquí.
-        // Antes esto se ejecutaba en cada venta/movimiento, sobrescribiendo
-        // el doc único con valores a medias del día. Ahora se persiste
-        // únicamente cuando el operador pulsa el botón "🔒 Cerrar Caja del Día"
-        // (ver método `cerrarCajaDelDia`), evitando escrituras a medias y
-        // manteniendo un doc por fecha en /config/cierreCaja/{YYYY-MM-DD}.
+        // Guardar automáticamente la caja final en cada movimiento
+        // de manera silenciosa para mantenerla actualizada sin acción del usuario
+        storageService.guardarCierreCajaDelDia(desgloseCaja.cajaFinal).catch(err => {
+            console.error('Error al autoguardar caja final:', err);
+        });
     }
 
     /**
@@ -4780,6 +4847,13 @@ class App {
 
         const imei = (input.value || '').trim();
 
+        // Desbloquear si se cambió y estaba bloqueado
+        if (input.dataset.autocompletado === "true" && input.value !== input.dataset.originalImei) {
+            const prefijo = config.id.replace('Imei', '');
+            this._desbloquearFormulario(prefijo);
+            input.dataset.autocompletado = "false";
+        }
+
         // 1. Ocultar si está vacío o muy corto
         if (imei.length < 15) {
             banner.classList.add('hidden');
@@ -4873,8 +4947,27 @@ class App {
                 icono.textContent = 'ℹ️';
                 titulo.textContent = `Equipo ${equipo.estado.toUpperCase()}`;
                 titulo.className = 'font-semibold text-xs text-blue-800 dark:text-blue-300';
-                detalle.textContent = `Este IMEI pertenece a un ${equipo.modelo} que fue ${equipo.estado}. Se registrará su reingreso.`;
+                detalle.textContent = `Este IMEI pertenece a un ${equipo.modelo} que fue ${equipo.estado}. Puedes autocompletarlo.`;
                 detalle.className = 'text-[10px] mt-0.5 leading-tight text-blue-600 dark:text-blue-400';
+
+                // Añadir botón de autocompletar si no existe
+                let btnWrap = banner.querySelector('.btn-wrap');
+                if (!btnWrap) {
+                    btnWrap = document.createElement('div');
+                    btnWrap.className = 'btn-wrap mt-2';
+                    btnWrap.innerHTML = `<button type="button" class="px-3 py-1 bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded text-xs font-semibold hover:bg-blue-300 transition">Autocompletar</button>`;
+                    const innerDiv = banner.querySelector('.flex-1');
+                    if(innerDiv) innerDiv.appendChild(btnWrap);
+                }
+                
+                const btn = btnWrap.querySelector('button');
+                const nuevoBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(nuevoBtn, btn);
+                nuevoBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const prefijo = config.id.replace('Imei', ''); // 'compraEquipo' o 'ingresoEquipo'
+                    this._autocompletarYBloquearFormulario(equipo, prefijo);
+                });
             } else {
                 // Nuevo IMEI, perfecto para ingreso
                 banner.classList.remove('hidden', 'bg-red-50', 'dark:bg-red-900/30', 'border-red-200', 'dark:border-red-700/50', 'bg-blue-50', 'dark:bg-blue-900/30', 'border-blue-200', 'dark:border-blue-700/50');
@@ -5402,6 +5495,18 @@ class App {
                     alert(`❌ El IMEI ${imei} ya está registrado en el inventario como DISPONIBLE.\n📱 ${existente.modelo} ${existente.gb} ${existente.color}\n\nNo se puede ingresar el mismo equipo dos veces.`);
                     return;
                 }
+                
+                // Si existe pero no está disponible, es un reingreso. Validar que no modifique los campos (anti-trampas DOM)
+                if (existente) {
+                    const eqMod = (datos.datos.modelo || '').toLowerCase().replace('iphone ', '').trim();
+                    const dbMod = (existente.modelo || '').toLowerCase().replace('iphone ', '').trim();
+                    const eqCap = datos.datos.capacidad;
+                    
+                    if (eqMod !== dbMod || eqCap !== existente.gb || datos.datos.color !== existente.color || parseInt(datos.datos.bateria) !== parseInt(existente.bateria)) {
+                        alert(`❌ Los datos del equipo a ingresar no coinciden con los registrados originalmente para el IMEI ${imei}. No modifique los campos autocompletados.`);
+                        return;
+                    }
+                }
 
                 // Validación 3: Campos de equipo completos
                 if (!datos.datos.modelo || !datos.datos.capacidad || !datos.datos.color) {
@@ -5423,7 +5528,7 @@ class App {
                     creadoPor: sedeId
                 });
 
-                const resultadoInv = await inventarioService.guardarLote([nuevoEquipo], origen);
+                const resultadoInv = await inventarioService.guardarLote([nuevoEquipo], origen, { permitirReingreso: true });
                 if (!resultadoInv.exito) {
                     alert(`❌ Error al agregar al inventario: ${resultadoInv.error}`);
                     return;

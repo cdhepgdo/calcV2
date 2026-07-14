@@ -19,6 +19,10 @@ export function initModoIngreso({
     
     let filaCounter = 0;
 
+    function preventDefaultEvent(e) {
+        e.preventDefault();
+    }
+
     function poblarColores(select) {
         if (!select) return;
         select.querySelectorAll('option:not(:first-child)').forEach(opt => opt.remove());
@@ -163,8 +167,84 @@ export function initModoIngreso({
                     }
                 } else {
                     imeiInput.classList.add('imei-ok');
-                    imeiStatus.textContent = '✅';
-                    imeiInput.title = 'IMEI válido y único';
+                    
+                    if (resultado.reingreso) {
+                        imeiStatus.textContent = '🔄';
+                        imeiInput.title = resultado.mensaje;
+                        
+                        // Autocompletar
+                        const eq = resultado.equipo;
+                        const modeloInput = tr.querySelector('.campo-modelo');
+                        const gbInput = tr.querySelector('.campo-gb');
+                        const colorInput = tr.querySelector('.campo-color');
+                        const bateriaInput = tr.querySelector('.campo-bateria');
+                        const gbContainer = tr.querySelector('.gb-chips-container');
+                        
+                        // Guardamos valores originales para saber si se cambian
+                        tr.dataset.reingresoImei = eq.imei;
+                        
+                        modeloInput.value = eq.modelo;
+                        gbInput.value = eq.gb;
+                        colorInput.value = eq.color;
+                        bateriaInput.value = eq.bateria;
+                        
+                        if (gbContainer) {
+                            gbContainer.querySelectorAll('.gb-chip').forEach(c => {
+                                c.classList.toggle('active', c.dataset.gb === eq.gb);
+                            });
+                        }
+                        
+                        // Bloquear visualmente
+                        modeloInput.readOnly = true;
+                        modeloInput.style.pointerEvents = 'none';
+                        modeloInput.classList.add('bg-gray-100', 'dark:bg-gray-800', 'opacity-70');
+                        
+                        colorInput.style.pointerEvents = 'none';
+                        colorInput.classList.add('bg-gray-100', 'dark:bg-gray-800', 'opacity-70');
+                        // Hacer readonly visual para los selects evitando que abran el dropdown
+                        colorInput.addEventListener('mousedown', preventDefaultEvent);
+                        
+                        bateriaInput.readOnly = true;
+                        bateriaInput.classList.add('bg-gray-100', 'dark:bg-gray-800', 'opacity-70');
+                        
+                        if (gbContainer) {
+                            gbContainer.style.pointerEvents = 'none';
+                            gbContainer.style.opacity = '0.7';
+                        }
+                        
+                        tr.dataset.reingreso = "true";
+                        
+                    } else {
+                        imeiStatus.textContent = '✅';
+                        imeiInput.title = 'IMEI válido y único';
+                        
+                        // Si era un reingreso y cambió el IMEI a uno nuevo, desbloqueamos
+                        if (tr.dataset.reingreso === "true") {
+                            const modeloInput = tr.querySelector('.campo-modelo');
+                            const colorInput = tr.querySelector('.campo-color');
+                            const bateriaInput = tr.querySelector('.campo-bateria');
+                            const gbContainer = tr.querySelector('.gb-chips-container');
+                            
+                            modeloInput.readOnly = false;
+                            modeloInput.style.pointerEvents = 'auto';
+                            modeloInput.classList.remove('bg-gray-100', 'dark:bg-gray-800', 'opacity-70');
+                            
+                            colorInput.style.pointerEvents = 'auto';
+                            colorInput.classList.remove('bg-gray-100', 'dark:bg-gray-800', 'opacity-70');
+                            colorInput.removeEventListener('mousedown', preventDefaultEvent);
+                            
+                            bateriaInput.readOnly = false;
+                            bateriaInput.classList.remove('bg-gray-100', 'dark:bg-gray-800', 'opacity-70');
+                            
+                            if (gbContainer) {
+                                gbContainer.style.pointerEvents = 'auto';
+                                gbContainer.style.opacity = '1';
+                            }
+                            
+                            tr.dataset.reingreso = "false";
+                            tr.dataset.reingresoImei = "";
+                        }
+                    }
                 }
             } else if (v.length > 0) {
                 imeiInput.classList.add('imei-error');
@@ -251,6 +331,18 @@ export function initModoIngreso({
             } else if (!v.valido) {
                 errores.push(`Fila ${num}: ${v.errores.join(', ')}`);
             } else {
+                // Validación estricta para reingresos (prevenir alteración de HTML)
+                if (tr.dataset.reingreso === "true" && tr.dataset.reingresoImei === imei) {
+                    const eqExistente = inventarioService.buscarPorImei(imei);
+                    if (eqExistente) {
+                        const m1 = norm(modelo);
+                        const m2 = norm(eqExistente.modelo);
+                        if (m1 !== m2 || gb !== eqExistente.gb || color !== eqExistente.color || bateria != eqExistente.bateria) {
+                            errores.push(`Fila ${num}: Los datos del IMEI ${imei} no coinciden con los del equipo original. No modifique los campos de un reingreso.`);
+                            return; // saltar el push
+                        }
+                    }
+                }
                 equipos.push(equipo);
             }
         });
@@ -294,7 +386,7 @@ export function initModoIngreso({
         const notasLote = document.getElementById('notasLote').value.trim();
         const registrarMovimiento = document.getElementById('chkRegistrarMovimiento').checked;
         
-        const resultado = await inventarioService.guardarLote(equipos, origenLote);
+        const resultado = await inventarioService.guardarLote(equipos, origenLote, { permitirReingreso: true });
         setLoading(false);
 
         if (resultado.exito) {

@@ -139,39 +139,38 @@ class InventarioService {
         return this.obtenerDisponibles().filter(e => e.modelo.toLowerCase().includes(txt));
     }
 
-    async guardarLote(equiposArray, origenLote = "") {
+    async guardarLote(equiposArray, origenLote = "", opciones = {}) {
         try {
+            const permitirReingreso = opciones.permitirReingreso || false;
+
+            if (!Array.isArray(equiposArray) || equiposArray.length === 0) {
+                return { exito: false, error: 'No hay equipos para guardar' };
+            }
+
             // ⚠️ VALIDACIÓN CRÍTICA: Esperar a que el inventario esté sincronizado
             if (!this._inventarioListo) {
                 console.warn('⏳ Esperando sincronización del inventario...');
                 await this.esperarListo();
             }
             
-            // Validación 1: Verificar IMEIs duplicados dentro del mismo lote
+            // Validación 1: Verificar duplicados DENTRO del mismo lote
             const imeisEnLote = new Set();
-            const duplicadosEnLote = [];
+            const imeisDuplicadosLote = [];
             
-            equiposArray.forEach((eq, index) => {
+            for (const eq of equiposArray) {
                 if (eq.imei && eq.imei.length >= 15) {
                     if (imeisEnLote.has(eq.imei)) {
-                        duplicadosEnLote.push({
-                            fila: index + 1,
-                            imei: eq.imei,
-                            modelo: eq.modelo
-                        });
+                        imeisDuplicadosLote.push(eq.imei);
                     } else {
                         imeisEnLote.add(eq.imei);
                     }
                 }
-            });
+            }
             
-            if (duplicadosEnLote.length > 0) {
-                const mensaje = duplicadosEnLote.map(d => 
-                    `Fila ${d.fila} (IMEI ${d.imei}, ${d.modelo})`
-                ).join(', ');
+            if (imeisDuplicadosLote.length > 0) {
                 return { 
                     exito: false, 
-                    error: `❌ IMEIs duplicados en el mismo lote: ${mensaje}. Cada equipo debe tener un IMEI único.` 
+                    error: `❌ Hay IMEIs duplicados dentro del mismo lote: ${imeisDuplicadosLote.join(', ')}` 
                 };
             }
             
@@ -181,13 +180,18 @@ class InventarioService {
                 if (eq.imei && eq.imei.length >= 15) {
                     const existente = this.buscarPorImei(eq.imei);
                     if (existente) {
-                        imeisDuplicados.push({
-                            fila: index + 1,
-                            imei: eq.imei,
-                            modelo: eq.modelo,
-                            estadoExistente: existente.estado,
-                            idExistente: existente.id
-                        });
+                        if (!permitirReingreso || existente.estado === 'disponible') {
+                            imeisDuplicados.push({
+                                fila: index + 1,
+                                imei: eq.imei,
+                                modelo: eq.modelo,
+                                estadoExistente: existente.estado,
+                                idExistente: existente.id
+                            });
+                        } else {
+                            // Reingreso permitido: usar el ID del equipo original
+                            eq.id = existente.id;
+                        }
                     }
                 }
             });
@@ -224,8 +228,10 @@ class InventarioService {
         }
     }
 
-    async ingresarEquipo(equipo) {
+    async ingresarEquipo(equipo, opciones = {}) {
         try {
+            const permitirReingreso = opciones.permitirReingreso || false;
+
             // Verificar duplicado en memoria para evitar doble submit
             if (equipo.imei && this._imeisRecienIngresados.has(equipo.imei)) {
                 console.warn(`⚠️ IMEI ${equipo.imei} ya fue ingresado recientemente, ignorando duplicado`);
@@ -235,8 +241,12 @@ class InventarioService {
             // Verificar si ya existe en el inventario
             const existente = this.buscarPorImei(equipo.imei);
             if (existente) {
-                const errorMsg = `❌ El equipo con IMEI ${equipo.imei} ya existe en el inventario (estado: ${existente.estado})`;
-                return { exito: false, error: errorMsg };
+                if (!permitirReingreso || existente.estado === 'disponible') {
+                    const errorMsg = `❌ El equipo con IMEI ${equipo.imei} ya existe en el inventario (estado: ${existente.estado})`;
+                    return { exito: false, error: errorMsg };
+                }
+                // Si es reingreso, usamos el ID del equipo original para sobreescribir/actualizar
+                equipo.id = existente.id;
             }
 
             const docRef = doc(db, `${this._getBasePath()}/inventario`, equipo.id);

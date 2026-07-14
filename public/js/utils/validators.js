@@ -152,13 +152,23 @@ export function validarIMEI(imei, filaActual, tablaBody, inventarioService, inve
     if (inventarioCargado && inventarioService) {
         const existente = inventarioService.buscarPorImei(imei);
         if (existente) {
-            return {
-                valido: false,
-                duplicado: true,
-                origen: 'inventario',
-                mensaje: `⚠️ IMEI ya existe en inventario (${existente.estado})`,
-                equipo: existente
-            };
+            if (existente.estado === 'disponible') {
+                return {
+                    valido: false,
+                    duplicado: true,
+                    origen: 'inventario',
+                    mensaje: `⚠️ IMEI ya existe y está Disponible en inventario`,
+                    equipo: existente
+                };
+            } else {
+                return {
+                    valido: true,
+                    duplicado: false,
+                    reingreso: true,
+                    mensaje: `🔄 Reingreso de equipo (${existente.estado})`,
+                    equipo: existente
+                };
+            }
         }
     }
 

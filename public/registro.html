@@ -70,10 +70,14 @@
 
         <!-- Resumen de Accesorios del Período -->
         <div class="accesorios-periodo">
-            <h2 class="accesorios-periodo-titulo">🛡️ Resumen de Accesorios del Período</h2>
-            <div id="resumenAccesoriosPeriodo" class="accesorios-periodo-contenido">
-                <p class="text-themed-muted text-center">Cargando...</p>
-            </div>
+            <details>
+                <summary class="accesorios-periodo-titulo select-none cursor-pointer" style="list-style: none;">
+                    🛡️ Resumen de Accesorios del Período <span class="text-sm font-normal opacity-70 ml-2">(Clic para expandir/colapsar)</span>
+                </summary>
+                <div id="resumenAccesoriosPeriodo" class="accesorios-periodo-contenido mt-4">
+                    <p class="text-themed-muted text-center">Cargando...</p>
+                </div>
+            </details>
         </div>
 
         <div id="contenedorRegistro" class="registro-container">

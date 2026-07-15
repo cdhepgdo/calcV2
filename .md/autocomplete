@@ -1,0 +1,117 @@
+# Plan de Solución: Banner de Autocompletado para IMEI Defectuoso en Cambio por Garantía (Actualizado)
+
+Este plan de solución detalla la causa raíz del error de visualización y describe una propuesta de refactorización altamente escalable y consistente con el sistema de diseño visual (Light/Dark mode) del proyecto.
+
+## Causa Raíz
+
+En `public/js/main.js`, al ingresar un IMEI vendido en el campo de equipo defectuoso bajo "Cambio por garantía", se ejecuta `_revalidarImeiDefectuosoActual()`. Esta función determina correctamente que se puede realizar un reingreso y llama a `_mostrarToastConflictoImeiRecibido()`.
+
+Sin embargo:
+1. **Falta el banner en HTML**: No existe un elemento banner `#imeiDefectuosoBanner` debajo de `defectuosoImei` en [cierree.html](file:///c:/Users/Ada/Desktop/4.7/calcV2/public/cierree.html).
+2. **Banner estático**: La función `_mostrarToastConflictoImeiRecibido()` actualiza directamente el banner de Trade-In (`#imeiTradeInBanner`). Al estar en una sección del formulario que permanece oculta en Cambio por garantía, el banner se actualiza pero nunca es visible.
+3. **Inconsistencia de Estilos**: Las clases de colores de los banners se escriben directamente con colores fijos en JS (ej. `bg-red-50`, `text-blue-800`), en lugar de usar los tokens de color del sistema que reaccionan automáticamente en modo claro y modo oscuro.
+
+---
+
+## Cambios Propuestos
+
+### 1. Registro de Colores del Tema en Tailwind
+Modificaremos [tailwind-config.js](file:///c:/Users/Ada/Desktop/4.7/calcV2/public/js/tailwind-config.js) para incluir los tokens semánticos de fondo (`-soft`) y texto (`-text`) que ya están declarados en `theme.css`. Esto nos permitirá usar clases como `bg-danger-soft`, `text-danger-text` y `border-danger/30` que se adaptan de forma nativa a Light y Dark mode.
+
+```javascript
+// En public/js/tailwind-config.js
+colors: {
+  // ...
+  success:          'rgb(var(--success) / <alpha-value>)',
+  'success-soft':   'rgb(var(--success-soft) / <alpha-value>)',
+  'success-text':   'rgb(var(--success-text) / <alpha-value>)',
+  warning:          'rgb(var(--warning) / <alpha-value>)',
+  'warning-soft':   'rgb(var(--warning-soft) / <alpha-value>)',
+  'warning-text':   'rgb(var(--warning-text) / <alpha-value>)',
+  danger:           'rgb(var(--danger) / <alpha-value>)',
+  'danger-soft':    'rgb(var(--danger-soft) / <alpha-value>)',
+  'danger-text':    'rgb(var(--danger-text) / <alpha-value>)',
+  info:             'rgb(var(--info) / <alpha-value>)',
+  'info-soft':      'rgb(var(--info-soft) / <alpha-value>)',
+  'info-text':      'rgb(var(--info-text) / <alpha-value>)'
+}
+```
+
+### 2. Creación de una Función Unificada de Renderizado (Escalabilidad)
+Para evitar la repetición de código en el DOM y hacer que el sistema sea escalable ante futuros formularios, crearemos un helper de UI en `main.js`:
+
+```javascript
+/**
+ * Renderiza de manera uniforme y consistente cualquier banner de validación
+ * de IMEI utilizando los tokens de diseño semánticos del tema.
+ */
+_renderizarBannerValidacion(prefix, estado, { icono, titulo, detalle, mostrarBtn = false, btnCallback = null }) {
+    const banner = document.getElementById(`${prefix}Banner`);
+    const iconoEl = document.getElementById(`${prefix}BannerIcono`);
+    const tituloEl = document.getElementById(`${prefix}BannerTitulo`);
+    const detalleEl = document.getElementById(`${prefix}BannerDetalle`);
+    const btnWrap = document.getElementById(`${prefix}BannerBtnWrap`);
+    const btn = document.getElementById(`${prefix}BannerBtn`);
+
+    if (!banner) return;
+
+    if (!estado) {
+        banner.classList.add('hidden');
+        return;
+    }
+
+    // Mapeo semántico al sistema de diseño
+    const estilos = {
+        danger: { bg: 'bg-danger-soft', border: 'border-danger/30', text: 'text-danger-text' },
+        success: { bg: 'bg-success-soft', border: 'border-success/30', text: 'text-success-text' },
+        warning: { bg: 'bg-warning-soft', border: 'border-warning/30', text: 'text-warning-text' },
+        info: { bg: 'bg-info-soft', border: 'border-info/30', text: 'text-info-text' }
+    };
+
+    const config = estilos[estado] || estilos.info;
+
+    banner.className = `mt-2 rounded-lg px-3 py-2 border ${config.bg} ${config.border}`;
+    if (iconoEl) iconoEl.textContent = icono || '⚠️';
+    if (tituloEl) {
+        tituloEl.textContent = titulo;
+        tituloEl.className = `font-semibold text-xs ${config.text}`;
+    }
+    if (detalleEl) {
+        detalleEl.innerHTML = detalle;
+        detalleEl.className = `text-[10px] mt-0.5 leading-tight ${config.text}/90`;
+    }
+
+    if (btnWrap) btnWrap.classList.toggle('hidden', !mostrarBtn);
+    if (btn && mostrarBtn && btnCallback) {
+        const nuevoBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(nuevoBtn, btn);
+        nuevoBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            btnCallback();
+        });
+    }
+
+    banner.classList.remove('hidden');
+}
+```
+
+### 3. Modificaciones en el HTML
+Añadiremos el banner semántico `#imeiDefectuosoBanner` debajo de `defectuosoImei` en [cierree.html](file:///c:/Users/Ada/Desktop/4.7/calcV2/public/cierree.html#L683-L685) con la misma estructura estándar.
+
+### 4. Actualización de Lógica en main.js
+1. Modificaremos `_mostrarToastConflictoImeiRecibido` para que use el prefijo dinámico (`imeiTradeIn` o `imeiDefectuoso`) y delegue el dibujo al nuevo helper `_renderizarBannerValidacion`.
+2. Adaptaremos `_ocultarBannerImeiDefectuoso()` y la limpieza de formularios para llamar adecuadamente a este helper, asegurando que ambos banners (Trade-In y Defectuoso) se limpien limpiamente.
+
+---
+
+## Plan de Verificación
+
+### Verificación Manual
+1. **Verificación de Estilos**:
+   - Abrir el formulario de Cierre de Caja en modo claro y modo oscuro.
+   - Digitar un IMEI que dispare el banner en Trade-In y en Defectuoso.
+   - Confirmar que los colores cambien de forma natural y premium adaptados a la paleta semántica.
+2. **Verificación de Flujo**:
+   - Digitar un IMEI de equipo vendido en el formulario de Equipo Defectuoso.
+   - Comprobar que aparezca el banner y que al hacer clic en "Autocompletar datos", el formulario se rellene correctamente y se bloquee.

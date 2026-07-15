@@ -28,13 +28,16 @@
         </div>
 
         <!-- Caja Inicial -->
-        <div class="bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-200 dark:border-emerald-700/50 rounded-xl shadow-lg p-6 mb-6">
+        <div
+            class="bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-200 dark:border-emerald-700/50 rounded-xl shadow-lg p-6 mb-6">
             <h2 class="text-xl font-semibold text-emerald-800 dark:text-emerald-300 mb-4">💰 Caja Inicial del Día</h2>
             <div class="flex items-center gap-4">
                 <div class="flex-1">
-                    <label class="block text-sm font-medium text-emerald-700 dark:text-emerald-400 mb-2">Efectivo disponible ($)</label>
+                    <label class="block text-sm font-medium text-emerald-700 dark:text-emerald-400 mb-2">Efectivo
+                        disponible ($)</label>
                     <input type="number" id="cajaInicial" step="0.01"
-                        class="w-full p-3 border border-emerald-300 dark:border-emerald-700 dark:bg-slate-800 dark:text-slate-100 rounded-lg" placeholder="0.00">
+                        class="w-full p-3 border border-emerald-300 dark:border-emerald-700 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
+                        placeholder="0.00">
                 </div>
                 <button id="guardarCajaInicial"
                     class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-lg transition">
@@ -42,7 +45,8 @@
                 </button>
             </div>
             <div id="cajaInicialConfirmacion" class="hidden mt-3 p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
-                <p class="text-emerald-800 dark:text-emerald-300 font-medium">✅ Caja inicial: $<span id="cajaInicialMostrar">0.00</span></p>
+                <p class="text-emerald-800 dark:text-emerald-300 font-medium">✅ Caja inicial: $<span
+                        id="cajaInicialMostrar">0.00</span></p>
             </div>
         </div>
 
@@ -75,7 +79,8 @@
                     <h2 class="text-xl font-semibold mb-4 text-themed">👤 Datos del Cliente</h2>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium mb-2 text-themed-secondary">Nombre y Apellido *</label>
+                            <label class="block text-sm font-medium mb-2 text-themed-secondary">Nombre y Apellido
+                                *</label>
                             <input type="text" id="clienteNombre" class="w-full p-3 border rounded-lg"
                                 placeholder="Nombre completo">
                         </div>
@@ -94,10 +99,12 @@
 
 
                 <!-- ══ SELECTOR DE INVENTARIO — MULTI-EQUIPO (patrón ModoSalida) ══ -->
-                <div id="inventarioBuscadorSection" class="border-b pb-6 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl p-5 mb-2">
+                <div id="inventarioBuscadorSection"
+                    class="border-b pb-6 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl p-5 mb-2">
                     <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
                         <h2 class="text-lg font-semibold text-indigo-800 dark:text-indigo-300 flex items-center gap-2">
-                            📦 Equipos a vender <span class="text-xs font-normal text-indigo-600 dark:text-indigo-400">(selecciona del
+                            📦 Equipos a vender <span
+                                class="text-xs font-normal text-indigo-600 dark:text-indigo-400">(selecciona del
                                 inventario de tu sede)</span>
                         </h2>
                         <span id="invStockBadge"
@@ -109,7 +116,8 @@
                         class="hidden mb-3 border-2 border-amber-300 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/30 rounded-lg px-4 py-3 flex items-start gap-2">
                         <span class="text-amber-500 dark:text-amber-400 text-lg mt-0.5 shrink-0">⚠️</span>
                         <div class="flex-1 min-w-0">
-                            <p class="font-semibold text-amber-800 dark:text-amber-300 text-sm">No hay equipos disponibles en tu inventario
+                            <p class="font-semibold text-amber-800 dark:text-amber-300 text-sm">No hay equipos
+                                disponibles en tu inventario
                             </p>
                             <p class="text-amber-700 dark:text-amber-400 text-xs mt-0.5">
                                 Para registrar ventas con equipos, primero ingresa la mercancía en
@@ -122,7 +130,8 @@
                     <div class="grid md:grid-cols-2 gap-4">
                         <!-- Columna izquierda: buscador + sugerencias -->
                         <div>
-                            <label class="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 mb-2 block">
+                            <label
+                                class="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 mb-2 block">
                                 🔍 Buscar en inventario
                             </label>
                             <div class="relative">
@@ -139,7 +148,8 @@
 
                         <!-- Columna derecha: lista apilada de seleccionados -->
                         <div>
-                            <label class="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 mb-2 block">
+                            <label
+                                class="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 mb-2 block">
                                 📋 Equipos seleccionados <span id="totalEquiposVentaResumenInline"
                                     class="text-indigo-500 dark:text-indigo-400">(0)</span>
                             </label>
@@ -165,10 +175,12 @@
                     <div class="flex items-start gap-3">
                         <span class="text-amber-500 dark:text-amber-400 text-lg mt-0.5 shrink-0">⚠️</span>
                         <div class="flex-1 min-w-0">
-                            <p class="font-semibold text-amber-800 dark:text-amber-300 text-sm" id="imeiInventarioBannerTitulo">
+                            <p class="font-semibold text-amber-800 dark:text-amber-300 text-sm"
+                                id="imeiInventarioBannerTitulo">
                                 Este IMEI corresponde a un equipo disponible en inventario
                             </p>
-                            <p class="text-amber-700 dark:text-amber-400 text-xs mt-0.5" id="imeiInventarioBannerDetalle">—</p>
+                            <p class="text-amber-700 dark:text-amber-400 text-xs mt-0.5"
+                                id="imeiInventarioBannerDetalle">—</p>
                         </div>
                     </div>
                     <div class="mt-3">
@@ -185,7 +197,8 @@
 
                     <div class="grid md:grid-cols-1 gap-4">
                         <div>
-                            <label class="block text-sm font-medium mb-2 text-themed-secondary">Tiempo de Garantía</label>
+                            <label class="block text-sm font-medium mb-2 text-themed-secondary">Tiempo de
+                                Garantía</label>
                             <select id="equipoGarantia"
                                 class="w-full p-3 border-themed rounded-lg focus:ring-2 focus:ring-blue-500 outline-none surface-card text-themed"></select>
                         </div>
@@ -387,7 +400,8 @@
                     </div>
 
                     <!-- Formulario EFECTIVO -->
-                    <div id="efectivo-form" class="hidden mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border-2 border-green-200 dark:border-green-700/50">
+                    <div id="efectivo-form"
+                        class="hidden mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border-2 border-green-200 dark:border-green-700/50">
                         <h3 class="font-semibold mb-3 text-themed">💵 Pago en Efectivo</h3>
                         <div>
                             <label class="block text-sm font-medium mb-2">Monto en Efectivo ($)</label>
@@ -397,7 +411,8 @@
                     </div>
 
                     <!-- Formulario ZELLE -->
-                    <div id="zelle-form" class="hidden mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border-2 border-blue-200 dark:border-blue-700">
+                    <div id="zelle-form"
+                        class="hidden mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border-2 border-blue-200 dark:border-blue-700">
                         <h3 class="font-semibold mb-3 text-themed">💰 Pago por Zelle</h3>
                         <div>
                             <label class="block text-sm font-medium mb-2">Monto en Dólares ($)</label>
@@ -407,7 +422,8 @@
                     </div>
 
                     <!-- Formulario BINANCE -->
-                    <div id="binance-form" class="hidden mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border-2 border-yellow-200 dark:border-yellow-700/50">
+                    <div id="binance-form"
+                        class="hidden mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border-2 border-yellow-200 dark:border-yellow-700/50">
                         <h3 class="font-semibold mb-3 text-themed">🪙 Pago por Binance</h3>
                         <div>
                             <label class="block text-sm font-medium mb-2">Monto en Dólares ($)</label>
@@ -510,7 +526,8 @@
                     </div>
 
                     <!-- Transferencia Detalles -->
-                    <div id="transferencia-detalles" class="hidden mt-4 bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                    <div id="transferencia-detalles"
+                        class="hidden mt-4 bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
                         <h3 class="font-medium mb-3 text-themed">Detalles Transferencia</h3>
                         <div class="grid md:grid-cols-3 gap-4">
                             <div>
@@ -532,7 +549,8 @@
                     </div>
 
                     <!-- Formulario PAYPAL -->
-                    <div id="paypal-form" class="hidden mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700">
+                    <div id="paypal-form"
+                        class="hidden mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700">
                         <h3 class="font-semibold mb-3 text-themed">🅿️ Pago por PayPal</h3>
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
@@ -644,12 +662,15 @@
                 </div>
 
                 <!-- Después de la sección de Equipo Recibido -->
-                <div id="cambioGarantiaForm" class="hidden bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-lg border-2 border-emerald-200 dark:border-emerald-700/50">
+                <div id="cambioGarantiaForm"
+                    class="hidden bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-lg border-2 border-emerald-200 dark:border-emerald-700/50">
                     <h3 class="text-xl font-bold mb-4 text-themed">🔄 Cambio por Garantía</h3>
 
                     <!-- Equipo Defectuoso (Recibido) -->
-                    <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg mb-4 border border-red-200 dark:border-red-700/50">
-                        <h4 class="font-semibold text-red-800 dark:text-red-300 mb-3">📱❌ Equipo Defectuoso (Recibido)</h4>
+                    <div
+                        class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg mb-4 border border-red-200 dark:border-red-700/50">
+                        <h4 class="font-semibold text-red-800 dark:text-red-300 mb-3">📱❌ Equipo Defectuoso (Recibido)
+                        </h4>
                         <div class="grid md:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-sm font-medium mb-1 text-themed-secondary">Modelo</label>
@@ -682,9 +703,27 @@
                             <div>
                                 <label class="block text-sm font-medium mb-1 text-themed-secondary">IMEI</label>
                                 <input type="text" id="defectuosoImei" class="w-full p-2 border rounded-lg">
+                                <!-- Banner de validación IMEI defectuoso (autocompletado por garantía) -->
+                                <div id="imeiDefectuosoBanner" class="hidden mt-2 rounded-lg px-3 py-2 border">
+                                    <div class="flex items-start gap-2">
+                                        <span id="imeiDefectuosoBannerIcono" class="text-sm mt-0.5 shrink-0">⚠️</span>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="font-semibold text-xs" id="imeiDefectuosoBannerTitulo"></p>
+                                            <p class="text-[10px] mt-0.5 leading-tight"
+                                                id="imeiDefectuosoBannerDetalle"></p>
+                                        </div>
+                                    </div>
+                                    <div id="imeiDefectuosoBannerBtnWrap" class="hidden mt-2">
+                                        <button type="button" id="imeiDefectuosoBannerBtn"
+                                            class="inline-flex items-center gap-1.5 text-white text-[11px] font-semibold px-3 py-1.5 rounded-md transition-colors duration-150 shadow-sm bg-blue-500 hover:bg-blue-600 active:bg-blue-700">
+                                            📋 Autocompletar datos
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium mb-1 text-themed-secondary">Problema Reportado</label>
+                                <label class="block text-sm font-medium mb-1 text-themed-secondary">Problema
+                                    Reportado</label>
                                 <textarea id="defectuosoProblema" rows="2" class="w-full p-2 border rounded-lg"
                                     placeholder="Ej: No enciende, pantalla rota, etc."></textarea>
                             </div>
@@ -692,9 +731,11 @@
                     </div>
 
                     <!-- Equipo Nuevo (Entregado) -->
-                    <div class="bg-green-100 dark:bg-green-900/20 p-4 rounded-lg border border-green-300 dark:border-green-700/50">
+                    <div
+                        class="bg-green-100 dark:bg-green-900/20 p-4 rounded-lg border border-green-300 dark:border-green-700/50">
                         <div class="flex justify-between items-center mb-3">
-                            <h4 class="font-semibold text-green-800 dark:text-green-300">📱✅ Equipo Nuevo (Entregado)</h4>
+                            <h4 class="font-semibold text-green-800 dark:text-green-300">📱✅ Equipo Nuevo (Entregado)
+                            </h4>
                             <button type="button" id="btnQuitarEquipoGarantia"
                                 class="hidden text-xs text-red-600 dark:text-red-300 hover:text-red-800 dark:hover:text-red-200 font-semibold px-2 py-1 rounded bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-700/50">❌
                                 Quitar Equipo</button>
@@ -702,10 +743,12 @@
 
                         <!-- Buscador de Inventario -->
                         <div id="buscadorGarantiaContainer" class="mb-4">
-                            <label class="block text-sm font-medium mb-2 text-themed-secondary">Buscar en Inventario (IMEI o
+                            <label class="block text-sm font-medium mb-2 text-themed-secondary">Buscar en Inventario
+                                (IMEI o
                                 Modelo)</label>
                             <div class="relative">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-themed-muted">🔍</span>
+                                <span
+                                    class="absolute inset-y-0 left-0 flex items-center pl-3 text-themed-muted">🔍</span>
                                 <input type="text" id="inputBuscadorGarantia"
                                     class="w-full p-2 pl-10 border border-green-400 dark:border-green-500 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 outline-none surface-card"
                                     placeholder="Escanea o escribe IMEI o modelo...">
@@ -771,11 +814,14 @@
                     </div>
 
                     <!-- Diferencia de Dinero -->
-                    <div class="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-300 dark:border-yellow-700/50 mt-4">
-                        <h4 class="font-semibold text-yellow-800 dark:text-yellow-300 mb-3">💵 Diferencia de Precio (Opcional)</h4>
+                    <div
+                        class="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-300 dark:border-yellow-700/50 mt-4">
+                        <h4 class="font-semibold text-yellow-800 dark:text-yellow-300 mb-3">💵 Diferencia de Precio
+                            (Opcional)</h4>
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium mb-1 text-themed-secondary">Tipo de Diferencia</label>
+                                <label class="block text-sm font-medium mb-1 text-themed-secondary">Tipo de
+                                    Diferencia</label>
                                 <select id="tipoDiferencia" class="w-full p-2 border rounded-lg">
                                     <option value="ninguna">Sin diferencia</option>
                                     <option value="favor-cliente">A favor del cliente (devolver dinero)</option>
@@ -808,7 +854,8 @@
                             <span>Abono</span>
                         </label>
                         <!-- NUEVO: Cambio por Garantía -->
-                        <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-green-50 dark:hover:bg-green-900/20">
+                        <label
+                            class="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-green-50 dark:hover:bg-green-900/20">
                             <input type="radio" name="tipoTransaccion" value="cambio-garantia" class="mr-3">
                             <span class="font-medium">🔄 Cambio Garantía</span>
                         </label>
@@ -822,7 +869,8 @@
                         </label>
                     </div>
                     <div id="abonoInfo" class="hidden mt-3 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                        <p class="text-sm text-orange-800 dark:text-orange-300">⚠️ <strong>Abono:</strong> No se incluirá en el total de
+                        <p class="text-sm text-orange-800 dark:text-orange-300">⚠️ <strong>Abono:</strong> No se
+                            incluirá en el total de
                             ventas del día</p>
                     </div>
                     <div id="notaVentaInfo" class="hidden mt-3">
@@ -832,14 +880,16 @@
                 </div>
 
                 <!-- Cierre de Abonos Previos -->
-                <div class="border-b pb-6 bg-purple-50 dark:bg-purple-900/20 rounded-xl p-6 mb-6" id="abonosPreviosForm">
+                <div class="border-b pb-6 bg-purple-50 dark:bg-purple-900/20 rounded-xl p-6 mb-6"
+                    id="abonosPreviosForm">
                     <label class="flex items-center mb-4">
                         <input type="checkbox" id="tieneAbonosPrevios" class="mr-3">
                         <span class="text-xl font-semibold">📅 Venta con Abonos Previos (Cierre)</span>
                     </label>
 
                     <div id="abonosPreviosDetalles" class="hidden p-4 rounded-lg border surface-card border-themed">
-                        <p class="text-sm text-purple-800 dark:text-purple-300 mb-3">Registra los pagos anteriores. Su total se sumará al de
+                        <p class="text-sm text-purple-800 dark:text-purple-300 mb-3">Registra los pagos anteriores. Su
+                            total se sumará al de
                             hoy en Ventas, pero en la Caja de hoy sólo ingresará lo que el cliente dé físico/hoy.</p>
                         <div id="listaAbonosPrevios" class="flex flex-col gap-2">
                             <div class="abono-previo-item grid grid-cols-[1fr,1fr,auto] gap-2 items-center">
@@ -886,13 +936,15 @@
                     </div>
 
                     <!-- Banner de diferencia entre lo pagado y la suma de precios de equipos -->
-                    <div id="diferenciaPago" class="hidden mt-3 p-2 rounded-lg text-sm font-medium flex items-center gap-2">
+                    <div id="diferenciaPago"
+                        class="hidden mt-3 p-2 rounded-lg text-sm font-medium flex items-center gap-2">
                         <span id="diferenciaPagoIcono" class="text-base shrink-0"></span>
                         <span id="diferenciaPagoTexto" class="flex-1"></span>
                     </div>
 
                     <!-- Campo editable para WEPPA (ventas a crédito) -->
-                    <div id="weppaMontoEditable" class="hidden border-t-2 border-emerald-300 dark:border-emerald-700 pt-3 mt-3">
+                    <div id="weppaMontoEditable"
+                        class="hidden border-t-2 border-emerald-300 dark:border-emerald-700 pt-3 mt-3">
                         <div class="bg-yellow-100 dark:bg-yellow-900/30 rounded-lg p-3 mb-3">
                             <p class="text-sm">⚠️ <strong>WEPPA Activo (Venta a Crédito):</strong></p>
                             <p class="text-xs mt-1">• <strong>Inicial:</strong> Lo que el cliente paga HOY
@@ -985,7 +1037,8 @@
                                 class="w-full p-2 border rounded-lg" placeholder="0.00">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Persona que retira</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Persona que
+                                retira</label>
                             <input type="text" id="salidaEfectivoPersona" class="w-full p-2 border rounded-lg"
                                 placeholder="Nombre completo">
                         </div>
@@ -998,7 +1051,8 @@
                 </div>
 
                 <!-- Ingreso de Efectivo -->
-                <div id="formIngresoEfectivo" class="movimiento-form hidden bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                <div id="formIngresoEfectivo"
+                    class="movimiento-form hidden bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
                     <h3 class="font-semibold text-green-800 dark:text-green-300 mb-3">💵 Ingreso de Efectivo</h3>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
@@ -1015,7 +1069,8 @@
                 </div>
 
                 <!-- Salida de Equipo -->
-                <div id="formSalidaEquipo" class="movimiento-form hidden bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg">
+                <div id="formSalidaEquipo"
+                    class="movimiento-form hidden bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg">
                     <div class="flex justify-between items-center mb-3">
                         <h3 class="font-semibold text-orange-800 dark:text-orange-300">📱➡️ Salida de Equipo</h3>
                         <button type="button" id="btnQuitarEquipoSalida"
@@ -1105,17 +1160,20 @@
                             </select>
                         </div>
                         <div id="salidaEquipoDestinoPersonalizadoDiv" class="hidden">
-                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Destino Personalizado</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Destino
+                                Personalizado</label>
                             <input type="text" id="salidaEquipoDestinoPersonalizado"
                                 class="w-full p-2 border rounded-lg" placeholder="Especificar destino">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Persona que retira</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Persona que
+                                retira</label>
                             <input type="text" id="salidaEquipoPersona" class="w-full p-2 border rounded-lg"
                                 placeholder="Nombre completo">
                         </div>
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Notas adicionales</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Notas
+                                adicionales</label>
                             <textarea id="salidaEquipoNota" rows="2" class="w-full p-2 border rounded-lg"
                                 placeholder="Detalles adicionales"></textarea>
                         </div>
@@ -1123,7 +1181,8 @@
                 </div>
 
                 <!-- Ingreso de Equipo -->
-                <div id="formIngresoEquipo" class="movimiento-form hidden bg-teal-50 dark:bg-teal-900/20 p-4 rounded-lg">
+                <div id="formIngresoEquipo"
+                    class="movimiento-form hidden bg-teal-50 dark:bg-teal-900/20 p-4 rounded-lg">
                     <h3 class="font-semibold text-teal-800 dark:text-teal-300 mb-3">📱⬅️ Ingreso de Equipo</h3>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
@@ -1166,7 +1225,8 @@
                                 class="w-full p-2 border rounded-lg" placeholder="85">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Origen/Procedencia</label>
+                            <label
+                                class="block text-sm font-medium mb-1 text-themed-secondary">Origen/Procedencia</label>
                             <select id="ingresoEquipoOrigen" class="w-full p-2 border rounded-lg">
                                 <option value="">Seleccionar</option>
                                 <option value="Aviadores">Aviadores</option>
@@ -1178,12 +1238,14 @@
                             </select>
                         </div>
                         <div id="ingresoEquipoOrigenPersonalizadoDiv" class="hidden">
-                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Origen Personalizado</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Origen
+                                Personalizado</label>
                             <input type="text" id="ingresoEquipoOrigenPersonalizado"
                                 class="w-full p-2 border rounded-lg" placeholder="Especificar origen">
                         </div>
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Notas adicionales</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Notas
+                                adicionales</label>
                             <textarea id="ingresoEquipoNota" rows="2" class="w-full p-2 border rounded-lg"
                                 placeholder="Detalles adicionales"></textarea>
                         </div>
@@ -1191,7 +1253,8 @@
                 </div>
 
                 <!-- Compra de Equipo -->
-                <div id="formCompraEquipo" class="movimiento-form hidden bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                <div id="formCompraEquipo"
+                    class="movimiento-form hidden bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
                     <h3 class="font-semibold text-green-800 dark:text-green-300 mb-3">📱⬅️ Compra de Equipo</h3>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
@@ -1234,17 +1297,20 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Precio de Compra ($)</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Precio de Compra
+                                ($)</label>
                             <input type="number" id="compraEquipoPrecio" step="0.01"
                                 class="w-full p-2 border rounded-lg" placeholder="0.00">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Proveedor/Vendedor</label>
+                            <label
+                                class="block text-sm font-medium mb-1 text-themed-secondary">Proveedor/Vendedor</label>
                             <input type="text" id="compraEquipoProveedor" class="w-full p-2 border rounded-lg"
                                 placeholder="Nombre del vendedor">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Estado del Equipo</label>
+                            <label class="block text-sm font-medium mb-1 text-themed-secondary">Estado del
+                                Equipo</label>
                             <select id="compraEquipoEstado" class="w-full p-2 border rounded-lg">
                                 <option value="">Seleccionar</option>
                                 <option value="Nuevo">Nuevo</option>
@@ -1263,7 +1329,8 @@
                 </div>
 
                 <!-- Salida de Accesorio -->
-                <div id="formSalidaAccesorio" class="movimiento-form hidden bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+                <div id="formSalidaAccesorio"
+                    class="movimiento-form hidden bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
                     <h3 class="font-semibold text-yellow-800 dark:text-yellow-300 mb-3">🛡️➡️ Salida de Accesorio</h3>
 
                     <!-- Destino -->
@@ -1432,7 +1499,8 @@
                 </div>
 
                 <!-- Ingreso de Accesorio -->
-                <div id="formIngresoAccesorio" class="movimiento-form hidden bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                <div id="formIngresoAccesorio"
+                    class="movimiento-form hidden bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
                     <h3 class="font-semibold text-purple-800 dark:text-purple-300 mb-3">🛡️⬅️ Ingreso de Accesorio</h3>
 
                     <!-- Proveedor -->
@@ -1616,14 +1684,20 @@
                 <p class="text-themed-secondary">No hay ventas registradas hoy.</p>
             </div>
             <div class="grid md:grid-cols-3 gap-4 mb-4">
-                <div class="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700/50">
-                    <p class="text-lg font-semibold text-green-800 dark:text-green-300">💰 Total: $<span id="totalDia">0.00</span></p>
+                <div
+                    class="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700/50">
+                    <p class="text-lg font-semibold text-green-800 dark:text-green-300">💰 Total: $<span
+                            id="totalDia">0.00</span></p>
                 </div>
-                <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/50">
-                    <p class="text-lg font-semibold text-blue-800 dark:text-blue-300">📱 Equipos: <span id="equiposVendidos">0</span></p>
+                <div
+                    class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/50">
+                    <p class="text-lg font-semibold text-blue-800 dark:text-blue-300">📱 Equipos: <span
+                            id="equiposVendidos">0</span></p>
                 </div>
-                <div class="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700/50">
-                    <p class="text-lg font-semibold text-purple-800 dark:text-purple-300">🏦 Caja Final: $<span id="cajaFinal">0.00</span>
+                <div
+                    class="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700/50">
+                    <p class="text-lg font-semibold text-purple-800 dark:text-purple-300">🏦 Caja Final: $<span
+                            id="cajaFinal">0.00</span>
                     </p>
                 </div>
             </div>
@@ -1653,9 +1727,9 @@
     <script type="module">
         import { mountNav } from './js/components/nav.js';
         import { AccesorioValidator } from './js/services/AccesorioValidator.js';
-        
+
         mountNav('cierre');
-        
+
         // Solo en desarrollo/debug: detectar desincronización HTML ↔ schema
         if (import.meta.env?.DEV || window.location.search.includes('debug')) {
             AccesorioValidator.verificarContratoHTML(document, 'salida');

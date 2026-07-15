@@ -2,7 +2,7 @@
 * Archivo principal de la aplicación
 * Orquesta la inicialización y coordinación de todos los módulos
 */
-import { authService } from './services/AuthService.js'; 
+import { authService } from './services/AuthService.js';
 import { CambioGarantia } from './models/CambioGarantia.js';
 import { Movimiento } from './models/Movimiento.js';
 import { Venta } from './models/Venta.js';
@@ -116,7 +116,7 @@ class App {
                         : (dias === 1 ? 'ayer' : `hace ${dias} días`);
                     ayuda.textContent = `💡 Caja inicial guardada automáticamente con el cierre del ${ultimoCierre.fecha} (${etiquetaDia}). Puedes editarla si hay errores.`;
                     document.getElementById('cajaInicial').parentElement.appendChild(ayuda);
-                    
+
                     // Guardar automáticamente de forma silenciosa
                     this.guardarCajaInicial(true);
                 }
@@ -380,14 +380,14 @@ class App {
                 campoEditable.classList.remove('hidden');
                 // Activar required solo cuando el campo es visible
                 document.getElementById('montoTotalManual').setAttribute('required', 'required');
-                
+
                 // Copiar el PRECIO TOTAL DE LOS EQUIPOS al campo manual como sugerencia (lo lógico en un crédito)
                 const totalEquiposBase = this._sumarPreciosEquiposVendidos();
                 document.getElementById('montoTotalManual').value = totalEquiposBase.toFixed(2);
-                
+
                 // Actualizar el campo oculto inmediatamente para reflejar la deuda
                 document.getElementById('montoTotal').value = totalEquiposBase.toFixed(2);
-                
+
                 // Actualizar el display del inicial (lo que el cliente paga hoy)
                 let subtotalAbonos = 0;
                 if (document.getElementById('tieneAbonosPrevios')?.checked) {
@@ -1417,12 +1417,12 @@ class App {
                     );
                     return;
                 }
-                
+
                 // Validar que no se hayan alterado los datos originales
                 const eqMod = (cambio.equipoDefectuoso.modelo || '').toLowerCase().replace('iphone ', '').trim();
                 const dbMod = (existente.modelo || '').toLowerCase().replace('iphone ', '').trim();
                 const eqCap = cambio.equipoDefectuoso.capacidad;
-                
+
                 if (eqMod !== dbMod || eqCap !== existente.gb || cambio.equipoDefectuoso.color !== existente.color || parseInt(cambio.equipoDefectuoso.bateria) !== parseInt(existente.bateria)) {
                     mostrarAlerta(`❌ Los datos del equipo defectuoso no coinciden con los registrados originalmente para el IMEI ${imeiDefectuoso}. No modifique los campos autocompletados.`, 'error');
                     return;
@@ -1581,10 +1581,10 @@ class App {
                         const dbEq = conflicto.equipo;
                         const eqMod = (eq.modelo || '').toLowerCase().replace('iphone ', '').trim();
                         const dbMod = (dbEq.modelo || '').toLowerCase().replace('iphone ', '').trim();
-                        
+
                         // En la vista de venta se usa 'capacidad' en lugar de 'gb', pero probemos ambos
                         const eqCap = eq.capacidad || eq.gb;
-                        
+
                         if (eqMod !== dbMod || eqCap !== dbEq.gb || eq.color !== dbEq.color || parseInt(eq.bateria) !== parseInt(dbEq.bateria)) {
                             submitBtn.disabled = false;
                             submitBtn.innerHTML = textoOriginal;
@@ -2104,43 +2104,86 @@ class App {
     }
 
     /**
-     * Actualiza el banner de validación del IMEI trade-in.
-     * Usa el nuevo banner visual consistente con el de ventas.
-     * @param {object|null} conflicto - Resultado de _obtenerConflictoImeiRecibido
+     * Renderiza de manera uniforme y consistente cualquier banner de validación
+     * de IMEI utilizando los tokens de diseño semánticos del tema.
      */
-    _mostrarToastConflictoImeiRecibido(conflicto) {
-        const banner = document.getElementById('imeiTradeInBanner');
-        const iconoEl = document.getElementById('imeiTradeInBannerIcono');
-        const tituloEl = document.getElementById('imeiTradeInBannerTitulo');
-        const detalleEl = document.getElementById('imeiTradeInBannerDetalle');
-        const btnWrap = document.getElementById('imeiTradeInBannerBtnWrap');
-        const btn = document.getElementById('imeiTradeInBannerBtn');
+    _renderizarBannerValidacion(prefix, estado, { icono, titulo, detalle, mostrarBtn = false, btnCallback = null }) {
+        const banner = document.getElementById(`${prefix}Banner`);
+        const iconoEl = document.getElementById(`${prefix}BannerIcono`);
+        const tituloEl = document.getElementById(`${prefix}BannerTitulo`);
+        const detalleEl = document.getElementById(`${prefix}BannerDetalle`);
+        const btnWrap = document.getElementById(`${prefix}BannerBtnWrap`);
+        const btn = document.getElementById(`${prefix}BannerBtn`);
 
         if (!banner) return;
 
-        // Sin conflicto → ocultar
-        if (!conflicto) {
+        // Ocultar si estado es falsy
+        if (!estado) {
             banner.classList.add('hidden');
             return;
         }
 
-        // Definir apariencia y mensaje según el tipo
+        // Mapeo semántico al sistema de diseño
+        const estilos = {
+            danger: { bg: 'bg-danger-soft', border: 'border-danger/30', text: 'text-danger-text' },
+            success: { bg: 'bg-success-soft', border: 'border-success/30', text: 'text-success-text' },
+            warning: { bg: 'bg-warning-soft', border: 'border-warning/30', text: 'text-warning-text' },
+            info: { bg: 'bg-info-soft', border: 'border-info/30', text: 'text-info-text' }
+        };
+
+        const config = estilos[estado] || estilos.info;
+
+        banner.className = `mt-2 rounded-lg px-3 py-2 border ${config.bg} ${config.border}`;
+        if (iconoEl) iconoEl.textContent = icono || '⚠️';
+        if (tituloEl) {
+            tituloEl.textContent = titulo;
+            tituloEl.className = `font-semibold text-xs ${config.text}`;
+        }
+        if (detalleEl) {
+            detalleEl.innerHTML = detalle;
+            detalleEl.className = `text-[10px] mt-0.5 leading-tight ${config.text}/90`;
+        }
+
+        if (btnWrap) btnWrap.classList.toggle('hidden', !mostrarBtn);
+        if (btn && mostrarBtn && btnCallback) {
+            const nuevoBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(nuevoBtn, btn);
+            nuevoBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                btnCallback();
+            });
+        }
+
+        banner.classList.remove('hidden');
+    }
+
+    /**
+     * Actualiza el banner de validación de IMEI para equipos recibidos o defectuosos.
+     * @param {object|null} conflicto - Resultado de _obtenerConflictoImeiRecibido
+     */
+    _mostrarToastConflictoImeiRecibido(conflicto) {
+        const isDefectuoso = conflicto && conflicto.isDefectuoso;
+        const prefix = isDefectuoso ? 'imeiDefectuoso' : 'imeiTradeIn';
+
+        if (!conflicto) {
+            this._renderizarBannerValidacion(prefix, null, {});
+            return;
+        }
+
+        let estado = 'danger'; // Bloqueado por defecto
         let icono = '⚠️';
         let titulo = '';
         let detalle = '';
-        let colorClases = 'border-red-300 dark:border-red-700/50 bg-red-50 dark:bg-red-900/20';           // rojo por defecto (bloqueado)
-        let tituloClases = 'text-red-800 dark:text-red-300';
-        let detalleClases = 'text-red-700 dark:text-red-400';
         let mostrarBtn = false;
-
         const eq = conflicto.equipo;
 
         switch (conflicto.tipo) {
             case 'bloqueado-disponible': {
-                const batColor = eq.bateria < 50 ? 'text-red-600 dark:text-red-400' : eq.bateria < 80 ? 'text-amber-600 dark:text-amber-400' : 'text-green-700 dark:text-green-400';
+                const batColor = eq.bateria < 50 ? 'text-danger' : eq.bateria < 80 ? 'text-warning' : 'text-success';
                 titulo = 'Este equipo está disponible en inventario';
                 detalle = `📱 iPhone ${eq.modelo} ${eq.gb}GB — ${eq.color} — ` +
-                    `<span class="${batColor}">🔋 ${eq.bateria}%</span> (IMEI: ${eq.imei}). ` +
+                    `<span class="${batColor} font-semibold">🔋 ${eq.bateria}%</span> (IMEI: ${eq.imei}). ` +
                     `No puede recibirse como parte de pago: todavía es stock disponible.`;
                 break;
             }
@@ -2156,13 +2199,11 @@ class App {
                 break;
             }
             case 'autocompletar-reingreso': {
+                estado = 'info';
                 icono = 'ℹ️';
                 titulo = `Este IMEI corresponde a un equipo ${eq.estado}`;
                 detalle = `📱 iPhone ${eq.modelo} ${eq.gb}GB — ${eq.color} (IMEI: ${eq.imei}). ` +
                     `Puedes autocompletar los datos del equipo.`;
-                colorClases = 'border-blue-300 dark:border-blue-700/50 bg-blue-50 dark:bg-blue-900/20';
-                tituloClases = 'text-blue-800 dark:text-blue-300';
-                detalleClases = 'text-blue-700 dark:text-blue-400';
                 mostrarBtn = true;
                 break;
             }
@@ -2173,27 +2214,14 @@ class App {
             }
         }
 
-        // Aplicar estilos
-        banner.className = `mt-3 rounded-xl px-4 py-3 border ${colorClases}`;
-        if (iconoEl) iconoEl.textContent = icono;
-        if (tituloEl) { tituloEl.textContent = titulo; tituloEl.className = `font-semibold text-sm ${tituloClases}`; }
-        if (detalleEl) { detalleEl.innerHTML = detalle; detalleEl.className = `text-xs mt-0.5 ${detalleClases}`; }
-
-        // Botón de autocompletar
-        if (btnWrap) btnWrap.classList.toggle('hidden', !mostrarBtn);
-        if (btn && mostrarBtn) {
-            // Reasignar handler limpio (sin acumulación de listeners)
-            const nuevoBtn = btn.cloneNode(true);
-            btn.parentNode.replaceChild(nuevoBtn, btn);
-            nuevoBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const prefijo = conflicto.isDefectuoso ? 'defectuoso' : 'equipo';
-                this._autocompletarYBloquearFormulario(eq, prefijo);
-            });
-        }
-
-        banner.classList.remove('hidden');
+        const prefijoForm = isDefectuoso ? 'defectuoso' : 'equipo';
+        this._renderizarBannerValidacion(prefix, estado, {
+            icono,
+            titulo,
+            detalle,
+            mostrarBtn,
+            btnCallback: () => this._autocompletarYBloquearFormulario(eq, prefijoForm)
+        });
     }
 
     /**
@@ -2206,7 +2234,7 @@ class App {
             this._desbloquearFormulario('equipo');
             imeiInput.dataset.autocompletado = "false";
         }
-        
+
         const conflicto = this._obtenerConflictoImeiRecibido(
             imeiInput.value,
             this.ventaEnEdicion,
@@ -2276,9 +2304,11 @@ class App {
             }
         }, 50);
 
-        document.getElementById('imeiTradeInBanner')?.classList.add('hidden');
-        document.getElementById('imeiCompraBanner')?.classList.add('hidden');
-        
+        // Ocultar todos los banners de validación de IMEI conocidos
+        ['imeiTradeInBanner', 'imeiDefectuosoBanner', 'imeiCompraBanner'].forEach(id => {
+            document.getElementById(id)?.classList.add('hidden');
+        });
+
         mostrarAlerta(`✅ Datos cargados desde inventario (${equipo.modelo} — Estado: ${equipo.estado})`, 'success');
         if (prefijo === 'equipo') this.calcularYMostrarTotal();
     }
@@ -2344,16 +2374,19 @@ class App {
         }
 
         let conflicto = this._obtenerConflictoImeiRecibido(imei, null, null);
-        if (conflicto) conflicto.isDefectuoso = true;
-
-        this._mostrarToastConflictoImeiRecibido(conflicto);
+        if (conflicto) {
+            conflicto.isDefectuoso = true;
+            this._mostrarToastConflictoImeiRecibido(conflicto);
+        } else {
+            this._ocultarBannerImeiDefectuoso();
+        }
     }
 
     /**
      * Oculta el banner de conflicto del IMEI defectuoso.
      */
     _ocultarBannerImeiDefectuoso() {
-        document.getElementById('imeiTradeInBanner')?.classList.add('hidden');
+        document.getElementById('imeiDefectuosoBanner')?.classList.add('hidden');
     }
 
     /**
@@ -2380,7 +2413,7 @@ class App {
                 return {
                     exito: false,
                     error: `El IMEI ${imeiActual} ya existe en el inventario como "${existente.estado}". ` +
-                           `No puede usarse como trade-in.`
+                        `No puede usarse como trade-in.`
                 };
             }
             const eqRecibido = new EquipoInventario({
@@ -2525,7 +2558,7 @@ class App {
             return {
                 exito: false,
                 error: `${erroresIngreso.length} trade-in(s) no se pudieron sincronizar: ` +
-                       erroresIngreso.map(e => `IMEI ${e.imei}: ${e.error}`).join('; ')
+                    erroresIngreso.map(e => `IMEI ${e.imei}: ${e.error}`).join('; ')
             };
         }
         return { exito: true };
@@ -2858,7 +2891,7 @@ class App {
         // Limpiar banners de conflicto de IMEI
         this._mostrarToastConflictoImeiRecibido(null);
         this._ocultarBannerImeiDefectuoso();
-        document.getElementById('imeiTradeInBanner')?.classList.add('hidden');
+
         document.getElementById('totalAbonosPreviosDisplay').textContent = '0.00';
 
         // Limpiar metadata de cierre de abonos (cargarAbonadoParaFinalizar)
@@ -4957,9 +4990,9 @@ class App {
                     btnWrap.className = 'btn-wrap mt-2';
                     btnWrap.innerHTML = `<button type="button" class="px-3 py-1 bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded text-xs font-semibold hover:bg-blue-300 transition">Autocompletar</button>`;
                     const innerDiv = banner.querySelector('.flex-1');
-                    if(innerDiv) innerDiv.appendChild(btnWrap);
+                    if (innerDiv) innerDiv.appendChild(btnWrap);
                 }
-                
+
                 const btn = btnWrap.querySelector('button');
                 const nuevoBtn = btn.cloneNode(true);
                 btn.parentNode.replaceChild(nuevoBtn, btn);
@@ -5495,13 +5528,13 @@ class App {
                     alert(`❌ El IMEI ${imei} ya está registrado en el inventario como DISPONIBLE.\n📱 ${existente.modelo} ${existente.gb} ${existente.color}\n\nNo se puede ingresar el mismo equipo dos veces.`);
                     return;
                 }
-                
+
                 // Si existe pero no está disponible, es un reingreso. Validar que no modifique los campos (anti-trampas DOM)
                 if (existente) {
                     const eqMod = (datos.datos.modelo || '').toLowerCase().replace('iphone ', '').trim();
                     const dbMod = (existente.modelo || '').toLowerCase().replace('iphone ', '').trim();
                     const eqCap = datos.datos.capacidad;
-                    
+
                     if (eqMod !== dbMod || eqCap !== existente.gb || datos.datos.color !== existente.color || parseInt(datos.datos.bateria) !== parseInt(existente.bateria)) {
                         alert(`❌ Los datos del equipo a ingresar no coinciden con los registrados originalmente para el IMEI ${imei}. No modifique los campos autocompletados.`);
                         return;

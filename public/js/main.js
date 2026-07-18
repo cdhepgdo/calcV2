@@ -311,7 +311,7 @@ class App {
         const imeiRecibidoInput = document.getElementById('equipoImeiR');
         if (imeiRecibidoInput) {
             imeiRecibidoInput.addEventListener('input', () => this._revalidarImeiRecibidoActual());
-            imeiRecibidoInput.addEventListener('change', () => this._revalidarImeiRecibidoActual());
+            //imeiRecibidoInput.addEventListener('change', () => this._revalidarImeiRecibidoActual());
         }
 
         // Validación de IMEI del equipo DEFECTUOSO en cambio por garantía

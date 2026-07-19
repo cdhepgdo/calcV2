@@ -319,7 +319,7 @@ class App {
         const defectuosoImeiInput = document.getElementById('defectuosoImei');
         if (defectuosoImeiInput) {
             defectuosoImeiInput.addEventListener('input', () => this._revalidarImeiDefectuosoActual());
-            defectuosoImeiInput.addEventListener('change', () => this._revalidarImeiDefectuosoActual());
+            //defectuosoImeiInput.addEventListener('change', () => this._revalidarImeiDefectuosoActual());
         }
 
         // Validación en tiempo real del IMEI del equipo a vender
@@ -4800,7 +4800,7 @@ class App {
             const input = document.getElementById(config.id);
             if (input) {
                 input.addEventListener('input', () => this._revalidarImeiMovimiento(config));
-                input.addEventListener('change', () => this._revalidarImeiMovimiento(config));
+                //input.addEventListener('change', () => this._revalidarImeiMovimiento(config));
             }
         });
     }

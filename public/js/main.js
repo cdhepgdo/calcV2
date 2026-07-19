@@ -1402,6 +1402,13 @@ class App {
         const datos = this.recopilarDatosCambioGarantia();
         const cambio = new CambioGarantia(datos);
 
+        // -- 0. VALIDAR DATOS ANTES DE CUALQUIER OPERACION --
+        const validacion = cambio.validar();
+        if (!validacion.valido) {
+            mostrarAlerta(validacion.errores.join('<br>'), 'error');
+            return;
+        }
+
         // ── 1. PRE-CHECK INVENTARIO (antes de cualquier escritura) ───────
         // Si el IMEI del equipo defectuoso ya existe en el inventario
         // (cualquier estado), abortar sin crear el movimiento.
@@ -2112,20 +2119,21 @@ class App {
      * @param {object|null} conflicto - Resultado de _obtenerConflictoImeiRecibido
      */
     _mostrarToastConflictoImeiRecibido(conflicto) {
-        const banner = document.getElementById('imeiTradeInBanner');
-        const iconoEl = document.getElementById('imeiTradeInBannerIcono');
-        const tituloEl = document.getElementById('imeiTradeInBannerTitulo');
-        const detalleEl = document.getElementById('imeiTradeInBannerDetalle');
-        const btnWrap = document.getElementById('imeiTradeInBannerBtnWrap');
-        const btn = document.getElementById('imeiTradeInBannerBtn');
-
-        if (!banner) return;
-
-        // Sin conflicto → ocultar
         if (!conflicto) {
-            banner.classList.add('hidden');
+            document.getElementById('imeiTradeInBanner')?.classList.add('hidden');
+            document.getElementById('imeiDefectuosoBanner')?.classList.add('hidden');
             return;
         }
+
+        const bannerId = conflicto.isDefectuoso ? 'imeiDefectuosoBanner' : 'imeiTradeInBanner';
+        const banner = document.getElementById(bannerId);
+        const iconoEl = document.getElementById(`${bannerId}Icono`);
+        const tituloEl = document.getElementById(`${bannerId}Titulo`);
+        const detalleEl = document.getElementById(`${bannerId}Detalle`);
+        const btnWrap = document.getElementById(`${bannerId}BtnWrap`);
+        const btn = document.getElementById(`${bannerId}Btn`);
+
+        if (!banner) return;
 
         // Definir apariencia y mensaje según el tipo
         let icono = '⚠️';
@@ -2288,6 +2296,7 @@ class App {
         }, 50);
 
         document.getElementById('imeiTradeInBanner')?.classList.add('hidden');
+        document.getElementById('imeiDefectuosoBanner')?.classList.add('hidden');
         document.getElementById('imeiCompraBanner')?.classList.add('hidden');
         
         mostrarAlerta(`✅ Datos cargados desde inventario (${equipo.modelo} — Estado: ${equipo.estado})`, 'success');
@@ -2364,7 +2373,7 @@ class App {
      * Oculta el banner de conflicto del IMEI defectuoso.
      */
     _ocultarBannerImeiDefectuoso() {
-        document.getElementById('imeiTradeInBanner')?.classList.add('hidden');
+        document.getElementById('imeiDefectuosoBanner')?.classList.add('hidden');
     }
 
     /**

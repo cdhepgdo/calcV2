@@ -319,7 +319,7 @@ class App {
         const defectuosoImeiInput = document.getElementById('defectuosoImei');
         if (defectuosoImeiInput) {
             defectuosoImeiInput.addEventListener('input', () => this._revalidarImeiDefectuosoActual());
-            //defectuosoImeiInput.addEventListener('change', () => this._revalidarImeiDefectuosoActual());
+            defectuosoImeiInput.addEventListener('change', () => this._revalidarImeiDefectuosoActual());
         }
 
         // Validación en tiempo real del IMEI del equipo a vender

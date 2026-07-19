@@ -69,6 +69,10 @@ export function initModoConsulta({
     let cacheEquipos = [];           // último resultado de obtenerTodos()
     let modalTrasladoAbierto = null; // { equipo, resolver }
 
+    // ── Estado de ordenamiento ──
+    let ordenColumna = 'fecha';
+    let ordenAscendente = false;
+
     // ── Helpers ──
     function formatFechaCorta(iso) {
         if (!iso) return '—';
@@ -148,6 +152,34 @@ export function initModoConsulta({
             if (totalEl) totalEl.textContent = '0';
             return;
         }
+
+        // ── Ordenamiento ──
+        cacheEquipos.sort((a, b) => {
+            let valA, valB;
+            switch (ordenColumna) {
+                case 'fecha':
+                    valA = new Date(a.createdAt || 0).getTime();
+                    valB = new Date(b.createdAt || 0).getTime();
+                    break;
+                case 'modelo':
+                    valA = (a.modelo || '').toLowerCase();
+                    valB = (b.modelo || '').toLowerCase();
+                    break;
+                case 'gb':
+                    valA = parseInt(a.gb) || 0;
+                    valB = parseInt(b.gb) || 0;
+                    break;
+                case 'bateria':
+                    valA = parseInt(a.bateria) || 0;
+                    valB = parseInt(b.bateria) || 0;
+                    break;
+                default:
+                    return 0;
+            }
+            if (valA < valB) return ordenAscendente ? -1 : 1;
+            if (valA > valB) return ordenAscendente ? 1 : -1;
+            return 0;
+        });
 
         // Paginación
         const totalPaginas = Math.ceil(cacheEquipos.length / FILAS_POR_PAGINA);
@@ -646,6 +678,25 @@ export function initModoConsulta({
 
         // Botón CSV
         document.getElementById('consultaBtnExportar')?.addEventListener('click', exportarCSV);
+
+        // Cabeceras de tabla (Ordenamiento)
+        document.querySelectorAll('th[data-ordenar]').forEach(th => {
+            th.addEventListener('click', () => {
+                const columna = th.dataset.ordenar;
+                if (ordenColumna === columna) {
+                    ordenAscendente = !ordenAscendente;
+                } else {
+                    ordenColumna = columna;
+                    ordenAscendente = false; 
+                }
+                
+                // Actualizar visualmente los íconos (flechas ↑ o ↓)
+                document.querySelectorAll('th[data-ordenar] .orden-icono').forEach(icon => icon.textContent = '');
+                th.querySelector('.orden-icono').textContent = ordenAscendente ? ' ↑' : ' ↓';
+                
+                renderTabla();
+            });
+        });
 
         // Paginador (delegación)
         document.getElementById('consultaPaginador')?.addEventListener('click', (e) => {

@@ -1,3 +1,5 @@
+import { DESTINOS } from '../../config/constants.js';
+
 export function initModoSalida({
     inventarioService,
     movimientoService,
@@ -6,6 +8,25 @@ export function initModoSalida({
     onInventarioCargado
 }) {
     let equiposSeleccionadosSalida = [];
+
+    // Inicializar selector de destinos
+    const selectDestino = document.getElementById('salidaDestinoSelect');
+    const inputDestinoOtro = document.getElementById('salidaDestinoOtro');
+    
+    if (selectDestino) {
+        selectDestino.innerHTML = '<option value="">Seleccione destino...</option>' + 
+            DESTINOS.map(d => `<option value="${d}">${d}</option>`).join('');
+            
+        selectDestino.addEventListener('change', (e) => {
+            if (e.target.value === 'Otro') {
+                inputDestinoOtro.classList.remove('hidden');
+                inputDestinoOtro.focus();
+            } else {
+                inputDestinoOtro.classList.add('hidden');
+                inputDestinoOtro.value = '';
+            }
+        });
+    }
 
     function buscarEquiposSalida(query) {
         if (!onInventarioCargado()) return [];
@@ -172,7 +193,15 @@ export function initModoSalida({
             return;
         }
 
-        const destino = document.getElementById('salidaDestino').value.trim();
+        let destino = '';
+        if (selectDestino) {
+            destino = selectDestino.value === 'Otro' ? inputDestinoOtro.value.trim() : selectDestino.value;
+        } else {
+            // Fallback por si acaso
+            const oldInput = document.getElementById('salidaDestino');
+            if (oldInput) destino = oldInput.value.trim();
+        }
+        
         const responsable = document.getElementById('salidaResponsable').value.trim();
 
         if (!destino || !responsable) {
@@ -222,7 +251,14 @@ export function initModoSalida({
 
             equiposSeleccionadosSalida = [];
             actualizarListaSeleccionadosSalida();
-            document.getElementById('salidaDestino').value = '';
+            if (selectDestino) {
+                selectDestino.value = '';
+                inputDestinoOtro.classList.add('hidden');
+                inputDestinoOtro.value = '';
+            }
+            const oldInput = document.getElementById('salidaDestino');
+            if (oldInput) oldInput.value = '';
+            
             document.getElementById('salidaResponsable').value = '';
             document.getElementById('salidaNotas').value = '';
             document.getElementById('salidaBuscadorInput').value = '';

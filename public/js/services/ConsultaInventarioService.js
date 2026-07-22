@@ -263,11 +263,8 @@ class ConsultaInventarioService {
         }
         if (imei) {
             // FIX A2: normalizar espacios/guiones en el filtro y en el campo.
-            // Si el operador guardó un IMEI como "35 1234 5678 90123 4" (con
-            // espacios), el prefijo "35" no lo encontraba. La validación
-            // exige length >= 15 pero no normaliza — el fix va en el filtro.
-            const imeiNorm = String(imei).replace(/[\s-]/g, '');
-            todos = todos.filter(e => String(e.imei || '').replace(/[\s-]/g, '').startsWith(imeiNorm));
+            const imeiNorm = String(imei).replace(/[\s-]/g, '').toLowerCase();
+            todos = todos.filter(e => String(e.imei || '').replace(/[\s-]/g, '').toLowerCase().includes(imeiNorm));
         }
         if (fechaDesde) {
             const desde = new Date(fechaDesde + 'T00:00:00');

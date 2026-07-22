@@ -91,8 +91,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="text-themed-muted text-xs font-medium block mb-1">Destino (Sede o Cliente)</label>
-                        <input type="text" id="salidaDestino" placeholder="Ej: Sede Cumbayá"
-                            class="cell-input rounded-lg py-2 px-3 text-sm w-full">
+                        <select id="salidaDestinoSelect" class="cell-input rounded-lg py-2 px-3 text-sm w-full mb-2">
+                            <option value="">Seleccione destino...</option>
+                        </select>
+                        <input type="text" id="salidaDestinoOtro" placeholder="Especificar otro destino..."
+                            class="cell-input rounded-lg py-2 px-3 text-sm w-full hidden">
                     </div>
                     <div>
                         <label class="text-themed-muted text-xs font-medium block mb-1">Persona Responsable</label>
@@ -241,8 +244,8 @@
                         </select>
                     </div>
                     <div class="consulta-filtro-grupo">
-                        <label for="consultaFiltroImei">IMEI (prefijo)</label>
-                        <input type="text" id="consultaFiltroImei" placeholder="35…" autocomplete="off">
+                        <label for="consultaFiltroImei">IMEI (búsqueda parcial)</label>
+                        <input type="text" id="consultaFiltroImei" placeholder="Ej: 5754 o 35…" autocomplete="off">
                     </div>
                     <div class="consulta-filtro-grupo">
                         <label for="consultaFiltroFechaDesde">Desde</label>

@@ -111,6 +111,22 @@ class InventarioService {
     }
 
     /**
+     * Devuelve los equipos físicamente presentes en tienda:
+     *   - 'disponible' → stock normal
+     *   - 'abonado'    → reservado por un cliente, pero sigue en tienda
+     *   - 'defectuoso' → recibido por garantía, en tienda hasta ser reparado o desechado
+     *
+     * Usar este método para conteos de stock físico y banners de "sin stock".
+     */
+    obtenerEnTienda() {
+        return this._cacheInventario.filter(e =>
+            e.estado === 'disponible' ||
+            e.estado === 'abonado' ||
+            e.estado === 'defectuoso'
+        );
+    }
+
+    /**
      * Devuelve los equipos en estado 'abonado'. Usado para badges morados
      * y para la vista "Cierre de abonos" en cierree.
      */
@@ -180,7 +196,8 @@ class InventarioService {
                 if (eq.imei && eq.imei.length >= 15) {
                     const existente = this.buscarPorImei(eq.imei);
                     if (existente) {
-                        if (!permitirReingreso || existente.estado === 'disponible') {
+                        // 'disponible' y 'abonado' están físicamente en tienda → no se pueden reingresar
+                        if (!permitirReingreso || existente.estado === 'disponible' || existente.estado === 'abonado') {
                             imeisDuplicados.push({
                                 fila: index + 1,
                                 imei: eq.imei,
@@ -241,7 +258,8 @@ class InventarioService {
             // Verificar si ya existe en el inventario
             const existente = this.buscarPorImei(equipo.imei);
             if (existente) {
-                if (!permitirReingreso || existente.estado === 'disponible') {
+                // 'disponible' y 'abonado' están físicamente en tienda → no se pueden reingresar
+                if (!permitirReingreso || existente.estado === 'disponible' || existente.estado === 'abonado') {
                     const errorMsg = `❌ El equipo con IMEI ${equipo.imei} ya existe en el inventario (estado: ${existente.estado})`;
                     return { exito: false, error: errorMsg };
                 }

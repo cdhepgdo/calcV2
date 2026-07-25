@@ -1409,10 +1409,11 @@ class App {
         if (imeiDefectuoso) {
             const existente = inventarioService.buscarPorImei(imeiDefectuoso);
             if (existente) {
-                if (existente.estado === 'disponible') {
+                if (existente.estado === 'disponible' || existente.estado === 'abonado') {
+                    const estadoLabel = existente.estado === 'disponible' ? 'disponible' : 'en tienda con abono activo';
                     mostrarAlerta(
-                        `❌ El IMEI ${imeiDefectuoso} del equipo defectuoso ya existe en el inventario ` +
-                        `como disponible. No se puede registrar como cambio por garantía.`,
+                        `❌ El IMEI ${imeiDefectuoso} del equipo defectuoso está registrado en inventario como ${estadoLabel}. ` +
+                        `No se puede registrar como cambio por garantía.`,
                         'error'
                     );
                     return;
@@ -1551,7 +1552,7 @@ class App {
                     }
 
                     const conflicto = this._obtenerConflictoImeiRecibido(imeiR, this.ventaEnEdicion, imeiTradeInOriginal);
-                    if (conflicto && conflicto.tipo !== 'autocompletar-reingreso') {
+                    if (conflicto && conflicto.tipo !== 'autocompletar-reingreso' && conflicto.tipo !== 'autocompletar-vendido') {
                         let msgError = '';
                         const eq = conflicto.equipo;
                         switch (conflicto.tipo) {
@@ -1576,16 +1577,16 @@ class App {
                         return;
                     }
 
-                    // Validación de seguridad para reingresos (evitar alteración del DOM)
-                    if (conflicto && conflicto.tipo === 'autocompletar-reingreso') {
+                    // Validación de seguridad para reingresos y ediciones (evitar alteración del DOM)
+                    if (conflicto && (conflicto.tipo === 'autocompletar-reingreso' || conflicto.tipo === 'autocompletar-vendido')) {
                         const dbEq = conflicto.equipo;
-                        const eqMod = (eq.modelo || '').toLowerCase().replace('iphone ', '').trim();
+                        const rMod = (r.modelo || '').toLowerCase().replace('iphone ', '').trim();
                         const dbMod = (dbEq.modelo || '').toLowerCase().replace('iphone ', '').trim();
                         
                         // En la vista de venta se usa 'capacidad' en lugar de 'gb', pero probemos ambos
-                        const eqCap = eq.capacidad || eq.gb;
+                        const rCap = r.capacidad || r.gb;
                         
-                        if (eqMod !== dbMod || eqCap !== dbEq.gb || eq.color !== dbEq.color || parseInt(eq.bateria) !== parseInt(dbEq.bateria)) {
+                        if (rMod !== dbMod || rCap !== dbEq.gb || r.color !== dbEq.color || parseInt(r.bateria) !== parseInt(dbEq.bateria)) {
                             submitBtn.disabled = false;
                             submitBtn.innerHTML = textoOriginal;
                             mostrarAlerta(`✕ Equipo recibido #${i + 1}: Los datos del IMEI ${imeiR} no coinciden con los del equipo original. No modifique los campos autocompletados.`, 'error');
@@ -2083,10 +2084,12 @@ class App {
             if (estado === 'disponible') {
                 return { tipo: 'bloqueado-disponible', equipo: equipoEnInventario };
             }
-            // Cualquier otro estado permite reingreso
+            // 'abonado' = reservado por cliente, pero sigue en tienda física → no puede reingresar
+            if (estado === 'abonado') {
+                return { tipo: 'bloqueado-abonado', equipo: equipoEnInventario };
+            }
+            // Cualquier otro estado (vendido, transferido, defectuoso, eliminado) → permitir reingreso con autocompletar
             return { tipo: 'autocompletar-reingreso', equipo: equipoEnInventario };
-            // Cualquier otro estado desconocido → bloquear por precaución
-            return { tipo: 'bloqueado-otro-estado', equipo: equipoEnInventario };
         }
 
         // 2. Buscar en otras ventas que ya lo usen como trade-in
@@ -2142,6 +2145,14 @@ class App {
                 detalle = `📱 iPhone ${eq.modelo} ${eq.gb}GB — ${eq.color} — ` +
                     `<span class="${batColor}">🔋 ${eq.bateria}%</span> (IMEI: ${eq.imei}). ` +
                     `No puede recibirse como parte de pago: todavía es stock disponible.`;
+                break;
+            }
+            case 'bloqueado-abonado': {
+                const batColor = eq.bateria < 50 ? 'text-red-600 dark:text-red-400' : eq.bateria < 80 ? 'text-amber-600 dark:text-amber-400' : 'text-green-700 dark:text-green-400';
+                titulo = 'Este equipo está en tienda — reservado con abono';
+                detalle = `📱 iPhone ${eq.modelo} ${eq.gb}GB — ${eq.color} — ` +
+                    `<span class="${batColor}">🔋 ${eq.bateria}%</span> (IMEI: ${eq.imei}). ` +
+                    `Está físicamente en tienda con un abono de cliente activo. No puede recibirse como parte de pago.`;
                 break;
             }
             case 'bloqueado-defectuoso': {
@@ -2958,10 +2969,14 @@ class App {
     _actualizarBadgeStock() {
         const badge = document.getElementById('invStockBadge');
         if (!badge) return;
-        const n = inventarioService.obtenerDisponibles().length;
+        const enTienda = inventarioService.obtenerEnTienda();
+        const n = enTienda.length;
+        const nDisp = inventarioService.obtenerDisponibles().length;
+        // Mostrar total en tienda; entre paréntesis los disponibles si hay abonados/defectuosos
+        const labelExtra = n !== nDisp ? ` (${nDisp} libres)` : '';
         badge.textContent = n === 0
             ? 'Sin stock'
-            : `${n} equipo${n === 1 ? '' : 's'} disponible${n === 1 ? '' : 's'}`;
+            : `${n} equipo${n === 1 ? '' : 's'} en tienda${labelExtra}`;
         badge.className = n === 0
             ? 'text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-300 px-3 py-1 rounded-full'
             : 'text-xs font-bold bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 px-3 py-1 rounded-full';
@@ -3658,8 +3673,9 @@ class App {
     _actualizarBannerInventarioVacio() {
         const banner = document.getElementById('invVacioBanner');
         if (!banner) return;
-        const disponibles = inventarioService.obtenerDisponibles();
-        if (disponibles.length === 0) {
+        // El banner de "sin stock" se basa en el stock físico total en tienda
+        const enTienda = inventarioService.obtenerEnTienda();
+        if (enTienda.length === 0) {
             banner.classList.remove('hidden');
         } else {
             banner.classList.add('hidden');
@@ -5489,14 +5505,16 @@ class App {
                     return;
                 }
 
-                // Validación 2: No existe ya como disponible
+                // Validación 2: No existe ya como disponible o abonado (están físicamente en tienda)
                 const existente = inventarioService.buscarPorImei(imei);
-                if (existente && existente.estado === 'disponible') {
-                    alert(`❌ El IMEI ${imei} ya está registrado en el inventario como DISPONIBLE.\n📱 ${existente.modelo} ${existente.gb} ${existente.color}\n\nNo se puede ingresar el mismo equipo dos veces.`);
+                if (existente && (existente.estado === 'disponible' || existente.estado === 'abonado')) {
+                    const estadoLabel = existente.estado === 'disponible' ? 'DISPONIBLE' : 'en tienda con ABONO activo';
+                    alert(`❌ El IMEI ${imei} ya está registrado en el inventario como ${estadoLabel}.\n📱 ${existente.modelo} ${existente.gb} ${existente.color}\n\nNo se puede ingresar el mismo equipo dos veces.`);
                     return;
                 }
                 
-                // Si existe pero no está disponible, es un reingreso. Validar que no modifique los campos (anti-trampas DOM)
+                // Si existe con otro estado (vendido, transferido, defectuoso), es un reingreso.
+                // Validar que no se hayan alterado los campos del formulario (anti-trampas DOM)
                 if (existente) {
                     const eqMod = (datos.datos.modelo || '').toLowerCase().replace('iphone ', '').trim();
                     const dbMod = (existente.modelo || '').toLowerCase().replace('iphone ', '').trim();

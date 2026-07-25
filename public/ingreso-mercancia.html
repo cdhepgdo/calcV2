@@ -75,9 +75,14 @@
                     <span class="sede-badge" id="badgeSede">📍 Cargando sede...</span>
                     <div class="text-themed-secondary text-sm font-medium" id="fechaHoy"></div>
                 </div>
-                <button id="btnImprimirLote" class="btn-accion btn-accion--neutro text-sm flex items-center gap-2">
-                    🖨️ Imprimir Nota
-                </button>
+                <div class="flex gap-2">
+                    <button id="btnHistorialLotes" class="btn-accion bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-themed-secondary text-sm flex items-center gap-2 transition-colors border border-gray-300 dark:border-gray-600 shadow-sm" title="Ver historial de lotes para reimprimir">
+                        🗂️ Historial Lotes
+                    </button>
+                    <button id="btnImprimirLote" class="btn-accion btn-accion--neutro text-sm flex items-center gap-2">
+                        🖨️ Imprimir Nota
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -91,8 +96,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="text-themed-muted text-xs font-medium block mb-1">Destino (Sede o Cliente)</label>
-                        <input type="text" id="salidaDestino" placeholder="Ej: Sede Cumbayá"
-                            class="cell-input rounded-lg py-2 px-3 text-sm w-full">
+                        <select id="salidaDestinoSelect" class="cell-input rounded-lg py-2 px-3 text-sm w-full mb-2">
+                            <option value="">Seleccione destino...</option>
+                        </select>
+                        <input type="text" id="salidaDestinoOtro" placeholder="Especificar otro destino..."
+                            class="cell-input rounded-lg py-2 px-3 text-sm w-full hidden">
                     </div>
                     <div>
                         <label class="text-themed-muted text-xs font-medium block mb-1">Persona Responsable</label>
@@ -241,8 +249,8 @@
                         </select>
                     </div>
                     <div class="consulta-filtro-grupo">
-                        <label for="consultaFiltroImei">IMEI (prefijo)</label>
-                        <input type="text" id="consultaFiltroImei" placeholder="35…" autocomplete="off">
+                        <label for="consultaFiltroImei">IMEI (búsqueda parcial)</label>
+                        <input type="text" id="consultaFiltroImei" placeholder="Ej: 5754 o 35…" autocomplete="off">
                     </div>
                     <div class="consulta-filtro-grupo">
                         <label for="consultaFiltroFechaDesde">Desde</label>
@@ -278,12 +286,12 @@
                         <thead>
                             <tr>
                                 <th style="width:50px">#</th>
-                                <th>Fecha</th>
+                                <th class="cursor-pointer hover:text-blue-500 transition-colors" data-ordenar="fecha">Fecha <span class="orden-icono"> ↓</span></th>
                                 <th>Sede</th>
-                                <th>Modelo</th>
-                                <th>GB</th>
+                                <th class="cursor-pointer hover:text-blue-500 transition-colors" data-ordenar="modelo">Modelo <span class="orden-icono"></span></th>
+                                <th class="cursor-pointer hover:text-blue-500 transition-colors" data-ordenar="gb">GB <span class="orden-icono"></span></th>
                                 <th>Color</th>
-                                <th>Bat%</th>
+                                <th class="cursor-pointer hover:text-blue-500 transition-colors" data-ordenar="bateria">Bat% <span class="orden-icono"></span></th>
                                 <th>IMEI</th>
                                 <th>Estado</th>
                                 <th>Detalles</th>

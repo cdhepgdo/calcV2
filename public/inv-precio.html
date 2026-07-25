@@ -207,7 +207,10 @@
                 if (!capMatches.length) continue;
 
                 const last = capMatches[capMatches.length - 1];
-                const tail = line.slice(last.index + last[0].length);
+                let tail = line.slice(last.index + last[0].length);
+
+                // NUEVO: Remover todo el texto entre paréntesis del tail para no contar detalles como baterías
+                tail = tail.replace(/\([^)]*\)/g, ' ');
 
                 const nums = [...tail.matchAll(/(\d{1,3})(?=\D|$)/g)].map(m => parseInt(m[1], 10));
                 let added = 0;

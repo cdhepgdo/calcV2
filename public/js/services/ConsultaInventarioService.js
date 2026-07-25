@@ -2,7 +2,7 @@
  * ConsultaInventarioService
  *
  * Servicio paralelo a InventarioService que mantiene un cache consolidado
- * del inventario de TODAS las sedes, escuchado en tiempo real via onSnapshot.
+ * del inventario de TODAS las sedes, escuchado en tiempo real via onSnapshot. 
  *
  * Por qué existe como singleton separado (no extiende InventarioService):
  *   - InventarioService es mono-sede por diseño (asumido por Ingreso, Salida,

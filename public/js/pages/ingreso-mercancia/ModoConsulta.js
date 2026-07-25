@@ -651,6 +651,126 @@ export function initModoConsulta({
         showToast(`📥 Exportadas ${cacheEquipos.length} filas`, 'success');
     }
 
+    function exportarWhatsApp() {
+        if (cacheEquipos.length === 0) {
+            showToast('⚠️ No hay equipos para exportar', 'error');
+            return;
+        }
+
+        // 1. Agrupar equipos
+        const grupos = new Map();
+        
+        cacheEquipos.forEach(eq => {
+            const mod = (eq.modelo || '').toLowerCase().trim();
+            const match = mod.match(/(\d+)/);
+            const num = match ? match[1] : '';
+            
+            let grupo = 'Otros';
+            
+            if (mod.includes('plus')) {
+                grupo = num ? `${num} Plus` : 'Plus';
+            } else if (mod.includes('pro') || mod.includes('pm') || mod.includes('max')) {
+                grupo = num ? `${num}pro/ ${num}pm` : 'Pro / Pro Max';
+            } else if (mod.includes('mini')) {
+                grupo = num ? `${num} Mini` : 'Mini';
+            } else if (mod.includes('se') || mod.match(/\be\b/)) {
+                grupo = 'SE / E';
+            } else if (num) {
+                grupo = num;
+            } else if (mod.includes('xr')) {
+                grupo = 'XR';
+            } else if (mod.includes('xs')) {
+                grupo = 'XS';
+            } else if (mod.includes('x')) {
+                grupo = 'X';
+            }
+            
+            if (!grupos.has(grupo)) {
+                grupos.set(grupo, []);
+            }
+            grupos.get(grupo).push(eq);
+        });
+
+        // 2. Ordenar los grupos por nombre
+        const gruposOrdenados = Array.from(grupos.keys()).sort((a, b) => {
+            const numA = parseInt(a.match(/(\d+)/)?.[1] || 0);
+            const numB = parseInt(b.match(/(\d+)/)?.[1] || 0);
+            if (numA !== numB) return numA - numB; // Ascendente: 11, 12, 13
+            
+            const getPriority = (g) => {
+                if (g.includes('pro') || g.includes('pm')) return 4;
+                if (g.includes('Plus')) return 3;
+                if (g.includes('Mini')) return 2;
+                return 1; // Base
+            };
+            return getPriority(a) - getPriority(b);
+        });
+
+        // 3. Construir el texto
+        let texto = '';
+        
+        gruposOrdenados.forEach(grupo => {
+            const eqGrupo = grupos.get(grupo);
+            
+            // Separador de grupo
+            texto += `///////////////// ${grupo} //////////////////////////\n`;
+            
+            // Sub-agrupar por modeloCorto, gb y color
+            const identicos = new Map();
+            
+            eqGrupo.forEach(eq => {
+                let modCorto = (eq.modelo || '').toLowerCase();
+                modCorto = modCorto.replace('iphone', '').trim();
+                modCorto = modCorto.replace('pro max', 'pm').replace('promax', 'pm');
+                modCorto = modCorto.replace(/\s+/g, '');
+                
+                const gb = (eq.gb || '').toLowerCase();
+                const colorNorm = (eq.color || '').toLowerCase().trim();
+                
+                const key = `${modCorto}|${gb}|${colorNorm}`;
+                if (!identicos.has(key)) {
+                    identicos.set(key, { 
+                        modCorto, 
+                        gb, 
+                        colorDisplay: eq.color || '', 
+                        equipos: [] 
+                    });
+                }
+                identicos.get(key).equipos.push(eq);
+            });
+            
+            // Ordenar los agrupados por GB
+            const listaAgrupada = Array.from(identicos.values()).sort((a, b) => (parseInt(a.gb) || 0) - (parseInt(b.gb) || 0));
+            
+            listaAgrupada.forEach(item => {
+                // Obtener baterías y detalles acoplados (ej: 80(rayon)/83/100(sellado))
+                const bateriasYDetalles = item.equipos
+                    .map(e => ({
+                        batNum: parseInt(e.bateria) || 0,
+                        batStr: e.bateria || '0',
+                        det: (e.detalles || '').trim()
+                    }))
+                    .sort((a, b) => a.batNum - b.batNum)
+                    .map(e => {
+                        return e.det ? `${e.batStr}(${e.det})` : e.batStr;
+                    })
+                    .join('/');
+                
+                texto += `${item.modCorto} ${item.gb} ${item.colorDisplay} ${bateriasYDetalles}\n`;
+            });
+            
+            texto += '\n'; // Salto de línea extra entre grupos
+        });
+
+        // 4. Copiar al portapapeles
+        navigator.clipboard.writeText(texto.trim())
+            .then(() => showToast('✅ Copiado al portapapeles', 'success'))
+            .catch(err => {
+                console.error('Error al copiar:', err);
+                showToast('❌ Error al copiar al portapapeles', 'error');
+            });
+    }
+
     // ── Bind de eventos (delegación en la sección) ──
     function wireEventos() {
         // Filtros: cualquier cambio → reset página + re-render
@@ -678,6 +798,7 @@ export function initModoConsulta({
 
         // Botón CSV
         document.getElementById('consultaBtnExportar')?.addEventListener('click', exportarCSV);
+        document.getElementById('consultaBtnExportarWhatsApp')?.addEventListener('click', exportarWhatsApp);
 
         // Cabeceras de tabla (Ordenamiento)
         document.querySelectorAll('th[data-ordenar]').forEach(th => {

@@ -291,6 +291,7 @@ export function initModoConsulta({
         const selEstado = document.getElementById('consultaFiltroEstado');
         if (selEstado) {
             selEstado.innerHTML = '<option value="">Todos los estados</option>' +
+                '<option value="en-tienda">En Tienda (Disp+Abon+Defect)</option>' +
                 ESTADOS_EQUIPO.map(e => `<option value="${e}">${e}</option>`).join('');
         }
 
@@ -739,8 +740,34 @@ export function initModoConsulta({
                 identicos.get(key).equipos.push(eq);
             });
             
-            // Ordenar los agrupados por GB
-            const listaAgrupada = Array.from(identicos.values()).sort((a, b) => (parseInt(a.gb) || 0) - (parseInt(b.gb) || 0));
+            // Funciones auxiliares para ordenamiento avanzado
+            const getModelPriority = (mod) => {
+                const m = (mod || '').toLowerCase();
+                if (m.includes('pm') || m.includes('promax') || m.includes('pro max')) return 5;
+                if (m.includes('pro')) return 4;
+                if (m.includes('plus')) return 3;
+                if (m.includes('mini')) return 2;
+                return 1; // Normal
+            };
+
+            const getGBValue = (gbStr) => {
+                const s = (gbStr || '').toLowerCase();
+                if (s.includes('tb')) return (parseInt(s) || 0) * 1024;
+                return parseInt(s) || 0;
+            };
+
+            // Ordenar por Modelo (Prioridad: Normal -> Mini -> Plus -> Pro -> PM) -> Almacenamiento (GB) -> Color
+            const listaAgrupada = Array.from(identicos.values()).sort((a, b) => {
+                const prioA = getModelPriority(a.modCorto);
+                const prioB = getModelPriority(b.modCorto);
+                if (prioA !== prioB) return prioA - prioB;
+
+                const gbA = getGBValue(a.gb);
+                const gbB = getGBValue(b.gb);
+                if (gbA !== gbB) return gbA - gbB;
+
+                return (a.colorDisplay || '').localeCompare(b.colorDisplay || '');
+            });
             
             listaAgrupada.forEach(item => {
                 // Obtener baterías y detalles acoplados (ej: 80(rayon)/83/100(sellado))

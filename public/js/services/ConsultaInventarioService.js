@@ -249,7 +249,14 @@ class ConsultaInventarioService {
 
         // Aplicar filtros
         if (estado) {
-            todos = todos.filter(e => e.estado === estado);
+            if (estado === 'en-tienda') {
+                todos = todos.filter(e => {
+                    const est = (e.estado || '').toLowerCase();
+                    return est === 'disponible' || est === 'abonado' || est === 'defectuoso';
+                });
+            } else {
+                todos = todos.filter(e => e.estado === estado);
+            }
         }
         if (modelo) {
             const m = modelo.toLowerCase();

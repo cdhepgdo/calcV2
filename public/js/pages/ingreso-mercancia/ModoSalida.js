@@ -220,10 +220,13 @@ export function initModoSalida({
                 inventarioService.obtenerDisponibles().find(e => e.id === id)
             ).filter(Boolean);
 
+            const loteSalidaId = `LOTE-OUT-${new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19)}`;
+
             const res = await inventarioService.procesarSalidaLote(equiposSeleccionadosSalida, 'transferido', {
                 destino,
                 responsable,
                 notasTraslado: notas,
+                loteSalidaId,
                 fechaTransferencia: new Date().toISOString(),
                 sedeOrigen: localStorage.getItem('usuario_sede_id') || 'sede_1'
             });

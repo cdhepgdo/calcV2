@@ -124,7 +124,14 @@ export function initNotasImpresion({
     }
 
     function generarNotaSalidaHTML(equiposPredefinidos = null, destinoPred = null, responsablePred = null, notasPred = null, fechaPred = null) {
-        const destino = escapeHTML(destinoPred !== null ? destinoPred : document.getElementById('salidaDestino')?.value);
+        const destinoFallback = (() => {
+            const sel = document.getElementById('salidaDestinoSelect');
+            if (!sel) return '';
+            return sel.value === 'Otro'
+                ? (document.getElementById('salidaDestinoOtro')?.value || '')
+                : sel.value;
+        })();
+        const destino = escapeHTML(destinoPred !== null ? destinoPred : destinoFallback);
         const responsable = escapeHTML(responsablePred !== null ? responsablePred : document.getElementById('salidaResponsable')?.value);
         const notas = escapeHTML(notasPred !== null ? notasPred : document.getElementById('salidaNotas')?.value);
         const sede = escapeHTML(localStorage.getItem('usuario_sede_id') || 'sede_1');

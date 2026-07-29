@@ -37,7 +37,18 @@ export class EquipoInventario {
         abonoInicialId = null,
         // Sello ISO de cuándo se cerró el ciclo (abonado → vendido).
         // null mientras sigue en 'abonado' o 'disponible'.
-        fechaFinalizacion = null
+        fechaFinalizacion = null,
+        // ── Campos de salida / traslado ──────────────────────────────────────
+        // Estos campos se escriben en Firestore vía procesarSalidaLote() y
+        // deben sobrevivir el round-trip fromJSON para que el historial de
+        // salidas pueda agrupar equipos por loteSalidaId.
+        loteSalidaId = null,
+        fechaTransferencia = null,
+        destino = null,
+        responsable = null,
+        notasTraslado = null,
+        sedeOrigen = null,
+        fechaActualizacion = null
     }) {
         this.id = id;
         this.tipoItem = tipoItem;
@@ -58,6 +69,14 @@ export class EquipoInventario {
         this.historialAbonos = Array.isArray(historialAbonos) ? historialAbonos : [];
         this.abonoInicialId = abonoInicialId || null;
         this.fechaFinalizacion = fechaFinalizacion || null;
+        // Campos de salida
+        this.loteSalidaId = loteSalidaId || null;
+        this.fechaTransferencia = fechaTransferencia || null;
+        this.destino = destino || null;
+        this.responsable = responsable || null;
+        this.notasTraslado = notasTraslado || null;
+        this.sedeOrigen = sedeOrigen || null;
+        this.fechaActualizacion = fechaActualizacion || null;
     }
 
     validar() {
@@ -98,7 +117,16 @@ export class EquipoInventario {
             // tener que cruzar colecciones.
             historialAbonos: this.historialAbonos || [],
             abonoInicialId: this.abonoInicialId || null,
-            fechaFinalizacion: this.fechaFinalizacion || null
+            fechaFinalizacion: this.fechaFinalizacion || null,
+            // Campos de salida — persistir para que el historial sobreviva
+            // recargas y funcione desde cache local (IndexedDB).
+            loteSalidaId: this.loteSalidaId || null,
+            fechaTransferencia: this.fechaTransferencia || null,
+            destino: this.destino || null,
+            responsable: this.responsable || null,
+            notasTraslado: this.notasTraslado || null,
+            sedeOrigen: this.sedeOrigen || null,
+            fechaActualizacion: this.fechaActualizacion || null
         };
         // FIX M1: persistir metadatos de sede cuando están presentes (no-enumerables
         // en la instancia). ConsultaInventarioService los setea tras el snapshot;

@@ -5,8 +5,8 @@
  * Escenarios agrupados por "describe()" — cada grupo = una regla de negocio.
  *
  * Cómo ejecutar:
- *   npm test              → corre una vez y termina
- *   npm run test:watch    → corre y se queda escuchando cambios
+ *   pnpm test             → corre una vez y termina
+ *   pnpm test:watch      → corre y se queda escuchando cambios
  *
  * Cómo leer un test:
  *   describe('grupo', ...)  → "estoy probando este grupo de reglas"

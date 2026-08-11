@@ -160,10 +160,20 @@ class AccesorioValidator {
         const modelos = [];
 
         filas.forEach((fila, idx) => {
-            const modelo = fila.querySelector(accesorio.campoModelo)?.value || '';
+            const select = fila.querySelector(accesorio.campoModelo);
+            const valor = select?.value || '';
             const cantidad = parseInt(fila.querySelector(accesorio.campoCant)?.value, 10) || 0;
-            if (modelo && cantidad > 0) {
-                modelos.push({ modelo, cantidad });
+            
+            if (valor && cantidad > 0) {
+                const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                const esId = UUID_REGEX.test(valor) || valor.startsWith('acc-');
+                const textoPlano = select.options[select.selectedIndex]?.text.split(' (')[0] || valor;
+                
+                modelos.push({ 
+                    accesorioId: esId ? valor : null, 
+                    modelo: esId ? textoPlano : valor, 
+                    cantidad 
+                });
             }
         });
 
@@ -197,11 +207,22 @@ class AccesorioValidator {
         const modelos = [];
 
         filas.forEach(fila => {
-            const modelo = fila.querySelector(accesorio.campoModelo)?.value || '';
+            const select = fila.querySelector(accesorio.campoModelo);
+            const valor = select?.value || '';
             const color  = fila.querySelector(accesorio.campoColor)?.value || '';
             const cantidad = parseInt(fila.querySelector(accesorio.campoCant)?.value, 10) || 0;
-            if (modelo && color && cantidad > 0) {
-                modelos.push({ modelo, color, cantidad });
+            
+            if (valor && color && cantidad > 0) {
+                const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                const esId = UUID_REGEX.test(valor) || valor.startsWith('acc-');
+                const textoPlano = select.options[select.selectedIndex]?.text.split(' (')[0] || valor;
+
+                modelos.push({ 
+                    accesorioId: esId ? valor : null, 
+                    modelo: esId ? textoPlano : valor, 
+                    color, 
+                    cantidad 
+                });
             }
         });
 

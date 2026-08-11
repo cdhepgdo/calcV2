@@ -2,6 +2,7 @@ import { authService } from '../../services/AuthService.js';
 import { inventarioService } from '../../services/InventarioService.js';
 import { movimientoService } from '../../services/MovimientoService.js';
 import { consultaInventarioService } from '../../services/ConsultaInventarioService.js';
+import { accesorioInventarioService } from '../../services/AccesorioInventarioService.js';
 import { EquipoInventario } from '../../models/EquipoInventario.js';
 import { MODELOS_CORTOS, COLORES_IPHONE, CAPACIDADES_IPHONE, SEDES, SEDES_NOMBRES } from '../../config/constants.js';
 
@@ -10,6 +11,7 @@ import { initModoIngreso } from './ModoIngreso.js';
 import { initModoSalida } from './ModoSalida.js';
 import { initModoConsulta } from './ModoConsulta.js';
 import { initNotasImpresion } from './NotasImpresion.js';
+import { initModoAccesorios } from './ModoAccesorios.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const appContent = document.getElementById('appContent');
@@ -17,7 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const overlay = document.getElementById('loadingOverlay');
 
     let inventarioCargado = false;
-    let modoActual = 'ingreso'; // 'ingreso' o 'salida'
+    let modoActual = 'ingreso'; // 'ingreso', 'salida', 'consulta', 'accesorios'
+    let modoAccesoriosApi = null; // Referencia al controlador, para destruir si hace falta
 
     function showToast(msg, type = 'success') {
         toast.textContent = msg;
@@ -109,6 +112,19 @@ document.addEventListener('DOMContentLoaded', () => {
             subtitulo: 'Filtra, busca y edita el inventario consolidado de todas las sedes.',
             mostrarResumen: false,
             onActivar: () => consultaApi.recargar()
+        },
+        accesorios: {
+            seccionId: 'seccionAccesorios',
+            btnId: 'btnModoAccesorios',
+            titulo: '🛡️ <span>Stock de Accesorios</span>',
+            subtitulo: 'Gestiona el inventario de accesorios: forros, vidrios, cargadores y más. El stock se actualiza automáticamente con las ventas.',
+            mostrarResumen: false,
+            onActivar: () => {
+                // Inicializar el modo de accesorios solo la primera vez que se activa
+                if (!modoAccesoriosApi) {
+                    modoAccesoriosApi = initModoAccesorios({ showToast, setLoading });
+                }
+            }
         }
     };
 
@@ -159,6 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnModoIngreso')?.addEventListener('click', () => cambiarModo('ingreso'));
     document.getElementById('btnModoSalida')?.addEventListener('click', () => cambiarModo('salida'));
     document.getElementById('btnModoConsulta')?.addEventListener('click', () => cambiarModo('consulta'));
+    document.getElementById('btnModoAccesorios')?.addEventListener('click', () => cambiarModo('accesorios'));
 
     // ====== AUTENTICACIÓN Y CARGA INICIAL ======
     authService.onAuthChange(async (user) => {
@@ -183,6 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
+            // Inicializar el inventario de equipos (iPhones)
             await inventarioService.esperarListo();
             inventarioCargado = true;
             if (btnGuardar) {
@@ -190,6 +208,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnGuardar.innerHTML = '💾 Guardar Todo al Inventario';
             }
             console.log('✅ Inventario listo para validaciones en tiempo real');
+
+            // Inicializar el inventario de accesorios en paralelo (no bloquea la UI)
+            accesorioInventarioService.inicializar();
+            console.log('🛡️ AccesorioInventarioService inicializado');
 
             if (modoActual === 'salida') {
                 actualizarListaSugerenciasSalida();

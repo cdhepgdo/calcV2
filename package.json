@@ -1,6 +1,7 @@
 {
   "name": "calcv2",
   "version": "1.0.0",
+  "packageManager": "pnpm@11.20.0",
   "main": "index.js",
   "directories": {
     "doc": "docs"

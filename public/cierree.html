@@ -377,7 +377,7 @@
                             <div id="otroContenedor" class="hidden flex-col gap-2">
                                 <div id="otroLista" class="flex flex-col gap-2">
                                     <div class="otro-item grid grid-cols-[1fr,auto,auto] gap-2 items-center">
-                                        <input type="text" class="p-2 border rounded-lg flex-1 otro-nombre"
+                                        <input type="text" class="p-2 border rounded-lg flex-1 otro-nombre" list="listaOtrosAccesorios"
                                             placeholder="¿Qué es?">
                                         <input type="number" min="1" value="1"
                                             class="p-2 border rounded-lg w-20 otro-cant" placeholder="Cant.">
@@ -1482,7 +1482,7 @@
                                 <div id="salidaOtroContenedor" class="hidden flex-col gap-2">
                                     <div id="salidaOtroLista" class="flex flex-col gap-2">
                                         <div class="otro-item grid grid-cols-[1fr,auto,auto] gap-2 items-center">
-                                            <input type="text" class="p-2 border rounded-lg flex-1 otro-nombre text-sm"
+                                            <input type="text" class="p-2 border rounded-lg flex-1 otro-nombre text-sm" list="listaOtrosAccesorios"
                                                 placeholder="¿Qué es?">
                                             <input type="number" min="1" value="1"
                                                 class="p-2 border rounded-lg w-16 otro-cant text-sm"
@@ -1647,7 +1647,7 @@
                                 <div id="ingresoOtroContenedor" class="hidden flex-col gap-2">
                                     <div id="ingresoOtroLista" class="flex flex-col gap-2">
                                         <div class="otro-item grid grid-cols-[1fr,auto,auto] gap-2 items-center">
-                                            <input type="text" class="p-2 border rounded-lg flex-1 otro-nombre text-sm"
+                                            <input type="text" class="p-2 border rounded-lg flex-1 otro-nombre text-sm" list="listaOtrosAccesorios"
                                                 placeholder="¿Qué es?">
                                             <input type="number" min="1" value="1"
                                                 class="p-2 border rounded-lg w-16 otro-cant text-sm"
@@ -1736,6 +1736,8 @@
             AccesorioValidator.verificarContratoHTML(document, 'ingreso');
         }
     </script>
+    <!-- Datalist global para autocompletado de Otros Accesorios -->
+    <datalist id="listaOtrosAccesorios"></datalist>
 </body>
 
 </html>

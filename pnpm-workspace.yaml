@@ -1,0 +1,9 @@
+# pnpm workspace configuration (pnpm v11+)
+#
+# allowBuilds: mapa que controla qué paquetes pueden ejecutar
+# scripts de ciclo de vida (postinstall/preinstall).
+# Solo los paquetes con 'true' tienen permitido ejecutar scripts.
+# Esto protege contra ataques a la cadena de suministro en npm/pnpm.
+allowBuilds:
+  esbuild: true
+  '@parcel/watcher': true

@@ -73,7 +73,7 @@ Corre vitest + build en matrix Node 18.x/20.x. Triggers en push/PR a `main`, `de
 - `public/js/utils/validators.test.js` (48 tests)
 - `public/js/utils/formatters.test.js` (38 tests)
 
-**Comando**: `npm test`
+**Comando**: `pnpm test`
 
 **Configuración nueva** en `package.json`:
 ```json
@@ -163,11 +163,11 @@ public/
 
 ### Comandos útiles
 ```bash
-npm test              # Corre los 154 tests
-npm run test:watch    # Tests en modo watch
-npm run dev           # Servidor de desarrollo
-npm run build         # Build de producción
-npm run build:css     # Compilar Tailwind (legacy, ya no se usa con Vite)
+pnpm test             # Corre los 154 tests
+pnpm test:watch       # Tests en modo watch
+pnpm dev              # Servidor de desarrollo
+pnpm build            # Build de producción
+# npm run build:css → ya no se usa con Vite (Tailwind v4 se compila automáticamente)
 ```
 
 ### Estado de git

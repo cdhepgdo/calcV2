@@ -5,7 +5,7 @@
  * teléfono venezolano, email y agregador de errores.
  *
  * Cómo ejecutar:
- *   npm test
+ *   pnpm test
  *
  * NOTA: validarIMEI se excluye de estos tests porque depende del DOM
  * (querySelector, HTMLElement). Eso requeriría un entorno jsdom o similar.

@@ -4,6 +4,9 @@
 # Node dependencies
 node_modules/
 
+# npm lockfile (this project uses pnpm — do not commit package-lock.json)
+package-lock.json
+
 # Entorno local (contiene claves reales de Firebase, NUNCA commitear)
 .env
 .env.local

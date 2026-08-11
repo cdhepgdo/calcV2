@@ -5,7 +5,7 @@
  * capitalización, truncamiento, porcentaje y sanitización XSS.
  *
  * Cómo ejecutar:
- *   npm test
+ *   pnpm test
  */
 
 import { describe, it, expect } from 'vitest';

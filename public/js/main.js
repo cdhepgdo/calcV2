@@ -10,6 +10,7 @@ import { ventaService } from './services/VentaService.js';
 import { movimientoService } from './services/MovimientoService.js';
 import { storageService } from './services/StorageService.js';
 import { inventarioService } from './services/InventarioService.js';
+import { accesorioInventarioService } from './services/AccesorioInventarioService.js';
 import { EquipoInventario } from './models/EquipoInventario.js';
 import { printService } from './services/PrintService.js';
 import { Caja } from './models/Caja.js';
@@ -55,6 +56,15 @@ class App {
         // Cuando el inventario cambie (ej: se guarda un lote desde otra pestaña)
         // actualizamos el badge de stock disponible
         inventarioService.onCambio(() => this._actualizarBadgeStock());
+
+        // ── AccesorioInventarioService ─────────────────
+        // Se inicializa en paralelo (no bloquea). El servicio mantiene
+        // el caché de accesorios sincronizado para que _ajustarStockAccesoriosEnBatch
+        // en InventarioService pueda encontrar las variantes por clave.
+        accesorioInventarioService.inicializar();
+        accesorioInventarioService.onCambio(() => {
+            this.actualizarSelectsAccesorios();
+        });
 
         // Inicializar componentes (no dependen de datos)
         this.inicializarSelectores();
@@ -481,6 +491,21 @@ class App {
                 }
             });
         }
+
+        // Delegación de evento de cambio en selects accModelo para Cajas (auto-selección de color)
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('accModelo') && e.target.closest('#cajaLista, #salidaCajaLista, #ingresoCajaLista')) {
+                const fila = e.target.closest('.caja-item');
+                const selectColor = fila ? fila.querySelector('.caja-color') : null;
+                if (selectColor) {
+                    const accId = e.target.value;
+                    const acc = (typeof accesorioInventarioService !== 'undefined') ? accesorioInventarioService.buscarPorId(accId) : null;
+                    if (acc && acc.color) {
+                        selectColor.value = acc.color;
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -858,21 +883,36 @@ class App {
         if (selectAccesorio) {
             const opciones = Array.from(selectAccesorio.options);
 
-            // El inventario puede guardar el modelo como "15 Pro" o "iPhone 15 Pro".
-            // Los selects de accesorios tienen values como "iPhone 15 Pro".
-            // Normalizamos para buscar en ambos formatos.
             const modeloConPrefijo = modeloIphone.startsWith('iPhone') ? modeloIphone : `iPhone ${modeloIphone}`;
             const modeloSinPrefijo = modeloIphone.startsWith('iPhone') ? modeloIphone.replace('iPhone ', '') : modeloIphone;
 
+            // Primero intentar buscar en el service por modelo compatible
+            let coincidenciaId = null;
+            if (typeof accesorioInventarioService !== 'undefined') {
+                const tipo = this._obtenerTipoAccesorioParaSelect(selectAccesorio);
+                if (tipo) {
+                    const variante = accesorioInventarioService.obtenerTodos().find(a => 
+                        a.nombre.toLowerCase() === tipo.toLowerCase() && 
+                        (a.modelo.toLowerCase() === modeloConPrefijo.toLowerCase() || a.modelo.toLowerCase() === modeloSinPrefijo.toLowerCase())
+                    );
+                    if (variante) {
+                        coincidenciaId = variante.id;
+                    }
+                }
+            }
+
             const opcionCoincidente = opciones.find(option =>
-                option.value === modeloConPrefijo || option.value === modeloSinPrefijo
+                (coincidenciaId && option.value === coincidenciaId) ||
+                option.value === modeloConPrefijo || 
+                option.value === modeloSinPrefijo
             );
 
             if (opcionCoincidente) {
                 selectAccesorio.value = opcionCoincidente.value;
+                selectAccesorio.dispatchEvent(new Event('change', { bubbles: true }));
                 console.log(`✅ Auto-seleccionado ${tipoAccesorio}: ${opcionCoincidente.value}`);
             } else {
-                console.log(`ℹ️ No se encontró coincidencia para ${tipoAccesorio}: "${modeloIphone}" (buscado como "${modeloConPrefijo}" y "${modeloSinPrefijo}")`);
+                console.log(`ℹ️ No se encontró coincidencia para ${tipoAccesorio}: "${modeloIphone}"`);
             }
         }
     }
@@ -2738,9 +2778,19 @@ class App {
         const forrosData = [];
         if (document.getElementById('forro').checked) {
             document.querySelectorAll('#forroLista .forro-item').forEach(item => {
-                const mod = item.querySelector('.accModelo').value;
+                const select = item.querySelector('.accModelo');
+                const valor = select.value;
                 const cant = parseInt(item.querySelector('.forro-cant').value) || 0;
-                if (mod && cant > 0) forrosData.push({ modelo: mod, cantidad: cant });
+                if (valor && cant > 0) {
+                    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                    const esId = UUID_REGEX.test(valor) || valor.startsWith('acc-');
+                    const textoPlano = select.options[select.selectedIndex]?.text.split(' (')[0] || valor;
+                    forrosData.push({ 
+                        accesorioId: esId ? valor : null,
+                        modelo: esId ? textoPlano : valor, 
+                        cantidad: cant 
+                    });
+                }
             });
         }
 
@@ -2748,9 +2798,19 @@ class App {
         const vidriosData = [];
         if (document.getElementById('vidrio').checked) {
             document.querySelectorAll('#vidrioLista .vidrio-item').forEach(item => {
-                const mod = item.querySelector('.accModelo').value;
+                const select = item.querySelector('.accModelo');
+                const valor = select.value;
                 const cant = parseInt(item.querySelector('.vidrio-cant').value) || 0;
-                if (mod && cant > 0) vidriosData.push({ modelo: mod, cantidad: cant });
+                if (valor && cant > 0) {
+                    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                    const esId = UUID_REGEX.test(valor) || valor.startsWith('acc-');
+                    const textoPlano = select.options[select.selectedIndex]?.text.split(' (')[0] || valor;
+                    vidriosData.push({ 
+                        accesorioId: esId ? valor : null,
+                        modelo: esId ? textoPlano : valor, 
+                        cantidad: cant 
+                    });
+                }
             });
         }
 
@@ -2769,10 +2829,21 @@ class App {
         const cajasData = [];
         if (document.getElementById('caja').checked) {
             document.querySelectorAll('#cajaLista .caja-item').forEach(item => {
-                const mod = item.querySelector('.accModelo')?.value;
+                const select = item.querySelector('.accModelo');
+                const valor = select?.value || '';
                 const col = item.querySelector('.caja-color')?.value || '';
                 const cant = parseInt(item.querySelector('.caja-cant')?.value) || 0;
-                if (mod && cant > 0) cajasData.push({ modelo: mod, color: col, cantidad: cant });
+                if (valor && cant > 0) {
+                    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                    const esId = UUID_REGEX.test(valor) || valor.startsWith('acc-');
+                    const textoPlano = select.options[select.selectedIndex]?.text.split(' (')[0] || valor;
+                    cajasData.push({ 
+                        accesorioId: esId ? valor : null,
+                        modelo: esId ? textoPlano : valor, 
+                        color: col, 
+                        cantidad: cant 
+                    });
+                }
             });
         }
 
@@ -5233,7 +5304,7 @@ class App {
     }
 
     /**
-     * Inicializa los selects de modelo con opciones de iPhone
+     * Inicializa los selects de modelo con opciones de iPhone o variantes de inventario
      * @private
      */
     _inicializarModeloSelects(contenedorId) {
@@ -5242,7 +5313,36 @@ class App {
 
         const selects = contenedor.querySelectorAll('.accModelo');
         selects.forEach(select => {
-            if (select.options.length === 0) {
+            this._actualizarSelectAccesorioIndividual(select);
+        });
+    }
+
+    /**
+     * Obtiene el tipo de accesorio (Forro, Vidrio Templado, Caja) según el contenedor del select.
+     */
+    _obtenerTipoAccesorioParaSelect(select) {
+        if (!select) return null;
+        if (select.closest('#forroLista, #salidaForroLista, #ingresoForroLista, #forroContenedor, #salidaForroContenedor, #ingresoForroContenedor')) {
+            return 'Forro';
+        }
+        if (select.closest('#vidrioLista, #salidaVidrioLista, #ingresoVidrioLista, #vidrioContenedor, #salidaVidrioContenedor, #ingresoVidrioContenedor')) {
+            return 'Vidrio Templado';
+        }
+        if (select.closest('#cajaLista, #salidaCajaLista, #ingresoCajaLista, #cajaContenedor, #salidaCajaContenedor, #ingresoCajaContenedor')) {
+            return 'Caja';
+        }
+        return null;
+    }
+
+    /**
+     * Actualiza las opciones de un select de accesorios individual con stock del inventario.
+     */
+    _actualizarSelectAccesorioIndividual(select) {
+        if (!select) return;
+        const tipo = this._obtenerTipoAccesorioParaSelect(select);
+        if (!tipo) {
+            // Fallback para otros selects .accModelo que no pertenecen a forro/vidrio/caja
+            if (select.options.length <= 1) {
                 select.innerHTML = '<option value="">Seleccionar</option>';
                 MODELOS_IPHONE.forEach(modelo => {
                     const option = document.createElement('option');
@@ -5251,7 +5351,84 @@ class App {
                     select.appendChild(option);
                 });
             }
-        });
+            return;
+        }
+
+        const valorSeleccionado = select.value;
+        select.innerHTML = '';
+        
+        // Obtener variantes filtradas por el tipo principal
+        const variantes = (typeof accesorioInventarioService !== 'undefined')
+            ? accesorioInventarioService.obtenerTodos().filter(a => a.nombre.toLowerCase() === tipo.toLowerCase())
+            : [];
+        
+        if (variantes.length === 0) {
+            const opt = document.createElement('option');
+            opt.value = "";
+            opt.textContent = `⚠️ Sin stock de ${tipo.toLowerCase()}`;
+            select.appendChild(opt);
+            
+            // Fallback a los modelos estáticos por si el operador necesita vender uno no listado
+            MODELOS_IPHONE.forEach(modelo => {
+                const option = document.createElement('option');
+                option.value = modelo.valor;
+                option.textContent = modelo.etiqueta;
+                select.appendChild(option);
+            });
+        } else {
+            const optPlaceholder = document.createElement('option');
+            optPlaceholder.value = "";
+            optPlaceholder.textContent = `Seleccionar ${tipo.toLowerCase()}...`;
+            select.appendChild(optPlaceholder);
+
+            variantes.forEach(a => {
+                const option = document.createElement('option');
+                option.value = a.id;
+                
+                const partes = [];
+                if (a.modelo && a.modelo !== 'Genérico') partes.push(a.modelo);
+                if (a.tipoVariacion) partes.push(a.tipoVariacion);
+                if (a.color) partes.push(a.color);
+                
+                const desc = partes.length > 0 ? partes.join(' — ') : 'Estándar';
+                option.textContent = `${desc} (${a.cantidad} uds)`;
+                select.appendChild(option);
+            });
+        }
+        
+        // Mantener selección actual si es posible
+        if (valorSeleccionado) {
+            select.value = valorSeleccionado;
+        }
+    }
+
+    /**
+     * Actualiza todos los selects de accesorios en la página y la lista de autocompletado.
+     */
+    actualizarSelectsAccesorios() {
+        // 1. Actualizar selects de forro/vidrio/caja
+        const selects = document.querySelectorAll('.accModelo');
+        selects.forEach(select => this._actualizarSelectAccesorioIndividual(select));
+
+        // 2. Actualizar datalist de Otros Accesorios con todos los disponibles
+        const datalistOtros = document.getElementById('listaOtrosAccesorios');
+        if (datalistOtros && typeof accesorioInventarioService !== 'undefined') {
+            datalistOtros.innerHTML = '';
+            const todos = accesorioInventarioService.obtenerTodos();
+            
+            // Queremos mostrar el nombre completo de cualquier accesorio, excepto los muy genéricos si queremos filtrarlos
+            // Pero como la idea es encontrar CUALQUIER accesorio, listamos sus nombres completos.
+            todos.forEach(a => {
+                const option = document.createElement('option');
+                const partes = [a.nombre];
+                if (a.modelo && a.modelo !== 'Genérico') partes.push(a.modelo);
+                if (a.tipoVariacion) partes.push(a.tipoVariacion);
+                if (a.color) partes.push(a.color);
+                
+                option.value = partes.join(' — ');
+                datalistOtros.appendChild(option);
+            });
+        }
     }
 
     /**
@@ -5498,11 +5675,77 @@ class App {
                 }
 
                 alert(`✅ ${guardadosOk} movimiento(s) de accesorios registrado(s) correctamente`);
+
+                // ── Actualizar stock de accesorios en inventario ──────────────
+                // El signo del delta depende del tipo: Salida resta (-1) e Ingreso suma (+1).
+                // Se hace DESPUÉS de confirmar que todos los movimientos se guardaron OK.
+                try {
+                    const { db } = await import('./config/firebase-config.js');
+                    const { writeBatch } = await import('https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js');
+                    const esSalida = datos.tipo === 'Salida Accesorio';
+                    const mult = esSalida ? -1 : +1;
+                    const batch = writeBatch(db);
+                    let hayAjustes = false;
+
+                    for (const acc of accesoriosValidos) {
+                        const tieneModelos = Array.isArray(acc.modelos) && acc.modelos.length > 0;
+                        const tieneCantidadDirecta = acc.cantidad > 0;
+
+                        if (tieneModelos || tieneCantidadDirecta) {
+                            // Para forros/vidrios/cajas con modelos: ajustar por cada modelo
+                            if (tieneModelos) {
+                                acc.modelos.forEach(m => {
+                                    accesorioInventarioService.ajustarStockBatch(
+                                        batch,
+                                        acc.tipo,
+                                        m.accesorioId || m.modelo || 'Genérico',
+                                        '',
+                                        m.color || null,
+                                        (m.cantidad || 1) * mult
+                                    );
+                                    hayAjustes = true;
+                                });
+                            } else {
+                                // Accesorio simple (cargador, cubo, etc.) o "Otro"
+                                // Si es "Otro", acc.descripcion contiene el nombre o UUID seleccionado del autocompletado
+                                const nombreReal = acc.tipo === 'Otro' && acc.descripcion ? acc.descripcion : acc.tipo;
+                                // Para "Otro", usamos la descripción como nombre, pero lo mandaremos completo a ajustarStockBatch.
+                                // ajustarStockBatch lo procesará bien si es un UUID, o lo creará con el nombre completo.
+                                accesorioInventarioService.ajustarStockBatch(
+                                    batch,
+                                    nombreReal,
+                                    acc.tipo === 'Otro' ? 'Genérico' : 'Genérico', // Modelo
+                                    '',
+                                    null,
+                                    acc.cantidad * mult
+                                );
+                                hayAjustes = true;
+                            }
+                        }
+                    }
+
+                    if (hayAjustes) {
+                        const commitPromise = batch.commit();
+                        const timeout = new Promise(r => setTimeout(() => r({ __offline: true }), 3500));
+                        const res = await Promise.race([commitPromise, timeout]);
+                        if (res?.__offline) {
+                            console.warn('⏳ Ajuste de stock de accesorios en cola offline (se sincronizará automáticamente).');
+                        } else {
+                            console.log('✅ Stock de accesorios actualizado por movimiento manual.');
+                        }
+                    }
+                } catch (errStock) {
+                    // No bloqueamos el flujo principal si falla el ajuste de stock
+                    console.error('⚠️ No se pudo ajustar el stock de accesorios:', errStock);
+                }
+                // ─────────────────────────────────────────────────────────────
+
                 this.cancelarMovimiento();
                 await this.actualizarResumenMovimientos();
                 await this.actualizarResumenVentas();
                 return;
             }
+
 
             // ── INGRESO EQUIPO o COMPRA EQUIPO: sincronizar con inventario ──
             if (datos.tipo === 'Ingreso Equipo' || datos.tipo === 'Compra Equipo') {

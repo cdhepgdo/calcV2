@@ -5,7 +5,7 @@
  * más el cálculo de impacto en caja.
  *
  * Cómo ejecutar:
- *   npm test
+ *   pnpm test
  */
 
 import { describe, it, expect } from 'vitest';

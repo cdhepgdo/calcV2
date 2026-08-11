@@ -11,9 +11,24 @@ import {
     query,
     where,
     arrayUnion,
-    arrayRemove
+    arrayRemove,
+    increment
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 import { EquipoInventario } from '../models/EquipoInventario.js';
+import { accesorioInventarioService } from './AccesorioInventarioService.js';
+
+/**
+ * Ejecuta batch.commit() con un timeout de seguridad para evitar que la UI
+ * se bloquee cuando el dispositivo está offline. Si el servidor no responde
+ * en `ms` milisegundos, resuelve con { __offlineTimeout: true } y Firestore
+ * sincronizará la operación en background cuando se recupere la conexión.
+ */
+function _commitConTimeout(batch, ms = 3500) {
+    return Promise.race([
+        batch.commit(),
+        new Promise(resolve => setTimeout(() => resolve({ __offlineTimeout: true }), ms))
+    ]);
+}
 
 class InventarioService {
     constructor() {
@@ -236,7 +251,11 @@ class InventarioService {
                 batch.set(docRef, data);
             });
 
-            await batch.commit();
+            const resultadoLote = await _commitConTimeout(batch);
+            if (resultadoLote?.__offlineTimeout) {
+                console.warn('⏳ [guardarLote] Sin conexión. Lote en cola offline de Firestore.');
+                return { exito: true, loteId, offline: true };
+            }
             console.log(`✅ Lote ${loteId} guardado con ${equiposArray.length} equipos.`);
             return { exito: true, loteId };
         } catch (error) {
@@ -739,7 +758,19 @@ class InventarioService {
                 });
             });
 
-            await batch.commit();
+            // ── Descuento de stock de accesorios (en el mismo batch) ────────
+            // Por cada accesorio de la venta, descontar su cantidad del
+            // inventario de accesorios. Si el accesorio no existía previamente,
+            // se auto-crea con cantidad negativa (alerta de auditoría).
+            if (venta && venta.accesorios && !esAbono) {
+                this._ajustarStockAccesoriosEnBatch(batch, venta.accesorios, -1);
+            }
+
+            const resultadoVenta = await _commitConTimeout(batch);
+            if (resultadoVenta?.__offlineTimeout) {
+                console.warn('⏳ [commitVentaConInventario] Sin conexión. Venta en cola offline.');
+                // Continúa para el post-batch de abonos (que también usará el caché local)
+            }
 
             // ════════════════════════════════════════════════════════════════
             // POST-BATCH: append al historial de abonos (FUERA del batch)
@@ -931,7 +962,17 @@ class InventarioService {
                 });
             });
 
-            await batch.commit();
+            // ── Restauración de stock de accesorios al eliminar venta ─────
+            // Devuelve al inventario las unidades de accesorios que se
+            // descontaron cuando se registró la venta original.
+            if (venta && venta.accesorios) {
+                this._ajustarStockAccesoriosEnBatch(batch, venta.accesorios, +1);
+            }
+
+            const resultadoEliminar = await _commitConTimeout(batch);
+            if (resultadoEliminar?.__offlineTimeout) {
+                console.warn('⏳ [commitEliminarVentaConInventario] Sin conexión. Eliminación en cola offline.');
+            }
 
             // ════════════════════════════════════════════════════════════════
             // POST-BATCH: si era un abono NO-último, removemos la entrada
@@ -969,6 +1010,86 @@ class InventarioService {
         } catch (error) {
             console.error('❌ Error en batch eliminar venta+inventario:', error);
             return { exito: false, error: error.message };
+        }
+    }
+
+    /**
+     * Mapea los accesorios de una venta y agrega las operaciones de ajuste
+     * de stock al batch dado. El multiplicador (+1 ó -1) controla si se suma
+     * (al eliminar venta) o se resta (al registrar venta).
+     *
+     * @private
+     * @param {WriteBatch} batch
+     * @param {Object}     accesorios  - venta.accesorios (estructura del modelo Venta)
+     * @param {number}     mult        - +1 restaurar stock, -1 descontar stock
+     */
+    _ajustarStockAccesoriosEnBatch(batch, accesorios, mult) {
+        if (!accesorios) return;
+
+        // ── Forros (multi-fila: Array de {modelo, cantidad}) ─────────────
+        if (accesorios.forro && Array.isArray(accesorios.forros)) {
+            accesorios.forros.forEach(f => {
+                if (f && f.cantidad > 0) {
+                    accesorioInventarioService.ajustarStockBatch(
+                        batch, 'Forro', f.accesorioId || f.modelo || 'Genérico', '', null,
+                        f.cantidad * mult
+                    );
+                }
+            });
+        }
+
+        // ── Vidrios (multi-fila: Array de {modelo, cantidad}) ────────────
+        if (accesorios.vidrio && Array.isArray(accesorios.vidrios)) {
+            accesorios.vidrios.forEach(v => {
+                if (v && v.cantidad > 0) {
+                    accesorioInventarioService.ajustarStockBatch(
+                        batch, 'Vidrio Templado', v.accesorioId || v.modelo || 'Genérico', '', null,
+                        v.cantidad * mult
+                    );
+                }
+            });
+        }
+
+        // ── Cajas (multi-fila: Array de {modelo, color, cantidad}) ───────
+        if (accesorios.caja && Array.isArray(accesorios.cajas)) {
+            accesorios.cajas.forEach(c => {
+                if (c && c.cantidad > 0) {
+                    accesorioInventarioService.ajustarStockBatch(
+                        batch, 'Caja', c.accesorioId || c.modelo || 'Genérico', '', c.color || null,
+                        c.cantidad * mult
+                    );
+                }
+            });
+        }
+
+        // ── Accesorios simples (cantidad escalar) ────────────────────────
+        const simples = [
+            { flag: 'cargador',       campoQty: 'cargadorCantidad',       nombre: 'Cargador' },
+            { flag: 'protectorCamara',campoQty: 'protectorCantidad',       nombre: 'Protector Cámara' },
+            { flag: 'cubo',           campoQty: 'cuboCantidad',            nombre: 'Cubo' },
+            { flag: 'cableLightning', campoQty: 'cableLightningCantidad',  nombre: 'Cable Lightning' },
+            { flag: 'cableCC',        campoQty: 'cableCCCantidad',         nombre: 'Cable C+C' }
+        ];
+        simples.forEach(({ flag, campoQty, nombre }) => {
+            if (accesorios[flag]) {
+                const qty = parseInt(accesorios[campoQty]) || 1;
+                if (qty > 0) {
+                    accesorioInventarioService.ajustarStockBatch(
+                        batch, nombre, 'Genérico', '', null, qty * mult
+                    );
+                }
+            }
+        });
+
+        // ── Otros (free-text: Array de {nombre, cantidad}) ───────────────
+        if (accesorios.otro && Array.isArray(accesorios.otros)) {
+            accesorios.otros.forEach(o => {
+                if (o && o.nombre && o.cantidad > 0) {
+                    accesorioInventarioService.ajustarStockBatch(
+                        batch, o.nombre, 'Genérico', '', null, o.cantidad * mult
+                    );
+                }
+            });
         }
     }
 

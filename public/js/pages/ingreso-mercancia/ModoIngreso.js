@@ -19,6 +19,130 @@ export function initModoIngreso({
     
     let filaCounter = 0;
 
+    // ── Sistema de Auto-Guardado de Borradores ────────────────────────────────
+    // Cada vez que el usuario edita una celda, guardamos un snapshot del
+    // formulario en localStorage. Si la página se recarga o se cae el
+    // internet justo al guardar, el operador puede recuperar su trabajo.
+
+    const DRAFT_KEY = `calcv2_ingreso_draft_${localStorage.getItem('usuario_sede_id') || 'sede_1'}`;
+
+    function guardarBorrador() {
+        try {
+            const filas = [];
+            tablaBody.querySelectorAll('tr').forEach(tr => {
+                filas.push({
+                    modelo:      tr.querySelector('.campo-modelo')?.value || '',
+                    gb:          tr.querySelector('.campo-gb')?.value || '',
+                    color:       tr.querySelector('.campo-color')?.value || '',
+                    bateria:     tr.querySelector('.campo-bateria')?.value || '',
+                    imei:        tr.querySelector('.campo-imei')?.value || '',
+                    tieneCaja:   tr.querySelector('.campo-caja')?.checked || false,
+                    cajaModelo:  tr.querySelector('.campo-caja-modelo')?.value || '',
+                    cajaColor:   tr.querySelector('.campo-caja-color')?.value || '',
+                    detalles:    tr.querySelector('.campo-detalles')?.value || ''
+                });
+            });
+            const estado = {
+                filas,
+                origenLote: document.getElementById('origenLote')?.value || '',
+                notasLote:  document.getElementById('notasLote')?.value || '',
+                ts: Date.now()
+            };
+            localStorage.setItem(DRAFT_KEY, JSON.stringify(estado));
+        } catch(e) { /* silencioso: no romper el flujo por quota de localStorage */ }
+    }
+
+    function limpiarBorrador() {
+        localStorage.removeItem(DRAFT_KEY);
+        const banner = document.getElementById('bannerBorrador');
+        if (banner) banner.remove();
+    }
+
+    function mostrarBannerBorrador(estado) {
+        const existing = document.getElementById('bannerBorrador');
+        if (existing) return; // ya mostrado
+
+        const d = new Date(estado.ts);
+        const label = d.toLocaleString('es-ES', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+
+        const banner = document.createElement('div');
+        banner.id = 'bannerBorrador';
+        banner.className = 'mb-4 flex items-center gap-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-600 rounded-xl px-4 py-3 text-sm';
+        banner.innerHTML = `
+            <span class="text-xl">📋</span>
+            <span class="flex-1 text-amber-800 dark:text-amber-200">
+                <strong>Borrador sin guardar</strong> del ${label} — ${estado.filas.length} fila(s)
+            </span>
+            <button id="btnRecuperarBorrador" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-semibold text-xs transition">
+                📂 Recuperar
+            </button>
+            <button id="btnDescartarBorrador" class="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-themed-secondary rounded-lg font-semibold text-xs transition">
+                🗑️ Descartar
+            </button>
+        `;
+
+        // Insertar antes del body de la tabla
+        const seccionIngreso = document.getElementById('seccionIngreso');
+        if (seccionIngreso) seccionIngreso.insertBefore(banner, seccionIngreso.firstChild);
+        else document.body.insertBefore(banner, document.body.firstChild);
+
+        document.getElementById('btnRecuperarBorrador').addEventListener('click', () => {
+            tablaBody.innerHTML = '';
+            filaCounter = 0;
+            autocomplete.hide();
+            estado.filas.forEach(datos => {
+                const tr = crearFila();
+                if (datos.modelo)    tr.querySelector('.campo-modelo').value = datos.modelo;
+                if (datos.gb) {
+                    tr.querySelector('.campo-gb').value = datos.gb;
+                    tr.querySelectorAll('.gb-chip').forEach(c => c.classList.toggle('active', c.dataset.gb === datos.gb));
+                }
+                if (datos.color)     tr.querySelector('.campo-color').value = datos.color;
+                if (datos.bateria)   tr.querySelector('.campo-bateria').value = datos.bateria;
+                if (datos.imei)      tr.querySelector('.campo-imei').value = datos.imei;
+                if (datos.tieneCaja) {
+                    const chk = tr.querySelector('.campo-caja');
+                    if (chk) { chk.checked = true; tr.querySelector('.caja-fields')?.classList.add('visible'); }
+                }
+                if (datos.cajaModelo) tr.querySelector('.campo-caja-modelo').value = datos.cajaModelo;
+                if (datos.cajaColor)  tr.querySelector('.campo-caja-color').value = datos.cajaColor;
+                if (datos.detalles)   tr.querySelector('.campo-detalles').value = datos.detalles;
+            });
+            if (estado.origenLote) {
+                const el = document.getElementById('origenLote');
+                if (el) el.value = estado.origenLote;
+            }
+            if (estado.notasLote) {
+                const el = document.getElementById('notasLote');
+                if (el) el.value = estado.notasLote;
+            }
+            actualizarResumen();
+            banner.remove();
+            showToast('✅ Borrador recuperado correctamente', 'success');
+        });
+
+        document.getElementById('btnDescartarBorrador').addEventListener('click', () => {
+            limpiarBorrador();
+            showToast('🗑️ Borrador descartado', 'success');
+        });
+    }
+
+    // Intentar restaurar borrador al inicializar
+    function verificarBorrador() {
+        try {
+            const raw = localStorage.getItem(DRAFT_KEY);
+            if (!raw) return;
+            const estado = JSON.parse(raw);
+            // Solo mostrar si tiene filas con contenido y es reciente (< 72 horas)
+            const hace72h = Date.now() - (72 * 3600 * 1000);
+            if (estado && Array.isArray(estado.filas) && estado.filas.length > 0 && estado.ts > hace72h) {
+                const tieneContenido = estado.filas.some(f => f.modelo || f.imei);
+                if (tieneContenido) mostrarBannerBorrador(estado);
+            }
+        } catch(e) { /* silent */ }
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     function preventDefaultEvent(e) {
         e.preventDefault();
     }
@@ -34,7 +158,12 @@ export function initModoIngreso({
         });
     }
 
+        actualizarResumen._debounceTimer = null;
+
     function actualizarResumen() {
+        // Debounce de 300ms para no saturar localStorage en keystrokes rápidos
+        clearTimeout(actualizarResumen._debounceTimer);
+        actualizarResumen._debounceTimer = setTimeout(() => guardarBorrador(), 300);
         const filas = tablaBody.querySelectorAll('tr');
         const modelos = {};
         let validos = 0;
@@ -414,6 +543,7 @@ export function initModoIngreso({
             }
             
             showToast(`✅ ${equipos.length} equipo(s) guardados correctamente`, 'success');
+            limpiarBorrador(); // ← Limpiar borrador al guardar con éxito
             tablaBody.innerHTML = '';
             filaCounter = 0;
             document.getElementById('origenLote').value = '';
@@ -456,6 +586,7 @@ export function initModoIngreso({
     });
 
     // Iniciar con una fila
+    verificarBorrador();
     crearFila();
 
     return { recolectarEquipos };

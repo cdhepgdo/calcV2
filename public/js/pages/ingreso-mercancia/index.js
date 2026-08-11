@@ -1,4 +1,4 @@
-import { authService } from '../../services/AuthService.js';
+import { authService } from '../../services/AuthService.js'; 
 import { inventarioService } from '../../services/InventarioService.js';
 import { movimientoService } from '../../services/MovimientoService.js';
 import { consultaInventarioService } from '../../services/ConsultaInventarioService.js';

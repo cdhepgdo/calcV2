@@ -25,6 +25,8 @@
 import { db } from '../config/firebase-config.js';
 import {
     collection,
+    query,
+    where,
     onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 import { EquipoInventario } from '../models/EquipoInventario.js';
@@ -145,7 +147,14 @@ class ConsultaInventarioService {
         console.log('🚀 Inicializando ConsultaInventarioService (multi-sede)...');
 
         this.sedes.forEach(sedeId => {
-            const q = collection(db, `sedes/${sedeId}/inventario`);
+            // Filtrar SOLO equipos (tipoItem === 'equipo').
+            // Los accesorios personalizados viven en la misma colección pero
+            // con tipoItem === 'accesorio' — sin este filtro aparecen como
+            // filas vacías/erróneas en la tabla de teléfonos.
+            const q = query(
+                collection(db, `sedes/${sedeId}/inventario`),
+                where('tipoItem', '==', 'equipo')
+            );
 
             const unsub = onSnapshot(q, (snapshot) => {
                 // Mapeo a EquipoInventario + enriquecimiento con metadatos de sede

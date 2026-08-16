@@ -812,14 +812,14 @@ class App {
 
         this._poblarSelectoresEquipoRecibido(fila);
 
-        // Listener: cambio de valor → recalcular total
+        // Listener: cambio de valor → recalcular total (incluye subtotales UI)
         const inpValor = fila.querySelector('.eq-recibido-valor');
-        if (inpValor) inpValor.addEventListener('input', () => this._recalcularTotalDesdePrecios());
+        if (inpValor) inpValor.addEventListener('input', () => this.calcularYMostrarTotal());
 
         fila.querySelector('.btn-remove-equipo-recibido').addEventListener('click', () => {
             fila.remove();
             this._actualizarContadorEquiposRecibidos();
-            this._recalcularTotalDesdePrecios();
+            this.calcularYMostrarTotal();
         });
 
         this._actualizarContadorEquiposRecibidos();
@@ -1125,11 +1125,9 @@ class App {
             subtotalPago = parseFloat(document.getElementById('paypalMonto')?.value) || 0;
         }
 
-        // Agregar equipo recibido si existe
-        let subtotalEquipo = 0;
-        if (document.getElementById('recibirEquipo')?.checked) {
-            subtotalEquipo = parseFloat(document.getElementById('equipoValor')?.value) || 0;
-        }
+        // Agregar equipo(s) recibido(s) si existe(n) — usa _sumarValoresRecibidos()
+        // para incluir el primer equipo (#equipoValor) MÁS todos los adicionales (.eq-recibido-valor)
+        let subtotalEquipo = this._sumarValoresRecibidos();
 
         let subtotalAbonos = 0;
         if (document.getElementById('tieneAbonosPrevios')?.checked) {
@@ -1374,11 +1372,8 @@ class App {
             total = parseFloat(document.getElementById(campoId).value) || 0;
         }
 
-        // Agregar equipo recibido si existe
-        if (document.getElementById('recibirEquipo').checked) {
-            const valorEquipo = parseFloat(document.getElementById('equipoValor').value) || 0;
-            total += valorEquipo;
-        }
+        // Agregar equipo(s) recibido(s) — suma el primero más todos los adicionales
+        total += this._sumarValoresRecibidos();
 
         return total;
     }

@@ -115,386 +115,338 @@ class PrintService {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <style>
-        /* Configuración de impresión */
-        @page {
-            size: A4;
-            margin: 18mm;
-        }
+        @page { size: A4; margin: 13mm 16mm 13mm 16mm; }
         @media print {
-            .no-print {
-                display: none !important;
-            }
-            body {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
+            .no-print { display: none !important; }
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
-        
-        /* Base tipográfica y layout */
-        html, body {
-            background: #f5f5f5;
-        }
+
+        html, body { background: #f5f5f5; }
         body {
             font-family: "Noto Sans", sans-serif;
             font-optical-sizing: auto;
             font-weight: 400;
             font-style: normal;
-            line-height: 1.2;
-            margin: 0;
-            padding: 0;
+            line-height: 1.25;
+            margin: 0; padding: 0;
+            font-size: 11.8px;
+            color: #111;
         }
-        .sheet {
-            background: #fff;
-        }
-        
-        /* Encabezado */
-        .title-row {
-            display: flex;
-            flex-direction: column;
-            align-items: baseline;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
+        .sheet { background: #fff; }
+
+        /* ── TÍTULO DEL DOCUMENTO ── */
         .doc-title {
-            font-size: 18px;
-            font-weight: 700;
-            letter-spacing: 0.3px;
-            text-transform: none;
-        }
-        .date-block {
-            font-size: 15px;
-            font-weight: 600;
-        }
-        .date-line {
-            display: inline-block;
-            min-width: 20px;
-            vertical-align: bottom;
-            margin-left: 6px;
-        }
-        
-        /* Figura/Logo simple */
-        .figure {
-            margin: 0 0 0 5px;
-            display: inline-block;
-            text-align: center;
-            font-weight: 700;
-            letter-spacing: 0.8px;
-        }
-        .figure .line {
-            font-size: 18px;
-        }
-        
-        /* Cuerpo del texto */
-        .paragraph {
-            margin: 0 0 0 0;
             font-size: 13px;
-            padding: 1px;
+            font-weight: 400;
+            margin: 0 0 3px 0;
         }
-        .bullet {
-            margin-left: 4mm;
-            text-indent: -4mm;
-        }
-        .bullet::before {
-            content: "•  ";
-            font-weight: bold;
-            font-size: 15px;
-        }
-        
-        /* Bloque de "Todos nuestros equipos…" */
-        .dot-paragraph {
-            margin: 0 0 0 0;
-            font-size: 13px;
-            margin-left: 4mm;
-            text-indent: -4mm;
-        }
-        .paragraph.h {
-            margin: 0 0 10px 0;
-            font-size: 13px;
-        }
-        .dot-paragraph::before {
-            content: "•  ";
-            font-weight: bold;
-            font-size: 15px;
-        }
-        
-        /* Nota importante */
-        .note {
-            font-size: 13px;
-            font-weight: 700;
-        }
-        
-        /* Figura inferior con formulario */
-        .figure-form {
-            margin-left: 10px;
-        }
-        .form-row {
+
+        /* ── FILA: "Fecha ___" izquierda + logo derecha ── */
+        .header-row {
             display: flex;
-            flex-wrap: wrap;
-            column-gap: 8mm;
-            row-gap: 5px;
-        }
-        .field {
-            min-width: 60mm;
-            font-size: 14px;
-            display: flex;
-            flex-wrap: wrap;
+            justify-content: space-between;
             align-items: flex-start;
+            margin-bottom: 4px;
         }
-        .field .label {
-            display: inline-block;
-            min-width: 36mm;
-            font-weight: 700;
-            flex-shrink: 0;
+        .fecha-block {
+            font-size: 14px;
+            font-weight: 800;
+            line-height: 1.4;
         }
-        .field .line {
+        .fecha-value {
             display: inline-block;
             border-bottom: 1px solid #000;
-            min-width: 60mm;
-            height: auto;
-            min-height: 18px;
+            min-width: 55mm;
+            margin-left: 4px;
             vertical-align: bottom;
-            word-wrap: break-word;
-            word-break: break-word;
-            white-space: normal;
-            overflow-wrap: break-word;
-            max-width: 100%;
         }
-        
-        /* Campo de accesorios con ancho completo */
-        .field.full-width {
-            width: 100%;
-            min-width: 100%;
-        }
-        .field.full-width .line {
-            flex: 1;
-            min-width: auto;
-            width: auto;
-        }
-        
-        /* Firma, sello y huella */
-        .sign-row {
+        .logo-block img { height: 62px; width: auto; }
+
+        /* ── INTRO: texto izquierda + logo derecha ── */
+        .intro-row {
             display: flex;
             justify-content: space-between;
-            align-items: end;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 3px;
+        }
+        .intro-text {
+            flex: 1;
+            font-size: 11.8px;
+            margin: 0;
+            line-height: 1.3;
+        }
+
+        /* ── PÁRRAFOS Y BULLETS ── */
+        .paragraph { margin: 0; font-size: 11.8px; padding: 1px 0; line-height: 1.3; }
+        .bullet {
+            margin: 2px 0 2px 4mm;
+            text-indent: -4mm;
+            font-size: 11.8px;
+            line-height: 1.28;
+        }
+        .bullet::before { content: "•  "; font-weight: bold; font-size: 13px; }
+        .dot-paragraph {
+            margin: 2px 0 2px 4mm;
+            text-indent: -4mm;
+            font-size: 11.8px;
+            line-height: 1.28;
+        }
+        .dot-paragraph::before { content: "•  "; font-weight: bold; font-size: 13px; }
+        .note { font-size: 11.8px; font-weight: 400; margin: 3px 0; }
+        .note strong { font-weight: 700; }
+
+        /* ── TABLA DE CHECKBOXES ── */
+        .check-table {
+            border-collapse: collapse;
+            width: 55%;
+            margin: 6px 0 4px 0;
+        }
+        .check-table td {
+            font-size: 12px;
+            padding: 2px 6px 2px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+        .check-box {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 1px solid #000;
+            vertical-align: middle;
+            margin-left: 4px;
+        }
+        .check-label { font-weight: 400; }
+        .check-label-color { color: #c0392b; font-style: italic; font-weight: 400; }
+
+        /* ── SECCIÓN FORMULARIO ── */
+        .form-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .form-fields { flex: 1; }
+        .field-row {
+            display: flex;
+            align-items: baseline;
+            margin: 2px 0;
+            font-size: 12px;
+        }
+        .field-label {
+            font-weight: 700;
+            white-space: nowrap;
+            margin-right: 3px;
+        }
+        .field-underline {
+            display: inline-block;
+            border-bottom: 1px solid #000;
+            min-width: 45mm;
+            min-height: 15px;
+            flex: 1;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            font-size: 11.5px;
+        }
+        .field-gap { margin-top: 5px; }
+
+        /* ── BLOQUE CONTACTO (azul oscuro) ── */
+        .contact-block {
+            background-color: #1a2e5c;
+            color: #fff;
+            border-radius: 3px;
+            padding: 7px 10px;
+            font-size: 11.5px;
+            font-weight: 700;
+            line-height: 1.7;
+            white-space: nowrap;
+        }
+        .contact-block .contact-line { display: block; }
+
+        /* ── SECCIÓN DE FIRMAS ── */
+        .sign-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
             margin-top: 10px;
             gap: 8mm;
-            height: 135px;
         }
-        .box {
-            flex: 1;
-            position: relative;
-        }
-        .box-label {
-            position: absolute;
-            top: -6mm;
-            left: 6mm;
-            background: #fff;
-            padding: 0 3mm;
-            font-size: 12px;
+        .sign-box { flex: 1; display: flex; flex-direction: column; align-items: center; }
+        .sign-box-inner { width: 100%; height: 26mm; border: 1px solid #000; box-sizing: border-box; }
+        .sign-caption {
+            font-size: 11.5px;
             font-weight: 700;
+            text-decoration: underline;
+            margin-top: 3px;
+            text-align: center;
+            font-style: italic;
         }
-        .signature-line {
-            border-top: 1px solid #000;
-            margin-top: 14mm;
-            width: 70%;
-        }
-        .signature-caption {
-            font-size: 12px;
-            margin-top: 3mm;
-            font-weight: 700;
-        }
-        .fingerprint {
-            border: 1px solid #000;
-            min-height: 28mm;
-            background: radial-gradient(ellipse at center, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.06) 60%, rgba(0,0,0,0.02) 100%);
-        }
-        
-        /* Pie de página */
-        .footer {
-            border-top: 1px solid #000;
-            margin-top: 10px;
-            padding-top: 4mm;
-            font-size: 12px;
-        }
-        
-        /* Botón de impresión */
-        .actions {
-            padding: 10px 18mm;
-            text-align: right;
-        }
-        .btn {
-            display: inline-block;
-            background: #111;
-            color: #fff;
-            border: none;
-            padding: 8px 14px;
-            font-size: 14px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        .btn:active {
-            transform: translateY(1px);
-        }
-        .juntos {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .text-logo {
-            display: flex;
-            justify-content: space-between;
-        }
+
+        /* ── BOTÓN ── */
+        .actions { padding: 10px 18mm; text-align: right; }
+        .btn { display: inline-block; background: #111; color: #fff; border: none; padding: 8px 14px; font-size: 14px; cursor: pointer; border-radius: 4px; }
+        .btn:active { transform: translateY(1px); }
     </style>
 </head>
 <body>
     <div class="actions no-print">
         <button class="btn" onclick="window.print()">Imprimir / Guardar PDF</button>
     </div>
-    
+
     <div class="sheet">
-        <div class="content" style="position: relative;">
-            <!-- Encabezado -->
-            <div class="title-row">
-                <div class="doc-title">Garantía Equipos Celulares.</div>
-                <div class="date-block">
-                    Fecha: ${new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                    <span class="date-line"></span>
-                </div>
-            </div>
-            
-            <div class="juntos">
-                <!-- Cuerpo -->
-                <p class="paragraph">
-                    Nuestros equipos condición <strong>Like New (usado poco uso)</strong> cuentan con una garantía de
-                    <strong>${equipo.garantia} continuos por tienda</strong> estrictamente desde la fecha.
-                    Dicha garantía no será válida en caso de que el equipo presente mal estado
-                    <strong>(rayones, manchas en la pantalla, rasguños, desgaste en alguna de sus piezas ocasionadas por el cliente,
-                    sulfatación o humedad, indicios de caída, violación a los tornillos de seguridad),</strong> perdiendo la garantía.
-                </p>
+        <div class="content">
 
-                <!-- Figura superior -->
-                <div class="figure" style="right: 79px;">
-                    <img src="${logoUrl}" alt="logo">
+            <!-- ── TÍTULO ── -->
+            <div class="doc-title">Garantía Equipos Celulares.</div>
+
+            <!-- ── FECHA + LOGO ── -->
+            <div class="header-row">
+                <div class="fecha-block">
+                    Fecha&nbsp;<span class="fecha-value">${new Date().toLocaleDateString('es-ES')}</span>
+                </div>
+                <div class="logo-block">
+                    <img src="${logoUrl}" alt="USA IMPORT logo">
                 </div>
             </div>
 
-            <p class="paragraph bullet">
+            <!-- ── INTRO: texto a ancho completo ── -->
+            <p class="intro-text" style="margin-bottom:3px;">
+                Nuestros equipos condición <strong><u>Like New (usado poco uso)</u></strong> cuentan con una
+                garantía de <strong><span style="display:inline-block;border-bottom:1px solid #000;min-width:18mm;vertical-align:bottom;">${equipo.garantia}</span> días continuos por tienda</strong> estrictamente desde la fecha.
+                Dicha garantía no será válida en caso de que el equipo presente mal estado
+                <strong>(rayones, manchas en la pantalla, rasguños, desgaste en alguna de sus piezas ocasionadas por el cliente,
+                sulfatación o humedad, indicios de caída, violación a los tornillos de seguridad),</strong> perdiendo la garantía.
+            </p>
+
+            <!-- ── BULLETS ── -->
+            <p class="paragraph" style="margin-bottom:2px;">
                 No se cubre garantía por defectos de pantalla ni por defectos causados por que se moje el teléfono.
-                La empresa cubre los <strong>${equipo.garantia}</strong> haciéndose únicamente responsable por equipos
-                que presenten defectos de fábrica y estén dentro del periodo de tiempo establecido, siempre y cuando no se violen
-                las condiciones anteriormente mencionadas, mas no se devolverá dinero; en caso extremo se le hará un cambio de
-                equipo por otro que no presente falla alguna.
+                La empresa cubre los <u>${equipo.garantia}</u> días haciéndose únicamente responsable por equipos
+                que presenten defectos de fábrica y estén dentro del periodo de tiempo establecido, siempre y cuando no se
+                violen las condiciones anteriormente mencionadas mas no se devolverá el dinero; en caso extremo se le hará
+                un cambio de equipo por otro que no presente falla alguna.
             </p>
-            
-            <p class="paragraph bullet">
-                No se cubre garantía por disminución del porcentaje de batería ya que las causas que lo disminuyen va a depender 
-                del uso del cliente EJEMPLO: Cargar el teléfono toda la noche, usar un cargador no recomendado, usar el teléfono 
-                mientras está cargando. Ya que para nosotros es incierto saber el uso que le da el cliente a su equipo.
+
+            <p class="bullet">
+                No se cubre garantía por disminución del porcentaje de batería ya que las causas que lo disminuyen <u>va</u>
+                a depender del uso del cliente <strong>EJEMPLO:</strong> Cargar el teléfono toda la noche, usar un cargador no
+                recomendado, usar el teléfono mientras <u><strong>esta</strong></u> cargando. Ya que para nosotros es incierto saber el uso
+                que le da el cliente a su equipo.
             </p>
-            
-            <p class="paragraph bullet">
-                No se cubrirá la garantía si el equipo posee vidrio templado astillado o quebrado. Esto indicaría que dicho 
-                equipo sufrió un daño por parte del cliente.
+
+            <p class="bullet">
+                No se cubrirá la garantía si el equipo posee vidrio templado astillado o quebrado. Esto indicaría que
+                dicho equipo sufrió un daño por parte del cliente.
             </p>
-            
-            <p class="dot-paragraph">
-                Todos nuestros equipos son inspeccionados antes de ser entregados al cliente para asegurarnos de que estén en 
-                perfectas condiciones tanto físicas como operativas. No obstante, recomendamos que el cliente inspeccione y 
-                verifique el funcionamiento del equipo al momento de la entrega, confirmando también la presencia y funcionamiento 
-                de todos los accesorios incluidos en la compra.
+
+            <p class="dot-paragraph" style="font-weight:700; text-decoration:underline;">
+                Todos nuestros equipos son inspeccionados antes de ser entregados al cliente para asegurarnos
+                de que estén en perfectas condiciones tanto físicas como operativas. No obstante,
+                recomendamos que el cliente inspeccione y verifique el funcionamiento del equipo al momento
+                de la entrega, confirmando también la presencia y funcionamiento de todos los accesorios
+                incluidos en la compra.
             </p>
-            
-            <p class="paragraph bullet">
-                Para acceder a la garantía todos los equipos deberán ser enviados dentro de su empaque original y estos no 
-                deberán estar en mal estado.
+
+            <p class="bullet">
+                Para acceder a la garantía todos los equipos deberán ser enviados dentro de su empaque original y
+                estos no deberán estar en mal estado.
             </p>
-            
-            <p class="paragraph h">
-                Nuestros equipos incluyen Caja Original Apple sin Imei, para dar a entender que el equipo ya fue usado. 
-                El imei del equipo iría en la hoja de garantía en caso de poder reportarlo por robo o extravío.
+
+            <p class="bullet">
+                Nuestros equipos incluyen Caja Original Apple <strong>sin Imei</strong>, para dar a entender que el equipo ya fue
+                usado. El <u>imei</u> del equipo iría en la hoja de garantía en caso de poder reportarlo por robo o extravío.
             </p>
-            
-            <p class="paragraph">
+
+            <p class="paragraph" style="margin: 3px 0;">
                 Dicho documento deberá ser presentado para poder acceder a la garantía, de lo contrario, no se podrá dar la misma.
             </p>
-            
+
             <p class="note">
-                NOTA IMPORTANTE: Las Garantías serán atendidas de Lunes a Jueves de 10am a 3pm.
+                NOTA <strong><u>IMPORTANTE</u></strong> : Las Garantías serán atendidas de Lunes a Jueves de 10Am a 3pm.
             </p>
-            
-            <!-- Figura/formulario inferior -->
-            <div class="figure-form">
-                <div class="text-logo">
-                    <div class="form-row">
-                        <div class="field">
-                            <span class="label">•  Cedula:</span> 
-                            <span class="line">${venta.cliente.cedula}</span>
-                        </div>
-                        <div class="field">
-                            <span class="label">•  Nombre y Apellido:</span> 
-                            <span class="line">${venta.cliente.nombre}</span>
-                        </div>
-                        <div class="field">
-                            <span class="label">•  Teléfono contacto:</span> 
-                            <span class="line">${venta.cliente.telefono}</span>
-                        </div>
+
+            <!-- ── TABLA DE CHECKBOXES ── -->
+            <table class="check-table">
+                <tr>
+                    <td><span class="check-label">True Tone</span><span class="check-box"></span></td>
+                    <td style="padding-left:12px;"><span class="check-label">Auricular</span><span class="check-box"></span></td>
+                </tr>
+                <tr>
+                    <td><span class="check-label-color">Face ID</span><span class="check-box"></span></td>
+                    <td style="padding-left:12px;"><span class="check-label-color">Micrófono</span><span class="check-box"></span></td>
+                </tr>
+                <tr>
+                    <td><span class="check-label">Botones</span><span class="check-box"></span></td>
+                    <td style="padding-left:12px;"><span class="check-label">Señal</span><span class="check-box"></span></td>
+                </tr>
+            </table>
+
+            <!-- ── FORMULARIO: campos izquierda + logo + contacto derecha ── -->
+            <div class="form-section">
+                <div class="form-fields">
+                    <div class="field-row">
+                        <span class="field-label">•&nbsp;Cedula:</span>
+                        <span class="field-underline">${venta.cliente.cedula}</span>
                     </div>
-                    
-                    <div class="figure" style="right: 79px;">
-                        <img src="${logoUrl}" alt="logo">
+                    <div class="field-row">
+                        <span class="field-label">•&nbsp;Nombre y <u>Apellido</u>:</span>
+                        <span class="field-underline">${venta.cliente.nombre}</span>
                     </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="field">
-                        <span class="label">•  Modelo del equipo:</span>
-                        <span class="line">${modelo}${subtituloEquipo}</span>
+                    <div class="field-row">
+                        <span class="field-label">•&nbsp;Teléfono contacto:</span>
+                        <span class="field-underline">${venta.cliente.telefono}</span>
                     </div>
-                    <div class="field">
-                        <span class="label">•  Imei:</span>
-                        <span class="line">${equipo.imei || 'N/A'}</span>
+                    <div class="field-row field-gap">
+                        <span class="field-label">•&nbsp;Modelo del equipo:</span>
+                        <span class="field-underline">${modelo}${subtituloEquipo}</span>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-label">•&nbsp;Accesorio:</span>
+                        <span class="field-underline">${accesoriosTexto.length > 0 ? accesoriosTexto.join(' | ') : ''}</span>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-label">•&nbsp;<u>Imei</u>:</span>
+                        <span class="field-underline">${equipo.imei || ''}</span>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-label">•&nbsp;Precio del <u>Equipo</u>:</span>
+                        <span class="field-underline">${formatearMoneda(precioEquipo)}</span>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-label">•&nbsp;<strong>Total venta</strong>:</span>
+                        <span class="field-underline">${formatearMoneda(venta.montoTotal)}</span>
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="field full-width">
-                        <span class="label">•  Accesorio:</span>
-                        <span class="line">
-                            ${accesoriosTexto.length > 0 ? accesoriosTexto.join(' | ') : 'Sin accesorios'}
-                        </span>
+                <!-- Logo + bloque contacto -->
+                <div style="display:flex; flex-direction:column; align-items:center; gap:6px; padding-top:2px;">
+                    <div class="logo-block">
+                        <img src="${logoUrl}" alt="USA IMPORT logo">
+                    </div>
+                    <div class="contact-block">
+                        <span class="contact-line">Contacto: 0412-4864028</span>
+                        <span class="contact-line">Instagram: @usaimports.ve</span>
                     </div>
                 </div>
+            </div>
 
-                <div class="form-row">
-                    <div class="field">
-                        <span class="label">•  Precio del Equipo:</span>
-                        <span class="line">${formatearMoneda(precioEquipo)}</span>
-                    </div>
-                    <div class="field">
-                        <span class="label">•  Total venta:</span>
-                        <span class="line">${formatearMoneda(venta.montoTotal)}</span>
-                    </div>
+            <!-- ── FIRMAS ── -->
+            <div class="sign-section">
+                <div class="sign-box">
+                    <div class="sign-box-inner"></div>
+                    <div class="sign-caption">Sello del Establecimiento</div>
                 </div>
-                
-                <div class="sign-row">
-                    <div class="box">
-                        <div class="box-label">· Sello del Establecimiento</div>
-                    </div>
-                    <div class="box" style="flex:1.2">
-                        <div class="signature-line"></div>
-                        <div class="signature-caption">Firma del Cliente</div>
-                    </div>
-                    <div class="box fingerprint" style="flex:0.8">
-                        <div class="box-label">Huella del Cliente</div>
-                    </div>
+                <div class="sign-box">
+                    <div class="sign-box-inner"></div>
+                    <div class="sign-caption">Firma del Cliente</div>
+                </div>
+                <div class="sign-box">
+                    <div class="sign-box-inner"></div>
+                    <div class="sign-caption">Huella del Cliente</div>
                 </div>
             </div>
-            
-            <!-- Pie de página -->
-            <div class="footer">
-                Instagram: @usaimports.ve &nbsp;&nbsp;&nbsp; Contacto: 0424-3445840
-            </div>
+
         </div>
     </div>
 </body>

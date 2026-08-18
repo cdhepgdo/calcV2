@@ -13,7 +13,7 @@
 // ─────────────────────────────────────────────────────────────
 
 export const PRECIOS_VENTA = [
-  {
+ {
     "nombre": "Apple Watch serie 9 41 mm sellado",
     "usd": 299
   },
@@ -231,7 +231,7 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "Iphone 15 pro Max (512gb)",
-    "usd": 769
+    "usd": 789
   },
   {
     "nombre": "Iphone 15 pro Max (1TB)",
@@ -311,23 +311,23 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "Iphone 17 pro 512gb",
-    "usd": 1467
+    "usd": 1450
   },
   {
     "nombre": "Iphone 17 pro Max 256gb",
-    "usd": 1339
+    "usd": 1340
   },
   {
-    "nombre": "Iphone 17 pro Max 256gb Silver",
-    "usd": 1359
+    "nombre": "Iphone 17 pro Max 256gb",
+    "usd": 1350
   },
   {
     "nombre": "Iphone 17 pro Max 512gb",
-    "usd": 1599
+    "usd": 1530
   },
   {
     "nombre": "IPhone 17 pro Max 1TB",
-    "usd": 1799
+    "usd": 1750
   },
   {
     "nombre": "IPhone 17 pro Max 2TB",

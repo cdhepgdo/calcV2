@@ -235,7 +235,7 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "IPhone 16 (128gb)",
-    "usd": 659
+    "usd": 689
   },
   {
     "nombre": "IPhone 16 (256gb)",

@@ -30,7 +30,9 @@ export const MODELOS_IPHONE = [
     { valor: "iPhone 17e", etiqueta: "iPhone 17e" },
     { valor: "iPhone 17 Pro", etiqueta: "iPhone 17 Pro" },
     { valor: "iPhone 17 Air", etiqueta: "iPhone 17 Air" },
-    { valor: "iPhone 17 Pro Max", etiqueta: "iPhone 17 Pro Max" }
+    { valor: "iPhone 17 Pro Max", etiqueta: "iPhone 17 Pro Max" },
+    { valor: "iPhone 18 Pro", etiqueta: "iPhone 18 Pro" },
+    { valor: "iPhone 18 Pro Max", etiqueta: "iPhone 18 Pro Max" }
 ];
 
 export const MODELOS_CORTOS = [
@@ -40,7 +42,7 @@ export const MODELOS_CORTOS = [
     "14", "14 Plus", "14 Pro", "14 Pro Max",
     "15", "15 Plus", "15 Pro", "15 Pro Max",
     "16", "16e", "16 Plus", "16 Pro", "16 Pro Max",
-    "17", "17e", "17 Air", "17 Pro", "17 Pro Max"
+    "17", "17e", "17 Air", "17 Pro", "17 Pro Max", "18 Pro", "18 Pro Max"
 ];
 
 export const COLORES_IPHONE = [

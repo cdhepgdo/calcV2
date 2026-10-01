@@ -30,10 +30,6 @@ export const PRECIOS_VENTA = [
     "usd": 450
   },
   {
-    "nombre": "Apple Watch Ultra 3 like new",
-    "usd": 699
-  },
-  {
     "nombre": "iPhone 11 (64)gb",
     "usd": 190
   },
@@ -191,7 +187,7 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "IPhone 15 (128gb)",
-    "usd": 489
+    "usd": 499
   },
   {
     "nombre": "IPhone 15 (256gb)",
@@ -215,7 +211,7 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "IPhone 15 pro (256gb)",
-    "usd": 659
+    "usd": 699
   },
   {
     "nombre": "IPhone 15 pro Max (256gb)",
@@ -235,7 +231,7 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "IPhone 16 (128gb)",
-    "usd": 689
+    "usd": 659
   },
   {
     "nombre": "IPhone 16 (256gb)",
@@ -319,7 +315,27 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "IPhone 17 pro Max 2TB",
-    "usd": 1999
+    "usd": 1970
+  },
+  {
+    "nombre": "IPhone 18 pro 256",
+    "usd": 1650
+  },
+  {
+    "nombre": "IPhone 18 pro 512",
+    "usd": 1990
+  },
+  {
+    "nombre": "IPhone 18 pro Max 256",
+    "usd": 1839
+  },
+  {
+    "nombre": "IPhone 18 pro Max 512",
+    "usd": 2120
+  },
+  {
+    "nombre": "IPhone 18 pro Max 1TB",
+    "usd": 2550
   },
   {
     "nombre": "iPad 11 air sellada",

@@ -319,19 +319,27 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "IPhone 18 pro 256",
-    "usd": 1529
+    "usd": 1499
   },
   {
     "nombre": "IPhone 18 pro 512",
-    "usd": 1799
+    "usd": 1670
+  },
+  {
+    "nombre": "IPhone 18 pro Max 256 burgundy",
+    "usd": 1750
   },
   {
     "nombre": "IPhone 18 pro Max 256",
-    "usd": 1770
+    "usd": 1650
+  },
+  {
+    "nombre": "IPhone 18 pro Max 512 burgundy",
+    "usd": 1970
   },
   {
     "nombre": "IPhone 18 pro Max 512",
-    "usd": 1989
+    "usd": 1890
   },
   {
     "nombre": "IPhone 18 pro Max 1TB",
@@ -339,7 +347,7 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "iPad 11 air sellada",
-    "usd": 740
+    "usd": 650
   }
 ];
 

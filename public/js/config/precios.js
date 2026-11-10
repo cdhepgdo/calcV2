@@ -307,35 +307,19 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "IPhone 18 pro 256",
-    "usd": 1420
-  },
-  {
-    "nombre": "IPhone 18 pro 256 Vino",
-    "usd": 1499
+    "usd": 1389
   },
   {
     "nombre": "IPhone 18 pro 512",
     "usd": 1590
   },
   {
-    "nombre": "IPhone 18 pro 512 Vino",
-    "usd": 1650
-  },
-  {
     "nombre": "IPhone 18 pro Max 256",
-    "usd": 1599
-  },
-  {
-    "nombre": "IPhone 18 pro Max 256 Vino",
-    "usd": 1699
+    "usd": 1579
   },
   {
     "nombre": "IPhone 18 pro Max 512",
-    "usd": 1840
-  },
-  {
-    "nombre": "IPhone 18 pro Max 512 Vino",
-    "usd": 1889
+    "usd": 1789
   },
   {
     "nombre": "IPhone 18 pro Max 1TB",

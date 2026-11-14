@@ -171,7 +171,7 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "IPhone 15 (128gb)",
-    "usd": 479
+    "usd": 469
   },
   {
     "nombre": "IPhone 15 (256gb)",
@@ -191,11 +191,11 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "IPhone 15 pro (128gb)",
-    "usd": 649
+    "usd": 639
   },
   {
     "nombre": "IPhone 15 pro (256gb)",
-    "usd": 689
+    "usd": 679
   },
   {
     "nombre": "IPhone 15 pro Max (256gb)",
@@ -243,7 +243,7 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "IPhone 16 pro Max (256gb)",
-    "usd": 879
+    "usd": 859
   },
   {
     "nombre": "IPhone 16 pro Max (256gb) 100%",
@@ -283,7 +283,7 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "Iphone 17 pro 256gb",
-    "usd": 1249
+    "usd": 1229
   },
   {
     "nombre": "Iphone 17 pro 512gb",
@@ -291,7 +291,7 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "Iphone 17 pro Max 256gb",
-    "usd": 1339
+    "usd": 1320
   },
   {
     "nombre": "Iphone 17 pro Max 512gb",
@@ -307,23 +307,27 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "IPhone 18 pro 256",
-    "usd": 1389
+    "usd": 1369
   },
   {
     "nombre": "IPhone 18 pro 512",
     "usd": 1590
   },
   {
+    "nombre": "IPhone 18 pro 1TB",
+    "usd": 1749
+  },
+  {
     "nombre": "IPhone 18 pro Max 256",
-    "usd": 1579
+    "usd": 1559
   },
   {
     "nombre": "IPhone 18 pro Max 512",
-    "usd": 1789
+    "usd": 1739
   },
   {
     "nombre": "IPhone 18 pro Max 1TB",
-    "usd": 2250
+    "usd": 2350
   }
 ];
 

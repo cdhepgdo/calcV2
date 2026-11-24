@@ -147,6 +147,10 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "IPhone 14 pro(128gb)",
+    "usd": 479
+  },
+  {
+    "nombre": "IPhone 14 pro(128gb) gold silver",
     "usd": 499
   },
   {
@@ -170,8 +174,12 @@ export const PRECIOS_VENTA = [
     "usd": 610
   },
   {
-    "nombre": "IPhone 15 (128gb)",
-    "usd": 469
+    "nombre": "IPhone 15 (128gb) black",
+    "usd": 449
+  },
+  {
+    "nombre": "IPhone 15 (128gb) otros",
+    "usd": 479
   },
   {
     "nombre": "IPhone 15 (256gb)",
@@ -235,11 +243,11 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "IPhone 16 pro (128gb)",
-    "usd": 759
+    "usd": 739
   },
   {
     "nombre": "IPhone 16 pro (256gb)",
-    "usd": 819
+    "usd": 799
   },
   {
     "nombre": "IPhone 16 pro Max (256gb)",
@@ -319,7 +327,7 @@ export const PRECIOS_VENTA = [
   },
   {
     "nombre": "IPhone 18 pro Max 256",
-    "usd": 1559
+    "usd": 1489
   },
   {
     "nombre": "IPhone 18 pro Max 512",
